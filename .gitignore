@@ -1,0 +1,9 @@
+/build
+
+*.o
+*.iso
+*.a
+
+/limine
+
+last_output
