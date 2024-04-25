@@ -2,16 +2,18 @@
 
 #include <stdint.h>
 
+#define PAGE_SIZE 4096
+
 void init_gdt ();
 void init_idt ();
 void init_page_mmap ();
 void init_aps ();
 
-void outb (uint16_t port, uint8_t value);
-uint8_t inb (uint16_t port);
+void write_port_b (uint16_t port, uint8_t value);
+uint8_t read_port_b (uint16_t port);
 
-void wrmsr (uint32_t msr_id, uint64_t value);
-uint64_t rdmsr (uint32_t msr_id);
+void write_msr (uint32_t msr_id, uint64_t value);
+uint64_t read_msr (uint32_t msr_id);
 
 uintptr_t read_cr2 ();
 

@@ -14,7 +14,7 @@ spin_lock (spin_lock_t *lock)
   int back = atomic_fetch_add_explicit (&lock->back, 1, memory_order_relaxed);
 
   while (atomic_load_explicit (&lock->front, memory_order_acquire) != back)
-    cpu_relax ();
+    relax_busy_loop ();
 }
 
 void

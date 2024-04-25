@@ -31,9 +31,6 @@ USED void
 c_interrupt_entry (frame_t *f)
 {
   print_interrupt_info (f);
-
-  printf ("halt forever\n");
-  halt_forever ();
 }
 
 USED void

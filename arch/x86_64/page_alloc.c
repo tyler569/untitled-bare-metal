@@ -66,9 +66,7 @@ limine_hhdm ()
 {
   static uintptr_t hhdm_cache = 0;
   if (!hhdm_cache)
-    {
-      hhdm_cache = volatile_read (hhdminfo.response)->offset;
-    }
+    hhdm_cache = volatile_read (hhdminfo.response)->offset;
   return hhdm_cache;
 }
 
@@ -257,7 +255,7 @@ alloc_page ()
     do
       if (page_is_free (free_bump_cursor))
         {
-          page = free_bump_cursor;
+          page = free_bump_cursor++;
           break;
         }
     while (++free_bump_cursor < global_page_map_end);

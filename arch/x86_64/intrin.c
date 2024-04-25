@@ -4,7 +4,13 @@
 #include <sys/cdefs.h>
 #include <sys/lock.h>
 
-USED [[noreturn]] void
+void
+halt_until_interrupt ()
+{
+  asm volatile ("hlt");
+}
+
+[[noreturn]] void
 halt_forever ()
 {
   while (true)
@@ -14,22 +20,25 @@ halt_forever ()
     }
 }
 
-void
-outb (uint16_t port, uint8_t value)
-{
-  asm volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
-}
+#define DEFINE_PORT_IO(suffix, type)                                          \
+  void write_port_##suffix (uint16_t port, type value)                        \
+  {                                                                           \
+    asm volatile ("out" #suffix " %0, %1" : : "a"(value), "Nd"(port));        \
+  }                                                                           \
+                                                                              \
+  type read_port_##suffix (uint16_t port)                                     \
+  {                                                                           \
+    type ret;                                                                 \
+    asm volatile ("in" #suffix " %1, %0" : "=a"(ret) : "Nd"(port));           \
+    return ret;                                                               \
+  }
 
-uint8_t
-inb (uint16_t port)
-{
-  uint8_t ret;
-  asm volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));
-  return ret;
-}
+DEFINE_PORT_IO (b, uint8_t)
+DEFINE_PORT_IO (w, uint16_t)
+DEFINE_PORT_IO (l, uint32_t)
 
 void
-wrmsr (uint32_t msr_id, uint64_t value)
+write_msr (uint32_t msr_id, uint64_t value)
 {
   uint32_t low = value & 0xffffffff;
   uint32_t high = value >> 32;
@@ -37,7 +46,7 @@ wrmsr (uint32_t msr_id, uint64_t value)
 }
 
 uint64_t
-rdmsr (uint32_t msr_id)
+read_msr (uint32_t msr_id)
 {
   uint32_t low, high;
   asm volatile ("rdmsr" : "=a"(low), "=d"(high) : "c"(msr_id));
@@ -55,7 +64,7 @@ read_cr2 ()
 void
 write_e9 (char c)
 {
-  outb (0xe9, c);
+  write_port_b (0xe9, c);
 }
 
 ssize_t
@@ -65,7 +74,7 @@ write_debug (FILE *, const void *str, size_t len)
 
   spin_lock (&lock);
 
-  for (size_t i = 0; i < len; i++)
+  for (size_t i = 0; i < len && ((char *)str)[i]; i++)
     write_e9 (((char *)str)[i]);
 
   spin_unlock (&lock);
@@ -74,7 +83,7 @@ write_debug (FILE *, const void *str, size_t len)
 }
 
 void
-cpu_relax ()
+relax_busy_loop ()
 {
   asm volatile ("pause");
 }

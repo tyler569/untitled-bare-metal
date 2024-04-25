@@ -10,5 +10,7 @@ panic (const char *msg, ...)
   vprintf (msg, args);
   va_end (args);
 
+  printf ("\n");
+
   halt_forever ();
 }

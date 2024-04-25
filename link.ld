@@ -13,7 +13,6 @@ PHDRS {
 
 SECTIONS {
     . = VMA;
-    _kernel_phy_base = . - VMA;
 
     .text ALIGN(4K)   : { *(.text .text.*) } :text
     .rodata ALIGN(4K) : { *(.rodata .rodata.*) } :rodata
@@ -21,7 +20,4 @@ SECTIONS {
     .bss              : { *(COMMON) *(.bss .bss.*) } :data
 
     /DISCARD/ : { *(.eh_frame) *(.note .note.*) }
-
-    _kernel_phy_top = . - VMA;
-    _kernel_end = .;
 }
