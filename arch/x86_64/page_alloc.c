@@ -25,6 +25,8 @@ typedef struct page page_t;
 
 static spin_lock_t page_lock;
 
+static uintptr_t global_page_map_phy;
+
 static page_t *global_page_map;
 static size_t global_page_count;
 static page_t *global_page_map_end;
@@ -62,7 +64,12 @@ bool limine_memmap_type_available[] = {
 uintptr_t
 limine_hhdm ()
 {
-  return volatile_read (hhdminfo.response)->offset;
+  static uintptr_t hhdm_cache = 0;
+  if (!hhdm_cache)
+    {
+      hhdm_cache = volatile_read (hhdminfo.response)->offset;
+    }
+  return hhdm_cache;
 }
 
 uintptr_t
@@ -90,9 +97,6 @@ alloc_page_map (size_t num_pages)
 
       page_t *page = (page_t *)(base | limine_hhdm ());
 
-      for (int j = 0; j < num_pages; j++)
-        page[j].flags = PAGE_UNUSABLE;
-
       return page;
     }
 
@@ -115,6 +119,9 @@ fill_page_map ()
 {
   struct limine_memmap_response *resp = volatile_read (mmapinfo.response);
 
+  for (size_t i = 0; i < global_page_count; i++)
+    global_page_map[i].flags = PAGE_UNUSABLE;
+
   for (size_t i = 0; i < resp->entry_count; i++)
     {
       struct limine_memmap_entry *entry = resp->entries[i];
@@ -129,8 +136,9 @@ fill_page_map ()
         }
     }
 
-  for (uintptr_t addr = limine_reverse_hhdm (global_page_map);
-       addr < limine_reverse_hhdm (global_page_map_end); addr++)
+  for (uintptr_t addr = global_page_map_phy;
+       addr < global_page_map_phy + global_page_count * sizeof (page_t);
+       addr += PAGE_SIZE)
     {
       page_t *page = get_page_struct (addr);
       page->flags = PAGE_USED;
@@ -213,6 +221,7 @@ init_page_mmap ()
   printf (")\n");
 
   global_page_map = alloc_page_map (page_struct_count);
+  global_page_map_phy = limine_reverse_hhdm (global_page_map);
   global_page_count = page_struct_count;
   global_page_map_end = global_page_map + page_struct_count;
   free_bump_cursor = global_page_map;
