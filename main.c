@@ -1,13 +1,17 @@
-#include "kernel/main.h"
-#include "kernel/arch.h"
-#include <sys/cdefs.h>
+#include "kernel.h"
 
-[[noreturn]] USED void
+void
 kernel_main ()
 {
-  printf ("Hello, world!\n");
+  printf ("Hello, World!\n");
 
-  asm volatile ("int3");
+  uintptr_t page;
+  printf ("%lu\n", page = alloc_page ());
+  free_page (page);
+  printf ("%lu\n", page = alloc_page ());
+  free_page (page);
+
+  asm volatile ("int $0x3");
 
   halt_forever ();
 }

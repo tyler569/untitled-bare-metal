@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 23)
 
 include(ExternalProject)
 
-add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall -Wextra -mcmodel=kernel)
 
 add_link_options(
   -T ${CMAKE_SOURCE_DIR}/link.ld
@@ -22,10 +22,16 @@ add_executable(untitled_bare_metal
   arch/x86_64/idt.c
   arch/x86_64/intrin.c
   arch/x86_64/gdt.c
-  arch/x86_64/x86_64.h
+  arch/x86_64/page_alloc.c
   arch/x86_64/entry.c
   lib/print.c
   lib/string.c
+  arch/x86_64/smp.c
+  lib/spin_lock.c
+  include/sys/lock.h
+  arch/x86_64/lapic.c
+  debug.c
+  arch/x86_64/ints.c
 )
 
 install(TARGETS untitled_bare_metal DESTINATION bin)

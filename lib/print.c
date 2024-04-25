@@ -1,4 +1,4 @@
-#include "kernel/arch.h"
+#include "kernel.h"
 #include "stream.h"
 #include <limits.h>
 #include <stdarg.h>
@@ -617,6 +617,6 @@ puts (const char *str)
 
 struct stream *w_stdout = &(struct stream){
   .vtbl = &(const struct stream_vtbl){
-    .write = arch_debug_write,
+    .write = write_debug,
   },
 };
