@@ -1,3 +1,4 @@
+#include "kernel.h"
 #include "limine.h"
 #include <stdio.h>
 #include <string.h>
@@ -13,21 +14,29 @@ struct page
   uint64_t reserved[5];
 };
 
+enum page_flags : uint64_t
+{
+  PAGE_UNUSABLE = 1 << 63,
+  PAGE_FREE = 0,
+  PAGE_USED = 1,
+};
+
 typedef struct page page_t;
 
 static spin_lock_t page_lock;
 
 static page_t *global_page_map;
 static size_t global_page_count;
+static page_t *global_page_map_end;
 
 static page_t *free_list_head;
 static page_t *free_bump_cursor;
 
-static volatile struct limine_memmap_request limine_memmap_request = {
+static struct limine_memmap_request mmapinfo = {
   .id = LIMINE_MEMMAP_REQUEST,
 };
 
-static volatile struct limine_hhdm_request limine_hhdm_request = {
+static struct limine_hhdm_request hhdminfo = {
   .id = LIMINE_HHDM_REQUEST,
 };
 
@@ -53,13 +62,19 @@ bool limine_memmap_type_available[] = {
 uintptr_t
 limine_hhdm ()
 {
-  return limine_hhdm_request.response->offset;
+  return volatile_read (hhdminfo.response)->offset;
+}
+
+uintptr_t
+limine_reverse_hhdm (void *addr)
+{
+  return (uintptr_t)addr - limine_hhdm ();
 }
 
 page_t *
 alloc_page_map (size_t num_pages)
 {
-  struct limine_memmap_response *resp = limine_memmap_request.response;
+  struct limine_memmap_response *resp = volatile_read (mmapinfo.response);
 
   for (size_t i = 0; i < resp->entry_count; i++)
     {
@@ -75,7 +90,8 @@ alloc_page_map (size_t num_pages)
 
       page_t *page = (page_t *)(base | limine_hhdm ());
 
-      memset (page, 0, num_pages * sizeof (page_t));
+      for (int j = 0; j < num_pages; j++)
+        page[j].flags = PAGE_UNUSABLE;
 
       return page;
     }
@@ -84,7 +100,7 @@ alloc_page_map (size_t num_pages)
 }
 
 page_t *
-get_page (uintptr_t addr)
+get_page_struct (uintptr_t addr)
 {
   size_t index = addr / PAGE_SIZE;
 
@@ -97,7 +113,7 @@ get_page (uintptr_t addr)
 void
 fill_page_map ()
 {
-  struct limine_memmap_response *resp = limine_memmap_request.response;
+  struct limine_memmap_response *resp = volatile_read (mmapinfo.response);
 
   for (size_t i = 0; i < resp->entry_count; i++)
     {
@@ -108,9 +124,16 @@ fill_page_map ()
 
       for (size_t j = 0; j < entry->length / PAGE_SIZE; j++)
         {
-          page_t *page = get_page (entry->base + j * PAGE_SIZE);
-          page->flags = 1;
+          page_t *page = get_page_struct (entry->base + j * PAGE_SIZE);
+          page->flags = PAGE_FREE;
         }
+    }
+
+  for (uintptr_t addr = limine_reverse_hhdm (global_page_map);
+       addr < limine_reverse_hhdm (global_page_map_end); addr++)
+    {
+      page_t *page = get_page_struct (addr);
+      page->flags = PAGE_USED;
     }
 }
 
@@ -143,7 +166,7 @@ print_si_fraction (size_t num)
 void
 init_page_mmap ()
 {
-  struct limine_memmap_response *resp = limine_memmap_request.response;
+  struct limine_memmap_response *resp = volatile_read (mmapinfo.response);
 
   if (!resp)
     return;
@@ -191,9 +214,16 @@ init_page_mmap ()
 
   global_page_map = alloc_page_map (page_struct_count);
   global_page_count = page_struct_count;
+  global_page_map_end = global_page_map + page_struct_count;
   free_bump_cursor = global_page_map;
 
   fill_page_map ();
+}
+
+bool
+page_is_free (page_t *page)
+{
+  return page->flags == PAGE_FREE;
 }
 
 uintptr_t
@@ -205,32 +235,27 @@ page_addr (page_t *page)
 uintptr_t
 alloc_page ()
 {
-  uintptr_t res = 0;
+  page_t *page = nullptr;
 
   spin_lock (&page_lock);
 
   if (free_list_head)
     {
-      page_t *page = free_list_head;
+      page = free_list_head;
       free_list_head = page->next;
-
-      res = page_addr (page);
     }
   else
-    {
-      while (++free_bump_cursor < global_page_map + global_page_count)
+    do
+      if (page_is_free (free_bump_cursor))
         {
-          if ((free_bump_cursor->flags & 1) == 1)
-            {
-              res = page_addr (free_bump_cursor);
-              break;
-            }
+          page = free_bump_cursor;
+          break;
         }
-    }
+    while (++free_bump_cursor < global_page_map_end);
 
   spin_unlock (&page_lock);
 
-  return res;
+  return page_addr (page);
 }
 
 void
@@ -238,8 +263,9 @@ free_page (uintptr_t addr)
 {
   spin_lock (&page_lock);
 
-  page_t *page = get_page (addr);
+  page_t *page = get_page_struct (addr);
   page->next = free_list_head;
+  page->flags = PAGE_FREE;
   free_list_head = page;
 
   spin_unlock (&page_lock);

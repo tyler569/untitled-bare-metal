@@ -1,8 +1,9 @@
+#include "kernel.h"
 #include "limine.h"
 #include "x86_64.h"
 #include <stddef.h>
 
-static volatile struct limine_smp_request limine_smp_request = {
+static struct limine_smp_request smpinfo = {
   .id = LIMINE_SMP_REQUEST,
 };
 
@@ -11,7 +12,7 @@ void ap_entry (struct limine_smp_info *);
 void
 init_aps ()
 {
-  struct limine_smp_response *resp = limine_smp_request.response;
+  struct limine_smp_response *resp = volatile_read (smpinfo.response);
 
   for (size_t i = 0; i < resp->cpu_count; i++)
     {
