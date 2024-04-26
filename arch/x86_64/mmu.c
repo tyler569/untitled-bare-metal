@@ -1,12 +1,11 @@
 #include "kernel.h"
 #include "x86_64.h"
+#include <stdatomic.h>
 #include <string.h>
+#include <sys/cdefs.h>
 
 typedef uint64_t pte_t;
 
-#define PTE_PRESENT (1 << 0)
-#define PTE_WRITE (1 << 1)
-#define PTE_USER (1 << 2)
 #define PTE_PWT (1 << 3)
 #define PTE_PCD (1 << 4)
 #define PTE_ACCESSED (1 << 5)
@@ -33,15 +32,18 @@ typedef uint64_t pte_t;
 
 #define PAGE_SIZE 4096
 
-pte_t *
-get_root ()
-{
-  pte_t root;
-  asm volatile ("mov %%cr3, %0" : "=r"(root));
-  return PTE (root);
-}
+extern uintptr_t KERNEL_END;
+static _Atomic uintptr_t vm_alloc_base = (uintptr_t)&KERNEL_END;
 
 uintptr_t
+get_vm_root ()
+{
+  uintptr_t root;
+  asm volatile ("mov %%cr3, %0" : "=r"(root));
+  return root;
+}
+
+static uintptr_t
 alloc_table ()
 {
   uintptr_t table = alloc_page ();
@@ -50,7 +52,7 @@ alloc_table ()
 }
 
 void
-add_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
+add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
 {
   pte_t *pml4 = PTE (root);
   pte_t *pdp;
@@ -94,12 +96,53 @@ add_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
 }
 
 uintptr_t
+resolve_vm_mapping (uintptr_t root, uintptr_t virt)
+{
+  pte_t *pml4 = PTE (root);
+  pte_t *pdp;
+  pte_t *pd;
+  pte_t *pt;
+  pte_t *pte;
+
+  pte_t pml4e = pml4[virt >> PML4_SHIFT & PML4_MASK];
+  if (!(pml4e & PTE_PRESENT))
+    return 0;
+
+  pdp = PTE (pml4e);
+
+  pte_t pdpe = pdp[(virt >> PDP_SHIFT) & PDP_MASK];
+  if (!(pdpe & PTE_PRESENT))
+    return 0;
+
+  pd = PTE (pdpe);
+
+  pte_t pde = pd[(virt >> PD_SHIFT) & PD_MASK];
+  if (!(pde & PTE_PRESENT))
+    return 0;
+
+  pt = PTE (pde);
+
+  pte = &pt[(virt >> PT_SHIFT) & PT_MASK];
+  if (!(*pte & PTE_PRESENT))
+    return 0;
+
+  return PTE_ADDR (*pte) | (virt & 0xFFF);
+}
+
+uintptr_t
+alloc_kernel_vm (size_t len)
+{
+  len = ALIGN_UP (len, PAGE_SIZE);
+  return atomic_fetch_add (&vm_alloc_base, len);
+}
+
+uintptr_t
 new_page_table ()
 {
   uintptr_t root = alloc_page ();
   pte_t *pml4 = PTE (root);
 
-  pte_t *current_root = get_root ();
+  pte_t *current_root = PTE (get_vm_root ());
 
   // Copy all higher-half (kernel) mappings
   for (int i = 256; i < 512; i++)

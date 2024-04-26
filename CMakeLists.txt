@@ -48,7 +48,7 @@ add_executable(untitled_bare_metal
   arch/x86_64/idt.c
   arch/x86_64/intrin.c
   arch/x86_64/gdt.c
-  arch/x86_64/page_alloc.c
+  page_alloc.c
   arch/x86_64/entry.c
   lib/print.c
   lib/string.c
@@ -60,7 +60,10 @@ add_executable(untitled_bare_metal
   arch/x86_64/ints.c
   arch/x86_64/mmu.c
   lib/slab.c
+  include/assert.h
 )
+
+set_target_properties(untitled_bare_metal PROPERTIES LINK_DEPENDS ${CMAKE_SOURCE_DIR}/link.ld)
 
 define_file_basename_for_sources(untitled_bare_metal)
 

@@ -7,13 +7,6 @@
 #include <string.h>
 #include <sys/cdefs.h>
 
-#define MIN(a, b)                                                             \
-  ({                                                                          \
-    typeof (a) _a = (a);                                                      \
-    typeof (b) _b = (b);                                                      \
-    _a < _b ? _a : _b;                                                        \
-  })
-
 #define WRITE(data, size)                                                     \
   do                                                                          \
     {                                                                         \

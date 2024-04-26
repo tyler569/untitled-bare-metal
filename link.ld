@@ -20,4 +20,6 @@ SECTIONS {
     .bss              : { *(COMMON) *(.bss .bss.*) } :data
 
     /DISCARD/ : { *(.eh_frame) *(.note .note.*) }
+
+    KERNEL_END = ALIGN(4K);
 }

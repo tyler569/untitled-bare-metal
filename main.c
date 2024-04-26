@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include <assert.h>
 
 void
 kernel_main ()
@@ -18,6 +19,13 @@ kernel_main ()
 
   for (int i = 0; i < 10; i++)
     free_page (pages[i]);
+
+  init_kmem_alloc ();
+
+  int *ptr = kmem_alloc (sizeof (int));
+  *ptr = 42;
+  printf ("kmem_alloc: %p: %i\n", ptr, *ptr);
+  kmem_free (ptr);
 
   assert ("foo bar");
   assert (0 && "foo bar");

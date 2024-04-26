@@ -1,27 +1,9 @@
 #include "kernel.h"
 #include "limine.h"
 #include <stdio.h>
-#include <string.h>
 #include <sys/lock.h>
 
 #define PAGE_SIZE 4096
-
-struct page
-{
-  uint64_t flags;
-  struct page *next;
-  struct page *prev;
-  uint64_t reserved[5];
-};
-
-enum page_flags : uint64_t
-{
-  PAGE_UNUSABLE = 1 << 63,
-  PAGE_FREE = 0,
-  PAGE_USED = 1,
-};
-
-typedef struct page page_t;
 
 static spin_lock_t page_lock;
 
@@ -31,7 +13,7 @@ static page_t *global_page_map;
 static size_t global_page_count;
 static page_t *global_page_map_end;
 
-static page_t *free_list_head;
+LIST_HEAD (free_list);
 static page_t *free_bump_cursor;
 
 static struct limine_memmap_request mmapinfo = {
@@ -139,6 +121,9 @@ fill_page_map ()
        addr += PAGE_SIZE)
     {
       page_t *page = get_page_struct (addr);
+
+      list_init (&page->list);
+
       page->flags = PAGE_USED;
     }
 }
@@ -240,16 +225,16 @@ page_addr (page_t *page)
 }
 
 uintptr_t
-alloc_page ()
+alloc_page_s (page_t **page_ret)
 {
   page_t *page = nullptr;
 
   spin_lock (&page_lock);
 
-  if (free_list_head)
+  if (!list_empty (&free_list))
     {
-      page = free_list_head;
-      free_list_head = page->next;
+      struct list_head *l = list_pop_front (&free_list);
+      page = CONTAINER_OF (l, page_t, list);
     }
   else
     do
@@ -260,7 +245,12 @@ alloc_page ()
         }
     while (++free_bump_cursor < global_page_map_end);
 
+  page->flags = PAGE_USED;
+
   spin_unlock (&page_lock);
+
+  if (page_ret)
+    *page_ret = page;
 
   return page_addr (page);
 }
@@ -271,9 +261,8 @@ free_page (uintptr_t addr)
   spin_lock (&page_lock);
 
   page_t *page = get_page_struct (addr);
-  page->next = free_list_head;
+  list_insert_before (&page->list, &free_list);
   page->flags = PAGE_FREE;
-  free_list_head = page;
 
   spin_unlock (&page_lock);
 }
