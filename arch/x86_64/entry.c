@@ -6,6 +6,8 @@
 #include "sys/mem.h"
 #include "x86_64.h"
 
+LIMINE_BASE_REVISION (1)
+
 USED void
 kernel_entry ()
 {

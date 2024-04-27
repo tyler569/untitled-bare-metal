@@ -2,7 +2,7 @@
 #include "stdint.h"
 #include "stdio.h"
 #include "sys/cdefs.h"
-#include "sys/lock.h"
+#include "sys/spinlock.h"
 
 void
 halt_until_interrupt ()

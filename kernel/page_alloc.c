@@ -1,8 +1,8 @@
 #include "assert.h"
 #include "kernel.h"
 #include "stdio.h"
-#include "sys/lock.h"
 #include "sys/mem.h"
+#include "sys/spinlock.h"
 
 #define PAGE_SIZE 4096
 
@@ -94,7 +94,7 @@ alloc_page_map (size_t num_pages)
 
       uintptr_t addr = extent->start;
 
-      return (page_t *)addr;
+      return (page_t *)direct_map_of (addr);
     }
 
   assert (0 && "unable to allocate page map");

@@ -2,39 +2,32 @@
 #include "kernel.h"
 #include "list.h"
 #include "string.h"
-#include "sys/lock.h"
 #include "sys/mem.h"
+#include "sys/slab.h"
+#include "sys/spinlock.h"
 
 #define PAGE_SIZE 4096
 
-struct slab_cache
-{
-  struct list_head list;
-
-  struct list_head slabs_full;
-  struct list_head slabs_partial;
-  struct list_head slabs_free;
-
-  spin_lock_t lock;
-
-  size_t object_size;
-  size_t slab_page_count;
-};
+LIST_HEAD (slab_caches);
 
 void
-slab_cache_init (struct slab_cache *cache, size_t size)
+init_slab_cache (struct slab_cache *cache, size_t size)
 {
+  assert (size < 16 * PAGE_SIZE && "just allocate pages");
+
   list_init (&cache->list);
   list_init (&cache->slabs_full);
   list_init (&cache->slabs_partial);
   list_init (&cache->slabs_free);
 
+  list_insert_after (&cache->list, &slab_caches);
+
   cache->object_size = size;
 
-  if (size < 64)
-    cache->slab_page_count = 1;
-  else
-    cache->slab_page_count = 1 + (size * 8 - 1) / PAGE_SIZE;
+  // This formula gives us 254 objects per slab page for 16-byte objects,
+  // reducing as the object size increases down to 32 objects per slab page
+  // at a minimum for objects larger than 4096 bytes.
+  cache->slab_page_count = 1 + (32 * size) / PAGE_SIZE;
 }
 
 #define BITMAP_SIZE (sizeof (uint64_t) * 4)
@@ -124,8 +117,8 @@ down_ref_slab (struct slab_cache *cache, page_t *slab)
     }
 }
 
-void
-slab_cache_grow (struct slab_cache *cache)
+static void
+grow_slab_cache (struct slab_cache *cache)
 {
   size_t slab_size = cache->slab_page_count * PAGE_SIZE;
   uintptr_t slab_vm_addr = alloc_kernel_vm (slab_size);
@@ -176,7 +169,7 @@ slab_alloc (struct slab_cache *cache)
   if (!slab)
     {
       if (list_empty (&cache->slabs_free))
-        slab_cache_grow (cache);
+        grow_slab_cache (cache);
 
       slab = CONTAINER_OF (list_first (&cache->slabs_free), page_t, list);
       list_remove (&slab->list);
@@ -213,122 +206,4 @@ slab_free (struct slab_cache *cache, void *ptr)
   down_ref_slab (cache, slab);
 
   spin_unlock (&cache->lock);
-}
-
-struct malloc_bucket
-{
-  const size_t size;
-  struct slab_cache cache;
-};
-
-static struct malloc_bucket buckets[] = {
-  { .size = 16 },   { .size = 24 },   { .size = 32 },   { .size = 48 },
-  { .size = 64 },   { .size = 96 },   { .size = 128 },  { .size = 192 },
-  { .size = 256 },  { .size = 384 },  { .size = 512 },  { .size = 768 },
-  { .size = 1024 }, { .size = 1536 }, { .size = 2048 }, { .size = 3072 }
-};
-
-static size_t
-sat_sub64 (size_t a, size_t b)
-{
-  size_t res = a - b;
-  res &= -(res <= a);
-
-  return res;
-}
-
-size_t
-get_bucket_index_analytic (size_t size)
-{
-  if (__builtin_expect (size < 2, 0))
-    return 0;
-
-  size_t sm1 = size - 1;
-  size_t l2 = 63 - __builtin_clzl (sm1);
-  size_t bit2 = sm1 & (1ul << (l2 - 1));
-
-  return sat_sub64 (l2 * 2 + (bit2 == 0 ? 0 : 1), 7);
-}
-
-void
-init_kmem_alloc ()
-{
-  for (size_t i = 0; i < ARRAY_SIZE (buckets); i++)
-    {
-      struct slab_cache *cache = &buckets[i].cache;
-      slab_cache_init (cache, buckets[i].size);
-    }
-}
-
-void *
-kmem_page_alloc (size_t size)
-{
-  size_t n_pages = ALIGN_UP (size, PAGE_SIZE) / PAGE_SIZE;
-  uintptr_t vm_root = get_vm_root ();
-  uintptr_t vm_addr = alloc_kernel_vm (n_pages * PAGE_SIZE);
-  page_t *alloc_head = nullptr;
-
-  for (size_t i = 0; i < n_pages; i++)
-    {
-      page_t *page;
-      uintptr_t addr = alloc_page_s (&page);
-      add_vm_mapping (vm_root, vm_addr + i * PAGE_SIZE, addr,
-                      PTE_PRESENT | PTE_WRITE);
-
-      if (i == 0)
-        {
-          alloc_head = page;
-          page->flags = PAGE_USED | PAGE_ALLOC | PAGE_HEAD;
-        }
-      else
-        page->flags = PAGE_USED | PAGE_ALLOC | PAGE_MEMBER;
-
-      page->alloc_head = alloc_head;
-      page->alloc_kernel_addr = vm_addr + i * PAGE_SIZE;
-      page->alloc_pages = n_pages;
-    }
-
-  return (void *)vm_addr;
-}
-
-void
-kmem_page_free (page_t *page)
-{
-  uintptr_t vm_root = get_vm_root ();
-  uintptr_t vm_addr = page->alloc_kernel_addr;
-  size_t n_pages = page->alloc_pages;
-
-  for (size_t i = 0; i < n_pages; i++)
-    {
-      uintptr_t addr = resolve_vm_mapping (vm_root, vm_addr + i * PAGE_SIZE);
-      free_page (addr);
-      add_vm_mapping (vm_root, vm_addr + i * PAGE_SIZE, 0, 0);
-    }
-}
-
-void *
-kmem_alloc (size_t size)
-{
-  if (size >= 4096)
-    return kmem_page_alloc (size);
-
-  size_t index = get_bucket_index_analytic (size);
-  return slab_alloc (&buckets[index].cache);
-}
-
-void
-kmem_free (void *ptr)
-{
-  uintptr_t vm_root = get_vm_root ();
-  uintptr_t addr = (uintptr_t)ptr;
-  uintptr_t phys_addr = resolve_vm_mapping (vm_root, addr);
-
-  page_t *page = get_page_struct (phys_addr);
-
-  if (page->flags & PAGE_ALLOC)
-    kmem_page_free (page);
-  else if (page->flags & PAGE_SLAB)
-    slab_free (page->slab_cache, ptr);
-  else
-    assert (0 && "invalid free");
 }

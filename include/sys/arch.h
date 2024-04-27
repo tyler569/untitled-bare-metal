@@ -5,6 +5,7 @@
 struct frame;
 typedef struct frame frame_t;
 
+void halt_until_interrupt ();
 [[noreturn]] void halt_forever ();
 
 void relax_busy_loop ();
