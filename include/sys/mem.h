@@ -1,8 +1,8 @@
 #pragma once
 
 #include "list.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "stddef.h"
+#include "stdint.h"
 
 enum physical_extent_flags
 {
@@ -53,6 +53,8 @@ enum page_flags : uint64_t
 };
 
 void print_si_fraction (size_t num);
+
+void init_page_mmap ();
 
 uintptr_t alloc_page_s (page_t **page);
 #define alloc_page() alloc_page_s (nullptr)

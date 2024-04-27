@@ -1,7 +1,7 @@
 #include "kernel.h"
 #include "limine.h"
+#include "stddef.h"
 #include "x86_64.h"
-#include <stddef.h>
 
 static struct limine_smp_request smpinfo = {
   .id = LIMINE_SMP_REQUEST,

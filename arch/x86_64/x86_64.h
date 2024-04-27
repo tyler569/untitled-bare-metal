@@ -1,12 +1,11 @@
 #pragma once
 
-#include <stdint.h>
+#include "stdint.h"
 
 #define PAGE_SIZE 4096
 
 void init_gdt ();
 void init_idt ();
-void init_page_mmap ();
 void init_aps ();
 
 void write_port_b (uint16_t port, uint8_t value);

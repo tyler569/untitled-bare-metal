@@ -1,8 +1,9 @@
 #include "kernel.h"
 #include "limine.h"
+#include "stdio.h"
+#include "sys/cdefs.h"
+#include "sys/mem.h"
 #include "x86_64.h"
-#include <stdio.h>
-#include <sys/cdefs.h>
 
 USED void
 kernel_entry ()

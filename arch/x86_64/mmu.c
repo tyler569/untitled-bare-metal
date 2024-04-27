@@ -1,9 +1,9 @@
 #include "kernel.h"
+#include "stdatomic.h"
+#include "string.h"
+#include "sys/cdefs.h"
+#include "sys/mem.h"
 #include "x86_64.h"
-#include <stdatomic.h>
-#include <string.h>
-#include <sys/cdefs.h>
-#include <sys/mem.h>
 
 typedef uint64_t pte_t;
 

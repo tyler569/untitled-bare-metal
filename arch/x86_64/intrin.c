@@ -1,8 +1,8 @@
 #include "kernel.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <sys/cdefs.h>
-#include <sys/lock.h>
+#include "stdint.h"
+#include "stdio.h"
+#include "sys/cdefs.h"
+#include "sys/lock.h"
 
 void
 halt_until_interrupt ()

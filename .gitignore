@@ -1,9 +1,8 @@
-/build
-
 *.o
 *.iso
 *.a
 
+/build
 /limine
-
-last_output
+/last_output
+/cmake-build-*

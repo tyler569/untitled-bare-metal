@@ -1,6 +1,6 @@
+#include "kernel.h"
+#include "stdio.h"
 #include "x86_64.h"
-#include <kernel.h>
-#include <stdio.h>
 
 const char *interrupt_acronyms[]
     = { "#DE", "#DB", "NMI", "#BP", "#OF", "#BR", "#UD", "#NM",

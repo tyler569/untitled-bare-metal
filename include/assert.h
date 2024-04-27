@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sys/cdefs.h>
+#include "sys/cdefs.h"
 
 [[noreturn]] void panic (const char *msg, ...);
 

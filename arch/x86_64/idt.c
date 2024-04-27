@@ -1,5 +1,5 @@
+#include "sys/cdefs.h"
 #include "x86_64.h"
-#include <sys/cdefs.h>
 
 #define TYPE_INTERRUPT 0xE
 #define TYPE_TRAP 0xF

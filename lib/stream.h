@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stddef.h>
-#include <sys/types.h>
+#include "stddef.h"
+#include "sys/types.h"
 
 struct stream;
 

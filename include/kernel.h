@@ -1,8 +1,9 @@
 #pragma once
 
-#include <list.h>
-#include <stdint.h>
-#include <stdio.h>
+#include "list.h"
+#include "stddef.h"
+#include "stdint.h"
+#include "sys/types.h"
 
 void kernel_main ();
 
@@ -20,7 +21,8 @@ typedef struct frame frame_t;
 
 void relax_busy_loop ();
 
-ssize_t write_debug (FILE *, const void *str, size_t len);
+struct stream;
+ssize_t write_debug (struct stream *, const void *str, size_t len);
 
 void print_backtrace (frame_t *);
 void print_frame (frame_t *);

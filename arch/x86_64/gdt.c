@@ -1,6 +1,6 @@
+#include "stdio.h"
+#include "sys/cdefs.h"
 #include "x86_64.h"
-#include <stdio.h>
-#include <sys/cdefs.h>
 
 #define KERNEL_CODE 0x9A
 #define KERNEL_DATA 0x92

@@ -1,6 +1,8 @@
 #include "kernel.h"
+#include "stdarg.h"
+#include "stdio.h"
 
-void
+[[noreturn]] void
 panic (const char *msg, ...)
 {
   va_list args;

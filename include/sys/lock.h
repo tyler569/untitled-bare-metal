@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdatomic.h>
+#include "stdatomic.h"
 
 struct spin_lock
 {

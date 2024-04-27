@@ -1,8 +1,8 @@
+#include "assert.h"
 #include "kernel.h"
-#include <assert.h>
-#include <stdio.h>
-#include <sys/lock.h>
-#include <sys/mem.h>
+#include "stdio.h"
+#include "sys/lock.h"
+#include "sys/mem.h"
 
 #define PAGE_SIZE 4096
 
@@ -14,17 +14,23 @@ static page_t *global_page_map;
 static size_t global_page_count;
 static page_t *global_page_map_end;
 
+// The global page map is a contiguous array of page_t structures that
+// represent the physical memory of the system. Normally, global_page_map[0]
+// represents the first page of physical memory at address 0, but on systems
+// where this would create an unreasonable map (such as user-mode), the
+// global_page_map_offset variable can be used to offset the map.
+uintptr_t global_page_map_offset = 0;
+
 LIST_HEAD (free_list);
 static page_t *free_bump_cursor;
 
-uintptr_t physical_base = 0;
 struct physical_extent extents[32];
 size_t extent_count = ARRAY_SIZE (extents);
 
 page_t *
 get_page_struct (uintptr_t addr)
 {
-  size_t index = (addr - physical_base) / PAGE_SIZE;
+  size_t index = (addr - global_page_map_offset) / PAGE_SIZE;
 
   if (index >= global_page_count)
     return nullptr;
@@ -35,7 +41,8 @@ get_page_struct (uintptr_t addr)
 uintptr_t
 page_addr (page_t *page)
 {
-  return (uintptr_t)(page - global_page_map) * PAGE_SIZE;
+  return (uintptr_t)(page - global_page_map) * PAGE_SIZE
+         + global_page_map_offset;
 }
 
 bool
@@ -122,19 +129,23 @@ fill_page_map ()
       page->flags = PAGE_USED;
     }
 }
+
 void
 init_page_mmap ()
 {
   get_physical_extents (extents, &extent_count);
 
+  global_page_map_offset = extents[0].start;
   uintptr_t highest_usable_addr
       = extents[extent_count - 1].start + extents[extent_count - 1].len;
 
   size_t page_struct_size = sizeof (struct page);
-  size_t page_struct_count = highest_usable_addr / PAGE_SIZE;
+  size_t memory_represented = highest_usable_addr - global_page_map_offset;
+  size_t page_struct_count = memory_represented / PAGE_SIZE;
   size_t page_map_total_size
       = ALIGN_UP (page_struct_size * page_struct_count, PAGE_SIZE);
 
+  printf ("  Lowest usable address: %#zx\n", global_page_map_offset);
   printf ("  Highest usable address: %#zx\n", highest_usable_addr);
   printf ("  Page struct count: %zu\n", page_struct_count);
   printf ("  Need %zu bytes for page structs\n", page_map_total_size);

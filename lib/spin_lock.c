@@ -1,5 +1,5 @@
-#include <kernel.h>
-#include <stdatomic.h>
+#include "kernel.h"
+#include "stdatomic.h"
 
 struct spin_lock
 {

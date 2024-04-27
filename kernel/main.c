@@ -1,6 +1,7 @@
+#include "assert.h"
 #include "kernel.h"
-#include <assert.h>
-#include <sys/mem.h>
+#include "stdio.h"
+#include "sys/mem.h"
 
 void
 kernel_main ()
