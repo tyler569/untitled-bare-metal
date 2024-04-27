@@ -1,8 +1,6 @@
 #include "assert.h"
 #include "kernel.h"
 #include "list.h"
-#include "stdint.h"
-#include "stdio.h"
 #include "string.h"
 #include "sys/lock.h"
 #include "sys/mem.h"

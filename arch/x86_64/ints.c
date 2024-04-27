@@ -1,5 +1,5 @@
-#include "kernel.h"
 #include "stdio.h"
+#include "sys/arch.h"
 #include "x86_64.h"
 
 const char *interrupt_acronyms[]

@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "stdarg.h"
 #include "stdio.h"
+#include "sys/arch.h"
 
 [[noreturn]] void
 panic (const char *msg, ...)

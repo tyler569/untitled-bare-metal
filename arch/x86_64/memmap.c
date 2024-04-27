@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "limine.h"
+#include "stdio.h"
 #include "sys/mem.h"
 #include "x86_64.h"
 

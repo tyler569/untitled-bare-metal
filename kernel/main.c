@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "kernel.h"
 #include "stdio.h"
+#include "sys/arch.h"
 #include "sys/mem.h"
 
 void
