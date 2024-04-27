@@ -8,19 +8,33 @@ struct page
 {
   uint64_t flags;
   struct list_head list;
-  struct page *slab_head;
-  struct slab_cache *slab_cache;
-  uintptr_t slab_kernel_addr;
-  uint32_t slab_objects;
+  union
+  {
+    struct
+    {
+      struct page *slab_head;
+      struct slab_cache *slab_cache;
+      uintptr_t slab_kernel_addr;
+      uint32_t slab_objects;
+    };
+    struct
+    {
+      struct page *alloc_head;
+      uintptr_t alloc_kernel_addr;
+      uint32_t alloc_pages;
+    };
+  };
 };
 
 enum page_flags : uint64_t
 {
   PAGE_UNUSABLE = 1 << 63,
   PAGE_FREE = 0,
-  PAGE_USED = 1,
-  PAGE_SLAB_HEAD = 2,
-  PAGE_SLAB_MEMBER = 3,
+  PAGE_USED = 1 << 0,
+  PAGE_SLAB = 1 << 1,
+  PAGE_ALLOC = 1 << 2,
+  PAGE_HEAD = 1 << 3,
+  PAGE_MEMBER = 1 << 4,
 };
 
 typedef struct page page_t;
@@ -54,8 +68,14 @@ void kmem_free (void *ptr);
 
 // arch-specific procedures provided by arch code.
 
+struct frame;
+typedef struct frame frame_t;
+
 [[noreturn]] void halt_forever ();
 
 void relax_busy_loop ();
 
 ssize_t write_debug (FILE *, const void *str, size_t len);
+
+void print_backtrace (frame_t *);
+void print_frame (frame_t *);

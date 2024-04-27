@@ -16,11 +16,21 @@ print_interrupt_info (frame_t *f)
 
   switch (f->int_no)
     {
-    case 8:
-      printf ("Double fault\n");
-      halt_forever ();
+    case 3:
+      return;
+    case 13:
+      printf ("General protection fault\n");
+      print_frame (f);
+      print_backtrace (f);
+      break;
     case 14:
       printf ("Page fault at %lx\n", read_cr2 ());
       printf ("Error code: %lx\n", f->err_code);
+      print_backtrace (f);
+      break;
+    default:
+      print_backtrace (f);
     }
+
+  halt_forever ();
 }

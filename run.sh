@@ -5,8 +5,9 @@ mem="128M"
 smp="4"
 debugopt="-debugcon stdio"
 gdbserver=""
+tee="|& tee last_output"
 
-while getopts "dms" opt; do
+while getopts "dmst" opt; do
   case $opt in
     d)
       debugopt="-d int,cpu_reset"
@@ -16,6 +17,9 @@ while getopts "dms" opt; do
       ;;
     s)
       gdbserver="-S"
+      ;;
+    t)
+      tee=""
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2

@@ -43,14 +43,6 @@ get_vm_root ()
   return root;
 }
 
-static uintptr_t
-alloc_table ()
-{
-  uintptr_t table = alloc_page ();
-  memset (PTE (table), 0, PAGE_SIZE);
-  return table;
-}
-
 void
 add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
 {

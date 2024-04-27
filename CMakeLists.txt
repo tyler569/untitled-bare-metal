@@ -44,23 +44,22 @@ endfunction()
 
 add_executable(untitled_bare_metal
   main.c
+  debug.c
+  page_alloc.c
+  arch/x86_64/debug.c
+  arch/x86_64/entry.c
   arch/x86_64/entry.S
+  arch/x86_64/gdt.c
   arch/x86_64/idt.c
   arch/x86_64/intrin.c
-  arch/x86_64/gdt.c
-  page_alloc.c
-  arch/x86_64/entry.c
-  lib/print.c
-  lib/string.c
-  arch/x86_64/smp.c
-  lib/spin_lock.c
-  include/sys/lock.h
-  arch/x86_64/lapic.c
-  debug.c
   arch/x86_64/ints.c
+  arch/x86_64/smp.c
+  arch/x86_64/lapic.c
   arch/x86_64/mmu.c
-  lib/slab.c
-  include/assert.h
+  lib/print.c
+  lib/slab_alloc.c
+  lib/spin_lock.c
+  lib/string.c
 )
 
 set_target_properties(untitled_bare_metal PROPERTIES LINK_DEPENDS ${CMAKE_SOURCE_DIR}/link.ld)
