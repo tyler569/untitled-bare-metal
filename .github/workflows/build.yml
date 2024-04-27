@@ -19,8 +19,8 @@ jobs:
           sudo apt install git make cmake ninja-build ruby clang lld xorriso mtools qemu-system
       - name: build
         run: |
-          mkdir build
-          cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/x86_64.cmake
+          mkdir -p build
+          cmake -B build -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchains/x86_64.txt
           cmake --build build
       - name: Upload ISO
         uses: actions/upload-artifact@v2
