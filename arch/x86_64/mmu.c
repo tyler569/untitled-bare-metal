@@ -3,9 +3,13 @@
 #include <stdatomic.h>
 #include <string.h>
 #include <sys/cdefs.h>
+#include <sys/mem.h>
 
 typedef uint64_t pte_t;
 
+#define PTE_PRESENT (1 << 0)
+#define PTE_WRITE (1 << 1)
+#define PTE_USER (1 << 2)
 #define PTE_PWT (1 << 3)
 #define PTE_PCD (1 << 4)
 #define PTE_ACCESSED (1 << 5)
@@ -16,7 +20,7 @@ typedef uint64_t pte_t;
 #define PTE_NX (1ULL << 63)
 
 #define PTE_ADDR(pte) ((pte) & 0x000FFFFFFFFFF000)
-#define PTE(pte) (pte_t *)(PTE_ADDR (pte) | limine_hhdm ())
+#define PTE(pte) (pte_t *)(direct_map_of (PTE_ADDR (pte)))
 
 #define PML4_SHIFT 39
 #define PML4_MASK 0x1FF

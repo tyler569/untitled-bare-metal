@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include <assert.h>
+#include <sys/mem.h>
 
 void
 kernel_main ()
@@ -32,7 +33,7 @@ kernel_main ()
 
   assert ("foo bar");
 
-  asm volatile ("int $0x3");
+  debug_trap ();
 
   printf ("Idle loop\n");
 

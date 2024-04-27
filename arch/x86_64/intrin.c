@@ -87,3 +87,9 @@ relax_busy_loop ()
 {
   asm volatile ("pause");
 }
+
+void
+debug_trap ()
+{
+  asm volatile ("int3");
+}

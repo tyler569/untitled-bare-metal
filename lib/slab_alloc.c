@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/lock.h>
+#include <sys/mem.h>
 
 #define PAGE_SIZE 4096
 

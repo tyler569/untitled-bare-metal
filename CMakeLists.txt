@@ -1,68 +1,52 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.5)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(ExternalProject)
+include(DefineFileBasenameForSources)
+
 project(untitled_bare_metal C ASM)
 
 set(CMAKE_C_STANDARD 23)
 
-include(ExternalProject)
-
-add_compile_options(-Wall -Wextra -mcmodel=kernel)
-
-add_link_options(
-  -T ${CMAKE_SOURCE_DIR}/link.ld
-  -z max-page-size=0x1000
-)
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+add_compile_options(-Wall -Wextra)
 
 include_directories(include)
 
-set(CMAKE_C_FLAGS_DEBUG "-g -O0")
-
-# Helper function to add preprocessor definition of FILE_BASENAME
-# to pass the filename without directory path for debugging use.
-#
-# Note that in header files this is not consistent with
-# __FILE__ and __LINE__ since FILE_BASENAME will be the
-# compilation unit source file name (.c/.cpp).
-#
-# Example:
-#
-#   define_file_basename_for_sources(my_target)
-#
-# Will add -DFILE_BASENAME="filename" for each source file depended on
-# by my_target, where filename is the name of the file.
-#
-function(define_file_basename_for_sources targetname)
-  get_target_property(source_files "${targetname}" SOURCES)
-  foreach (sourcefile ${source_files})
-    # Add the FILE_BASENAME=filename compile definition to the list.
-    get_filename_component(basename "${sourcefile}" NAME)
-    # Set the updated compile definitions on the source file.
-    set_property(
-      SOURCE "${sourcefile}" APPEND
-      PROPERTY COMPILE_DEFINITIONS "FILE_BASENAME=\"${basename}\"")
-  endforeach ()
-endfunction()
-
 add_executable(untitled_bare_metal
-  main.c
-  debug.c
-  page_alloc.c
-  arch/x86_64/debug.c
-  arch/x86_64/entry.c
-  arch/x86_64/entry.S
-  arch/x86_64/gdt.c
-  arch/x86_64/idt.c
-  arch/x86_64/intrin.c
-  arch/x86_64/ints.c
-  arch/x86_64/smp.c
-  arch/x86_64/lapic.c
-  arch/x86_64/mmu.c
+  kernel/main.c
+  kernel/debug.c
+  kernel/page_alloc.c
   lib/print.c
   lib/slab_alloc.c
   lib/spin_lock.c
   lib/string.c
 )
 
-set_target_properties(untitled_bare_metal PROPERTIES LINK_DEPENDS ${CMAKE_SOURCE_DIR}/link.ld)
+if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
+  target_sources(untitled_bare_metal PRIVATE
+    arch/x86_64/debug.c
+    arch/x86_64/entry.c
+    arch/x86_64/entry.S
+    arch/x86_64/gdt.c
+    arch/x86_64/idt.c
+    arch/x86_64/intrin.c
+    arch/x86_64/ints.c
+    arch/x86_64/smp.c
+    arch/x86_64/lapic.c
+    arch/x86_64/memmap.c
+    arch/x86_64/mmu.c
+  )
+
+  target_compile_options(untitled_bare_metal PRIVATE -mcmodel=kernel)
+  target_link_options(untitled_bare_metal PRIVATE
+    -T ${CMAKE_SOURCE_DIR}/arch/x86_64/link.ld
+    -z max-page-size=0x1000
+  )
+  set_target_properties(untitled_bare_metal
+    PROPERTIES LINK_DEPENDS ${CMAKE_SOURCE_DIR}/arch/x86_64/link.ld
+  )
+endif ()
 
 define_file_basename_for_sources(untitled_bare_metal)
 
@@ -96,7 +80,9 @@ add_custom_command(
   COMMAND cp ${limine_dir}/limine-cd.bin ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-cd-efi.bin ${iso_dir}/boot/limine
   COMMAND cp ${CMAKE_BINARY_DIR}/untitled_bare_metal ${iso_dir}/boot
-  COMMAND xorriso -as mkisofs -b boot/limine/limine-cd.bin -no-emul-boot -boot-load-size 4 --boot-info-table --efi-boot boot/limine/limine-cd-efi.bin -efi-boot-part --efi-boot-image --protective-msdos-label "${iso_dir}" -o "${iso_file}"
+  COMMAND xorriso -as mkisofs -b boot/limine/limine-cd.bin -no-emul-boot
+  -boot-load-size 4 --boot-info-table --efi-boot boot/limine/limine-cd-efi.bin
+  -efi-boot-part --efi-boot-image --protective-msdos-label "${iso_dir}" -o "${iso_file}"
   COMMAND ${limine_dir}/limine-deploy ${iso_file}
   OUTPUT ${iso_file}
 )

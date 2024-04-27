@@ -28,6 +28,12 @@ ap_entry (struct limine_smp_info *)
 }
 
 USED void
+c_exception_entry (frame_t *f)
+{
+  print_interrupt_info (f);
+}
+
+USED void
 c_interrupt_entry (frame_t *f)
 {
   print_interrupt_info (f);
