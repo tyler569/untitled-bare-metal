@@ -43,7 +43,7 @@ uintptr_t
 get_vm_root ()
 {
   uintptr_t root;
-  asm volatile ("mov %%cr3, %0" : "=r"(root));
+  __asm__ volatile ("mov %%cr3, %0" : "=r"(root));
   return root;
 }
 

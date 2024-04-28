@@ -26,8 +26,6 @@ elf_map (struct elf_phdr *p)
     {
       int flags = PTE_PRESENT | PTE_USER | PTE_WRITE;
 
-      printf ("Mapping %#lx\n", p->vaddr + i);
-
       add_vm_mapping (root, p->vaddr + i, alloc_page (), flags);
     }
 }
@@ -44,8 +42,8 @@ elf_load (struct elf_ehdr *e)
 
       elf_map (p);
 
-      memcpy ((void *)p->vaddr, (void *)e + p->offset, p->filesz);
-      memset ((void *)p->vaddr + p->filesz, 0, p->memsz - p->filesz);
+      memcpy ((char *)p->vaddr, (char *)e + p->offset, p->filesz);
+      memset ((char *)p->vaddr + p->filesz, 0, p->memsz - p->filesz);
     }
 }
 

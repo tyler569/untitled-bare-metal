@@ -29,6 +29,10 @@ void
 run_smoke_tests ()
 {
   printf ("Smoke tests:\n");
+
+  printf ("  Interrupt\n");
+  debug_trap ();
+
   printf ("  Allocator\n");
   {
 #define ALLOCS 512
@@ -71,9 +75,6 @@ run_smoke_tests ()
           }
       }
   }
-
-  printf ("  Interrupt\n");
-  debug_trap ();
 
   printf ("  Chacha20\n");
   {

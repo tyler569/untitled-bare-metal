@@ -20,8 +20,8 @@ init_syscall ()
 }
 
 USED uintptr_t
-c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
-                 uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *f)
+c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t, uintptr_t, uintptr_t,
+                 uintptr_t, int syscall_number, frame_t *f)
 {
   printf ("Syscall (num: %i, a0: %#lx, a1: %#lx)\n", syscall_number, a0, a1);
 

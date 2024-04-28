@@ -9,7 +9,7 @@ project(untitled_bare_metal C ASM)
 set(CMAKE_C_STANDARD 23)
 
 set(CMAKE_C_FLAGS_DEBUG "-g -O1")
-add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall -Wextra -Wnewline-eof)
 
 add_compile_options(-iquote ${CMAKE_SOURCE_DIR}/include)
 
@@ -23,19 +23,15 @@ add_executable(untitled_bare_metal
   kernel/debug.c
   kernel/page_alloc.c
   kernel/task.c
+  lib/chacha20.c
   lib/elf.c
+  lib/hexdump.c
   lib/mem_alloc.c
   lib/print.c
+  lib/rng.c
   lib/slab_alloc.c
   lib/spin_lock.c
   lib/string.c
-  user/init.c
-  include/chacha20.h
-  lib/chacha20.c
-  lib/hexdump.c
-  include/ctype.h
-  lib/rng.c
-  include/rng.h
 )
 
 add_executable(userland

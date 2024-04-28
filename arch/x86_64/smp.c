@@ -1,8 +1,6 @@
-#include "assert.h"
 #include "kernel.h"
 #include "limine.h"
 #include "list.h"
-#include "stdint.h"
 #include "stdio.h"
 #include "sys/arch.h"
 #include "sys/slab.h"

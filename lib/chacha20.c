@@ -44,17 +44,6 @@ do_chacha20_block (uint32_t state[static 16])
     state[i] += state_copy[i];
 }
 
-static void
-print_chacha20_state (uint32_t state[static 16])
-{
-  for (size_t i = 0; i < 16; i++)
-    {
-      printf ("%08x ", state[i]);
-      if (i % 4 == 3)
-        printf ("\n");
-    }
-}
-
 void
 xor_chacha20 (chacha20 *cc, unsigned char *buf, size_t len)
 {
