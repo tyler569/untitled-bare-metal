@@ -1,6 +1,9 @@
 #include "stdio.h"
 #include "sys/arch.h"
+#include "sys/mem.h"
 #include "x86_64.h"
+
+#define INT_STACK_SIZE 8192
 
 const char *interrupt_acronyms[]
     = { "#DE", "#DB", "NMI", "#BP", "#OF", "#BR", "#UD", "#NM",
@@ -33,4 +36,14 @@ print_interrupt_info (frame_t *f)
     }
 
   halt_forever ();
+}
+
+void
+init_int_stacks ()
+{
+  void *int_stack = kmem_alloc (INT_STACK_SIZE);
+  void *nmi_stack = kmem_alloc (INT_STACK_SIZE);
+  this_cpu->kernel_stack_top = (uintptr_t)int_stack + INT_STACK_SIZE;
+  this_cpu->tss.ist[0] = this_cpu->kernel_stack_top;
+  this_cpu->tss.ist[1] = (uintptr_t)nmi_stack + INT_STACK_SIZE;
 }

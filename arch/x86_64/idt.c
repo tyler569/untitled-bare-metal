@@ -1,19 +1,16 @@
 #include "sys/cdefs.h"
 #include "x86_64.h"
 
-#define TYPE_INTERRUPT 0xE
-#define TYPE_TRAP 0xF
+#define TYPE_INT 0x8E
+#define TYPE_TRAP 0x8F
+#define TYPE_USER_INT 0x60
 
 struct PACKED idt_entry
 {
   uint16_t handler_low;
   uint16_t segment;
-  uint8_t ist : 3;
-  uint8_t reserved_0 : 5;
-  uint8_t type : 4;
-  uint8_t s : 1;
-  uint8_t dpl : 2;
-  uint8_t p : 1;
+  uint8_t ist;
+  uint8_t type;
   uint16_t handler_mid;
   uint32_t handler_high;
   uint32_t reserved_1;
@@ -34,15 +31,12 @@ static idt_ptr_t idt_ptr = { sizeof (idt) - 1, (uintptr_t)idt };
 void
 set_idt_gate (int num, uintptr_t base, int type, int dpl)
 {
-  idt[num].p = 1;
   idt[num].handler_low = base & 0xFFFF;
   idt[num].handler_mid = (base >> 16) & 0xFFFF;
   idt[num].handler_high = base >> 32;
   idt[num].segment = KERNEL_CS;
   idt[num].ist = 0;
   idt[num].type = type;
-  idt[num].s = 0;
-  idt[num].dpl = dpl;
 }
 
 void
@@ -51,7 +45,8 @@ load_idt (idt_ptr_t *i)
   asm volatile ("lidt %0" : : "m"(*i));
 }
 
-#define SET_IDT_GATE(n, i) set_idt_gate (n, (uintptr_t)i, TYPE_INTERRUPT, 0)
+#define SET_IDT_GATE(n, i) set_idt_gate (n, (uintptr_t)i, TYPE_INT, 0)
+#define SET_IDT_GATE_ex(n, i, typ) set_idt_gate (n, (uintptr_t)i, typ, 0)
 
 void
 init_idt ()
@@ -59,7 +54,7 @@ init_idt ()
   SET_IDT_GATE (0, isr0);
   SET_IDT_GATE (1, isr1);
   SET_IDT_GATE (2, isr2);
-  SET_IDT_GATE (3, isr3);
+  SET_IDT_GATE_ex (3, isr3, TYPE_INT | TYPE_USER_INT);
   SET_IDT_GATE (4, isr4);
   SET_IDT_GATE (5, isr5);
   SET_IDT_GATE (6, isr6);

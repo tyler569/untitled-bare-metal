@@ -25,6 +25,7 @@ USED int
 _start ()
 {
   _syscall2 (1, (uintptr_t) "Hello, World from userland!", 27);
+  // asm volatile ("int3");
   _syscall0 (0);
 
   UNREACHABLE ();

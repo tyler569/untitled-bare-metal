@@ -15,6 +15,13 @@
 	jmp \handler
 .endm
 
+.macro MAYBE_SWAPGS
+    cmpq $0x23, 16(%rsp)
+    jne 1f
+    swapgs
+1:
+.endm
+
 isrnoerr isr0   $0 exception_entry
 isrnoerr isr1   $1 exception_entry
 isrnoerr isr2   $2 exception_entry
@@ -66,19 +73,23 @@ isrnoerr irq15 $47 interrupt_entry
 
 .global exception_entry
 exception_entry:
+    MAYBE_SWAPGS
     PUSH_ALL
     mov %rsp, %rdi
     call c_exception_entry
     POP_ALL
     add $16, %rsp
+    MAYBE_SWAPGS
     iretq
 
 
 .global interrupt_entry
 interrupt_entry:
+    MAYBE_SWAPGS
     PUSH_ALL
     mov %rsp, %rdi
     call c_interrupt_entry
     POP_ALL
     add $16, %rsp
+    MAYBE_SWAPGS
     iretq

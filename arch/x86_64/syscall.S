@@ -5,7 +5,7 @@ jump_to_userland:
     xchg %rsi, %rsp
     mov %rdi, %rcx
     mov $0, %r11
-    
+
     swapgs
     sysretq
 
@@ -21,9 +21,10 @@ syscall_entry:
     push %r11           // user rflags
     PUSH_CALLEE_SAVED   // save callee saved registers
     mov %r10, %rcx      // fix 3rd parameter
+    push %rsp           // 8th parameter to the function
     push %rax           // 7th paramter to the function
     call c_syscall_entry
-    add $8, %rsp        // caller pops 7th parameter
+    add $16, %rsp        // caller pops parameters
     POP_CALLEE_SAVED    // restore callee saved registers
     pop %r11            // restore user rflags
     pop %rcx            // restore user rip

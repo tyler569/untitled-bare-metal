@@ -91,12 +91,15 @@ struct per_cpu
 
 typedef struct per_cpu per_cpu_t;
 
+#define this_cpu ((__seg_gs per_cpu_t *)0)
+
 void init_bsp_gdt ();
 void init_ap_gdt (per_cpu_t *cpu);
 void init_ap_idt ();
 void init_idt ();
 void init_aps ();
 void init_syscall ();
+void init_int_stacks ();
 
 void write_port_b (uint16_t port, uint8_t);
 uint8_t read_port_b (uint16_t port);
@@ -124,6 +127,12 @@ struct frame
 };
 
 typedef struct frame frame_t;
+
+struct syscall_frame
+{
+  uint64_t r15, r14, r13, r12, rbp, rbx;
+  uint64_t rflags, rip, rsp;
+};
 
 void print_interrupt_info (frame_t *);
 

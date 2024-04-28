@@ -20,9 +20,24 @@ init_syscall ()
 
 USED uintptr_t
 c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
-                 uintptr_t a4, uintptr_t a5, int syscall_number)
+                 uintptr_t a4, uintptr_t a5, int syscall_number,
+                 struct syscall_frame *frame)
 {
   printf ("Syscall (num: %i, a0: %#lx, a1: %#lx)\n", syscall_number, a0, a1);
+
+  printf ("frame: %p\n", frame);
+  if (frame)
+    {
+      printf ("  rip: %#lx\n", frame->rip);
+      printf ("  rfl: %#lx\n", frame->rflags);
+      printf ("  rsp: %#lx\n", frame->rsp);
+      printf ("  rbp: %#lx\n", frame->rbp);
+      printf ("  rbx: %#lx\n", frame->rbx);
+      printf ("  r12: %#lx\n", frame->r12);
+      printf ("  r13: %#lx\n", frame->r13);
+      printf ("  r14: %#lx\n", frame->r14);
+      printf ("  r15: %#lx\n", frame->r15);
+    }
 
   switch (syscall_number)
     {
