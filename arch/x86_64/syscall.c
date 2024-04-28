@@ -11,16 +11,16 @@ init_syscall ()
   uint64_t mask = FLAG_TF | FLAG_IF;
   uint64_t efer = read_msr (IA32_EFER);
 
-  write_msr (MSR_STAR, star);
-  write_msr (MSR_LSTAR, lstar);
-  write_msr (MSR_CSTAR, cstar);
-  write_msr (MSR_SYSCALL_FLAG_MASK, mask);
+  write_msr (IA32_STAR, star);
+  write_msr (IA32_LSTAR, lstar);
+  write_msr (IA32_CSTAR, cstar);
+  write_msr (IA32_FMASK, mask);
   write_msr (IA32_EFER, efer | IA32_EFER_SCE);
 }
 
-USED void
-c_syscall_entry (uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
-                 uint64_t a4, uint64_t a5, int syscall_number)
+USED uintptr_t
+c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
+                 uintptr_t a4, uintptr_t a5, int syscall_number)
 {
   printf ("Syscall (num: %i, a0: %#lx, a1: %#lx)\n", syscall_number, a0, a1);
 
@@ -36,4 +36,6 @@ c_syscall_entry (uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3,
       printf ("Unknown syscall\n");
       break;
     }
+
+  return 0;
 }

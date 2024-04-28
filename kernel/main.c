@@ -10,8 +10,6 @@ kernel_main ()
 {
   printf ("Hello, World!\n");
 
-  init_kmem_alloc ();
-
   int *allocations[512];
   for (int i = 0; i < 512; i++)
     {

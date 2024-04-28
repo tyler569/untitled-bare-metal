@@ -8,27 +8,19 @@
 
 LIMINE_BASE_REVISION (1)
 
+// The kernel entrypoint, called by the bootloader.
+// This function is set as the entry on the kernel ELF file.
 USED void
 kernel_entry ()
 {
-  init_gdt ();
+  init_bsp_gdt ();
   init_idt ();
-
   init_syscall ();
-
   init_page_mmap ();
-
+  init_kmem_alloc ();
   init_aps ();
 
   kernel_main ();
-
-  halt_forever ();
-}
-
-void
-ap_entry (struct limine_smp_info *)
-{
-  printf ("AP started\n");
 
   halt_forever ();
 }

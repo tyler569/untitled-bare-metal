@@ -1,8 +1,6 @@
-#include "kernel.h"
-#include "stdint.h"
 #include "stdio.h"
-#include "sys/cdefs.h"
 #include "sys/spinlock.h"
+#include "x86_64.h"
 
 void
 halt_until_interrupt ()
@@ -53,12 +51,40 @@ read_msr (uint32_t msr_id)
   return ((uint64_t)high << 32) | low;
 }
 
-uintptr_t
+void
+write_fsbase (uintptr_t value)
+{
+  // asm volatile ("wrfsbase %0" : : "r"(value));
+  write_msr (IA32_FS_BASE, value);
+}
+
+void
+write_gsbase (uintptr_t value)
+{
+  // asm volatile ("wrgsbase %0" : : "r"(value));
+  write_msr (IA32_GS_BASE, value);
+}
+
+uint64_t
 read_cr2 ()
 {
-  uintptr_t ret;
+  uint64_t ret;
   asm volatile ("mov %%cr2, %0" : "=r"(ret));
   return ret;
+}
+
+uint64_t
+read_cr4 ()
+{
+  uint64_t ret;
+  asm volatile ("mov %%cr4, %0" : "=r"(ret));
+  return ret;
+}
+
+void
+write_cr4 (uint64_t value)
+{
+  asm volatile ("mov %0, %%cr4" : : "r"(value));
 }
 
 void

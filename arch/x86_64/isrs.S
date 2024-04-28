@@ -15,7 +15,6 @@
 	jmp \handler
 .endm
 
-
 isrnoerr isr0   $0 exception_entry
 isrnoerr isr1   $1 exception_entry
 isrnoerr isr2   $2 exception_entry

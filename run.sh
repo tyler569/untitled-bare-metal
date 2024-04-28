@@ -2,7 +2,7 @@
 
 iso="untitled_bare_metal.iso"
 mem="128M"
-smp="4"
+smp=2
 debugopt="-debugcon stdio"
 gdbserver=""
 video="-display none"

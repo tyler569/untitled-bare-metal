@@ -107,3 +107,9 @@ init_idt ()
 
   load_idt (&idt_ptr);
 }
+
+void
+init_ap_idt ()
+{
+  load_idt (&idt_ptr);
+}
