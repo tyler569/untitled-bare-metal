@@ -47,6 +47,15 @@ get_vm_root ()
   return root;
 }
 
+uintptr_t
+alloc_table ()
+{
+  uintptr_t page = alloc_page ();
+  void *table = (void *)direct_map_of (page);
+  memset (table, 0, PAGE_SIZE);
+  return page;
+}
+
 void
 add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
 {
@@ -60,7 +69,7 @@ add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
   pte_t pml4e = pml4[virt >> PML4_SHIFT & PML4_MASK];
   if (!(pml4e & PTE_PRESENT))
     {
-      uintptr_t pdp_page = alloc_page ();
+      uintptr_t pdp_page = alloc_table ();
       pml4[virt >> PML4_SHIFT & PML4_MASK] = pdp_page | table_flags;
       pdp = PTE (pdp_page);
     }
@@ -70,7 +79,7 @@ add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
   pte_t pdpe = pdp[(virt >> PDP_SHIFT) & PDP_MASK];
   if (!(pdpe & PTE_PRESENT))
     {
-      uintptr_t pd_page = alloc_page ();
+      uintptr_t pd_page = alloc_table ();
       pdp[(virt >> PDP_SHIFT) & PDP_MASK] = pd_page | table_flags;
       pd = PTE (pd_page);
     }
@@ -80,7 +89,7 @@ add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
   pte_t pde = pd[(virt >> PD_SHIFT) & PD_MASK];
   if (!(pde & PTE_PRESENT))
     {
-      uintptr_t pt_page = alloc_page ();
+      uintptr_t pt_page = alloc_table ();
       pd[(virt >> PD_SHIFT) & PD_MASK] = (uintptr_t)pt_page | table_flags;
       pt = PTE (pt_page);
     }
@@ -135,7 +144,7 @@ alloc_kernel_vm (size_t len)
 uintptr_t
 new_page_table ()
 {
-  uintptr_t root = alloc_page ();
+  uintptr_t root = alloc_table ();
   pte_t *pml4 = PTE (root);
 
   pte_t *current_root = PTE (get_vm_root ());

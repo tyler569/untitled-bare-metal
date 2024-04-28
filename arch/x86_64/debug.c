@@ -4,6 +4,14 @@
 void
 print_backtrace (frame_t *f)
 {
+  if (this_cpu->printing_backtrace)
+    {
+      printf ("Faulted in backtrace\n");
+      return;
+    }
+
+  this_cpu->printing_backtrace = true;
+
   printf ("Backtrace:\n");
 
   uintptr_t rbp = f->rbp;
@@ -17,6 +25,8 @@ print_backtrace (frame_t *f)
       rip = *(uintptr_t *)(rbp + 8);
       rbp = *(uintptr_t *)rbp;
     }
+
+  this_cpu->printing_backtrace = false;
 }
 
 void

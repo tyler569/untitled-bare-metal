@@ -15,12 +15,12 @@ init_slab_cache (struct slab_cache *cache, size_t size)
 {
   assert (size < 16 * PAGE_SIZE && "just allocate pages");
 
-  list_init (&cache->list);
-  list_init (&cache->slabs_full);
-  list_init (&cache->slabs_partial);
-  list_init (&cache->slabs_free);
+  init_list (&cache->list);
+  init_list (&cache->slabs_full);
+  init_list (&cache->slabs_partial);
+  init_list (&cache->slabs_free);
 
-  list_insert_after (&cache->list, &slab_caches);
+  append_to_list (&cache->list, &slab_caches);
 
   cache->object_size = size;
 
@@ -94,8 +94,8 @@ up_ref_slab (struct slab_cache *cache, page_t *slab)
 
   if (slab->slab_objects == obj_per_page (cache))
     {
-      list_remove (&slab->list);
-      list_insert_after (&slab->list, &cache->slabs_full);
+      remove_from_list (&slab->list);
+      append_to_list (&slab->list, &cache->slabs_full);
     }
 }
 
@@ -104,16 +104,16 @@ down_ref_slab (struct slab_cache *cache, page_t *slab)
 {
   if (slab->slab_objects == obj_per_page (cache))
     {
-      list_remove (&slab->list);
-      list_insert_after (&slab->list, &cache->slabs_partial);
+      remove_from_list (&slab->list);
+      append_to_list (&slab->list, &cache->slabs_partial);
     }
 
   slab->slab_objects--;
 
   if (slab->slab_objects == 0)
     {
-      list_remove (&slab->list);
-      list_insert_after (&slab->list, &cache->slabs_free);
+      remove_from_list (&slab->list);
+      append_to_list (&slab->list, &cache->slabs_free);
     }
 }
 
@@ -136,7 +136,7 @@ grow_slab_cache (struct slab_cache *cache)
       add_vm_mapping (vm_root, slab_vm_addr + i * PAGE_SIZE, addr,
                       PTE_PRESENT | PTE_WRITE);
 
-      list_init (&page->list);
+      init_list (&page->list);
 
       if (i == 0)
         {
@@ -153,7 +153,7 @@ grow_slab_cache (struct slab_cache *cache)
 
   memset ((void *)slab_vm_addr, 0, slab_size);
 
-  list_insert_after (&slab_head->list, &cache->slabs_free);
+  append_to_list (&slab_head->list, &cache->slabs_free);
 }
 
 void *
@@ -163,17 +163,17 @@ slab_alloc (struct slab_cache *cache)
 
   page_t *slab = nullptr;
 
-  if (!list_empty (&cache->slabs_partial))
-    slab = CONTAINER_OF (list_first (&cache->slabs_partial), page_t, list);
+  if (!is_list_empty (&cache->slabs_partial))
+    slab = CONTAINER_OF (first_item (&cache->slabs_partial), page_t, list);
 
   if (!slab)
     {
-      if (list_empty (&cache->slabs_free))
+      if (is_list_empty (&cache->slabs_free))
         grow_slab_cache (cache);
 
-      slab = CONTAINER_OF (list_first (&cache->slabs_free), page_t, list);
-      list_remove (&slab->list);
-      list_insert_after (&slab->list, &cache->slabs_partial);
+      slab = CONTAINER_OF (first_item (&cache->slabs_free), page_t, list);
+      remove_from_list (&slab->list);
+      append_to_list (&slab->list, &cache->slabs_partial);
     }
 
   size_t per_page = obj_per_page (cache);

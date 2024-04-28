@@ -11,12 +11,12 @@ struct malloc_bucket
   struct slab_cache cache;
 };
 
-static struct malloc_bucket buckets[] = {
-  { .size = 16 },   { .size = 24 },   { .size = 32 },   { .size = 48 },
-  { .size = 64 },   { .size = 96 },   { .size = 128 },  { .size = 192 },
-  { .size = 256 },  { .size = 384 },  { .size = 512 },  { .size = 768 },
-  { .size = 1024 }, { .size = 1536 }, { .size = 2048 }, { .size = 3072 }
-};
+static struct malloc_bucket buckets[]
+    = { { .size = 16 },   { .size = 24 },   { .size = 32 },   { .size = 48 },
+        { .size = 64 },   { .size = 96 },   { .size = 128 },  { .size = 192 },
+        { .size = 256 },  { .size = 384 },  { .size = 512 },  { .size = 768 },
+        { .size = 1024 }, { .size = 1536 }, { .size = 2048 }, { .size = 3072 },
+        { .size = 4096 }, { .size = 6144 }, { .size = 8192 } };
 
 static size_t
 sat_sub64 (size_t a, size_t b)
@@ -99,7 +99,7 @@ kmem_page_free (page_t *page)
 void *
 kmem_alloc (size_t size)
 {
-  if (size >= 4096)
+  if (size >= 8192)
     return kmem_page_alloc (size);
 
   size_t index = get_bucket_index_analytic (size);

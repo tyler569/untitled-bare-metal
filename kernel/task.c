@@ -7,7 +7,7 @@ struct slab_cache task_cache;
 void
 init_tasks ()
 {
-  list_init (&tasks);
+  init_list (&tasks);
   init_slab_cache (&task_cache, sizeof (struct task));
 }
 
@@ -16,10 +16,10 @@ task_create ()
 {
   struct task *t = slab_alloc (&task_cache);
 
-  list_init (&t->tasks);
-  list_init (&t->children);
+  init_list (&t->tasks);
+  init_list (&t->children);
 
-  list_insert_after (&t->tasks, &tasks);
+  append_to_list (&t->tasks, &tasks);
 
   return t;
 }

@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "elf.h"
 #include "kernel.h"
+#include "rng.h"
 #include "stdio.h"
 #include "sys/arch.h"
 #include "sys/mem.h"
@@ -10,29 +11,9 @@ kernel_main ()
 {
   printf ("Hello, World!\n");
 
-  int *allocations[512];
-  for (int i = 0; i < 512; i++)
-    {
-      allocations[i] = kmem_alloc (sizeof (int));
-      assert (allocations[i]);
+  init_random (1);
 
-      *allocations[i] = i;
-    }
-
-  for (int i = 0; i < 512; i++)
-    {
-      assert (*allocations[i] == i);
-      kmem_free (allocations[i]);
-    }
-
-  void *biig_buffer = kmem_alloc (1024 * 1024);
-  assert (biig_buffer);
-  for (int i = 0; i < 1024 * 1024; i++)
-    ((char *)biig_buffer)[i] = i % 256;
-
-  kmem_free (biig_buffer);
-
-  assert ("foo bar");
+  run_smoke_tests ();
 
   void *initrd;
   size_t initrd_size;
@@ -54,9 +35,6 @@ kernel_main ()
   else
     printf ("No initrd found\n");
 
-  debug_trap ();
-
   printf ("Idle loop\n");
-
   halt_forever ();
 }

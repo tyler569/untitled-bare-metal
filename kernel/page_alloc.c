@@ -172,9 +172,9 @@ alloc_page_s (page_t **page_ret)
 
   spin_lock (&page_lock);
 
-  if (!list_empty (&free_list))
+  if (!is_list_empty (&free_list))
     {
-      struct list_head *l = list_pop_front (&free_list);
+      struct list_head *l = pop_from_list (&free_list);
       page = CONTAINER_OF (l, page_t, list);
     }
   else
@@ -202,7 +202,7 @@ free_page (uintptr_t addr)
   spin_lock (&page_lock);
 
   page_t *page = get_page_struct (addr);
-  list_insert_before (&page->list, &free_list);
+  prepend_to_list (&page->list, &free_list);
   page->flags = PAGE_FREE;
 
   spin_unlock (&page_lock);

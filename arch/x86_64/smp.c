@@ -22,7 +22,7 @@ ap_entry (struct limine_smp_info *)
   per_cpu_t *cpu = slab_alloc (&per_cpu_cache);
   cpu->self = cpu;
 
-  list_insert_before (&cpu->list, &cpus);
+  prepend_to_list (&cpu->list, &cpus);
 
   init_ap_idt ();
   init_ap_gdt (cpu);

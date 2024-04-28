@@ -30,6 +30,12 @@ add_executable(untitled_bare_metal
   lib/spin_lock.c
   lib/string.c
   user/init.c
+  include/chacha20.h
+  lib/chacha20.c
+  lib/hexdump.c
+  include/ctype.h
+  lib/rng.c
+  include/rng.h
 )
 
 add_executable(userland

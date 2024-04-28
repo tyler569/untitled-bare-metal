@@ -1,6 +1,7 @@
 #pragma once
 
 void kernel_main ();
+void run_smoke_tests ();
 
 [[noreturn]] void panic (const char *msg, ...);
 
