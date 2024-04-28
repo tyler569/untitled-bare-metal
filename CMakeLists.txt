@@ -8,7 +8,7 @@ project(untitled_bare_metal C ASM)
 
 set(CMAKE_C_STANDARD 23)
 
-set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+set(CMAKE_C_FLAGS_DEBUG "-g -O1")
 add_compile_options(-Wall -Wextra)
 
 add_compile_options(-iquote ${CMAKE_SOURCE_DIR}/include)
@@ -29,6 +29,11 @@ add_executable(untitled_bare_metal
   lib/slab_alloc.c
   lib/spin_lock.c
   lib/string.c
+  user/init.c
+)
+
+add_executable(userland
+  user/init.c
 )
 
 if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
@@ -38,12 +43,15 @@ if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
     arch/x86_64/entry.S
     arch/x86_64/gdt.c
     arch/x86_64/idt.c
+    arch/x86_64/initrd.c
     arch/x86_64/intrin.c
     arch/x86_64/ints.c
-    arch/x86_64/smp.c
     arch/x86_64/lapic.c
     arch/x86_64/memmap.c
     arch/x86_64/mmu.c
+    arch/x86_64/smp.c
+    arch/x86_64/syscall.c
+    arch/x86_64/syscall.S
   )
 
   target_compile_options(untitled_bare_metal PRIVATE -mcmodel=kernel)
@@ -56,19 +64,20 @@ if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
   )
 
   add_custom_command(
+    DEPENDS limine untitled_bare_metal userland "${CMAKE_SOURCE_DIR}/limine.cfg"
     OUTPUT ${iso_file}
     COMMAND cp ${CMAKE_SOURCE_DIR}/limine.cfg ${iso_dir}/boot/limine
     COMMAND cp ${limine_dir}/limine-bios.sys ${iso_dir}/boot/limine
     COMMAND cp ${limine_dir}/limine-bios-cd.bin ${iso_dir}/boot/limine
     COMMAND cp ${limine_dir}/limine-uefi-cd.bin ${iso_dir}/boot/limine
     COMMAND cp ${CMAKE_BINARY_DIR}/untitled_bare_metal ${iso_dir}/boot
-    COMMAND xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin 
+    COMMAND cp ${CMAKE_BINARY_DIR}/userland ${iso_dir}/boot
+    COMMAND xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin
     -no-emul-boot -boot-load-size 4 --boot-info-table
     --efi-boot boot/limine/limine-uefi-cd.bin
     -efi-boot-part --efi-boot-image --protective-msdos-label
     "${iso_dir}" -o "${iso_file}"
     COMMAND ${limine_dir}/limine bios-install ${iso_file}
-    DEPENDS untitled_bare_metal limine
   )
   add_custom_target(iso ALL DEPENDS ${iso_file})
 else ()

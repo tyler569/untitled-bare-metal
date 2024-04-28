@@ -3,50 +3,113 @@
 #include "stdint.h"
 #include "sys/cdefs.h"
 
+typedef uint16_t elf_half;
+typedef uint32_t elf_word;
+typedef uint64_t elf_xword;
+typedef int32_t elf_sword;
+typedef int64_t elf_sxword;
+
+typedef uint64_t elf_addr;
+typedef uint64_t elf_off;
+typedef uint16_t elf_section;
+typedef uint16_t elf_versym;
+typedef uint64_t elf_relr;
+
+#define EI_NIDENT 16
+#define ELFMAGIC "\x{7f}ELF"
+#define ELFCLASS64 2
+#define ELFDATA2LSB 1
+#define ELFVERSION_CURRENT 1
+#define ELFOSABI_SYSV 0
+#define ELFOSABI_GNU 3
+
+#define ET_REL 1
+#define ET_EXEC 2
+#define ET_DYN 3
+
+#define EM_X86_64 62
+
 struct elf_ehdr
 {
-  uint8_t ident[16];
-  uint16_t type;
-  uint16_t machine;
-  uint32_t version;
-  uint64_t entry;
-  uint64_t phoff;
-  uint64_t shoff;
-  uint32_t flags;
-  uint16_t ehsize;
-  uint16_t phentsize;
-  uint16_t phnum;
-  uint16_t shentsize;
-  uint16_t shnum;
-  uint16_t shstrndx;
+  unsigned char ident[EI_NIDENT];
+  elf_half type;
+  elf_half machine;
+  elf_word version;
+  elf_addr entry;
+  elf_off phoff;
+  elf_off shoff;
+  elf_word flags;
+  elf_half ehsize;
+  elf_half phentsize;
+  elf_half phnum;
+  elf_half shentsize;
+  elf_half shnum;
+  elf_half shstrndx;
 };
+
+#define PT_NULL 0
+#define PT_LOAD 1
+#define PT_DYNAMIC 2
+#define PT_INTERP 3
+
+#define PF_X 1
+#define PF_W 2
+#define PF_R 4
 
 struct elf_phdr
 {
-  uint32_t type;
-  uint32_t flags;
-  uint64_t offset;
-  uint64_t vaddr;
-  uint64_t paddr;
-  uint64_t filesz;
-  uint64_t memsz;
-  uint64_t align;
+  elf_word type;
+  elf_word flags;
+  elf_off offset;
+  elf_addr vaddr;
+  elf_addr paddr;
+  elf_xword filesz;
+  elf_xword memsz;
+  elf_xword align;
 };
 
 struct elf_shdr
 {
-  uint32_t name;
-  uint32_t type;
-  uint64_t flags;
-  uint64_t addr;
-  uint64_t offset;
-  uint64_t size;
-  uint32_t link;
-  uint32_t info;
-  uint64_t addralign;
-  uint64_t entsize;
+  elf_word name;
+  elf_word type;
+  elf_xword flags;
+  elf_addr addr;
+  elf_off offset;
+  elf_xword size;
+  elf_word link;
+  elf_word info;
+  elf_xword addralign;
+  elf_xword entsize;
 };
 
-#define ELF_MAGIC "\x{7F}ELF"
-#define ELF_TYPE_EXEC 2
-#define ELF_VERSION 1
+struct elf_sym
+{
+  elf_word name;
+  unsigned char info;
+  unsigned char other;
+  elf_half shndx;
+  elf_addr value;
+  elf_xword size;
+};
+
+struct elf_rel
+{
+  elf_addr offset;
+  elf_xword info;
+};
+
+struct elf_rela
+{
+  elf_addr offset;
+  elf_xword info;
+  elf_sxword addend;
+};
+
+struct elf_dyn
+{
+  elf_sxword tag;
+  elf_xword val;
+};
+
+void elf_load (struct elf_ehdr *e);
+uintptr_t elf_entry (struct elf_ehdr *e);

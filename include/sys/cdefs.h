@@ -4,6 +4,7 @@
 #define MUST_USE __attribute__ ((warn_unused_result))
 #define PACKED __attribute__ ((packed))
 #define PRINTF_FORMAT(a, b) __attribute__ ((format (printf, a, b)))
+#define PURE __attribute__ ((pure))
 
 #define STRINGIFY_(x) #x
 #define STRINGIFY(x) STRINGIFY_ (x)
@@ -12,8 +13,8 @@
 #define LIKELY(x) __builtin_expect (!!(x), 1)
 #define UNLIKELY(x) __builtin_expect (!!(x), 0)
 
-#define ALIGN_DOWN(x, a) ((x) & ~((a) - 1))
-#define ALIGN_UP(x, a) ALIGN_DOWN ((x) + (a) - 1, a)
+#define ALIGN_DOWN(x, a) ((x) & ~((a)-1))
+#define ALIGN_UP(x, a) ALIGN_DOWN ((x) + (a)-1, a)
 
 #define ARRAY_SIZE(x) (sizeof (x) / sizeof (x[0]))
 
@@ -32,6 +33,6 @@
   })
 
 #define CONTAINER_OF(ptr, type, member)                                       \
-  ((type *)((uintptr_t)(ptr) - offsetof (type, member)))
+  ((type *)((uintptr_t)(ptr)-offsetof (type, member)))
 
 #define UNREACHABLE() __builtin_unreachable ()

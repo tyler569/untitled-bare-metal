@@ -4,9 +4,44 @@
 
 #define PAGE_SIZE 4096
 
+#define MSR_STAR 0xC0000081
+#define MSR_LSTAR 0xC0000082
+#define MSR_CSTAR 0xC0000083
+#define MSR_SYSCALL_FLAG_MASK 0xC0000084
+
+#define IA32_EFER 0xC0000080
+#define IA32_EFER_SCE 0x1
+
+#define KERNEL_CS 0x08l
+#define USER_CS 0x23l
+// In long mode, SYSRET pulls its code segment from MSR_STAR 63:48 + 16
+// and its stack segment from MSR_STAR 63:48 + 8. This is the fake code
+// segment that we load into MSR_STAR, so that the real code segment is
+// KERNEL_CS.
+#define USER_FAKE_SYSRET_CS (USER_CS - 16)
+
+#define FLAG_CF 0x0001
+#define FLAG_PF 0x0004
+#define FLAG_AF 0x0010
+#define FLAG_ZF 0x0040
+#define FLAG_SF 0x0080
+#define FLAG_TF 0x0100
+#define FLAG_IF 0x0200
+#define FLAG_DF 0x0400
+#define FLAG_OF 0x0800
+
+#define PF_PRESENT 0x1
+#define PF_WRITE 0x2
+#define PF_USER 0x4
+#define PF_RESERVED 0x8
+#define PF_EXECUTE 0x10
+#define PF_PROTECTION_KEY 0x20
+#define PF_SHADOW_STACK 0x40
+
 void init_gdt ();
 void init_idt ();
 void init_aps ();
+void init_syscall ();
 
 void write_port_b (uint16_t port, uint8_t value);
 uint8_t read_port_b (uint16_t port);
@@ -15,8 +50,6 @@ void write_msr (uint32_t msr_id, uint64_t value);
 uint64_t read_msr (uint32_t msr_id);
 
 uintptr_t read_cr2 ();
-
-uintptr_t limine_hhdm ();
 
 struct frame
 {
@@ -80,4 +113,9 @@ void irq12 ();
 void irq13 ();
 void irq14 ();
 void irq15 ();
-void isr_syscall ();
+
+#define SYSCALL_ARGS                                                          \
+  uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8,        \
+      uint64_t r9
+
+void syscall_entry (SYSCALL_ARGS);

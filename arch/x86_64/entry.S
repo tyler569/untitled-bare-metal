@@ -1,3 +1,5 @@
+#include "asm.h"
+
 .macro isrnoerr name num handler
 .global \name
 \name:
@@ -62,61 +64,6 @@ isrnoerr irq12 $44 interrupt_entry
 isrnoerr irq13 $45 interrupt_entry
 isrnoerr irq14 $46 interrupt_entry
 isrnoerr irq15 $47 interrupt_entry
-isrnoerr isr_syscall $128 syscall_entry
-
-.macro PUSH_ALL
-    push %rax
-    push %rcx
-    push %rdx
-    push %rbx
-    push %rbp
-    push %rsi
-    push %rdi
-    push %r8
-    push %r9
-    push %r10
-    push %r11
-    push %r12
-    push %r13
-    push %r14
-    push %r15
-.endm
-
-.macro POP_ALL
-    pop %r15
-    pop %r14
-    pop %r13
-    pop %r12
-    pop %r11
-    pop %r10
-    pop %r9
-    pop %r8
-    pop %rdi
-    pop %rsi
-    pop %rbp
-    pop %rbx
-    pop %rdx
-    pop %rcx
-    pop %rax
-.endm
-
-.macro PUSH_CALLEE_SAVED
-    push %rbp
-    push %rbx
-    push %r12
-    push %r13
-    push %r14
-    push %r15
-.endm
-
-.macro POP_CALLEE_SAVED
-    pop %r15
-    pop %r14
-    pop %r13
-    pop %r12
-    pop %rbx
-    pop %rbp
-.endm
 
 .global exception_entry
 exception_entry:
@@ -134,15 +81,5 @@ interrupt_entry:
     mov %rsp, %rdi
     call c_interrupt_entry
     POP_ALL
-    add $16, %rsp
-    iretq
-
-
-.global syscall_entry
-syscall_entry:
-    PUSH_CALLEE_SAVED
-    mov %rsp, %rdi
-    call c_syscall_entry
-    POP_CALLEE_SAVED
     add $16, %rsp
     iretq

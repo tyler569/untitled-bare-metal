@@ -14,6 +14,8 @@ kernel_entry ()
   init_gdt ();
   init_idt ();
 
+  init_syscall ();
+
   init_page_mmap ();
 
   init_aps ();
@@ -41,10 +43,4 @@ USED void
 c_interrupt_entry (frame_t *f)
 {
   print_interrupt_info (f);
-}
-
-USED void
-c_syscall_entry ()
-{
-  printf ("Syscall\n");
 }

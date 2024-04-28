@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "elf.h"
 #include "kernel.h"
 #include "stdio.h"
 #include "sys/arch.h"
@@ -34,6 +35,26 @@ kernel_main ()
   kmem_free (biig_buffer);
 
   assert ("foo bar");
+
+  void *initrd;
+  size_t initrd_size;
+  if (get_initrd_info (&initrd, &initrd_size))
+    {
+      printf ("Initrd found at %p, size %zu\n", initrd, initrd_size);
+      elf_load (initrd);
+
+      uintptr_t stack = 0x7ffffff00000;
+
+      uintptr_t root = get_vm_root ();
+      add_vm_mapping (root, stack, alloc_page (),
+                      PTE_PRESENT | PTE_USER | PTE_WRITE);
+
+      uintptr_t entry = elf_entry (initrd);
+      printf ("Entry point: %#lx\n", entry);
+      jump_to_userland (entry, stack + PAGE_SIZE);
+    }
+  else
+    printf ("No initrd found\n");
 
   debug_trap ();
 

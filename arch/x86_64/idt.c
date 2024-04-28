@@ -4,8 +4,6 @@
 #define TYPE_INTERRUPT 0xE
 #define TYPE_TRAP 0xF
 
-#define KERNEL_CS 0x08
-
 struct PACKED idt_entry
 {
   uint16_t handler_low;
@@ -30,7 +28,7 @@ struct PACKED idt_ptr
 typedef struct idt_entry idt_entry_t;
 typedef struct idt_ptr idt_ptr_t;
 
-static idt_entry_t idt[256];
+static idt_entry_t idt[48];
 static idt_ptr_t idt_ptr = { sizeof (idt) - 1, (uintptr_t)idt };
 
 void
@@ -106,7 +104,6 @@ init_idt ()
   SET_IDT_GATE (45, irq13);
   SET_IDT_GATE (46, irq14);
   SET_IDT_GATE (47, irq15);
-  SET_IDT_GATE (128, isr_syscall);
 
   load_idt (&idt_ptr);
 }

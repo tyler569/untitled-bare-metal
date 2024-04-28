@@ -5,9 +5,10 @@ mem="128M"
 smp="4"
 debugopt="-debugcon stdio"
 gdbserver=""
+video="-display none"
 tee="|& tee last_output"
 
-while getopts "dmst" opt; do
+while getopts "dmstv" opt; do
   case $opt in
     d)
       debugopt="-d int,cpu_reset"
@@ -21,6 +22,9 @@ while getopts "dmst" opt; do
     t)
       tee=""
       ;;
+    v)
+      video=""
+      ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
       ;;
@@ -32,6 +36,6 @@ exec qemu-system-x86_64 -s -vga std \
   -m $mem \
   -smp $smp \
   -cdrom $iso \
-  -display none \
+  $video \
   $debugopt \
   $gdbserver |& tee last_output
