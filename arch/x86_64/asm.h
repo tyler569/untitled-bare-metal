@@ -1,11 +1,8 @@
 #pragma once
 
-// offsets into per_cpu_t, see static assertions in gdt.c
-#define TSS_RSP2 28
-#define TSS_STACK 184
+#include "x86_64.h"
 
 // clang-format off
-#ifdef __ASSEMBLER__
 
 .macro PUSH_ALL
     push %rax
@@ -60,5 +57,3 @@
     pop %rbx
     pop %rbp
 .endm
-
-#endif

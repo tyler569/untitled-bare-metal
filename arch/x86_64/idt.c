@@ -29,7 +29,7 @@ static idt_entry_t idt[48];
 static idt_ptr_t idt_ptr = { sizeof (idt) - 1, (uintptr_t)idt };
 
 void
-set_idt_gate (int num, uintptr_t base, int type, int dpl)
+set_idt_gate (int num, uintptr_t base, int type)
 {
   idt[num].handler_low = base & 0xFFFF;
   idt[num].handler_mid = (base >> 16) & 0xFFFF;
@@ -45,8 +45,8 @@ load_idt (idt_ptr_t *i)
   asm volatile ("lidt %0" : : "m"(*i));
 }
 
-#define SET_IDT_GATE(n, i) set_idt_gate (n, (uintptr_t)i, TYPE_INT, 0)
-#define SET_IDT_GATE_ex(n, i, typ) set_idt_gate (n, (uintptr_t)i, typ, 0)
+#define SET_IDT_GATE(n, i) set_idt_gate (n, (uintptr_t)i, TYPE_INT)
+#define SET_IDT_GATE_ex(n, i, typ) set_idt_gate (n, (uintptr_t)i, typ)
 
 void
 init_idt ()

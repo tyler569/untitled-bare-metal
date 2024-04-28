@@ -1,8 +1,12 @@
 #pragma once
 
+#ifndef __ASSEMBLER__
+
 #include "list.h"
 #include "stddef.h"
 #include "stdint.h"
+
+#endif // __ASSEMBLER__
 
 #define PAGE_SIZE 4096
 
@@ -19,7 +23,9 @@
 #define CR4_FSGSBASE 0x100
 
 #define KERNEL_CS 0x08l
+#define KERNEL_SS 0x10l
 #define USER_CS 0x23l
+#define USER_SS 0x1Bl
 // In long mode, SYSRET pulls its code segment from IA32_STAR 63:48 + 16
 // and its stack segment from IA32_STAR 63:48 + 8. This is the fake code
 // segment that we load into IA32_STAR, so that the real code segment is
@@ -43,6 +49,8 @@
 #define PF_EXECUTE 0x10
 #define PF_PROTECTION_KEY 0x20
 #define PF_SHADOW_STACK 0x40
+
+#ifndef __ASSEMBLER__
 
 union PACKED gdt_entry
 {
@@ -91,6 +99,18 @@ struct per_cpu
 
 typedef struct per_cpu per_cpu_t;
 
+#endif // __ASSEMBLER__
+
+#define TSS_RSP2 28
+#define TSS_STACK 184
+
+#ifndef __ASSEMBLER__
+
+static_assert (offsetof (per_cpu_t, tss.rsp[2]) == TSS_RSP2,
+               "tss rsp2 offset needs to be changed in asm.h");
+static_assert (offsetof (per_cpu_t, kernel_stack_top) == TSS_STACK,
+               "tss ist0 offset needs to be changed in asm.h");
+
 #define this_cpu ((__seg_gs per_cpu_t *)0)
 
 void init_bsp_gdt ();
@@ -128,9 +148,14 @@ struct frame
 
 typedef struct frame frame_t;
 
+// unused, probably going away in favor of regular frame
+// since when you decide to schedule a task you have to store
+// the registers in a frame anyway, so we can either have two
+// structs or just one. That or maintaining different kernel
+// stacks for every usermode task...
 struct syscall_frame
 {
-  uint64_t r15, r14, r13, r12, rbp, rbx;
+  uint64_t r15, r14, r13, r12, rbx, rbp;
   uint64_t rflags, rip, rsp;
 };
 
@@ -188,3 +213,5 @@ void irq14 ();
 void irq15 ();
 
 void syscall_entry ();
+
+#endif // __ASSEMBLER__

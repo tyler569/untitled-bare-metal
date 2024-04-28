@@ -1,13 +1,7 @@
-#include "asm.h"
 #include "stdio.h"
 #include "string.h"
 #include "sys/cdefs.h"
 #include "x86_64.h"
-
-static_assert (offsetof (per_cpu_t, tss.rsp[2]) == TSS_RSP2,
-               "tss rsp2 offset needs to be changed in asm.h");
-static_assert (offsetof (per_cpu_t, kernel_stack_top) == TSS_STACK,
-               "tss ist0 offset needs to be changed in asm.h");
 
 #define KERNEL_CODE 0x9A
 #define KERNEL_DATA 0x92

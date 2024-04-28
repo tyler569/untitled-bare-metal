@@ -31,7 +31,6 @@ print_frame (frame_t *f)
   printf ("r12 %16lx r13 %16lx r14 %16lx r15 %16lx\n", f->r12, f->r13, f->r14,
           f->r15);
   printf (" cs %16lx  ss %16lx\n", f->cs, f->ss);
-  printf (" ds %16lx  es %16lx  fs %16lx  gs %16lx\n", 0l, 0l, 0l, 0l);
   printf ("int %16lx err %16lx rip %16lx flg %16lx\n", f->int_no, f->err_code,
           f->rip, f->rflags);
 }

@@ -20,6 +20,7 @@ print_interrupt_info (frame_t *f)
   switch (f->int_no)
     {
     case 3:
+      print_frame (f);
       return;
     case 13:
       printf ("General protection fault\n");
