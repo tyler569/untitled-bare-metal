@@ -22,11 +22,14 @@ elf_map (struct elf_phdr *p)
 {
   uintptr_t root = get_vm_root ();
 
-  for (size_t i = 0; i < p->memsz; i += PAGE_SIZE)
+  for (uintptr_t pg = ALIGN_DOWN (p->vaddr, PAGE_SIZE);
+       pg < p->vaddr + p->memsz; pg += PAGE_SIZE)
     {
       int flags = PTE_PRESENT | PTE_USER | PTE_WRITE;
 
-      add_vm_mapping (root, p->vaddr + i, alloc_page (), flags);
+      printf ("Mapping %lx\n", pg);
+
+      add_vm_mapping (root, pg, alloc_page (), flags);
     }
 }
 

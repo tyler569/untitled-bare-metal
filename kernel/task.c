@@ -33,16 +33,15 @@ create_task ()
   return t;
 }
 
-void
-destroy_task (struct task *t)
+struct task *
+create_task_in_this_vm (uintptr_t rip, uintptr_t rsp)
 {
-  assert (is_list_empty (&t->children));
-  assert (is_list_empty (&t->runnable_tasks));
-  assert (t->state == TASK_STATE_DEAD);
+  struct task *t = create_task ();
 
-  remove_from_list (&t->tasks);
-  remove_from_list (&t->siblings);
-  slab_free (&task_cache, t);
+  t->vm_root = get_vm_root ();
+  t->saved_state = new_user_frame (rip, rsp);
+
+  return t;
 }
 
 struct task *
@@ -63,6 +62,18 @@ create_first_task (struct elf_ehdr *elf)
   t->saved_state = new_user_frame (elf_entry (elf), stack + PAGE_SIZE);
 
   return t;
+}
+
+void
+destroy_task (struct task *t)
+{
+  assert (is_list_empty (&t->children));
+  assert (is_list_empty (&t->runnable_tasks));
+  assert (t->state == TASK_STATE_DEAD);
+
+  remove_from_list (&t->tasks);
+  remove_from_list (&t->siblings);
+  slab_free (&task_cache, t);
 }
 
 void
@@ -92,7 +103,6 @@ void
 make_task_runnable (struct task *t)
 {
   assert (t->state != TASK_STATE_DEAD);
-  assert (t->state != TASK_STATE_RUNNING);
 
   t->state = TASK_STATE_RUNNABLE;
 
@@ -134,7 +144,7 @@ schedule ()
     while (true)
       halt_until_interrupt ();
 
-  if (current)
+  if (current && current->state == TASK_STATE_RUNNING)
     {
       save_task_state (current);
       make_task_runnable (current);

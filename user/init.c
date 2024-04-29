@@ -21,12 +21,23 @@ _syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
   return syscall_num;
 }
 
+char stack[4096] __attribute__ ((aligned (16)));
+
+void
+thread_entry (void)
+{
+  _syscall2 (1, (uintptr_t) "Hello, World from userland 2!", 29);
+  _syscall0 (3);
+  _syscall0 (0);
+}
+
 USED int
 _start ()
 {
   _syscall2 (1, (uintptr_t) "Hello, World from userland!", 27);
-  // asm volatile ("int3");
+  _syscall2 (2, (uintptr_t) thread_entry, (uintptr_t) stack + sizeof (stack));
   _syscall0 (0);
 
   UNREACHABLE ();
 }
+

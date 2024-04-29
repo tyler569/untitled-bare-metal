@@ -52,6 +52,7 @@ struct task *create_task ();
 void destroy_task (struct task *t);
 struct task *create_first_task (struct elf_ehdr *elf);
 void kill_task (struct task *t);
+struct task *create_task_in_this_vm (uintptr_t rip, uintptr_t rsp);
 
 void switch_task (struct task *t);
 void make_task_runnable (struct task *t);
