@@ -27,13 +27,9 @@ kernel_entry ()
 }
 
 USED void
-c_exception_entry (frame_t *f)
-{
-  print_interrupt_info (f);
-}
-
-USED void
 c_interrupt_entry (frame_t *f)
 {
+  save_frame_on_task (f);
   print_interrupt_info (f);
+  clear_frame_on_task (f);
 }

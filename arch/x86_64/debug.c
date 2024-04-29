@@ -21,7 +21,7 @@ print_backtrace (frame_t *f)
 
   while (rbp && frames++ < 25)
     {
-      printf ("  frame ip: %lx\n", rip);
+      printf ("  saved_state ip: %lx\n", rip);
 
       rip = *(uintptr_t *)(rbp + 8);
       rbp = *(uintptr_t *)rbp;

@@ -33,6 +33,7 @@ add_executable(untitled_bare_metal
   lib/spin_lock.c
   lib/string.c
   include/arch/x86_64/exports.h
+  arch/x86_64/frame.c
 )
 
 add_executable(userland

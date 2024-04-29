@@ -49,16 +49,3 @@ init_int_stacks ()
   this_cpu->arch.tss.ist[0] = this_cpu->kernel_stack_top;
   this_cpu->arch.tss.ist[1] = (uintptr_t)nmi_stack + INT_STACK_SIZE;
 }
-
-frame_t *
-new_user_frame (uintptr_t rip, uintptr_t rsp)
-{
-  frame_t *f = kmem_alloc (sizeof (frame_t));
-  memset (f, 0, sizeof (frame_t));
-
-  f->cs = USER_CS;
-  f->ss = USER_SS;
-  f->rip = rip;
-  f->rsp = rsp;
-  return f;
-}

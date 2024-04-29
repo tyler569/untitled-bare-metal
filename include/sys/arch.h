@@ -19,6 +19,9 @@ ssize_t write_debug (struct stream *, const void *str, size_t len);
 void print_backtrace (frame_t *);
 void print_frame (frame_t *);
 
+frame_t new_frame (uintptr_t rip, uintptr_t rsp);
+void copy_frame (frame_t *dst, frame_t *src);
+
 void debug_trap ();
 
 bool get_initrd_info (void **initrd_start, size_t *initrd_size);

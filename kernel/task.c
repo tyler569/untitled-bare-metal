@@ -37,7 +37,11 @@ void
 destroy_task (struct task *t)
 {
   assert (is_list_empty (&t->children));
+  assert (is_list_empty (&t->runnable_tasks));
+  assert (t->state == TASK_STATE_DEAD);
+
   remove_from_list (&t->tasks);
+  remove_from_list (&t->siblings);
   slab_free (&task_cache, t);
 }
 
@@ -56,7 +60,7 @@ create_first_task (struct elf_ehdr *elf)
   add_vm_mapping (t->vm_root, stack, alloc_page (),
                   PTE_PRESENT | PTE_USER | PTE_WRITE);
 
-  t->frame = new_user_frame (elf_entry (elf), stack + PAGE_SIZE);
+  t->saved_state = new_user_frame (elf_entry (elf), stack + PAGE_SIZE);
 
   return t;
 }
@@ -68,13 +72,20 @@ switch_task (struct task *t)
 
   this_cpu->current_task = t;
   set_vm_root (t->vm_root);
-  jump_to_userland_frame (t->frame);
+  jump_to_userland_frame (t->saved_state);
 }
 
 void
 kill_task (struct task *t)
 {
   t->state = TASK_STATE_DEAD;
+  destroy_task (t);
+}
+
+void
+save_task_state (struct task *t)
+{
+  copy_frame (t->saved_state, t->current_interrupt_frame);
 }
 
 void
@@ -124,6 +135,9 @@ schedule ()
       halt_until_interrupt ();
 
   if (current)
-    make_task_runnable (current);
+    {
+      save_task_state (current);
+      make_task_runnable (current);
+    }
   switch_task (next);
 }

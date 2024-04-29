@@ -25,6 +25,7 @@ c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t, uintptr_t, uintptr_t,
 {
   printf ("Syscall (num: %i, a0: %#lx, a1: %#lx)\n", syscall_number, a0, a1);
 
+  save_frame_on_task (f);
   print_frame (f);
 
   switch (syscall_number)
@@ -41,6 +42,8 @@ c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t, uintptr_t, uintptr_t,
       printf ("Unknown syscall\n");
       break;
     }
+
+  clear_frame_on_task (f);
 
   return 0;
 }

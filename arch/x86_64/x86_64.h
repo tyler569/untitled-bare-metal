@@ -60,7 +60,7 @@
 static_assert (offsetof (per_cpu_t, arch.tss.rsp[2]) == TSS_RSP2,
                "tss rsp2 offset needs to be changed in asm.h");
 static_assert (offsetof (per_cpu_t, kernel_stack_top) == TSS_STACK,
-               "tss ist0 offset needs to be changed in asm.h");
+               "offset needs to be changed in asm.h");
 
 void init_bsp_gdt ();
 void init_ap_gdt (per_cpu_t *cpu);
@@ -97,9 +97,12 @@ struct frame
 
 typedef struct frame frame_t;
 
-// unused, probably going away in favor of regular frame
+void save_frame_on_task (frame_t *);
+void clear_frame_on_task (frame_t *);
+
+// unused, probably going away in favor of regular saved_state
 // since when you decide to schedule a task you have to store
-// the registers in a frame anyway, so we can either have two
+// the registers in a saved_state anyway, so we can either have two
 // structs or just one. That or maintaining different kernel
 // stacks for every usermode task...
 struct syscall_frame

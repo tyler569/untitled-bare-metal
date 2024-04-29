@@ -1,4 +1,3 @@
-#include "elf.h"
 #include "kernel.h"
 #include "rng.h"
 #include "stdio.h"

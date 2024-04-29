@@ -28,8 +28,10 @@ struct task
   struct list_head runnable_tasks;
 
   struct elf_ehdr *elf;
-  frame_t *frame;
   uintptr_t vm_root;
+
+  frame_t *saved_state;
+  frame_t *current_interrupt_frame;
 };
 
 struct per_cpu

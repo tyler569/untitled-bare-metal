@@ -49,6 +49,7 @@ remove_from_list (struct list_head *entry)
 {
   entry->prev->next = entry->next;
   entry->next->prev = entry->prev;
+  init_list (entry);
 }
 
 static inline struct list_head *
