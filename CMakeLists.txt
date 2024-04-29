@@ -37,7 +37,7 @@ add_executable(untitled_bare_metal
 )
 
 add_executable(userland
-  user/init.c
+  user/userland.c
 )
 
 if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")

@@ -1,5 +1,4 @@
 #include "stdio.h"
-#include "sys/arch.h"
 #include "sys/cdefs.h"
 #include "x86_64.h"
 
@@ -23,8 +22,6 @@ USED uintptr_t
 c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t, uintptr_t, uintptr_t,
                  uintptr_t, int syscall_number, frame_t *f)
 {
-  printf ("Syscall (num: %i, a0: %#lx, a1: %#lx)\n", syscall_number, a0, a1);
-
   save_frame_on_task (f);
 
   switch (syscall_number)
