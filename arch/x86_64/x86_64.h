@@ -2,9 +2,11 @@
 
 #ifndef __ASSEMBLER__
 
+#include "arch/x86_64/exports.h"
 #include "list.h"
 #include "stddef.h"
 #include "stdint.h"
+#include "sys/task.h"
 
 #endif // __ASSEMBLER__
 
@@ -50,69 +52,15 @@
 #define PF_PROTECTION_KEY 0x20
 #define PF_SHADOW_STACK 0x40
 
-#ifndef __ASSEMBLER__
-
-union PACKED gdt_entry
-{
-  struct
-  {
-    uint16_t limit_low;
-    uint16_t base_low;
-    uint8_t base_middle;
-    uint8_t access;
-    uint8_t granularity;
-    uint8_t base_high;
-  };
-  uint32_t base_upper;
-};
-
-struct PACKED gdt_ptr
-{
-  uint16_t limit;
-  uintptr_t base;
-};
-
-struct PACKED tss
-{
-  uint32_t reserved;
-  uint64_t rsp[3];
-  uint64_t reserved2;
-  uint64_t ist[7];
-  uint64_t reserved3;
-  uint16_t reserved4;
-  uint16_t iomap_base;
-};
-
-typedef union gdt_entry gdt_entry_t;
-typedef struct gdt_ptr gdt_ptr_t;
-typedef struct tss tss_t;
-
-struct per_cpu
-{
-  struct per_cpu *self;
-  tss_t tss;
-  gdt_entry_t gdt[7];
-  gdt_ptr_t gdt_ptr;
-  uintptr_t kernel_stack_top;
-  struct list_head list;
-  bool printing_backtrace;
-};
-
-typedef struct per_cpu per_cpu_t;
-
-#endif // __ASSEMBLER__
-
 #define TSS_RSP2 28
 #define TSS_STACK 184
 
 #ifndef __ASSEMBLER__
 
-static_assert (offsetof (per_cpu_t, tss.rsp[2]) == TSS_RSP2,
+static_assert (offsetof (per_cpu_t, arch.tss.rsp[2]) == TSS_RSP2,
                "tss rsp2 offset needs to be changed in asm.h");
 static_assert (offsetof (per_cpu_t, kernel_stack_top) == TSS_STACK,
                "tss ist0 offset needs to be changed in asm.h");
-
-#define this_cpu ((__seg_gs per_cpu_t *)0)
 
 void init_bsp_gdt ();
 void init_ap_gdt (per_cpu_t *cpu);

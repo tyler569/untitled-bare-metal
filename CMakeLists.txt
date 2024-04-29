@@ -32,6 +32,7 @@ add_executable(untitled_bare_metal
   lib/slab_alloc.c
   lib/spin_lock.c
   lib/string.c
+  include/arch/x86_64/exports.h
 )
 
 add_executable(userland
@@ -49,7 +50,7 @@ if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
     arch/x86_64/intrin.c
     arch/x86_64/ints.c
     arch/x86_64/lapic.c
-    arch/x86_64/memmap.c
+    arch/x86_64/phy_mem.c
     arch/x86_64/mmu.c
     arch/x86_64/smp.c
     arch/x86_64/syscall.c

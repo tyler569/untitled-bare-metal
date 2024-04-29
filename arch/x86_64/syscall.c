@@ -31,6 +31,8 @@ c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t, uintptr_t, uintptr_t,
     {
     case 0:
       printf ("exit syscall\n");
+      kill_task (this_cpu->current_task);
+      schedule ();
       break;
     case 1:
       printf ("%.*s\n", (int)a1, (const char *)a0);

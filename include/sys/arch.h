@@ -23,4 +23,9 @@ void debug_trap ();
 
 bool get_initrd_info (void **initrd_start, size_t *initrd_size);
 
+uintptr_t get_vm_root ();
+void set_vm_root (uintptr_t root);
+
 void jump_to_userland (uintptr_t entry, uintptr_t stack);
+frame_t *new_user_frame (uintptr_t rip, uintptr_t rsp);
+void jump_to_userland_frame (frame_t *);

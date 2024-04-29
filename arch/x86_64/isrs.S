@@ -16,7 +16,7 @@
 .endm
 
 .macro MAYBE_SWAPGS
-    cmpq $0x23, 16(%rsp)
+    cmpq $0x23, 24(%rsp)
     jne 1f
     swapgs
 1:
@@ -78,10 +78,9 @@ exception_entry:
     mov %rsp, %rdi
     call c_exception_entry
     POP_ALL
-    add $16, %rsp
     MAYBE_SWAPGS
+    add $16, %rsp
     iretq
-
 
 .global interrupt_entry
 interrupt_entry:
@@ -90,6 +89,16 @@ interrupt_entry:
     mov %rsp, %rdi
     call c_interrupt_entry
     POP_ALL
-    add $16, %rsp
     MAYBE_SWAPGS
+    add $16, %rsp
+    iretq
+
+.global jump_to_userland_frame
+jump_to_userland_frame:
+    mov %rdi, %rsp
+
+    POP_ALL
+    MAYBE_SWAPGS
+    add $16, %rsp
+
     iretq

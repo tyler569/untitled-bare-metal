@@ -1,10 +1,8 @@
-#include "assert.h"
 #include "elf.h"
 #include "kernel.h"
 #include "rng.h"
 #include "stdio.h"
-#include "sys/arch.h"
-#include "sys/mem.h"
+#include "sys/task.h"
 
 void
 kernel_main ()
@@ -12,6 +10,7 @@ kernel_main ()
   printf ("Hello, World!\n");
 
   init_random (1);
+  init_tasks ();
 
   run_smoke_tests ();
 
@@ -20,17 +19,9 @@ kernel_main ()
   if (get_initrd_info (&initrd, &initrd_size))
     {
       printf ("Initrd found at %p, size %zu\n", initrd, initrd_size);
-      elf_load (initrd);
-
-      uintptr_t stack = 0x7ffffff00000;
-
-      uintptr_t root = get_vm_root ();
-      add_vm_mapping (root, stack, alloc_page (),
-                      PTE_PRESENT | PTE_USER | PTE_WRITE);
-
-      uintptr_t entry = elf_entry (initrd);
-      printf ("Entry point: %#lx\n", entry);
-      jump_to_userland (entry, stack + PAGE_SIZE);
+      struct task *t = create_first_task (initrd);
+      make_task_runnable (t);
+      schedule ();
     }
   else
     printf ("No initrd found\n");

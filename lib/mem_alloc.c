@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "sys/arch.h"
 #include "sys/cdefs.h"
 #include "sys/mem.h"
 #include "sys/slab.h"
@@ -30,7 +31,7 @@ sat_sub64 (size_t a, size_t b)
 size_t
 get_bucket_index_analytic (size_t size)
 {
-  if (__builtin_expect (size < 2, 0))
+  if (UNLIKELY (size < 2))
     return 0;
 
   size_t sm1 = size - 1;

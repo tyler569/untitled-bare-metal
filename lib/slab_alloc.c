@@ -2,6 +2,7 @@
 #include "kernel.h"
 #include "list.h"
 #include "string.h"
+#include "sys/arch.h"
 #include "sys/mem.h"
 #include "sys/slab.h"
 #include "sys/spinlock.h"
@@ -159,6 +160,8 @@ grow_slab_cache (struct slab_cache *cache)
 void *
 slab_alloc (struct slab_cache *cache)
 {
+  assert (cache->object_size && "slab cache not initialized");
+
   spin_lock (&cache->lock);
 
   page_t *slab = nullptr;

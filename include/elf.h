@@ -1,5 +1,6 @@
 #pragma once
 
+#include "stddef.h"
 #include "stdint.h"
 #include "sys/cdefs.h"
 
@@ -68,6 +69,19 @@ struct elf_phdr
   elf_xword align;
 };
 
+#define SHT_NULL 0
+#define SHT_PROGBITS 1
+#define SHT_SYMTAB 2
+#define SHT_STRTAB 3
+#define SHT_RELA 4
+#define SHT_HASH 5
+#define SHT_DYNAMIC 6
+#define SHT_NOTE 7
+#define SHT_NOBITS 8
+#define SHT_REL 9
+#define SHT_SHLIB 10
+#define SHT_DYNSYM 11
+
 struct elf_shdr
 {
   elf_word name;
@@ -113,3 +127,5 @@ struct elf_dyn
 
 void elf_load (struct elf_ehdr *e);
 uintptr_t elf_entry (struct elf_ehdr *e);
+bool elf_get_matching_symbol (struct elf_ehdr *e, uintptr_t address,
+                              char *name, size_t name_len, ptrdiff_t *offset);

@@ -65,7 +65,6 @@ page_t *get_page_struct (uintptr_t);
 #define PTE_WRITE (1 << 1)
 #define PTE_USER (1 << 2)
 
-uintptr_t get_vm_root ();
 uintptr_t alloc_kernel_vm (size_t len);
 void add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys,
                      int flags);

@@ -24,14 +24,16 @@
 
 per_cpu_t bsp_cpu = {
   .self = &bsp_cpu,
-  .gdt = {
-    DESCRIPTOR (0, 0),
-    DESCRIPTOR (KERNEL_CODE, LONG_MODE),
-    DESCRIPTOR (KERNEL_DATA, LONG_MODE),
-    DESCRIPTOR (USER_DATA, LONG_MODE),
-    DESCRIPTOR (USER_CODE, LONG_MODE),
-    TSS_DESCRIPTOR_LOW (),
-    TSS_DESCRIPTOR_HIGH (),
+  .arch = {
+    .gdt = {
+      DESCRIPTOR (0, 0),
+      DESCRIPTOR (KERNEL_CODE, LONG_MODE),
+      DESCRIPTOR (KERNEL_DATA, LONG_MODE),
+      DESCRIPTOR (USER_DATA, LONG_MODE),
+      DESCRIPTOR (USER_CODE, LONG_MODE),
+      TSS_DESCRIPTOR_LOW (),
+      TSS_DESCRIPTOR_HIGH (),
+    },
   },
 };
 
@@ -76,15 +78,15 @@ init_fsgs ()
 void
 init_gdt (per_cpu_t *cpu)
 {
-  cpu->gdt[5].base_low = (uintptr_t)&cpu->tss;
-  cpu->gdt[5].base_middle = (uintptr_t)&cpu->tss >> 16;
-  cpu->gdt[5].base_high = (uintptr_t)&cpu->tss >> 24;
-  cpu->gdt[6].base_upper = (uintptr_t)&cpu->tss >> 32;
+  cpu->arch.gdt[5].base_low = (uintptr_t)&cpu->arch.tss;
+  cpu->arch.gdt[5].base_middle = (uintptr_t)&cpu->arch.tss >> 16;
+  cpu->arch.gdt[5].base_high = (uintptr_t)&cpu->arch.tss >> 24;
+  cpu->arch.gdt[6].base_upper = (uintptr_t)&cpu->arch.tss >> 32;
 
-  cpu->gdt_ptr.limit = sizeof (cpu->gdt) - 1;
-  cpu->gdt_ptr.base = (uintptr_t)cpu->gdt;
+  cpu->arch.gdt_ptr.limit = sizeof (cpu->arch.gdt) - 1;
+  cpu->arch.gdt_ptr.base = (uintptr_t)cpu->arch.gdt;
 
-  load_gdt (&cpu->gdt_ptr);
+  load_gdt (&cpu->arch.gdt_ptr);
 
   jump_to_gdt ();
   reset_segment_registers ();
@@ -102,8 +104,8 @@ init_bsp_gdt ()
 void
 init_ap_gdt (per_cpu_t *cpu)
 {
-  memcpy (cpu->gdt, bsp_cpu.gdt, sizeof (bsp_cpu.gdt));
-  memset (&cpu->tss, 0, sizeof (tss_t));
+  memcpy (cpu->arch.gdt, bsp_cpu.arch.gdt, sizeof (bsp_cpu.arch.gdt));
+  memset (&cpu->arch.tss, 0, sizeof (tss_t));
 
   init_gdt (cpu);
 }

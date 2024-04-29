@@ -84,6 +84,15 @@ strcpy (char *dest, const char *src)
   return dest;
 }
 
+char *
+strncpy (char *dest, const char *src, size_t n)
+{
+  char *d = dest;
+  while (n-- && (*d++ = *src++))
+    ;
+  return dest;
+}
+
 bool
 isdigit (char c)
 {
