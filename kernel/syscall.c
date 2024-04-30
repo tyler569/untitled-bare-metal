@@ -1,6 +1,5 @@
+#include "syscall.h"
 #include "stdio.h"
-#include "sys/arch.h"
-#include "sys/cdefs.h"
 #include "sys/task.h"
 
 uintptr_t
@@ -34,6 +33,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       break;
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
+
       printf ("Unknown syscall\n");
       break;
     }
