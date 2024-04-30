@@ -45,12 +45,33 @@ create_task_in_this_vm (uintptr_t rip, uintptr_t rsp)
 }
 
 struct task *
-create_first_task (struct elf_ehdr *elf)
+create_task_from_elf_in_this_vm (struct elf_ehdr *elf)
 {
   struct task *t = create_task ();
 
   t->elf = elf;
   t->vm_root = get_vm_root ();
+
+  elf_load (elf);
+
+  uintptr_t stack = 0x7ffffff00000;
+
+  add_vm_mapping (t->vm_root, stack, alloc_page (),
+                  PTE_PRESENT | PTE_USER | PTE_WRITE);
+
+  t->saved_state = new_user_frame (elf_entry (elf), stack + PAGE_SIZE);
+
+  return t;
+}
+
+struct task *
+create_task_from_elf_in_new_vm (struct elf_ehdr *elf)
+{
+  struct task *t = create_task ();
+
+  t->elf = elf;
+  t->vm_root = new_page_table ();
+  set_vm_root (t->vm_root);
 
   elf_load (elf);
 
@@ -141,8 +162,7 @@ schedule ()
     return;
 
   if (next == nullptr)
-    while (true)
-      halt_until_interrupt ();
+    halt_forever_interrupts_enabled ();
 
   if (current && current->state == TASK_STATE_RUNNING)
     {

@@ -15,6 +15,8 @@ const char *interrupt_acronyms[]
 void
 print_interrupt_info (frame_t *f)
 {
+  save_frame_on_task (f);
+
   printf ("Interrupt %lu (%s) @ %#lx\n", f->int_no,
           interrupt_acronyms[f->int_no], f->rip);
 
@@ -36,6 +38,8 @@ print_interrupt_info (frame_t *f)
     default:
       print_backtrace (f);
     }
+
+  clear_frame_on_task (f);
 
   halt_forever ();
 }

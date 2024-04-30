@@ -34,6 +34,8 @@ add_executable(untitled_bare_metal
   lib/string.c
   include/arch/x86_64/exports.h
   arch/x86_64/frame.c
+  kernel/syscall.c
+  include/sys/syscall.h
 )
 
 add_executable(userland

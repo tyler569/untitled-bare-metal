@@ -25,6 +25,8 @@ ap_entry (struct limine_smp_info *)
   init_ap_idt ();
   init_ap_gdt (cpu);
 
+  init_int_stacks ();
+
   printf ("AP started\n");
 
   halt_forever ();

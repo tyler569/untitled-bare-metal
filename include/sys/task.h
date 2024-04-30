@@ -49,10 +49,11 @@ typedef struct per_cpu per_cpu_t;
 void init_tasks ();
 
 struct task *create_task ();
-void destroy_task (struct task *t);
-struct task *create_first_task (struct elf_ehdr *elf);
-void kill_task (struct task *t);
+struct task *create_task_from_elf_in_this_vm (struct elf_ehdr *elf);
+struct task *create_task_from_elf_in_new_vm (struct elf_ehdr *elf);
 struct task *create_task_in_this_vm (uintptr_t rip, uintptr_t rsp);
+void kill_task (struct task *t);
+void destroy_task (struct task *t);
 
 void switch_task (struct task *t);
 void make_task_runnable (struct task *t);

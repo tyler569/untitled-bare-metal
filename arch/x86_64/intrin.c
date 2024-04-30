@@ -18,6 +18,13 @@ halt_forever ()
     }
 }
 
+[[noreturn]] void
+halt_forever_interrupts_enabled ()
+{
+  while (true)
+    asm volatile ("hlt");
+}
+
 #define DEFINE_PORT_IO(suffix, type)                                          \
   void write_port_##suffix (uint16_t port, type value)                        \
   {                                                                           \

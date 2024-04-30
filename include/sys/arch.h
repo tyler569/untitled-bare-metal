@@ -10,6 +10,7 @@ typedef struct frame frame_t;
 
 void halt_until_interrupt ();
 [[noreturn]] void halt_forever ();
+[[noreturn]] void halt_forever_interrupts_enabled ();
 
 void relax_busy_loop ();
 
