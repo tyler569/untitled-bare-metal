@@ -6,6 +6,7 @@
 #include "list.h"
 #include "stddef.h"
 #include "stdint.h"
+#include "sys/per_cpu.h"
 #include "sys/task.h"
 
 #endif // __ASSEMBLER__

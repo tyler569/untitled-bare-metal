@@ -1,5 +1,6 @@
 #include "sys/syscall.h"
 #include "stdio.h"
+#include "sys/per_cpu.h"
 #include "sys/task.h"
 
 uintptr_t

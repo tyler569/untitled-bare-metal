@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "stdio.h"
 #include "sys/arch.h"
+#include "sys/per_cpu.h"
 #include "sys/task.h"
 
 static void
@@ -67,7 +68,6 @@ receive_message ()
       debug_printf ("receive -> no message\n");
 
       receiver->state = TASK_STATE_RECEIVING;
-      save_task_state (receiver);
 
       spin_unlock (&receiver->message_lock);
 

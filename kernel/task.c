@@ -2,6 +2,7 @@
 #include "assert.h"
 #include "string.h"
 #include "sys/mem.h"
+#include "sys/per_cpu.h"
 #include "sys/slab.h"
 
 LIST_HEAD (tasks);

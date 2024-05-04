@@ -6,10 +6,6 @@
 #include "sys/cdefs.h"
 #include "sys/spinlock.h"
 
-#ifdef __x86_64__
-#include "arch/x86_64/exports.h"
-#endif
-
 enum task_state
 {
   TASK_STATE_RUNNABLE,
@@ -40,18 +36,6 @@ struct task
   frame_t *saved_state;
   frame_t *current_user_frame;
 };
-
-struct per_cpu
-{
-  struct per_cpu *self;
-  struct arch_per_cpu arch;
-  uintptr_t kernel_stack_top;
-  struct task *current_task;
-  struct list_head list;
-  bool printing_backtrace;
-};
-
-typedef struct per_cpu per_cpu_t;
 
 void init_tasks ();
 

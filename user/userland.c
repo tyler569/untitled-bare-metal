@@ -88,6 +88,7 @@ client (uintptr_t task)
   unsigned i = 0;
   for (;;)
     send (task, i++);
+  // printf ("Client sent: %u\n", i++);
 }
 
 [[noreturn]] USED int
