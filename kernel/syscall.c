@@ -4,9 +4,12 @@
 
 uintptr_t
 do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
-            uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *)
+            uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *f)
 {
   (void)a2, (void)a3, (void)a4, (void)a5;
+
+  if (syscall_number != 1)
+    printf ("Task %#lx ", (uintptr_t)this_cpu->current_task & 0xff);
 
   switch (syscall_number)
     {
@@ -16,9 +19,10 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       schedule ();
       UNREACHABLE ();
     case 1:
-      printf ("Write (num: %i, str: %#lx, len: %lu)\n", syscall_number, a0,
-              a1);
-      printf ("  -> \"%.*s\"\n", (int)a1, (const char *)a0);
+      // printf ("Write (num: %i, str: %#lx, len: %lu)\n", syscall_number, a0,
+      //         a1);
+      // printf ("  -> \"%.*s\"\n", (int)a1, (const char *)a0);
+      write_debug (nullptr, (const void *)a0, a1);
       break;
     case 2:
       printf ("Clone (num: %i, fn: %#lx, stk: %#lx)\n", syscall_number, a0,
@@ -32,17 +36,18 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       schedule ();
       break;
     case 4:
-      printf ("Send (num: %i, to: %lu, msg: %#lx)\n", syscall_number, a0, a1);
-      // send_message (a0, a1);
+      printf ("Send (num: %i, to: %#lx, msg: %#lx)\n", syscall_number, a0, a1);
+      send_message ((struct task *)a0, a1);
       break;
     case 5:
-      printf ("Receive (num: %i, from: %lu, msg: %#lx)\n", syscall_number, a0,
-              a1);
-      // receive_message (a0, a1);
+      printf ("Receive (num: %i)\n", syscall_number);
+      receive_message ();
       break;
     case 6:
-      printf ("Create (num: %i, vm: %lu)\n", syscall_number, a0);
-      // struct task *t = create_task_from_syscall (a0 != 0);
+      printf ("Create (num: %i, vm: %lu, arg: %lu)\n", syscall_number, a0, a1);
+      struct task *t = create_task_from_syscall (a0 != 0, a1);
+      make_task_runnable (t);
+      set_frame_return (f, (uintptr_t)t);
       break;
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);

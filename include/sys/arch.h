@@ -23,6 +23,11 @@ void print_frame (frame_t *);
 frame_t new_frame (uintptr_t rip, uintptr_t rsp);
 void copy_frame (frame_t *dst, frame_t *src);
 
+uintptr_t get_frame_arg (frame_t *, int);
+uintptr_t get_frame_syscall_arg (frame_t *, int);
+void set_frame_arg (frame_t *, int, uintptr_t);
+void set_frame_return (frame_t *, uintptr_t);
+
 void debug_trap ();
 
 bool get_initrd_info (void **initrd_start, size_t *initrd_size);

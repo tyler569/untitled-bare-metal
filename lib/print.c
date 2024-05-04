@@ -608,8 +608,18 @@ puts (const char *str)
   return ret;
 }
 
+#ifdef __KERNEL__
 struct stream *w_stdout = &(struct stream){
   .vtbl = &(const struct stream_vtbl){
     .write = write_debug,
   },
 };
+#else
+long write (FILE *, const void *str, unsigned long len);
+
+struct stream *w_stdout = &(struct stream){
+  .vtbl = &(const struct stream_vtbl){
+    .write = write,
+  },
+};
+#endif

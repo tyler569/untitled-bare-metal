@@ -26,6 +26,7 @@ create_task ()
   init_list (&t->tasks);
   init_list (&t->runnable_tasks);
   init_list (&t->send_receive_pending);
+  init_list (&t->send_receive_pending_node);
 
   append_to_list (&t->tasks, &tasks);
 
@@ -84,6 +85,16 @@ create_task_from_elf_in_new_vm (struct elf_ehdr *elf)
   return t;
 }
 
+struct task *
+create_task_from_syscall (bool, uintptr_t arg)
+{
+  struct task *t
+      = create_task_from_elf_in_new_vm (this_cpu->current_task->elf);
+  set_frame_arg (t->saved_state, 0, arg);
+  set_vm_root (this_cpu->current_task->vm_root);
+  return t;
+}
+
 void
 destroy_task (struct task *t)
 {
@@ -95,26 +106,9 @@ destroy_task (struct task *t)
 }
 
 void
-switch_task (struct task *t)
-{
-  t->state = TASK_STATE_RUNNING;
-
-  this_cpu->current_task = t;
-  set_vm_root (t->vm_root);
-  jump_to_userland_frame (t->saved_state);
-}
-
-void
-kill_task (struct task *t)
-{
-  t->state = TASK_STATE_DEAD;
-  destroy_task (t);
-}
-
-void
 save_task_state (struct task *t)
 {
-  copy_frame (t->saved_state, t->current_interrupt_frame);
+  copy_frame (t->saved_state, t->current_user_frame);
 }
 
 void
@@ -127,6 +121,35 @@ make_task_runnable (struct task *t)
   spin_lock (&runnable_tasks_lock);
   append_to_list (&t->runnable_tasks, &runnable_tasks);
   spin_unlock (&runnable_tasks_lock);
+}
+
+void
+switch_task (struct task *t)
+{
+  struct task *current = this_cpu->current_task;
+
+  // Save the current task unless it is dead.
+  if (current && current->state != TASK_STATE_DEAD)
+    save_task_state (current);
+
+  // Make the current task runnable if it still wants to run.
+  if (current && current->state == TASK_STATE_RUNNING)
+    make_task_runnable (current);
+
+  assert_eq (t->state, TASK_STATE_RUNNABLE);
+
+  t->state = TASK_STATE_RUNNING;
+
+  this_cpu->current_task = t;
+  set_vm_root (t->vm_root);
+  jump_to_userland_frame (t->saved_state);
+}
+
+void
+kill_task (struct task *t)
+{
+  t->state = TASK_STATE_DEAD;
+  destroy_task (t);
 }
 
 struct task *
@@ -144,8 +167,6 @@ pick_next_task ()
                     runnable_tasks);
   spin_unlock (&runnable_tasks_lock);
 
-  t->state = TASK_STATE_RUNNING;
-
   return t;
 }
 
@@ -155,16 +176,14 @@ schedule ()
   struct task *current = this_cpu->current_task;
   struct task *next = pick_next_task ();
 
-  if (next == nullptr && current && current->state == TASK_STATE_RUNNING)
+  // There is no task who wants to run, but the current one
+  // wants to continue.
+  if (!next && current && current->state == TASK_STATE_RUNNING)
     return;
 
-  if (next == nullptr)
+  // There is no task who wants to run at all.
+  if (!next)
     halt_forever_interrupts_enabled ();
 
-  if (current && current->state == TASK_STATE_RUNNING)
-    {
-      save_task_state (current);
-      make_task_runnable (current);
-    }
   switch_task (next);
 }

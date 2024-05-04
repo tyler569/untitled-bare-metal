@@ -18,10 +18,8 @@ kernel_main ()
   if (get_initrd_info (&initrd, &initrd_size))
     {
       printf ("Initrd found at %p, size %zu\n", initrd, initrd_size);
-      struct task *t1 = create_task_from_elf_in_this_vm (initrd);
-      struct task *t2 = create_task_from_elf_in_new_vm (initrd);
-      make_task_runnable (t1);
-      make_task_runnable (t2);
+      struct task *t = create_task_from_elf_in_this_vm (initrd);
+      make_task_runnable (t);
       schedule ();
     }
   else

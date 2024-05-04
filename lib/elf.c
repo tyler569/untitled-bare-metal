@@ -53,38 +53,3 @@ elf_entry (struct elf_ehdr *e)
 {
   return e->entry;
 }
-
-bool
-elf_get_matching_symbol (struct elf_ehdr *e, uintptr_t address, char *name,
-                         size_t name_len, ptrdiff_t *offset)
-{
-  struct elf_shdr *shstrtab
-      = (struct elf_shdr *)((uintptr_t)e + e->shoff
-                            + e->shentsize * e->shstrndx);
-  char *shstrtab_p = (char *)e + shstrtab->offset;
-
-  for (size_t i = 0; i < e->shnum; i++)
-    {
-      struct elf_shdr *s
-          = (struct elf_shdr *)((uintptr_t)e + e->shoff + e->shentsize * i);
-      if (s->type != SHT_SYMTAB)
-        continue;
-
-      struct elf_shdr *strtab = (struct elf_shdr *)((uintptr_t)e + e->shoff
-                                                    + e->shentsize * s->link);
-      char *strtab_p = (char *)e + strtab->offset;
-
-      for (size_t j = 0; j < s->size / s->entsize; j++)
-        {
-          struct elf_sym *sym
-              = (struct elf_sym *)((uintptr_t)e + s->offset + j * s->entsize);
-          if (sym->value <= address && address < sym->value + sym->size)
-            {
-              strncpy (name, strtab_p + sym->name, name_len);
-              return true;
-            }
-        }
-    }
-
-  return false;
-}

@@ -31,8 +31,12 @@ project(untitled_bare_metal C ASM)
 add_compile_options(-Wall -Wextra -Wnewline-eof -fbuiltin)
 add_compile_options(-iquote ${CMAKE_SOURCE_DIR}/include)
 
+add_compile_definitions(__UNTITLED_BARE_METAL__=1)
+
 add_executable(userland
   user/userland.c
+  lib/print.c
+  lib/string.c
 )
 
 add_subdirectory(kernel)

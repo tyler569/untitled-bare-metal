@@ -1,6 +1,7 @@
 add_executable(untitled_bare_metal
   main.c
   debug.c
+  msg.c
   page_alloc.c
   syscall.c
   task.c
@@ -13,6 +14,10 @@ add_executable(untitled_bare_metal
   ../lib/slab_alloc.c
   ../lib/spin_lock.c
   ../lib/string.c
+)
+
+add_compile_definitions(
+  __KERNEL__=1
 )
 
 if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
