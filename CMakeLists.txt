@@ -28,7 +28,7 @@ endif ()
 
 project(untitled_bare_metal C ASM)
 
-add_compile_options(-Wall -Wextra -Wnewline-eof)
+add_compile_options(-Wall -Wextra -Wnewline-eof -fbuiltin)
 add_compile_options(-iquote ${CMAKE_SOURCE_DIR}/include)
 
 add_executable(userland
@@ -44,7 +44,7 @@ add_custom_command(
   COMMAND cp ${limine_dir}/limine-bios.sys ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-bios-cd.bin ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-uefi-cd.bin ${iso_dir}/boot/limine
-  COMMAND cp ${CMAKE_BINARY_DIR}/untitled_bare_metal ${iso_dir}/boot
+  COMMAND cp ${CMAKE_BINARY_DIR}/kernel/untitled_bare_metal ${iso_dir}/boot
   COMMAND cp ${CMAKE_BINARY_DIR}/userland ${iso_dir}/boot
   COMMAND xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin
   -no-emul-boot -boot-load-size 4 --boot-info-table

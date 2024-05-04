@@ -18,16 +18,12 @@ phdr (struct elf_ehdr *e, size_t i)
 }
 
 static void
-elf_map (struct elf_phdr *p)
+elf_map (uintptr_t root, struct elf_phdr *p)
 {
-  uintptr_t root = get_vm_root ();
-
   for (uintptr_t pg = ALIGN_DOWN (p->vaddr, PAGE_SIZE);
        pg < p->vaddr + p->memsz; pg += PAGE_SIZE)
     {
       int flags = PTE_PRESENT | PTE_USER | PTE_WRITE;
-
-      printf ("Mapping %lx\n", pg);
 
       add_vm_mapping (root, pg, alloc_page (), flags);
     }
@@ -36,6 +32,8 @@ elf_map (struct elf_phdr *p)
 void
 elf_load (struct elf_ehdr *e)
 {
+  uintptr_t root = get_vm_root ();
+
   for (size_t i = 0; i < n_phdrs (e); i++)
     {
       struct elf_phdr *p = phdr (e, i);
@@ -43,7 +41,7 @@ elf_load (struct elf_ehdr *e)
       if (p->type != PT_LOAD)
         continue;
 
-      elf_map (p);
+      elf_map (root, p);
 
       memcpy ((char *)p->vaddr, (char *)e + p->offset, p->filesz);
       memset ((char *)p->vaddr + p->filesz, 0, p->memsz - p->filesz);

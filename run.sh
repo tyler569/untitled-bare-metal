@@ -36,6 +36,7 @@ exec qemu-system-x86_64 -s -vga std \
   -m $mem \
   -smp $smp \
   -cdrom $iso \
+  -M smm=off \
   $video \
   $debugopt \
   $gdbserver |& tee last_output

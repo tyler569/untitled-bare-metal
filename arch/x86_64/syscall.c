@@ -1,4 +1,4 @@
-#include "../../kernel/syscall.h"
+#include "sys/syscall.h"
 #include "sys/cdefs.h"
 #include "x86_64.h"
 

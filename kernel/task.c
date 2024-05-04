@@ -24,9 +24,8 @@ create_task ()
   memset (t, 0, sizeof (struct task));
 
   init_list (&t->tasks);
-  init_list (&t->children);
-  init_list (&t->siblings);
   init_list (&t->runnable_tasks);
+  init_list (&t->send_receive_pending);
 
   append_to_list (&t->tasks, &tasks);
 
@@ -88,12 +87,10 @@ create_task_from_elf_in_new_vm (struct elf_ehdr *elf)
 void
 destroy_task (struct task *t)
 {
-  assert (is_list_empty (&t->children));
   assert (is_list_empty (&t->runnable_tasks));
   assert (t->state == TASK_STATE_DEAD);
 
   remove_from_list (&t->tasks);
-  remove_from_list (&t->siblings);
   slab_free (&task_cache, t);
 }
 

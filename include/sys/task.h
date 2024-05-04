@@ -16,6 +16,8 @@ enum task_state
   TASK_STATE_BLOCKED,
   TASK_STATE_ZOMBIE,
   TASK_STATE_DEAD,
+  TASK_STATE_SENDING,
+  TASK_STATE_RECEIVING,
 };
 
 struct task
@@ -23,9 +25,8 @@ struct task
   enum task_state state;
 
   struct list_head tasks;
-  struct list_head children;
-  struct list_head siblings;
   struct list_head runnable_tasks;
+  struct list_head send_receive_pending;
 
   struct elf_ehdr *elf;
   uintptr_t vm_root;
@@ -52,6 +53,7 @@ struct task *create_task ();
 struct task *create_task_from_elf_in_this_vm (struct elf_ehdr *elf);
 struct task *create_task_from_elf_in_new_vm (struct elf_ehdr *elf);
 struct task *create_task_in_this_vm (uintptr_t rip, uintptr_t rsp);
+struct task *create_task_from_syscall (bool in_this_vm);
 void kill_task (struct task *t);
 void destroy_task (struct task *t);
 

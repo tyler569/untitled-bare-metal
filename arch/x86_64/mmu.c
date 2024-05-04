@@ -161,3 +161,9 @@ new_page_table ()
 
   return root;
 }
+
+void
+destroy_page_table (uintptr_t)
+{
+  // todo
+}

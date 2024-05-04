@@ -1,4 +1,4 @@
-#include "syscall.h"
+#include "sys/syscall.h"
 #include "stdio.h"
 #include "sys/task.h"
 
@@ -14,7 +14,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       printf ("Exit (num: %i)\n", syscall_number);
       kill_task (this_cpu->current_task);
       schedule ();
-      break;
+      UNREACHABLE ();
     case 1:
       printf ("Write (num: %i, str: %#lx, len: %lu)\n", syscall_number, a0,
               a1);
@@ -30,6 +30,19 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
     case 3:
       printf ("Yield (num: %i)\n", syscall_number);
       schedule ();
+      break;
+    case 4:
+      printf ("Send (num: %i, to: %lu, msg: %#lx)\n", syscall_number, a0, a1);
+      // send_message (a0, a1);
+      break;
+    case 5:
+      printf ("Receive (num: %i, from: %lu, msg: %#lx)\n", syscall_number, a0,
+              a1);
+      // receive_message (a0, a1);
+      break;
+    case 6:
+      printf ("Create (num: %i, vm: %lu)\n", syscall_number, a0);
+      // struct task *t = create_task_from_syscall (a0 != 0);
       break;
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
