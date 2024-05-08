@@ -89,10 +89,9 @@ create_task_from_elf_in_new_vm (struct elf_ehdr *elf)
 struct task *
 create_task_from_syscall (bool, uintptr_t arg)
 {
-  struct task *t
-      = create_task_from_elf_in_new_vm (this_cpu->current_task->elf);
+  struct task *t = create_task_from_elf_in_new_vm (this_task->elf);
   set_frame_arg (t->saved_state, 0, arg);
-  set_vm_root (this_cpu->current_task->vm_root);
+  set_vm_root (this_task->vm_root);
   return t;
 }
 
@@ -127,7 +126,7 @@ make_task_runnable (struct task *t)
 void
 switch_task (struct task *t)
 {
-  struct task *current = this_cpu->current_task;
+  struct task *current = this_task;
 
   // Save the current task unless it is dead.
   if (current && current->state != TASK_STATE_DEAD)
@@ -174,7 +173,7 @@ pick_next_task ()
 void
 schedule ()
 {
-  struct task *current = this_cpu->current_task;
+  struct task *current = this_task;
   struct task *next = pick_next_task ();
 
   // There is no task who wants to run, but the current one

@@ -1,6 +1,10 @@
-#include "chacha20.h"
-#include "stdio.h"
+#include "chacha.h"
 #include "string.h"
+
+#undef xor_chacha
+
+const uint32_t constants[16]
+    = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
 
 static inline uint32_t
 rol (uint32_t x, int n)
@@ -23,12 +27,12 @@ rol (uint32_t x, int n)
   while (0)
 
 static void
-do_chacha20_block (uint32_t state[static 16])
+do_chacha_block (uint32_t state[static 16], int rounds, bool re_add)
 {
   uint32_t state_copy[16];
   memcpy (state_copy, state, sizeof (state_copy));
 
-  for (size_t i = 0; i < 10; i++)
+  for (int i = 0; i < rounds / 2; i++)
     {
       QUARTER_ROUND (0, 4, 8, 12);
       QUARTER_ROUND (1, 5, 9, 13);
@@ -40,12 +44,13 @@ do_chacha20_block (uint32_t state[static 16])
       QUARTER_ROUND (3, 4, 9, 14);
     }
 
-  for (size_t i = 0; i < 16; i++)
-    state[i] += state_copy[i];
+  if (re_add)
+    for (size_t i = 0; i < 16; i++)
+      state[i] += state_copy[i];
 }
 
 void
-xor_chacha20 (chacha20 *cc, unsigned char *buf, size_t len)
+xor_chacha (struct chacha *cc, unsigned char *buf, size_t len, int rounds)
 {
   size_t count = 0;
   do
@@ -55,7 +60,7 @@ xor_chacha20 (chacha20 *cc, unsigned char *buf, size_t len)
       state[12] = cc->counter;
       memcpy (state + 13, cc->nonce, 12);
 
-      do_chacha20_block (state);
+      do_chacha_block (state, rounds, true);
 
       size_t i;
       for (i = 0; i < 64 && count + i < len; i++)

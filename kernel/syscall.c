@@ -9,14 +9,16 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
 {
   (void)a2, (void)a3, (void)a4, (void)a5;
 
+  uintptr_t ret = 0;
+
   if (syscall_number != 1)
-    printf ("Task %#lx ", (uintptr_t)this_cpu->current_task & 0xff);
+    printf ("Task %#lx ", (uintptr_t)this_task & 0xff);
 
   switch (syscall_number)
     {
     case 0:
       printf ("Exit (num: %i)\n", syscall_number);
-      kill_task (this_cpu->current_task);
+      kill_task (this_task);
       schedule ();
       UNREACHABLE ();
     case 1:
@@ -48,7 +50,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       printf ("Create (num: %i, vm: %lu, arg: %lu)\n", syscall_number, a0, a1);
       struct task *t = create_task_from_syscall (a0 != 0, a1);
       make_task_runnable (t);
-      set_frame_return (f, (uintptr_t)t);
+      ret = (uintptr_t)t;
       break;
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
@@ -57,5 +59,5 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       break;
     }
 
-  return 0;
+  return ret;
 }

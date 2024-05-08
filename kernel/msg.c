@@ -42,7 +42,7 @@ queue_message (struct task *receiver, struct task *sender)
 void
 send_message (struct task *receiver, uintptr_t message)
 {
-  struct task *sender = this_cpu->current_task;
+  struct task *sender = this_task;
   assert (sender);
 
   save_message_on_task (sender, message);
@@ -56,7 +56,7 @@ send_message (struct task *receiver, uintptr_t message)
 void
 receive_message ()
 {
-  struct task *receiver = this_cpu->current_task;
+  struct task *receiver = this_task;
   assert (receiver);
 
   struct task *sender;

@@ -43,7 +43,6 @@ struct arch_per_cpu
 {
   tss_t tss;
   gdt_entry_t gdt[7];
-  gdt_ptr_t gdt_ptr;
 };
 
 #define this_cpu ((__seg_gs per_cpu_t *)0)

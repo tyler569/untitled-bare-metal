@@ -54,7 +54,7 @@
 #define PF_SHADOW_STACK 0x40
 
 #define TSS_RSP2 28
-#define TSS_STACK 184
+#define TSS_STACK 168
 
 #ifndef __ASSEMBLER__
 

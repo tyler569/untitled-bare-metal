@@ -83,10 +83,12 @@ init_gdt (per_cpu_t *cpu)
   cpu->arch.gdt[5].base_high = (uintptr_t)&cpu->arch.tss >> 24;
   cpu->arch.gdt[6].base_upper = (uintptr_t)&cpu->arch.tss >> 32;
 
-  cpu->arch.gdt_ptr.limit = sizeof (cpu->arch.gdt) - 1;
-  cpu->arch.gdt_ptr.base = (uintptr_t)cpu->arch.gdt;
+  struct gdt_ptr ptr = {
+    .limit = sizeof (cpu->arch.gdt) - 1,
+    .base = (uintptr_t)cpu->arch.gdt,
+  };
 
-  load_gdt (&cpu->arch.gdt_ptr);
+  load_gdt (&ptr);
 
   jump_to_gdt ();
   reset_segment_registers ();
