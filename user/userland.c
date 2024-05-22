@@ -79,6 +79,8 @@ server ()
     {
       uintptr_t rx = receive ();
       printf ("Server received: %lu\n", rx);
+      if (rx != 0 && rx % 100 == 0)
+        asm volatile ("int3");
     }
 }
 

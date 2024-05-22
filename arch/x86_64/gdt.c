@@ -34,6 +34,9 @@ per_cpu_t bsp_cpu = {
       TSS_DESCRIPTOR_LOW (),
       TSS_DESCRIPTOR_HIGH (),
     },
+    .tss = {
+      .iomap_base = sizeof (tss_t),
+    },
   },
 };
 
@@ -41,6 +44,7 @@ void
 load_gdt (gdt_ptr_t *g)
 {
   asm volatile ("lgdt %0" : : "m"(*g));
+  asm volatile ("ltr %w0" : : "r"(0x28));
 }
 
 struct PACKED long_jump

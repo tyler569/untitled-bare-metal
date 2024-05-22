@@ -30,8 +30,8 @@ run_smoke_tests ()
 {
   printf ("Smoke tests:\n");
 
-  printf ("  Interrupt\n");
-  debug_trap ();
+  // printf ("  Interrupt\n");
+  // debug_trap ();
 
   printf ("  Allocator\n");
   {

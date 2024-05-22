@@ -40,6 +40,8 @@ init_aps ()
   if (!resp || resp->cpu_count <= 1)
     return;
 
+  append_to_list(&bsp_cpu.list, &cpus);
+
   init_slab_cache (&per_cpu_cache, sizeof (per_cpu_t));
 
   for (size_t i = 0; i < resp->cpu_count; i++)
