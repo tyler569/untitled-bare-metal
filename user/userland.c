@@ -36,12 +36,6 @@ write (FILE *, const void *str, unsigned long len)
 }
 
 static inline void
-clone (void (*fn) (void), void *stack)
-{
-  _syscall2 (2, (uintptr_t)fn, (uintptr_t)stack);
-}
-
-static inline void
 yield ()
 {
   _syscall0 (3);
@@ -65,13 +59,6 @@ create (uintptr_t arg)
   return _syscall2 (6, 1, arg);
 }
 
-static void
-yields ()
-{
-  for (int i = 0; i < 10; i++)
-    yield ();
-}
-
 [[noreturn]] void
 server ()
 {
@@ -79,8 +66,6 @@ server ()
     {
       uintptr_t rx = receive ();
       printf ("Server received: %lu\n", rx);
-      if (rx != 0 && rx % 100 == 0)
-        asm volatile ("int3");
     }
 }
 
