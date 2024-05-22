@@ -35,8 +35,8 @@ struct format_spec
   bool print_plus;
   bool leave_space;
   bool left_justify;
-  char padding_char;
-  char int_width;
+  signed char padding_char;
+  signed char int_width;
   short padding_width;
   short precision;
 };

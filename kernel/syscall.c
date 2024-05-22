@@ -7,7 +7,7 @@ uintptr_t
 do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
             uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *f)
 {
-  (void)a2, (void)a3, (void)a4, (void)a5;
+  (void)a2, (void)a3, (void)a4, (void)a5, (void)f;
 
   uintptr_t ret = 0;
 

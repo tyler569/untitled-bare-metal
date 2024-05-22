@@ -4,6 +4,8 @@
 
 #ifdef __x86_64__
 #include "arch/x86_64/exports.h"
+#elifdef __aarch64__
+#include "arch/arm64/exports.h"
 #endif
 
 struct per_cpu

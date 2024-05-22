@@ -47,6 +47,19 @@ if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
   set_target_properties(untitled_bare_metal
     PROPERTIES LINK_DEPENDS ${CMAKE_SOURCE_DIR}/arch/x86_64/link.ld
   )
+elseif ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic arm64")
+  target_sources(untitled_bare_metal PRIVATE
+    ../arch/arm64/intrin.c
+  )
+
+  target_compile_options(untitled_bare_metal PRIVATE)
+  target_link_options(untitled_bare_metal PRIVATE
+    -T ${CMAKE_SOURCE_DIR}/arch/arm64/link.ld
+    -z max-page-size=0x1000
+  )
+  set_target_properties(untitled_bare_metal
+    PROPERTIES LINK_DEPENDS ${CMAKE_SOURCE_DIR}/arch/arm64/link.ld
+  )
 else ()
   message(FATAL_ERROR "Unsupported target: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}")
 endif ()

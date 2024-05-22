@@ -2,7 +2,7 @@
 *.iso
 *.a
 
-/build
+/build*
 /limine
 /last_output
 /cmake-build-*
