@@ -1,5 +1,4 @@
 #include "assert.h"
-#include "kernel.h"
 #include "stdio.h"
 #include "sys/mem.h"
 #include "sys/spinlock.h"

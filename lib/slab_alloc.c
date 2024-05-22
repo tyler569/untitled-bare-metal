@@ -1,5 +1,4 @@
 #include "assert.h"
-#include "kernel.h"
 #include "list.h"
 #include "string.h"
 #include "sys/arch.h"

@@ -1,6 +1,6 @@
-#include "kernel.h"
 #include "limine.h"
 #include "stddef.h"
+#include "sys/cdefs.h"
 
 static struct limine_module_request moduleinfo = {
   .id = LIMINE_MODULE_REQUEST,
@@ -9,7 +9,7 @@ static struct limine_module_request moduleinfo = {
 bool
 get_initrd_info (void **initrd_start, size_t *initrd_size)
 {
-  struct limine_module_response *resp = volatile_read (moduleinfo.response);
+  struct limine_module_response *resp = volatile_get (moduleinfo.response);
 
   if (resp->module_count == 0)
     return false;

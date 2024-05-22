@@ -1,6 +1,5 @@
 #include "assert.h"
 #include "chacha.h"
-#include "kernel.h"
 #include "rng.h"
 #include "stdarg.h"
 #include "stdio.h"
@@ -76,7 +75,7 @@ run_smoke_tests ()
       }
   }
 
-  printf ("  Chacha20\n");
+  printf ("  Chacha\n");
   {
     // test vector2 from RFC 7539
     struct chacha cc1 = {

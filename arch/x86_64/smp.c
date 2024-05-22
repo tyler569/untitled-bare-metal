@@ -1,4 +1,3 @@
-#include "kernel.h"
 #include "limine.h"
 #include "list.h"
 #include "stdio.h"
@@ -35,7 +34,7 @@ ap_entry (struct limine_smp_info *)
 void
 init_aps ()
 {
-  struct limine_smp_response *resp = volatile_read (smpinfo.response);
+  struct limine_smp_response *resp = volatile_get (smpinfo.response);
 
   if (!resp || resp->cpu_count <= 1)
     return;

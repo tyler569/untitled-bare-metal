@@ -1,7 +1,8 @@
-#include "kernel.h"
 #include "rng.h"
 #include "stdio.h"
 #include "sys/task.h"
+
+void run_smoke_tests ();
 
 void
 kernel_main ()

@@ -3,12 +3,6 @@
 file="${1-build/kernel/untitled_bare_metal}"
 addr2line_binary="llvm-addr2line"
 
-if [ ! -f "$file" ]; then
-    echo "File not found: $file"
-    echo "Usage: $0 [file]"
-    exit 1
-fi
-
 if grep -q '(0x.*) <.*>' last_output; then
     grep '(0x.*) <.*>' last_output | \
         sed 's/.*(0x\(.*\)) .*/\1/g' | \

@@ -1,4 +1,3 @@
-#include "kernel.h"
 #include "limine.h"
 #include "stdio.h"
 #include "sys/mem.h"
@@ -36,7 +35,7 @@ direct_map_of (uintptr_t addr)
 {
   static uintptr_t hhdm_cache = 0;
   if (!hhdm_cache)
-    hhdm_cache = volatile_read (hhdminfo.response)->offset;
+    hhdm_cache = volatile_get (hhdminfo.response)->offset;
   return addr | hhdm_cache;
 }
 
@@ -55,7 +54,7 @@ get_physical_extents (struct physical_extent *extents, size_t *extent_count)
   size_t max_extents = *extent_count;
   *extent_count = 0;
 
-  struct limine_memmap_response *resp = volatile_read (mmapinfo.response);
+  struct limine_memmap_response *resp = volatile_get (mmapinfo.response);
 
   printf ("Limine memory map:\n");
 

@@ -1,4 +1,3 @@
-#include "kernel.h"
 #include "stdatomic.h"
 #include "sys/arch.h"
 

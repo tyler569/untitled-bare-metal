@@ -1,6 +1,7 @@
 #pragma once
 
 #define USED __attribute__ ((used, unused))
+#define UNUSED __attribute__ ((unused))
 #define MUST_USE __attribute__ ((warn_unused_result))
 #define PACKED __attribute__ ((packed))
 #define PRINTF_FORMAT(a, b) __attribute__ ((format (printf, a, b)))
@@ -37,3 +38,7 @@
   ((type *)((uintptr_t)(ptr)-offsetof (type, member)))
 
 #define UNREACHABLE() __builtin_unreachable ()
+
+#define volatile_get(x) (*(volatile typeof (x) *)&(x))
+#define volatile_read(x) (*(volatile typeof (x))(x))
+#define volatile_write(x, y) ((*(volatile typeof (x))(x)) = (y))

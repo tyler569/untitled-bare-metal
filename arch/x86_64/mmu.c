@@ -1,4 +1,3 @@
-#include "kernel.h"
 #include "stdatomic.h"
 #include "string.h"
 #include "sys/cdefs.h"
