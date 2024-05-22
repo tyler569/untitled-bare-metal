@@ -1,4 +1,5 @@
 #include "assert.h"
+#include "stdio.h"
 #include "string.h"
 #include "sys/arch.h"
 #include "sys/mem.h"
@@ -7,18 +8,18 @@
 void
 save_frame_on_task (frame_t *f)
 {
-  if (this_cpu->current_task && f->cs == USER_CS)
-    this_cpu->current_task->current_user_frame = f;
+  if (this_task && f->cs == USER_CS)
+    this_task->current_user_frame = f;
 }
 
 void
 clear_frame_on_task (frame_t *f)
 {
-  if (!this_cpu->current_task)
+  if (!this_task)
     return;
-  if (this_cpu->current_task->current_user_frame != f)
+  if (this_task->current_user_frame != f)
     return;
-  this_cpu->current_task->current_user_frame = nullptr;
+  this_task->current_user_frame = nullptr;
 }
 
 frame_t *

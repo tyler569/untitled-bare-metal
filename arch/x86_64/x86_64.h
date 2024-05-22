@@ -54,7 +54,10 @@
 #define PF_SHADOW_STACK 0x40
 
 #define TSS_RSP2 28
-#define TSS_STACK 184
+#define TSS_STACK 168
+
+#define IST_NMI 1
+#define IST_DF 2
 
 #ifndef __ASSEMBLER__
 
@@ -70,6 +73,8 @@ void init_idt ();
 void init_aps ();
 void init_syscall ();
 void init_int_stacks ();
+
+extern per_cpu_t bsp_cpu;
 
 void write_port_b (uint16_t port, uint8_t);
 uint8_t read_port_b (uint16_t port);

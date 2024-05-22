@@ -1,5 +1,5 @@
 #include "assert.h"
-#include "chacha20.h"
+#include "chacha.h"
 #include "kernel.h"
 #include "rng.h"
 #include "stdarg.h"
@@ -30,8 +30,8 @@ run_smoke_tests ()
 {
   printf ("Smoke tests:\n");
 
-  printf ("  Interrupt\n");
-  debug_trap ();
+  // printf ("  Interrupt\n");
+  // debug_trap ();
 
   printf ("  Allocator\n");
   {
@@ -79,7 +79,7 @@ run_smoke_tests ()
   printf ("  Chacha20\n");
   {
     // test vector2 from RFC 7539
-    chacha20 cc1 = {
+    struct chacha cc1 = {
       1,
       { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
         16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 },
@@ -87,7 +87,7 @@ run_smoke_tests ()
     };
 
     uint8_t data[64] = { 0 };
-    xor_chacha20 (&cc1, data, sizeof (data));
+    xor_chacha (&cc1, data, sizeof (data));
 
     assert (data[0] == 0x10 && data[63] == 0x4e);
 
@@ -95,14 +95,14 @@ run_smoke_tests ()
         = "Ladies and Gentlemen of the class of '99: If I could offer "
           "you only one tip for the future, sunscreen would be it.";
 
-    chacha20 cc2 = {
+    struct chacha cc2 = {
       1,
       { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
         16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 },
       { 0, 0, 0, 0, 0, 0, 0, 0x4a, 0, 0, 0, 0 },
     };
 
-    xor_chacha20 (&cc2, data2, sizeof (data2) - 1);
+    xor_chacha (&cc2, data2, sizeof (data2) - 1);
 
     assert (data2[0] == 0x6e && data2[1] == 0x2e && data2[2] == 0x35);
     assert (data2[112] == 0x87 && data2[113] == 0x4d);

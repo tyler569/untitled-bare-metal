@@ -55,3 +55,5 @@ void schedule ();
 
 void send_message (struct task *receiver, uintptr_t message);
 void receive_message ();
+
+#define this_task (this_cpu->current_task)

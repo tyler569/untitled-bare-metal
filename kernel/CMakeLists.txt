@@ -5,7 +5,7 @@ add_executable(untitled_bare_metal
   page_alloc.c
   syscall.c
   task.c
-  ../lib/chacha20.c
+  ../lib/chacha.c
   ../lib/elf.c
   ../lib/hexdump.c
   ../lib/mem_alloc.c

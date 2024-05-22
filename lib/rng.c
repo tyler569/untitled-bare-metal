@@ -1,7 +1,7 @@
-#include "chacha20.h"
+#include "chacha.h"
 #include "string.h"
 
-chacha20 chacha_state;
+struct chacha chacha_state;
 
 void
 init_random (uint64_t seed)
@@ -14,6 +14,6 @@ uint64_t
 random_u64 ()
 {
   uint64_t r;
-  xor_chacha20 (&chacha_state, (unsigned char *)&r, sizeof (r));
+  xor_chacha (&chacha_state, (unsigned char *)&r, sizeof (r));
   return r;
 }

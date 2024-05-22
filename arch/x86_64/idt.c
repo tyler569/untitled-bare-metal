@@ -1,9 +1,11 @@
 #include "sys/cdefs.h"
+#include "sys/mem.h"
 #include "x86_64.h"
 
 #define TYPE_INT 0x8E
-#define TYPE_TRAP 0x8F
-#define TYPE_USER_INT 0x60
+#define TYPE_USER_INT 0x60 | 0x8E
+
+#define INT_STACK_SIZE (PAGE_SIZE*2)
 
 struct PACKED idt_entry
 {
@@ -29,13 +31,13 @@ static idt_entry_t idt[48];
 static idt_ptr_t idt_ptr = { sizeof (idt) - 1, (uintptr_t)idt };
 
 void
-set_idt_gate (int num, uintptr_t base, int type)
+set_idt_gate (int num, uintptr_t base, int type, int ist)
 {
   idt[num].handler_low = base & 0xFFFF;
   idt[num].handler_mid = (base >> 16) & 0xFFFF;
   idt[num].handler_high = base >> 32;
   idt[num].segment = KERNEL_CS;
-  idt[num].ist = 0;
+  idt[num].ist = ist;
   idt[num].type = type;
 }
 
@@ -45,21 +47,21 @@ load_idt (idt_ptr_t *i)
   asm volatile ("lidt %0" : : "m"(*i));
 }
 
-#define SET_IDT_GATE(n, i) set_idt_gate (n, (uintptr_t)i, TYPE_INT)
-#define SET_IDT_GATE_ex(n, i, typ) set_idt_gate (n, (uintptr_t)i, typ)
+#define SET_IDT_GATE(n, i) set_idt_gate (n, (uintptr_t)i, TYPE_INT, 0)
+#define SET_IDT_GATE_ex(n, i, t, ist) set_idt_gate (n, (uintptr_t)i, t, ist)
 
 void
 init_idt ()
 {
   SET_IDT_GATE (0, isr0);
   SET_IDT_GATE (1, isr1);
-  SET_IDT_GATE (2, isr2);
-  SET_IDT_GATE_ex (3, isr3, TYPE_INT | TYPE_USER_INT);
+  SET_IDT_GATE_ex (2, isr2, TYPE_INT, IST_NMI);
+  SET_IDT_GATE_ex (3, isr3, TYPE_USER_INT, 0);
   SET_IDT_GATE (4, isr4);
   SET_IDT_GATE (5, isr5);
   SET_IDT_GATE (6, isr6);
   SET_IDT_GATE (7, isr7);
-  SET_IDT_GATE (8, isr8);
+  SET_IDT_GATE_ex (8, isr8, TYPE_INT, IST_DF);
   SET_IDT_GATE (9, isr9);
   SET_IDT_GATE (10, isr10);
   SET_IDT_GATE (11, isr11);
@@ -107,4 +109,17 @@ void
 init_ap_idt ()
 {
   load_idt (&idt_ptr);
+}
+
+void
+init_int_stacks ()
+{
+  void *int_stack = kmem_alloc (INT_STACK_SIZE);
+  void *nmi_stack = kmem_alloc (INT_STACK_SIZE);
+  void *df_stack = kmem_alloc (INT_STACK_SIZE);
+
+  this_cpu->kernel_stack_top = (uintptr_t)int_stack + INT_STACK_SIZE;
+  this_cpu->arch.tss.rsp[0] = this_cpu->kernel_stack_top;
+  this_cpu->arch.tss.ist[0] = (uintptr_t)nmi_stack + INT_STACK_SIZE;
+  this_cpu->arch.tss.ist[0] = (uintptr_t)df_stack + INT_STACK_SIZE;
 }

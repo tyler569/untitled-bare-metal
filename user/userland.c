@@ -79,6 +79,8 @@ server ()
     {
       uintptr_t rx = receive ();
       printf ("Server received: %lu\n", rx);
+      if (rx != 0 && rx % 100 == 0)
+        asm volatile ("int3");
     }
 }
 
@@ -88,7 +90,6 @@ client (uintptr_t task)
   unsigned i = 0;
   for (;;)
     send (task, i++);
-  // printf ("Client sent: %u\n", i++);
 }
 
 [[noreturn]] USED int
