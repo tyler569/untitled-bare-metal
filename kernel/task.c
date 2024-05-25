@@ -5,52 +5,41 @@
 #include "sys/per_cpu.h"
 #include "sys/slab.h"
 
-LIST_HEAD (tasks);
-struct slab_cache task_cache;
-
 LIST_HEAD (runnable_tasks);
 spin_lock_t runnable_tasks_lock;
 
 void
 init_tasks ()
 {
-  init_list (&tasks);
-  init_slab_cache (&task_cache, sizeof (struct task));
 }
 
 struct task *
-create_task ()
+create_task (struct task *t)
 {
-  struct task *t = slab_alloc (&task_cache);
   memset (t, 0, sizeof (struct task));
 
-  init_list (&t->tasks);
   init_list (&t->runnable_tasks);
-  init_list (&t->send_receive_pending);
   init_list (&t->send_receive_pending_node);
 
-  append_to_list (&t->tasks, &tasks);
-
   return t;
 }
 
 struct task *
-create_task_in_this_vm (uintptr_t rip, uintptr_t rsp)
+create_task_in_this_vm (struct task *t, uintptr_t rip, uintptr_t rsp)
 {
-  struct task *t = create_task ();
+  create_task (t);
 
   t->vm_root = get_vm_root ();
-  t->saved_state = new_user_frame (rip, rsp);
+  new_user_frame (&t->saved_state, rip, rsp);
 
   return t;
 }
 
 struct task *
-create_task_from_elf_in_this_vm (struct elf_ehdr *elf)
+create_task_from_elf_in_this_vm (struct task *t, struct elf_ehdr *elf)
 {
-  struct task *t = create_task ();
+  create_task (t);
 
-  t->elf = elf;
   t->vm_root = get_vm_root ();
 
   elf_load (elf);
@@ -60,38 +49,8 @@ create_task_from_elf_in_this_vm (struct elf_ehdr *elf)
   add_vm_mapping (t->vm_root, stack, alloc_page (),
                   PTE_PRESENT | PTE_USER | PTE_WRITE);
 
-  t->saved_state = new_user_frame (elf_entry (elf), stack + PAGE_SIZE);
+  new_user_frame (&t->saved_state, elf_entry (elf), stack + PAGE_SIZE);
 
-  return t;
-}
-
-struct task *
-create_task_from_elf_in_new_vm (struct elf_ehdr *elf)
-{
-  struct task *t = create_task ();
-
-  t->elf = elf;
-  t->vm_root = new_page_table ();
-  set_vm_root (t->vm_root);
-
-  elf_load (elf);
-
-  uintptr_t stack = 0x7ffffff00000;
-
-  add_vm_mapping (t->vm_root, stack, alloc_page (),
-                  PTE_PRESENT | PTE_USER | PTE_WRITE);
-
-  t->saved_state = new_user_frame (elf_entry (elf), stack + PAGE_SIZE);
-
-  return t;
-}
-
-struct task *
-create_task_from_syscall (bool, uintptr_t arg)
-{
-  struct task *t = create_task_from_elf_in_new_vm (this_task->elf);
-  set_frame_arg (t->saved_state, 0, arg);
-  set_vm_root (this_task->vm_root);
   return t;
 }
 
@@ -100,15 +59,12 @@ destroy_task (struct task *t)
 {
   assert (is_list_empty (&t->runnable_tasks));
   assert (t->state == TASK_STATE_DEAD);
-
-  remove_from_list (&t->tasks);
-  slab_free (&task_cache, t);
 }
 
 void
 save_task_state (struct task *t)
 {
-  copy_frame (t->saved_state, t->current_user_frame);
+  copy_frame (&t->saved_state, t->current_user_frame);
 }
 
 void
@@ -142,7 +98,7 @@ switch_task (struct task *t)
 
   this_cpu->current_task = t;
   set_vm_root (t->vm_root);
-  jump_to_userland_frame (t->saved_state);
+  jump_to_userland_frame (&t->saved_state);
 }
 
 void

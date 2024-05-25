@@ -49,9 +49,6 @@ physical_of (uintptr_t addr)
 void
 get_physical_extents (struct physical_extent *extents, size_t *extent_count)
 {
-  size_t total_pages = 0;
-  size_t free_pages = 0;
-
   size_t max_extents = *extent_count;
   *extent_count = 0;
 
@@ -64,16 +61,9 @@ get_physical_extents (struct physical_extent *extents, size_t *extent_count)
       struct limine_memmap_entry *entry = resp->entries[i];
 
       uintptr_t top = entry->base + entry->length;
-      size_t pages = entry->length / PAGE_SIZE;
 
       printf ("  %11lx - %11lx: %s\n", entry->base, top,
               limine_memmap_type_str[entry->type]);
-
-      if (limine_memmap_type_available[entry->type])
-        total_pages += pages;
-
-      if (entry->type == LIMINE_MEMMAP_USABLE)
-        free_pages += pages;
 
       if (entry->type == LIMINE_MEMMAP_USABLE && *extent_count < max_extents)
         {
@@ -82,10 +72,4 @@ get_physical_extents (struct physical_extent *extents, size_t *extent_count)
           (*extent_count)++;
         }
     }
-  printf ("Total pages: %zu (", total_pages);
-  print_si_fraction (total_pages * PAGE_SIZE);
-  printf (")\n");
-  printf ("Free pages: %zu (", free_pages);
-  print_si_fraction (free_pages * PAGE_SIZE);
-  printf (")\n");
 }

@@ -22,17 +22,15 @@ clear_frame_on_task (frame_t *f)
   this_task->current_user_frame = nullptr;
 }
 
-frame_t *
-new_user_frame (uintptr_t rip, uintptr_t rsp)
+void
+new_user_frame (frame_t *f, uintptr_t rip, uintptr_t rsp)
 {
-  frame_t *f = kmem_alloc (sizeof (frame_t));
   memset (f, 0, sizeof (frame_t));
 
   f->cs = USER_CS;
   f->ss = USER_SS;
   f->rip = rip;
   f->rsp = rsp;
-  return f;
 }
 
 void

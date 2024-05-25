@@ -5,13 +5,10 @@ add_executable(untitled_bare_metal
   page_alloc.c
   syscall.c
   task.c
-  ../lib/chacha.c
   ../lib/elf.c
   ../lib/hexdump.c
-  ../lib/mem_alloc.c
   ../lib/print.c
-  ../lib/rng.c
-  ../lib/slab_alloc.c
+  ../lib/sort.c
   ../lib/spin_lock.c
   ../lib/string.c
 )

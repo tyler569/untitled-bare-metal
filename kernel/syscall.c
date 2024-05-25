@@ -7,7 +7,7 @@ uintptr_t
 do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
             uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *f)
 {
-  (void)a2, (void)a3, (void)a4, (void)a5;
+  (void)a2, (void)a3, (void)a4, (void)a5, (void)f;
 
   uintptr_t ret = 0;
 
@@ -26,31 +26,6 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       //         a1);
       // printf ("  -> \"%.*s\"\n", (int)a1, (const char *)a0);
       write_debug (nullptr, (const void *)a0, a1);
-      break;
-    case 2:
-      printf ("Clone (num: %i, fn: %#lx, stk: %#lx)\n", syscall_number, a0,
-              a1);
-      struct task *new_t = create_task_in_this_vm (a0, a1);
-      make_task_runnable (new_t);
-      schedule ();
-      break;
-    case 3:
-      printf ("Yield (num: %i)\n", syscall_number);
-      schedule ();
-      break;
-    case 4:
-      printf ("Send (num: %i, to: %#lx, msg: %#lx)\n", syscall_number, a0, a1);
-      send_message ((struct task *)a0, a1);
-      break;
-    case 5:
-      printf ("Receive (num: %i)\n", syscall_number);
-      receive_message ();
-      break;
-    case 6:
-      printf ("Create (num: %i, vm: %lu, arg: %lu)\n", syscall_number, a0, a1);
-      struct task *t = create_task_from_syscall (a0 != 0, a1);
-      make_task_runnable (t);
-      ret = (uintptr_t)t;
       break;
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);

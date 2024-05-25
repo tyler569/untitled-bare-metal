@@ -11,8 +11,6 @@
 
 #endif // __ASSEMBLER__
 
-#define PAGE_SIZE 4096
-
 #define IA32_EFER 0xC0000080
 #define IA32_STAR 0xC0000081
 #define IA32_LSTAR 0xC0000082
@@ -93,29 +91,8 @@ uint64_t read_cr2 ();
 uint64_t read_cr4 ();
 void write_cr4 (uint64_t);
 
-struct frame
-{
-  uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
-  uint64_t rdi, rsi, rbp, rbx, rdx, rcx, rax;
-  uint64_t int_no, err_code;
-  uint64_t rip, cs, rflags, rsp, ss;
-};
-
-typedef struct frame frame_t;
-
 void save_frame_on_task (frame_t *);
 void clear_frame_on_task (frame_t *);
-
-// unused, probably going away in favor of regular saved_state
-// since when you decide to schedule a task you have to store
-// the registers in a saved_state anyway, so we can either have two
-// structs or just one. That or maintaining different kernel
-// stacks for every usermode task...
-struct syscall_frame
-{
-  uint64_t r15, r14, r13, r12, rbx, rbp;
-  uint64_t rflags, rip, rsp;
-};
 
 void print_interrupt_info (frame_t *);
 

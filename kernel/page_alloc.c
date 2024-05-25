@@ -1,133 +1,57 @@
 #include "assert.h"
 #include "kernel.h"
 #include "stdio.h"
+#include "stdlib.h"
+#include "sys/arch.h"
 #include "sys/mem.h"
 #include "sys/spinlock.h"
 
-#define PAGE_SIZE 4096
+#define MAX_EXTENTS 32
+#define MAX_REGIONS 64
 
-static spin_lock_t page_lock;
+struct physical_extent extents[MAX_EXTENTS];
+size_t extent_count = MAX_EXTENTS;
 
-static uintptr_t global_page_map_phy;
-
-static page_t *global_page_map;
-static size_t global_page_count;
-static page_t *global_page_map_end;
-
-// The global page map is a contiguous array of page_t structures that
-// represent the physical memory of the system. Normally, global_page_map[0]
-// represents the first page of physical memory at address 0, but on systems
-// where this would create an unreasonable map (such as user-mode), the
-// global_page_map_offset variable can be used to offset the map.
-uintptr_t global_page_map_offset = 0;
-
-LIST_HEAD (free_list);
-static page_t *free_bump_cursor;
-
-struct physical_extent extents[32];
-size_t extent_count = ARRAY_SIZE (extents);
-
-page_t *
-get_page_struct (uintptr_t addr)
+struct power_of_two_region
 {
-  size_t index = (addr - global_page_map_offset) / PAGE_SIZE;
+  uintptr_t addr;
+  uint8_t size_bits;
+  bool in_kernel_use;
+  bool for_pages;
+  size_t watermark;
+};
 
-  if (index >= global_page_count)
-    return nullptr;
+struct power_of_two_region regions[MAX_REGIONS];
+size_t region_count = 0;
 
-  return &global_page_map[index];
+void allocate_aligned_regions (struct physical_extent *extent)
+{
+  size_t len = extent->len;
+  uintptr_t acc = extent->start;
+  while (len > 0)
+	{
+	  // find the largest power of 2 that fits in len
+	  int zeros = __builtin_clzll (len);
+	  size_t max_len = 1 << (63 - zeros);
+
+	  assert (max_len <= len);
+	  assert (max_len >> 12 > 0);
+
+	  printf ("  %p: %zu pages\n", (void *)acc, max_len >> 12);
+
+      regions[region_count].addr = acc;
+	  regions[region_count].size_bits = 63 - zeros - 12;
+	  region_count++;
+
+	  acc += max_len;
+	  len -= max_len;
+	}
 }
 
-uintptr_t
-page_addr (page_t *page)
+int compare_power_of_two_regions (const struct power_of_two_region *a,
+								  const struct power_of_two_region *b)
 {
-  return (uintptr_t)(page - global_page_map) * PAGE_SIZE
-         + global_page_map_offset;
-}
-
-bool
-page_is_free (page_t *page)
-{
-  return !(page->flags & PAGE_USED);
-}
-
-// Print a number in SI units (e.g. 1.23 MB) out to 3 decimal places
-void
-print_si_fraction (size_t num)
-{
-  static const char *suffixes[] = { "kB", "MB", "GB", "TB" };
-
-  if (num < 1024)
-    {
-      printf ("%zu B", num);
-      return;
-    }
-
-  for (int i = 0; i < 4; i++)
-    {
-      size_t p = 1024lu << (i * 10);
-      if (num < p * 1024)
-        {
-          if (num % p == 0)
-            printf ("%zu %s", num / p, suffixes[i]);
-          else
-            printf ("%zu.%03zu %s", num / p, num % p * 1000 / p, suffixes[i]);
-          break;
-        }
-    }
-}
-
-page_t *
-alloc_page_map (size_t num_pages)
-{
-  for (size_t i = 0; i < extent_count; i++)
-    {
-      struct physical_extent *extent = &extents[i];
-
-      if (extent->flags != PHYSICAL_EXTENT_FREE)
-        continue;
-
-      size_t extent_pages = extent->len / PAGE_SIZE;
-
-      if (extent_pages < num_pages)
-        continue;
-
-      uintptr_t addr = extent->start;
-
-      return (page_t *)direct_map_of (addr);
-    }
-
-  assert (0 && "unable to allocate page map");
-}
-
-void
-fill_page_map ()
-{
-  for (size_t i = 0; i < global_page_count; i++)
-    global_page_map[i].flags = PAGE_UNUSABLE;
-
-  for (size_t i = 0; i < extent_count; i++)
-    {
-      struct physical_extent *extent = &extents[i];
-
-      for (size_t j = 0; j < extent->len / PAGE_SIZE; j++)
-        {
-          page_t *page = get_page_struct (extent->start + j * PAGE_SIZE);
-          if (extent->flags & PHYSICAL_EXTENT_USED)
-            page->flags = PAGE_USED;
-          else
-            page->flags = PAGE_FREE;
-        }
-    }
-
-  for (uintptr_t addr = global_page_map_phy;
-       addr < global_page_map_phy + global_page_count * sizeof (page_t);
-       addr += PAGE_SIZE)
-    {
-      page_t *page = get_page_struct (addr);
-
-      page->flags = PAGE_USED;
-    }
+  return a->size_bits - b->size_bits;
 }
 
 void
@@ -135,75 +59,81 @@ init_page_mmap ()
 {
   get_physical_extents (extents, &extent_count);
 
-  global_page_map_offset = extents[0].start;
-  uintptr_t highest_usable_addr
-      = extents[extent_count - 1].start + extents[extent_count - 1].len;
+  for (size_t i = 0; i < extent_count; i++)
+	allocate_aligned_regions (&extents[i]);
 
-  size_t page_struct_size = sizeof (struct page);
-  size_t memory_represented = highest_usable_addr - global_page_map_offset;
-  size_t page_struct_count = memory_represented / PAGE_SIZE;
-  size_t page_map_total_size
-      = ALIGN_UP (page_struct_size * page_struct_count, PAGE_SIZE);
-
-  printf ("  Lowest usable address: %#zx\n", global_page_map_offset);
-  printf ("  Highest usable address: %#zx\n", highest_usable_addr);
-  printf ("  Page struct count: %zu\n", page_struct_count);
-  printf ("  Need %zu bytes for page structs\n", page_map_total_size);
-  printf ("  Need %zu pages for page structs\n",
-          page_map_total_size / PAGE_SIZE);
-
-  printf ("Page struct size: (");
-  print_si_fraction (page_map_total_size);
-  printf (")\n");
-
-  global_page_map = alloc_page_map (page_map_total_size / PAGE_SIZE);
-  global_page_map_phy = page_addr (global_page_map);
-  global_page_count = page_struct_count;
-  global_page_map_end = global_page_map + page_struct_count;
-  free_bump_cursor = global_page_map;
-
-  fill_page_map ();
+  qsort (regions, region_count, sizeof (struct power_of_two_region),
+		 (int (*)(const void *, const void *))compare_power_of_two_regions);
 }
 
-uintptr_t
-alloc_page_s (page_t **page_ret)
+uintptr_t alloc_page ()
 {
-  page_t *page = nullptr;
+  // if there is already a kernel region being used to allocate pages, use it
+  for (size_t i = 0; i < region_count; i++)
+	{
+	  struct power_of_two_region *region = &regions[i];
+	  size_t size = PAGE_SIZE << region->size_bits;
+	  if (region->in_kernel_use && region->for_pages &&
+		  region->watermark < size - PAGE_SIZE)
+		{
+		  uintptr_t addr = region->addr + region->watermark;
+		  region->watermark += PAGE_SIZE;
+		  // printf ("Allocating page at %p\n", (void *)addr);
+		  return addr;
+		}
+	}
 
-  spin_lock (&page_lock);
+  // otherwise, find a region that is not in use and use it, prefering
+  // the smallest available region
+  for (size_t i = 0; i < region_count; i++)
+	{
+	  struct power_of_two_region *region = &regions[i];
+	  if (!region->in_kernel_use)
+		{
+		  region->in_kernel_use = true;
+		  region->for_pages = true;
+		  region->watermark = PAGE_SIZE;
+		  // printf ("Allocating page at %p\n", (void *)region->addr);
+		  return region->addr;
+		}
+	}
 
-  if (!is_list_empty (&free_list))
-    {
-      struct list_head *l = pop_from_list (&free_list);
-      page = CONTAINER_OF (l, page_t, list);
-    }
-  else
-    do
-      if (page_is_free (free_bump_cursor))
-        {
-          page = free_bump_cursor++;
-          break;
-        }
-    while (++free_bump_cursor < global_page_map_end);
-
-  page->flags = PAGE_USED;
-
-  spin_unlock (&page_lock);
-
-  if (page_ret)
-    *page_ret = page;
-
-  return page_addr (page);
+  assert (0 && "No more pages available");
 }
 
-void
-free_page (uintptr_t addr)
+void *kmem_alloc (size_t size)
 {
-  spin_lock (&page_lock);
+  size = ALIGN_UP (size, 16);
 
-  page_t *page = get_page_struct (addr);
-  prepend_to_list (&page->list, &free_list);
-  page->flags = PAGE_FREE;
+  // if there is already a kernel region of sufficient size being used to
+  // allocate memory, use it
+  for (size_t i = 0; i < region_count; i++)
+	{
+	  struct power_of_two_region *region = &regions[i];
+	  size_t region_size = 1ul << region->size_bits;
+	  if (region->in_kernel_use && !region->for_pages &&
+		  region->watermark < region_size - size)
+		{
+		  uintptr_t addr = region->addr + region->watermark;
+		  region->watermark += size;
+		  return (void *)direct_map_of(addr);
+		}
+	}
 
-  spin_unlock (&page_lock);
+  // otherwise, find a region that is not in use and use it, prefering
+  // the smallest available region
+  for (size_t i = 0; i < region_count; i++)
+	{
+	  struct power_of_two_region *region = &regions[i];
+	  size_t region_size = 1ul << region->size_bits;
+	  if (!region->in_kernel_use && !region->for_pages && region_size >= size)
+		{
+		  region->in_kernel_use = true;
+		  region->for_pages = false;
+		  region->watermark = size;
+		  return (void *)direct_map_of(region->addr);
+		}
+	}
+
+  return nullptr;
 }

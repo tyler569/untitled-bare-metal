@@ -35,63 +35,10 @@ write (FILE *, const void *str, unsigned long len)
   return (long)len;
 }
 
-static inline void
-yield ()
-{
-  _syscall0 (3);
-}
-
-static inline void
-send (uintptr_t to, uintptr_t msg)
-{
-  _syscall2 (4, to, msg);
-}
-
-static inline uintptr_t
-receive ()
-{
-  return _syscall0 (5);
-}
-
-static inline uintptr_t
-create (uintptr_t arg)
-{
-  return _syscall2 (6, 1, arg);
-}
-
-[[noreturn]] void
-server ()
-{
-  for (;;)
-    {
-      uintptr_t rx = receive ();
-      printf ("Server received: %lu\n", rx);
-    }
-}
-
-[[noreturn]] void
-client (uintptr_t task)
-{
-  unsigned i = 0;
-  for (;;)
-    send (task, i++);
-}
-
 [[noreturn]] USED int
 _start (uintptr_t arg)
 {
   printf ("Hello, World from userland; arg: %lu!\n", arg);
-
-  uintptr_t task;
-
-  if (arg == 0)
-    {
-      task = create (1);
-      yield ();
-      client (task);
-    }
-  else
-    server ();
 
   exit ();
 }

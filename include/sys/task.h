@@ -3,8 +3,15 @@
 #include "elf.h"
 #include "list.h"
 #include "sys/arch.h"
+#include "sys/cap.h"
 #include "sys/cdefs.h"
+#include "sys/ipc.h"
 #include "sys/spinlock.h"
+#include "sys/types.h"
+
+#ifdef __x86_64__
+#include "arch/x86_64/exports.h"
+#endif
 
 enum task_state
 {
@@ -21,29 +28,25 @@ struct task
 {
   enum task_state state;
 
-  struct list_head tasks;
   struct list_head runnable_tasks;
-
-  spin_lock_t message_lock;
-  struct list_head send_receive_pending;
   struct list_head send_receive_pending_node;
 
-  uintptr_t sending_message;
+  struct ipc_buffer *ipc_buffer;
+  uintptr_t ipc_buffer_mapped;
 
-  struct elf_ehdr *elf;
+  cap_t cspace_root;
+  cap_t vspace_root;
+
   uintptr_t vm_root;
 
-  frame_t *saved_state;
+  frame_t saved_state;
   frame_t *current_user_frame;
 };
 
 void init_tasks ();
 
-struct task *create_task ();
-struct task *create_task_from_elf_in_this_vm (struct elf_ehdr *elf);
-struct task *create_task_from_elf_in_new_vm (struct elf_ehdr *elf);
-struct task *create_task_in_this_vm (uintptr_t rip, uintptr_t rsp);
-struct task *create_task_from_syscall (bool in_this_vm, uintptr_t arg);
+struct task *create_task (struct task *);
+struct task *create_task_from_elf_in_this_vm (struct task *, struct elf_ehdr *elf);
 void kill_task (struct task *t);
 void destroy_task (struct task *t);
 

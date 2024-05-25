@@ -3,7 +3,9 @@
 #include "stdint.h"
 #include "sys/types.h"
 
-#define PAGE_SIZE 4096
+#ifdef __x86_64__
+#include "arch/x86_64/exports.h"
+#endif
 
 struct frame;
 typedef struct frame frame_t;
@@ -20,7 +22,8 @@ ssize_t write_debug (struct stream *, const void *str, size_t len);
 void print_backtrace (frame_t *);
 void print_frame (frame_t *);
 
-frame_t new_frame (uintptr_t rip, uintptr_t rsp);
+void new_frame (frame_t *, uintptr_t rip, uintptr_t rsp);
+void new_user_frame (frame_t *, uintptr_t rip, uintptr_t rsp);
 void copy_frame (frame_t *dst, frame_t *src);
 
 uintptr_t get_frame_arg (frame_t *, int);
@@ -36,5 +39,4 @@ uintptr_t get_vm_root ();
 void set_vm_root (uintptr_t root);
 
 void jump_to_userland (uintptr_t entry, uintptr_t stack);
-frame_t *new_user_frame (uintptr_t rip, uintptr_t rsp);
 void jump_to_userland_frame (frame_t *);

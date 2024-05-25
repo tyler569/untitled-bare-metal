@@ -34,8 +34,6 @@ typedef uint64_t pte_t;
 #define PT_SHIFT 12
 #define PT_MASK 0x1FF
 
-#define PAGE_SIZE 4096
-
 extern uintptr_t KERNEL_END;
 static _Atomic uintptr_t vm_alloc_base = (uintptr_t)&KERNEL_END;
 

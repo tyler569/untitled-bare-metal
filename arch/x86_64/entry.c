@@ -16,7 +16,6 @@ kernel_entry ()
   init_idt ();
   init_syscall ();
   init_page_mmap ();
-  init_kmem_alloc ();
   init_int_stacks ();
   // init_aps ();
 

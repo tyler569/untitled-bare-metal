@@ -3,12 +3,13 @@
 #include "stdio.h"
 #include "sys/task.h"
 
+struct task init_task;
+
 void
 kernel_main ()
 {
   printf ("Hello, World!\n");
 
-  init_random (1);
   init_tasks ();
 
   run_smoke_tests ();
@@ -18,8 +19,8 @@ kernel_main ()
   if (get_initrd_info (&initrd, &initrd_size))
     {
       printf ("Initrd found at %p, size %zu\n", initrd, initrd_size);
-      struct task *t = create_task_from_elf_in_this_vm (initrd);
-      make_task_runnable (t);
+      create_task_from_elf_in_this_vm (&init_task, initrd);
+      make_task_runnable (&init_task);
       schedule ();
     }
   else

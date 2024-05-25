@@ -30,7 +30,7 @@ print_interrupt_info (frame_t *f)
       print_backtrace (f);
       halt_forever ();
     case 3:
-      print_frame (f);
+      // print_frame (f);
       return;
     case 13:
       printf ("General protection fault\n");

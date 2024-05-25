@@ -6,21 +6,19 @@
 #include "sys/slab.h"
 #include "x86_64.h"
 
+#define MAX_CPUS 32
+
 static struct limine_smp_request smpinfo = {
   .id = LIMINE_SMP_REQUEST,
 };
 
-static struct slab_cache per_cpu_cache;
-
-static LIST_HEAD (cpus);
+struct per_cpu cpus[MAX_CPUS];
 
 void
-ap_entry (struct limine_smp_info *)
+ap_entry (struct limine_smp_info *info)
 {
-  per_cpu_t *cpu = slab_alloc (&per_cpu_cache);
+  per_cpu_t *cpu = &cpus[info->processor_id];
   cpu->self = cpu;
-
-  prepend_to_list (&cpu->list, &cpus);
 
   init_ap_idt ();
   init_ap_gdt (cpu);
@@ -40,12 +38,10 @@ init_aps ()
   if (!resp || resp->cpu_count <= 1)
     return;
 
-  append_to_list(&bsp_cpu.list, &cpus);
-
-  init_slab_cache (&per_cpu_cache, sizeof (per_cpu_t));
-
   for (size_t i = 0; i < resp->cpu_count; i++)
     {
+	  if (resp->cpus[i]->processor_id >= MAX_CPUS)
+		continue;
       if (resp->cpus[i]->lapic_id == resp->bsp_lapic_id)
         continue;
 
