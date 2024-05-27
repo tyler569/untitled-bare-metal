@@ -1,12 +1,12 @@
 #include "kern/ipc.h"
+#include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
-#include "kern/task.h"
 
 word_t
 get_ipc_info ()
 {
-  if (this_task && this_task->ipc_buffer)
-    return this_task->ipc_buffer->tag;
+  if (this_tcb && this_tcb->ipc_buffer)
+    return this_tcb->ipc_buffer->tag;
   else
     return 0;
 }
@@ -32,8 +32,8 @@ get_ipc_length ()
 word_t
 get_mr (word_t i)
 {
-  if (this_task && this_task->ipc_buffer)
-    return this_task->ipc_buffer->msg[i];
+  if (this_tcb && this_tcb->ipc_buffer)
+    return this_tcb->ipc_buffer->msg[i];
   else
     return 0;
 }
@@ -41,8 +41,8 @@ get_mr (word_t i)
 word_t
 get_extra_cap (word_t i)
 {
-  if (this_task && this_task->ipc_buffer)
-    return this_task->ipc_buffer->caps_or_badges[i];
+  if (this_tcb && this_tcb->ipc_buffer)
+    return this_tcb->ipc_buffer->caps_or_badges[i];
   else
     return 0;
 }
@@ -50,15 +50,15 @@ get_extra_cap (word_t i)
 void
 set_mr (word_t i, word_t v)
 {
-  if (this_task && this_task->ipc_buffer)
-    this_task->ipc_buffer->msg[i] = v;
+  if (this_tcb && this_tcb->ipc_buffer)
+    this_tcb->ipc_buffer->msg[i] = v;
 }
 
 void
 set_ipc_info (message_info_t tag)
 {
-  if (this_task && this_task->ipc_buffer)
-    this_task->ipc_buffer->tag = tag;
+  if (this_tcb && this_tcb->ipc_buffer)
+    this_tcb->ipc_buffer->tag = tag;
 }
 
 void

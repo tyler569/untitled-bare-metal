@@ -27,7 +27,7 @@ kernel_entry ()
 USED void
 c_interrupt_entry (frame_t *f)
 {
-  save_frame_on_task (f);
+  save_frame_on_tcb (f);
   print_interrupt_info (f);
-  clear_frame_on_task (f);
+  clear_frame_on_tcb (f);
 }

@@ -1,4 +1,4 @@
-#include "kern/task.h"
+#include "kern/obj/tcb.h"
 #include "assert.h"
 #include "kern/ipc.h"
 #include "kern/mem.h"
@@ -6,30 +6,30 @@
 #include "string.h"
 #include "sys/syscall.h"
 
-// struct list_head runnable_tasks[MAX_PRIORITY];
-LIST_HEAD (runnable_tasks);
-spin_lock_t runnable_tasks_lock;
+// struct list_head runnable_tcbs[MAX_PRIORITY];
+LIST_HEAD (runnable_tcbs);
+spin_lock_t runnable_tcbs_lock;
 
 void
-init_tasks ()
+init_tcbs ()
 {
 }
 
-struct task *
-create_task (struct task *t)
+struct tcb *
+create_tcb (struct tcb *t)
 {
-  memset (t, 0, sizeof (struct task));
+  memset (t, 0, sizeof (struct tcb));
 
-  init_list (&t->runnable_tasks);
+  init_list (&t->runnable_tcbs);
   init_list (&t->send_receive_pending_node);
 
   return t;
 }
 
-struct task *
-create_task_in_this_vm (struct task *t, uintptr_t rip, uintptr_t rsp)
+struct tcb *
+create_tcb_in_this_vm (struct tcb *t, uintptr_t rip, uintptr_t rsp)
 {
-  create_task (t);
+  create_tcb (t);
 
   t->vm_root = get_vm_root ();
   new_user_frame (&t->saved_state, rip, rsp);
@@ -37,10 +37,10 @@ create_task_in_this_vm (struct task *t, uintptr_t rip, uintptr_t rsp)
   return t;
 }
 
-struct task *
-create_task_from_elf_in_this_vm (struct task *t, struct elf_ehdr *elf)
+struct tcb *
+create_tcb_from_elf_in_this_vm (struct tcb *t, struct elf_ehdr *elf)
 {
-  create_task (t);
+  create_tcb (t);
 
   t->vm_root = get_vm_root ();
 
@@ -67,8 +67,8 @@ create_task_from_elf_in_this_vm (struct task *t, struct elf_ehdr *elf)
 }
 
 void
-configure_task (struct task *t, cap_t cspace_root, cap_t vspace_root,
-                uintptr_t ipc_buffer)
+configure_tcb (struct tcb *t, cap_t cspace_root, cap_t vspace_root,
+               uintptr_t ipc_buffer)
 {
   t->cspace_root = cspace_root;
   t->vspace_root = vspace_root;
@@ -76,28 +76,28 @@ configure_task (struct task *t, cap_t cspace_root, cap_t vspace_root,
 }
 
 void
-destroy_task (struct task *t)
+destroy_tcb (struct tcb *t)
 {
-  assert (is_list_empty (&t->runnable_tasks));
+  assert (is_list_empty (&t->runnable_tcbs));
   assert (t->state == TASK_STATE_DEAD);
 }
 
 void
-save_task_state (struct task *t)
+save_tcb_state (struct tcb *t)
 {
   copy_frame (&t->saved_state, t->current_user_frame);
 }
 
 void
-make_task_runnable (struct task *t)
+make_tcb_runnable (struct tcb *t)
 {
   assert (t->state != TASK_STATE_DEAD);
 
   t->state = TASK_STATE_RUNNABLE;
 
-  spin_lock (&runnable_tasks_lock);
-  append_to_list (&t->runnable_tasks, &runnable_tasks);
-  spin_unlock (&runnable_tasks_lock);
+  spin_lock (&runnable_tcbs_lock);
+  append_to_list (&t->runnable_tcbs, &runnable_tcbs);
+  spin_unlock (&runnable_tcbs_lock);
 }
 
 int
@@ -106,7 +106,7 @@ invoke_tcb_method ()
   cptr_t target_cptr = get_extra_cap (0);
   cap_t tcb;
   exception_t status
-      = lookup_cap (this_task->cspace_root, target_cptr, 64, &tcb);
+      = lookup_cap (this_tcb->cspace_root, target_cptr, 64, &tcb);
 
   if (status != no_error)
     {
@@ -114,14 +114,14 @@ invoke_tcb_method ()
       return 1;
     }
 
-  struct task *t = cap_ptr (tcb);
+  struct tcb *t = cap_ptr (tcb);
 
   assert (tcb.type == CAP_TCB);
 
   switch (get_ipc_label ())
     {
     case tcb_resume:
-      make_task_runnable (t);
+      make_tcb_runnable (t);
       break;
     default:
       return_ipc_error (invalid_argument, 0);
@@ -132,48 +132,47 @@ invoke_tcb_method ()
 }
 
 void
-switch_task (struct task *t)
+switch_tcb (struct tcb *t)
 {
-  struct task *current = this_task;
+  struct tcb *current = this_tcb;
 
-  // Save the current task unless it is dead.
+  // Save the current tcb unless it is dead.
   if (current && current->state != TASK_STATE_DEAD)
-    save_task_state (current);
+    save_tcb_state (current);
 
-  // Make the current task runnable if it still wants to run.
+  // Make the current tcb runnable if it still wants to run.
   if (current && current->state == TASK_STATE_RUNNING)
-    make_task_runnable (current);
+    make_tcb_runnable (current);
 
   assert_eq (t->state, TASK_STATE_RUNNABLE);
 
   t->state = TASK_STATE_RUNNING;
 
-  this_cpu->current_task = t;
+  this_cpu->current_tcb = t;
   set_vm_root (t->vm_root);
   jump_to_userland_frame (&t->saved_state);
 }
 
 void
-kill_task (struct task *t)
+kill_tcb (struct tcb *t)
 {
   t->state = TASK_STATE_DEAD;
-  destroy_task (t);
+  destroy_tcb (t);
 }
 
-struct task *
-pick_next_task ()
+struct tcb *
+pick_next_tcb ()
 {
-  struct task *t;
+  struct tcb *t;
 
-  spin_lock (&runnable_tasks_lock);
-  if (is_list_empty (&runnable_tasks))
+  spin_lock (&runnable_tcbs_lock);
+  if (is_list_empty (&runnable_tcbs))
     {
-      spin_unlock (&runnable_tasks_lock);
+      spin_unlock (&runnable_tcbs_lock);
       return nullptr;
     }
-  t = CONTAINER_OF (pop_from_list (&runnable_tasks), struct task,
-                    runnable_tasks);
-  spin_unlock (&runnable_tasks_lock);
+  t = CONTAINER_OF (pop_from_list (&runnable_tcbs), struct tcb, runnable_tcbs);
+  spin_unlock (&runnable_tcbs_lock);
 
   return t;
 }
@@ -181,17 +180,17 @@ pick_next_task ()
 void
 schedule ()
 {
-  struct task *current = this_task;
-  struct task *next = pick_next_task ();
+  struct tcb *current = this_tcb;
+  struct tcb *next = pick_next_tcb ();
 
-  // There is no task who wants to run, but the current one
+  // There is no tcb who wants to run, but the current one
   // wants to continue.
   if (!next && current && current->state == TASK_STATE_RUNNING)
     return;
 
-  // There is no task who wants to run at all.
+  // There is no tcb who wants to run at all.
   if (!next)
     halt_forever_interrupts_enabled ();
 
-  switch_task (next);
+  switch_tcb (next);
 }

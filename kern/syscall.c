@@ -1,6 +1,6 @@
 #include "kern/syscall.h"
+#include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
-#include "kern/task.h"
 #include "stdio.h"
 
 uintptr_t
@@ -12,13 +12,13 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
   uintptr_t ret = 0;
 
   if (syscall_number != sys_debug_write)
-    printf ("Task %#lx ", (uintptr_t)this_task & 0xff);
+    printf ("Task %#lx ", (uintptr_t)this_tcb & 0xff);
 
   switch (syscall_number)
     {
     case sys_exit:
       printf ("Exit (num: %i)\n", syscall_number);
-      kill_task (this_task);
+      kill_tcb (this_tcb);
       schedule ();
       UNREACHABLE ();
     case sys_debug_write:

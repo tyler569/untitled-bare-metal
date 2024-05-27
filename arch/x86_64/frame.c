@@ -6,20 +6,20 @@
 #include "x86_64.h"
 
 void
-save_frame_on_task (frame_t *f)
+save_frame_on_tcb (frame_t *f)
 {
-  if (this_task && f->cs == USER_CS)
-    this_task->current_user_frame = f;
+  if (this_tcb && f->cs == USER_CS)
+    this_tcb->current_user_frame = f;
 }
 
 void
-clear_frame_on_task (frame_t *f)
+clear_frame_on_tcb (frame_t *f)
 {
-  if (!this_task)
+  if (!this_tcb)
     return;
-  if (this_task->current_user_frame != f)
+  if (this_tcb->current_user_frame != f)
     return;
-  this_task->current_user_frame = nullptr;
+  this_tcb->current_user_frame = nullptr;
 }
 
 void

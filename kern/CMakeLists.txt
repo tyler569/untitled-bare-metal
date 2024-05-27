@@ -5,7 +5,7 @@ add_executable(untitled_bare_metal
   elf.c
   ipc.c
   syscall.c
-  obj/task.c
+  obj/tcb.c
   obj/untyped.c
   ../lib/hexdump.c
   ../lib/print.c

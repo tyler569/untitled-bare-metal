@@ -10,7 +10,7 @@
 
 #define MAX_PRIORITY 254
 
-enum task_state
+enum tcb_state
 {
   TASK_STATE_RUNNABLE,
   TASK_STATE_RUNNING,
@@ -21,7 +21,7 @@ enum task_state
   TASK_STATE_RECEIVING,
 };
 
-enum task_methods
+enum tcb_methods
 {
   tcb_configure = tcb_base,
   tcb_resume,

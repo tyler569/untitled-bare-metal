@@ -3,8 +3,8 @@
 #ifndef __ASSEMBLER__
 
 #include "arch/x86_64/exports.h"
+#include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
-#include "kern/task.h"
 #include "list.h"
 #include "stddef.h"
 #include "stdint.h"
@@ -91,8 +91,8 @@ uint64_t read_cr2 ();
 uint64_t read_cr4 ();
 void write_cr4 (uint64_t);
 
-void save_frame_on_task (frame_t *);
-void clear_frame_on_task (frame_t *);
+void save_frame_on_tcb (frame_t *);
+void clear_frame_on_tcb (frame_t *);
 
 void print_interrupt_info (frame_t *);
 
