@@ -1,9 +1,11 @@
 #include "assert.h"
 #include "kern/arch.h"
+#include "kern/cap.h"
 #include "kern/kernel.h"
 #include "kern/mem.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "sys/bootinfo.h"
 
 #define MAX_EXTENTS 32
 #define MAX_REGIONS 64
@@ -16,6 +18,7 @@ struct power_of_two_region
   uintptr_t addr;
   uint8_t size_bits;
   bool in_kernel_use;
+  bool in_user_use;
   bool for_pages;
   size_t watermark;
 };
@@ -45,6 +48,25 @@ allocate_aligned_regions (struct physical_extent *extent)
 
       acc += max_len;
       len -= max_len;
+    }
+}
+
+void
+create_init_untyped_caps (cte_t *base, size_t *count,
+                          struct untyped_desc *desc)
+{
+  size_t n = MIN (*count, region_count);
+  size_t cap_i = 0;
+  for (size_t i = 0; i < n; i++)
+    {
+      if (regions[i].in_kernel_use)
+        continue;
+      regions[i].in_user_use = true;
+      base[cap_i++].cap
+          = cap_untyped_new (regions[i].addr, regions[i].size_bits);
+
+      desc[i].base = regions[i].addr;
+      desc[i].size_bits = regions[i].size_bits;
     }
 }
 
@@ -90,7 +112,7 @@ alloc_page ()
   for (size_t i = 0; i < region_count; i++)
     {
       struct power_of_two_region *region = &regions[i];
-      if (!region->in_kernel_use)
+      if (!region->in_kernel_use && !region->in_user_use)
         {
           region->in_kernel_use = true;
           region->for_pages = true;
@@ -129,7 +151,8 @@ kmem_alloc (size_t size)
     {
       struct power_of_two_region *region = &regions[i];
       size_t region_size = 1ul << region->size_bits;
-      if (!region->in_kernel_use && !region->for_pages && region_size >= size)
+      if (!region->in_kernel_use && !region->in_user_use && !region->for_pages
+          && region_size >= size)
         {
           region->in_kernel_use = true;
           region->for_pages = false;

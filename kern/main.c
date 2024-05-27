@@ -15,7 +15,7 @@ kernel_main ()
   if (get_initrd_info (&initrd, &initrd_size))
     {
       printf ("Initrd found at %p, size %zu\n", initrd, initrd_size);
-      init_tcbs (initrd);
+      create_init_tcb (initrd);
       schedule ();
     }
   else

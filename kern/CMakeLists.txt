@@ -1,6 +1,7 @@
 add_executable(untitled_bare_metal
   main.c
   alloc.c
+  boot.c
   debug.c
   elf.c
   ipc.c
