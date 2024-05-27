@@ -11,14 +11,14 @@ enum
 
 enum object_method_bases
 {
-  tcb_methods = 0x1000,
-  frame_methods = 0x2000,
-  pml4_methods = 0x3000,
-  pdpt_methods = 0x4000,
-  pd_methods = 0x5000,
-  pt_methods = 0x6000,
-  cnode_methods = 0x7000,
-  untyped_methods = 0x8000,
+  tcb_base = 0x1000,
+  frame_base = 0x2000,
+  pml4_base = 0x3000,
+  pdpt_base = 0x4000,
+  pd_base = 0x5000,
+  pt_base = 0x6000,
+  cnode_base = 0x7000,
+  untyped_base = 0x8000,
 };
 
 static inline message_info_t

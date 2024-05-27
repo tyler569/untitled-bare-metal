@@ -1,5 +1,5 @@
+#include "spinlock.h"
 #include "stdio.h"
-#include "sys/spinlock.h"
 #include "x86_64.h"
 
 void

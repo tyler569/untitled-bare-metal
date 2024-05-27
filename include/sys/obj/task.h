@@ -3,9 +3,9 @@
 #include "assert.h"
 #include "elf.h"
 #include "list.h"
+#include "spinlock.h"
 #include "sys/cdefs.h"
 #include "sys/ipc.h"
-#include "sys/spinlock.h"
 #include "sys/types.h"
 
 #define MAX_PRIORITY 254
@@ -23,7 +23,7 @@ enum task_state
 
 enum task_methods
 {
-  TCB_CONFIGURE = tcb_methods,
-  TCB_RESUME,
-  TCB_SET_PRIORITY,
+  tcb_configure = tcb_base,
+  tcb_resume,
+  tcb_set_prio,
 };

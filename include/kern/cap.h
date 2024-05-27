@@ -1,5 +1,7 @@
 #pragma once
 
+#include "assert.h"
+#include "sys/syscall.h"
 #include "sys/types.h"
 
 // clang-format off
@@ -213,8 +215,8 @@ cap_frame_new (uintptr_t frame_phy)
   return cap;
 }
 
-static inline cap_t
-lookup_cap (cap_t cspace_root, word_t index, word_t depth)
+static inline exception_t
+lookup_cap (cap_t cspace_root, word_t index, word_t depth, cap_t *cap)
 {
   assert (depth == 64); // for now
   assert (cap_type (cspace_root) == CAP_CNODE);
@@ -223,5 +225,6 @@ lookup_cap (cap_t cspace_root, word_t index, word_t depth)
   size_t length = 1 << cspace_root.size_bits;
   assert (index < length);
 
-  return cte[index].cap;
+  *cap = cte[index].cap;
+  return no_error;
 }

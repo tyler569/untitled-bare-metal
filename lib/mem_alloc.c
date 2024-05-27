@@ -1,8 +1,8 @@
 #include "assert.h"
 #include "kern/arch.h"
+#include "slab.h"
 #include "sys/cdefs.h"
 #include "sys/mem.h"
-#include "sys/slab.h"
 
 #define PAGE_SIZE 4096
 

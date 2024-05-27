@@ -104,14 +104,22 @@ int
 invoke_tcb_method ()
 {
   cptr_t target_cptr = get_extra_cap (0);
-  cap_t target = lookup_cap (this_task->cspace_root, target_cptr, 64);
-  struct task *t = cap_ptr (target);
+  cap_t tcb;
+  exception_t status = lookup_cap (this_task->cspace_root, target_cptr, 64, &tcb);
 
-  assert (target.type == CAP_TCB);
+  if (status != no_error)
+	{
+	  return_ipc_error (status, 0);
+	  return 1;
+	}
+
+  struct task *t = cap_ptr (tcb);
+
+  assert (tcb.type == CAP_TCB);
 
   switch (get_ipc_label ())
     {
-    case TCB_RESUME:
+    case tcb_resume:
       make_task_runnable (t);
       break;
     default:

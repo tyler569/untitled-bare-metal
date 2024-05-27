@@ -18,6 +18,11 @@ struct physical_extent
   size_t len;
 };
 
+enum
+{
+  MAX_UNTYPED_ROOT_CAPS = 128,
+};
+
 #define PTE_PRESENT (1 << 0)
 #define PTE_WRITE (1 << 1)
 #define PTE_USER (1 << 2)

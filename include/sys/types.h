@@ -9,3 +9,4 @@ typedef uint64_t message_info_t;
 typedef uint64_t word_t;
 typedef uint64_t cptr_t;
 typedef uint64_t badge_t;
+typedef uint64_t exception_t;

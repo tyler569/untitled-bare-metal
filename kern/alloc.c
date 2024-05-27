@@ -4,7 +4,6 @@
 #include "kern/mem.h"
 #include "stdio.h"
 #include "stdlib.h"
-#include "sys/spinlock.h"
 
 #define MAX_EXTENTS 32
 #define MAX_REGIONS 64

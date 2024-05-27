@@ -1,11 +1,12 @@
 add_executable(untitled_bare_metal
   main.c
+  alloc.c
   debug.c
   elf.c
   ipc.c
-  page_alloc.c
   syscall.c
-  task.c
+  obj/task.c
+  obj/untyped.c
   ../lib/hexdump.c
   ../lib/print.c
   ../lib/sort.c
