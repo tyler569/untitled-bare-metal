@@ -1,8 +1,8 @@
 #include "kern/obj/tcb.h"
 #include "assert.h"
-#include "kern/ipc.h"
 #include "kern/mem.h"
 #include "kern/per_cpu.h"
+#include "kern/syscall.h"
 #include "string.h"
 #include "sys/syscall.h"
 
@@ -101,24 +101,17 @@ make_tcb_runnable (struct tcb *t)
 }
 
 int
-invoke_tcb_method ()
+invoke_tcb_method (cap_t tcb, word_t method)
 {
-  cptr_t target_cptr = get_extra_cap (0);
-  cap_t tcb;
-  exception_t status
-      = lookup_cap (this_tcb->cspace_root, target_cptr, 64, &tcb);
-
-  if (status != no_error)
+  if (tcb.type != cap_tcb)
     {
-      return_ipc_error (status, 0);
+      return_ipc_error (invalid_argument, 0);
       return 1;
     }
 
   struct tcb *t = cap_ptr (tcb);
 
-  assert (tcb.type == CAP_TCB);
-
-  switch (get_ipc_label ())
+  switch (method)
     {
     case tcb_resume:
       make_tcb_runnable (t);

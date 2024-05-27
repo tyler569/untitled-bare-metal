@@ -42,6 +42,6 @@ void schedule ();
 void send_message (struct tcb *receiver, uintptr_t message);
 void receive_message ();
 
-int invoke_tcb_method ();
+int invoke_tcb_method (cap_t tcb, word_t method);
 
 #define this_tcb (this_cpu->current_tcb)

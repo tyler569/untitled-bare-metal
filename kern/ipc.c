@@ -60,9 +60,3 @@ set_ipc_info (message_info_t tag)
   if (this_tcb && this_tcb->ipc_buffer)
     this_tcb->ipc_buffer->tag = tag;
 }
-
-void
-return_ipc_error (word_t err, word_t registers)
-{
-  set_ipc_info (new_message_info (err, 0, registers));
-}

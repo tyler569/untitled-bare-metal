@@ -29,19 +29,19 @@ set_bits_pointer (word_t *bits, void *ptr)
 
 enum capability_type : unsigned char
 {
-  CAP_NULL,
-  CAP_UNTYPED,
-  CAP_ENDPOINT,
-  CAP_CNODE,
-  CAP_VSPACE,
-  CAP_TCB,
+  cap_null,
+  cap_untyped,
+  cap_endpoint,
+  cap_cnode,
+  cap_vspace,
+  cap_tcb,
 
-  CAP_PML4,
-  CAP_PDPT,
-  CAP_PD,
-  CAP_PT,
+  cap_pml4,
+  cap_pdpt,
+  cap_pd,
+  cap_pt,
 
-  CAP_FRAME,
+  cap_frame,
 };
 
 union capability
@@ -133,21 +133,21 @@ static_assert (sizeof (cte_t) == 32, "cte_t size is not 32 bytes");
 static inline cap_t
 cap_null_new ()
 {
-  cap_t cap = { .type = CAP_NULL };
+  cap_t cap = { .type = cap_null };
   return cap;
 }
 
 static inline cap_t
 cap_untyped_new (uintptr_t paddr, uintptr_t size_bits)
 {
-  cap_t cap = { .type = CAP_UNTYPED, .size_bits = size_bits, .ptr = paddr };
+  cap_t cap = { .type = cap_untyped, .size_bits = size_bits, .ptr = paddr };
   return cap;
 }
 
 static inline cap_t
 cap_endpoint_new (void *endpoint, uintptr_t badge)
 {
-  cap_t cap = { .type = CAP_ENDPOINT, .badge = badge };
+  cap_t cap = { .type = cap_endpoint, .badge = badge };
   cap_set_ptr (&cap, endpoint);
   return cap;
 }
@@ -156,21 +156,21 @@ static inline cap_t
 cap_cnode_new (void *cnode, uintptr_t size_bits)
 {
   cap_t cap
-      = { .type = CAP_CNODE, .size_bits = size_bits, .ptr = (uintptr_t)cnode };
+      = { .type = cap_cnode, .size_bits = size_bits, .ptr = (uintptr_t)cnode };
   return cap;
 }
 
 static inline cap_t
 cap_vspace_new (uintptr_t root_phy)
 {
-  cap_t cap = { .type = CAP_VSPACE, .badge = root_phy };
+  cap_t cap = { .type = cap_vspace, .badge = root_phy };
   return cap;
 }
 
 static inline cap_t
 cap_tcb_new (void *tcb)
 {
-  cap_t cap = { .type = CAP_TCB };
+  cap_t cap = { .type = cap_tcb };
   cap_set_ptr (&cap, tcb);
   return cap;
 }
@@ -178,7 +178,7 @@ cap_tcb_new (void *tcb)
 static inline cap_t
 cap_pml4_new (uintptr_t pml4_phy)
 {
-  cap_t cap = { .type = CAP_PML4 };
+  cap_t cap = { .type = cap_pml4 };
   cap_set_ptr (&cap, (void *)pml4_phy);
   return cap;
 }
@@ -186,7 +186,7 @@ cap_pml4_new (uintptr_t pml4_phy)
 static inline cap_t
 cap_pdpt_new (uintptr_t pdpt_phy)
 {
-  cap_t cap = { .type = CAP_PDPT };
+  cap_t cap = { .type = cap_pdpt };
   cap_set_ptr (&cap, (void *)pdpt_phy);
   return cap;
 }
@@ -194,7 +194,7 @@ cap_pdpt_new (uintptr_t pdpt_phy)
 static inline cap_t
 cap_pd_new (uintptr_t pd_phy)
 {
-  cap_t cap = { .type = CAP_PD };
+  cap_t cap = { .type = cap_pd };
   cap_set_ptr (&cap, (void *)pd_phy);
   return cap;
 }
@@ -202,7 +202,7 @@ cap_pd_new (uintptr_t pd_phy)
 static inline cap_t
 cap_pt_new (uintptr_t pt_phy)
 {
-  cap_t cap = { .type = CAP_PT };
+  cap_t cap = { .type = cap_pt };
   cap_set_ptr (&cap, (void *)pt_phy);
   return cap;
 }
@@ -210,7 +210,7 @@ cap_pt_new (uintptr_t pt_phy)
 static inline cap_t
 cap_frame_new (uintptr_t frame_phy)
 {
-  cap_t cap = { .type = CAP_FRAME };
+  cap_t cap = { .type = cap_frame };
   cap_set_ptr (&cap, (void *)frame_phy);
   return cap;
 }
@@ -219,7 +219,7 @@ static inline exception_t
 lookup_cap (cap_t cspace_root, word_t index, word_t depth, cap_t *cap)
 {
   assert (depth == 64); // for now
-  assert (cap_type (cspace_root) == CAP_CNODE);
+  assert (cap_type (cspace_root) == cap_cnode);
 
   cte_t *cte = (cte_t *)cap_ptr (cspace_root);
   size_t length = 1 << cspace_root.size_bits;

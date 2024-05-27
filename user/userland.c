@@ -2,23 +2,13 @@
 #include "stdio.h"
 #include "sys/cdefs.h"
 #include "sys/ipc.h"
+#include "sys/syscall.h"
 
 static uintptr_t
 _syscall0 (int syscall_num)
 {
   uintptr_t ret;
   asm volatile ("syscall" : "=a"(ret) : "0"(syscall_num) : "rcx", "r11");
-  return ret;
-}
-
-static uintptr_t
-_syscall1 (int syscall_num, uintptr_t a1)
-{
-  uintptr_t ret;
-  asm volatile ("syscall"
-                : "=a"(ret)
-                : "0"(syscall_num), "D"(a1)
-                : "rcx", "r11");
   return ret;
 }
 
@@ -51,7 +41,14 @@ void
 send (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall1 (2, cap);
+  _syscall2 (sys_send, cap, info);
+}
+
+void
+call (cptr_t cap, message_info_t info)
+{
+  __ipc_buffer->tag = info;
+  _syscall2 (sys_call, cap, info);
 }
 
 [[noreturn]] static inline void
@@ -72,7 +69,12 @@ write (FILE *, const void *str, unsigned long len)
 _start (uintptr_t arg)
 {
   __ipc_buffer = (void *)arg;
-  printf ("Hello, World from userland; arg: %lu!\n", arg);
+  printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
+
+  // Send a message to the kernel
+  message_info_t info = new_message_info (0, 0, 0);
+  set_mr (0, 0xdeadbeef);
+  call (0, info);
 
   exit ();
 }
