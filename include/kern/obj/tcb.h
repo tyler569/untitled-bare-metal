@@ -25,7 +25,7 @@ struct tcb
   frame_t *current_user_frame;
 };
 
-void init_tcbs ();
+void init_tcbs (void *init_elf);
 
 struct tcb *create_tcb (struct tcb *);
 struct tcb *create_tcb_from_elf_in_this_vm (struct tcb *,

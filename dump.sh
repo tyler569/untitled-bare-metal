@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-file="${1-build/kernel/untitled_bare_metal}"
+file="${1-build/kern/untitled_bare_metal}"
 objdump_binary="llvm-objdump"
 format=""
 

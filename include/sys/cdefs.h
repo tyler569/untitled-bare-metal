@@ -37,3 +37,8 @@
   ((type *)((uintptr_t)(ptr) - offsetof (type, member)))
 
 #define UNREACHABLE() __builtin_unreachable ()
+
+#define BIT(x) (1ULL << (x))
+
+#define ALIGN_UP_POW2_BITS (x) (64 - __builtin_clzll (x - 1))
+#define ALIGN_UP_POW2(x) BIT (ALIGN_UP_POW2_BITS (x))

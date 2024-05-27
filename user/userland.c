@@ -1,5 +1,6 @@
 #include "stdint.h"
 #include "stdio.h"
+#include "sys/bootinfo.h"
 #include "sys/cdefs.h"
 #include "sys/ipc.h"
 #include "sys/syscall.h"
@@ -40,14 +41,12 @@ get_mr (word_t i)
 void
 send (cptr_t cap, message_info_t info)
 {
-  __ipc_buffer->tag = info;
   _syscall2 (sys_send, cap, info);
 }
 
 void
 call (cptr_t cap, message_info_t info)
 {
-  __ipc_buffer->tag = info;
   _syscall2 (sys_call, cap, info);
 }
 
@@ -66,15 +65,24 @@ write (FILE *, const void *str, unsigned long len)
 }
 
 [[noreturn]] USED int
-_start (uintptr_t arg)
+c_start (uintptr_t arg)
 {
   __ipc_buffer = (void *)arg;
   printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
 
   // Send a message to the kernel
-  message_info_t info = new_message_info (0, 0, 0);
-  set_mr (0, 0xdeadbeef);
-  call (0, info);
+  message_info_t info = new_message_info (tcb_echo, 0, 0);
+  call (init_cap_init_tcb, info);
 
   exit ();
+}
+
+#define PAGE_SIZE 4096
+uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
+
+[[noreturn]] USED __attribute__ ((naked)) void
+_start ()
+{
+  asm volatile ("movq %0, %%rsp" ::"r"(stack + sizeof (stack)));
+  asm volatile ("jmp c_start");
 }

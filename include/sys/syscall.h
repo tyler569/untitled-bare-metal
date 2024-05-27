@@ -59,3 +59,7 @@ enum object_method_bases
   untyped_base = untyped_object * 0x1000,
   endpoint_base = endpoint_object * 0x1000,
 };
+
+#include "sys/obj/cnode.h"
+#include "sys/obj/tcb.h"
+#include "sys/obj/untyped.h"

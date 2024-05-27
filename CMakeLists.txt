@@ -38,6 +38,7 @@ add_executable(userland
   lib/print.c
   lib/string.c
 )
+define_file_basename_for_sources(userland)
 
 add_subdirectory(kern)
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assert.h"
+#include "sys/cdefs.h"
 #include "sys/syscall.h"
 #include "sys/types.h"
 
@@ -49,11 +50,11 @@ union capability
   word_t words[2];
   struct
   {
-    word_t type : 5;
-    word_t rights : 5;
-    word_t size_bits : 6;
-    word_t ptr : 46;
     word_t reserved : 2;
+    word_t ptr : 46;
+    word_t size_bits : 6;
+    word_t rights : 5;
+    word_t type : 5;
     word_t badge;
   };
 };
@@ -72,6 +73,12 @@ static inline word_t
 cap_type (cap_t cap)
 {
   return cap.type;
+}
+
+static inline word_t
+cap_size (cap_t cap)
+{
+  return BIT (cap.size_bits);
 }
 
 static inline void
@@ -140,7 +147,8 @@ cap_null_new ()
 static inline cap_t
 cap_untyped_new (uintptr_t paddr, uintptr_t size_bits)
 {
-  cap_t cap = { .type = cap_untyped, .size_bits = size_bits, .ptr = paddr };
+  cap_t cap = { .type = cap_untyped, .size_bits = size_bits };
+  cap_set_ptr (&cap, (void *)paddr);
   return cap;
 }
 
@@ -155,8 +163,8 @@ cap_endpoint_new (void *endpoint, uintptr_t badge)
 static inline cap_t
 cap_cnode_new (void *cnode, uintptr_t size_bits)
 {
-  cap_t cap
-      = { .type = cap_cnode, .size_bits = size_bits, .ptr = (uintptr_t)cnode };
+  cap_t cap = { .type = cap_cnode, .size_bits = size_bits };
+  cap_set_ptr (&cap, cnode);
   return cap;
 }
 
@@ -221,8 +229,8 @@ lookup_cap (cap_t cspace_root, word_t index, word_t depth, cap_t *cap)
   assert (depth == 64); // for now
   assert (cap_type (cspace_root) == cap_cnode);
 
-  cte_t *cte = (cte_t *)cap_ptr (cspace_root);
-  size_t length = 1 << cspace_root.size_bits;
+  cte_t *cte = cap_ptr (cspace_root);
+  size_t length = cap_size (cspace_root);
   assert (index < length);
 
   *cap = cte[index].cap;

@@ -43,7 +43,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         cptr_t cptr = (cptr_t)a0;
         message_info_t info = (message_info_t)a1;
 
-        printf ("Call (num: %i, cptr: %#lx, info: %#lx)\n", syscall_number,
+        printf ("Call (num: %i, cptr: %#lx, info: %#lx) ", syscall_number,
                 cptr, info);
 
         cap_t cap;
@@ -51,6 +51,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
             = lookup_cap (this_tcb->cspace_root, cptr, 64, &cap);
         if (status != no_error)
           {
+            printf ("-> Error\n");
             return_ipc_error (status, 0);
             return 1;
           }
@@ -58,15 +59,15 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         switch (cap.type)
           {
           case cap_untyped:
-            printf ("  -> Untyped\n");
+            printf ("-> Untyped\n");
             invoke_untyped_cap (cap, get_message_label (info));
             break;
           case cap_tcb:
-            printf ("  -> TCB\n");
+            printf ("-> TCB\n");
             invoke_tcb_method (cap, get_message_label (info));
             break;
           default:
-            printf ("  -> Unknown\n");
+            printf ("-> Unknown\n");
             return_ipc_error (invalid_capability, 0);
             return 1;
           }

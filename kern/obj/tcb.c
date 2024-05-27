@@ -1,18 +1,43 @@
 #include "kern/obj/tcb.h"
 #include "assert.h"
+#include "kern/cap.h"
 #include "kern/mem.h"
 #include "kern/per_cpu.h"
+#include "kern/size.h"
 #include "kern/syscall.h"
+#include "stdio.h"
 #include "string.h"
+#include "sys/bootinfo.h"
 #include "sys/syscall.h"
+
+static_assert (sizeof (struct tcb) <= BIT (tcb_size_bits),
+               "tcb size is too large");
 
 // struct list_head runnable_tcbs[MAX_PRIORITY];
 LIST_HEAD (runnable_tcbs);
 spin_lock_t runnable_tcbs_lock;
 
+struct tcb init_tcb;
+cte_t init_cnode[BIT (INIT_CNODE_SIZE_BITS)];
+
 void
-init_tcbs ()
+init_tcbs (void *init_elf)
 {
+  create_tcb_from_elf_in_this_vm (&init_tcb, init_elf);
+
+  printf ("initial thread cnode is %p\n", init_cnode);
+
+  cap_t init_cnode_cap = cap_cnode_new (init_cnode, INIT_CNODE_SIZE_BITS);
+
+  init_cnode[1].cap = cap_tcb_new (&init_tcb);
+  init_cnode[2].cap = init_cnode_cap;
+  init_cnode[3].cap = cap_vspace_new (get_vm_root ());
+
+  init_tcb.cspace_root = init_cnode_cap;
+
+  // create initial vspace
+
+  make_tcb_runnable (&init_tcb);
 }
 
 struct tcb *
@@ -46,12 +71,7 @@ create_tcb_from_elf_in_this_vm (struct tcb *t, struct elf_ehdr *elf)
 
   elf_load (elf);
 
-  uintptr_t stack = 0x7ffffff00000;
-
-  add_vm_mapping (t->vm_root, stack, alloc_page (),
-                  PTE_PRESENT | PTE_USER | PTE_WRITE);
-
-  new_user_frame (&t->saved_state, elf_entry (elf), stack + PAGE_SIZE);
+  new_user_frame (&t->saved_state, elf_entry (elf), 0);
 
   uintptr_t ipc_buffer = 0x7fffffe00000;
   uintptr_t ipc_buffer_page = alloc_page ();
@@ -115,6 +135,9 @@ invoke_tcb_method (cap_t tcb, word_t method)
     {
     case tcb_resume:
       make_tcb_runnable (t);
+      break;
+    case tcb_echo:
+      printf ("echo\n");
       break;
     default:
       return_ipc_error (invalid_argument, 0);

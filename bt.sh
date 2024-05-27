@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-file="${1-build/kernel/untitled_bare_metal}"
+file="${1-build/kern/untitled_bare_metal}"
 addr2line_binary="llvm-addr2line"
 
 if [ ! -f "$file" ]; then

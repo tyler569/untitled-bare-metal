@@ -26,4 +26,5 @@ enum tcb_methods
   tcb_configure = tcb_base,
   tcb_resume,
   tcb_set_prio,
+  tcb_echo,
 };
