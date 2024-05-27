@@ -9,18 +9,6 @@ enum
   MESSAGE_MAX_LENGTH = 512 - 5 - MESSAGE_MAX_EXTRA_CAPS,
 };
 
-enum object_method_bases
-{
-  tcb_base = 0x1000,
-  frame_base = 0x2000,
-  pml4_base = 0x3000,
-  pdpt_base = 0x4000,
-  pd_base = 0x5000,
-  pt_base = 0x6000,
-  cnode_base = 0x7000,
-  untyped_base = 0x8000,
-};
-
 static inline message_info_t
 new_message_info (word_t label, word_t extra_caps, word_t length)
 {

@@ -105,13 +105,14 @@ invoke_tcb_method ()
 {
   cptr_t target_cptr = get_extra_cap (0);
   cap_t tcb;
-  exception_t status = lookup_cap (this_task->cspace_root, target_cptr, 64, &tcb);
+  exception_t status
+      = lookup_cap (this_task->cspace_root, target_cptr, 64, &tcb);
 
   if (status != no_error)
-	{
-	  return_ipc_error (status, 0);
-	  return 1;
-	}
+    {
+      return_ipc_error (status, 0);
+      return 1;
+    }
 
   struct task *t = cap_ptr (tcb);
 

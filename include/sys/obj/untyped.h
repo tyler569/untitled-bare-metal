@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sys/ipc.h"
+#include "sys/syscall.h"
 
 enum ipc_methods
 {

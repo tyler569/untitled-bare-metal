@@ -31,3 +31,31 @@ enum error_number
   revoke_first,
   not_enough_memory,
 };
+
+enum object_type
+{
+  null_object,
+  tcb_object,
+  cnode_object,
+  frame_object,
+  pml4_object,
+  pdpt_object,
+  pd_object,
+  pt_object,
+  untyped_object,
+  endpoint_object,
+};
+
+enum object_method_bases
+{
+  null_base = null_object * 0x1000,
+  tcb_base = tcb_object * 0x1000,
+  cnode_base = cnode_object * 0x1000,
+  frame_base = frame_object * 0x1000,
+  pml4_base = pml4_object * 0x1000,
+  pdpt_base = pdpt_object * 0x1000,
+  pd_base = pd_object * 0x1000,
+  pt_base = pt_object * 0x1000,
+  untyped_base = untyped_object * 0x1000,
+  endpoint_base = endpoint_object * 0x1000,
+};
