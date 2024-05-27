@@ -1,7 +1,7 @@
 #include "assert.h"
 #include "kern/arch.h"
+#include "kern/kernel.h"
 #include "kern/mem.h"
-#include "kernel.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "sys/spinlock.h"

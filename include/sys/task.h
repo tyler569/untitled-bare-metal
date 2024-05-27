@@ -2,16 +2,11 @@
 
 #include "assert.h"
 #include "elf.h"
-#include "kern/arch.h"
 #include "list.h"
 #include "sys/cdefs.h"
 #include "sys/ipc.h"
 #include "sys/spinlock.h"
 #include "sys/types.h"
-
-#ifdef __x86_64__
-#include "arch/x86_64/exports.h"
-#endif
 
 #define MAX_PRIORITY 254
 

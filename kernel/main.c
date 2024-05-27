@@ -1,5 +1,5 @@
+#include "kern/kernel.h"
 #include "kern/task.h"
-#include "kernel.h"
 #include "rng.h"
 #include "stdio.h"
 

@@ -1,5 +1,5 @@
 #include "kern/arch.h"
-#include "kernel.h"
+#include "kern/kernel.h"
 #include "limine.h"
 #include "list.h"
 #include "stdio.h"

@@ -1,5 +1,5 @@
+#include "kern/kernel.h"
 #include "kern/mem.h"
-#include "kernel.h"
 #include "stdatomic.h"
 #include "string.h"
 #include "sys/cdefs.h"

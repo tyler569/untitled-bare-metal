@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assert.h"
+#include "kern/arch.h"
 #include "kern/cap.h"
 #include "sys/task.h"
 

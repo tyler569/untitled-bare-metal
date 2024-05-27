@@ -1,5 +1,5 @@
+#include "kern/kernel.h"
 #include "kern/mem.h"
-#include "kernel.h"
 #include "sys/mman.h"
 #include <stdio.h>
 #include <stdlib.h>
