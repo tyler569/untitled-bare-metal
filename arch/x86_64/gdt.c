@@ -10,14 +10,8 @@
 #define TSS 0x89
 #define LONG_MODE 0x20
 
-#define DESCRIPTOR(a, g)                                                      \
-  {                                                                           \
-    .access = a, .granularity = g                                             \
-  }
-#define TSS_DESCRIPTOR_LOW()                                                  \
-  {                                                                           \
-    .access = TSS, .limit_low = sizeof (tss_t) - 1                            \
-  }
+#define DESCRIPTOR(a, g) { .access = a, .granularity = g }
+#define TSS_DESCRIPTOR_LOW() { .access = TSS, .limit_low = sizeof (tss_t) - 1 }
 #define TSS_DESCRIPTOR_HIGH()                                                 \
   {                                                                           \
   }

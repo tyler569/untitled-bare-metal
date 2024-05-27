@@ -1,7 +1,8 @@
 #pragma once
 
-#include "sys/task.h"
+#include "assert.h"
 #include "kern/cap.h"
+#include "sys/task.h"
 
 struct task
 {

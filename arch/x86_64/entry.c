@@ -1,8 +1,8 @@
+#include "kern/arch.h"
+#include "kern/mem.h"
 #include "kernel.h"
 #include "limine.h"
-#include "kern/arch.h"
 #include "sys/cdefs.h"
-#include "kern/mem.h"
 #include "x86_64.h"
 
 LIMINE_BASE_REVISION (1)

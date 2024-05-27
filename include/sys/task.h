@@ -2,8 +2,8 @@
 
 #include "assert.h"
 #include "elf.h"
-#include "list.h"
 #include "kern/arch.h"
+#include "list.h"
 #include "sys/cdefs.h"
 #include "sys/ipc.h"
 #include "sys/spinlock.h"

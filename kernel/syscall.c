@@ -1,7 +1,7 @@
 #include "kern/syscall.h"
-#include "stdio.h"
 #include "kern/per_cpu.h"
 #include "kern/task.h"
+#include "stdio.h"
 
 uintptr_t
 do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
@@ -27,10 +27,10 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       // printf ("  -> \"%.*s\"\n", (int)a1, (const char *)a0);
       write_debug (nullptr, (const void *)a0, a1);
       break;
-	case sys_send:
-	case sys_call:
-	case sys_reply:
-	case sys_recv:
+    case sys_send:
+    case sys_call:
+    case sys_reply:
+    case sys_recv:
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
 

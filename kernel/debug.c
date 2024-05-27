@@ -1,13 +1,13 @@
 #include "assert.h"
 #include "chacha.h"
+#include "kern/arch.h"
+#include "kern/mem.h"
 #include "kernel.h"
 #include "rng.h"
 #include "stdarg.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "kern/arch.h"
-#include "kern/mem.h"
 
 void hexdump (const void *data, size_t len);
 
@@ -26,9 +26,10 @@ panic (const char *msg, ...)
   halt_forever ();
 }
 
-int int_cmp (const void *a, const void *b)
+int
+int_cmp (const void *a, const void *b)
 {
-  return *(int *) a - *(int *) b;
+  return *(int *)a - *(int *)b;
 }
 
 void
@@ -39,14 +40,14 @@ run_sort_test ()
 
   printf ("    Before: ");
   for (size_t i = 0; i < len; i++)
-	printf ("%d ", data[i]);
+    printf ("%d ", data[i]);
   printf ("\n");
 
   qsort (data, len, sizeof (data[0]), int_cmp);
 
   printf ("    After:  ");
   for (size_t i = 0; i < len; i++)
-	printf ("%d ", data[i]);
+    printf ("%d ", data[i]);
   printf ("\n");
 }
 

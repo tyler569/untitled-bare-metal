@@ -1,11 +1,11 @@
-#include "sys/cdefs.h"
 #include "kern/mem.h"
+#include "sys/cdefs.h"
 #include "x86_64.h"
 
 #define TYPE_INT 0x8E
 #define TYPE_USER_INT 0x60 | 0x8E
 
-#define INT_STACK_SIZE (PAGE_SIZE*2)
+#define INT_STACK_SIZE (PAGE_SIZE * 2)
 
 struct PACKED idt_entry
 {

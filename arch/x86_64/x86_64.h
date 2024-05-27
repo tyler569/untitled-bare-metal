@@ -3,11 +3,11 @@
 #ifndef __ASSEMBLER__
 
 #include "arch/x86_64/exports.h"
+#include "kern/per_cpu.h"
+#include "kern/task.h"
 #include "list.h"
 #include "stddef.h"
 #include "stdint.h"
-#include "kern/per_cpu.h"
-#include "kern/task.h"
 
 #endif // __ASSEMBLER__
 

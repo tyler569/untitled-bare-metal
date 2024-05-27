@@ -1,6 +1,6 @@
 #include "kern/ipc.h"
-#include "kern/task.h"
 #include "kern/per_cpu.h"
+#include "kern/task.h"
 
 word_t
 get_ipc_info ()
@@ -42,9 +42,9 @@ word_t
 get_extra_cap (word_t i)
 {
   if (this_task && this_task->ipc_buffer)
-	return this_task->ipc_buffer->caps_or_badges[i];
+    return this_task->ipc_buffer->caps_or_badges[i];
   else
-	return 0;
+    return 0;
 }
 
 void

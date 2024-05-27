@@ -1,9 +1,9 @@
 #include "assert.h"
+#include "kern/arch.h"
+#include "kern/mem.h"
 #include "kernel.h"
 #include "stdio.h"
 #include "stdlib.h"
-#include "kern/arch.h"
-#include "kern/mem.h"
 #include "sys/spinlock.h"
 
 #define MAX_EXTENTS 32
@@ -24,32 +24,34 @@ struct power_of_two_region
 struct power_of_two_region regions[MAX_REGIONS];
 size_t region_count = 0;
 
-void allocate_aligned_regions (struct physical_extent *extent)
+void
+allocate_aligned_regions (struct physical_extent *extent)
 {
   size_t len = extent->len;
   uintptr_t acc = extent->start;
   while (len > 0)
-	{
-	  // find the largest power of 2 that fits in len
-	  int zeros = __builtin_clzll (len);
-	  size_t max_len = 1 << (63 - zeros);
+    {
+      // find the largest power of 2 that fits in len
+      int zeros = __builtin_clzll (len);
+      size_t max_len = 1 << (63 - zeros);
 
-	  assert (max_len <= len);
-	  assert (max_len >> 12 > 0);
+      assert (max_len <= len);
+      assert (max_len >> 12 > 0);
 
-	  printf ("  %p: %zu pages\n", (void *)acc, max_len >> 12);
+      printf ("  %p: %zu pages\n", (void *)acc, max_len >> 12);
 
       regions[region_count].addr = acc;
-	  regions[region_count].size_bits = 63 - zeros - 12;
-	  region_count++;
+      regions[region_count].size_bits = 63 - zeros - 12;
+      region_count++;
 
-	  acc += max_len;
-	  len -= max_len;
-	}
+      acc += max_len;
+      len -= max_len;
+    }
 }
 
-int compare_power_of_two_regions (const struct power_of_two_region *a,
-								  const struct power_of_two_region *b)
+int
+compare_power_of_two_regions (const struct power_of_two_region *a,
+                              const struct power_of_two_region *b)
 {
   return a->size_bits - b->size_bits;
 }
@@ -60,80 +62,82 @@ init_page_mmap ()
   get_physical_extents (extents, &extent_count);
 
   for (size_t i = 0; i < extent_count; i++)
-	allocate_aligned_regions (&extents[i]);
+    allocate_aligned_regions (&extents[i]);
 
   qsort (regions, region_count, sizeof (struct power_of_two_region),
-		 (int (*)(const void *, const void *))compare_power_of_two_regions);
+         (int (*) (const void *, const void *))compare_power_of_two_regions);
 }
 
-uintptr_t alloc_page ()
+uintptr_t
+alloc_page ()
 {
   // if there is already a kernel region being used to allocate pages, use it
   for (size_t i = 0; i < region_count; i++)
-	{
-	  struct power_of_two_region *region = &regions[i];
-	  size_t size = PAGE_SIZE << region->size_bits;
-	  if (region->in_kernel_use && region->for_pages &&
-		  region->watermark < size - PAGE_SIZE)
-		{
-		  uintptr_t addr = region->addr + region->watermark;
-		  region->watermark += PAGE_SIZE;
-		  // printf ("Allocating page at %p\n", (void *)addr);
-		  return addr;
-		}
-	}
+    {
+      struct power_of_two_region *region = &regions[i];
+      size_t size = PAGE_SIZE << region->size_bits;
+      if (region->in_kernel_use && region->for_pages
+          && region->watermark < size - PAGE_SIZE)
+        {
+          uintptr_t addr = region->addr + region->watermark;
+          region->watermark += PAGE_SIZE;
+          // printf ("Allocating page at %p\n", (void *)addr);
+          return addr;
+        }
+    }
 
   // otherwise, find a region that is not in use and use it, prefering
   // the smallest available region
   for (size_t i = 0; i < region_count; i++)
-	{
-	  struct power_of_two_region *region = &regions[i];
-	  if (!region->in_kernel_use)
-		{
-		  region->in_kernel_use = true;
-		  region->for_pages = true;
-		  region->watermark = PAGE_SIZE;
-		  // printf ("Allocating page at %p\n", (void *)region->addr);
-		  return region->addr;
-		}
-	}
+    {
+      struct power_of_two_region *region = &regions[i];
+      if (!region->in_kernel_use)
+        {
+          region->in_kernel_use = true;
+          region->for_pages = true;
+          region->watermark = PAGE_SIZE;
+          // printf ("Allocating page at %p\n", (void *)region->addr);
+          return region->addr;
+        }
+    }
 
   assert (0 && "No more pages available");
 }
 
-void *kmem_alloc (size_t size)
+void *
+kmem_alloc (size_t size)
 {
   size = ALIGN_UP (size, 16);
 
   // if there is already a kernel region of sufficient size being used to
   // allocate memory, use it
   for (size_t i = 0; i < region_count; i++)
-	{
-	  struct power_of_two_region *region = &regions[i];
-	  size_t region_size = 1ul << region->size_bits;
-	  if (region->in_kernel_use && !region->for_pages &&
-		  region->watermark < region_size - size)
-		{
-		  uintptr_t addr = region->addr + region->watermark;
-		  region->watermark += size;
-		  return (void *)direct_map_of(addr);
-		}
-	}
+    {
+      struct power_of_two_region *region = &regions[i];
+      size_t region_size = 1ul << region->size_bits;
+      if (region->in_kernel_use && !region->for_pages
+          && region->watermark < region_size - size)
+        {
+          uintptr_t addr = region->addr + region->watermark;
+          region->watermark += size;
+          return (void *)direct_map_of (addr);
+        }
+    }
 
   // otherwise, find a region that is not in use and use it, prefering
   // the smallest available region
   for (size_t i = 0; i < region_count; i++)
-	{
-	  struct power_of_two_region *region = &regions[i];
-	  size_t region_size = 1ul << region->size_bits;
-	  if (!region->in_kernel_use && !region->for_pages && region_size >= size)
-		{
-		  region->in_kernel_use = true;
-		  region->for_pages = false;
-		  region->watermark = size;
-		  return (void *)direct_map_of(region->addr);
-		}
-	}
+    {
+      struct power_of_two_region *region = &regions[i];
+      size_t region_size = 1ul << region->size_bits;
+      if (!region->in_kernel_use && !region->for_pages && region_size >= size)
+        {
+          region->in_kernel_use = true;
+          region->for_pages = false;
+          region->watermark = size;
+          return (void *)direct_map_of (region->addr);
+        }
+    }
 
   return nullptr;
 }

@@ -57,5 +57,3 @@ struct ipc_buffer
   cptr_t receive_index;
   word_t receive_depth;
 };
-
-

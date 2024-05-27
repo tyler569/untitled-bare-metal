@@ -1,8 +1,8 @@
 #include "assert.h"
-#include "stdio.h"
-#include "string.h"
 #include "kern/arch.h"
 #include "kern/mem.h"
+#include "stdio.h"
+#include "string.h"
 #include "x86_64.h"
 
 const char *interrupt_acronyms[]

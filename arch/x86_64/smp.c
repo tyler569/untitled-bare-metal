@@ -1,8 +1,8 @@
+#include "kern/arch.h"
 #include "kernel.h"
 #include "limine.h"
 #include "list.h"
 #include "stdio.h"
-#include "kern/arch.h"
 #include "sys/slab.h"
 #include "x86_64.h"
 
@@ -40,8 +40,8 @@ init_aps ()
 
   for (size_t i = 0; i < resp->cpu_count; i++)
     {
-	  if (resp->cpus[i]->processor_id >= MAX_CPUS)
-		continue;
+      if (resp->cpus[i]->processor_id >= MAX_CPUS)
+        continue;
       if (resp->cpus[i]->lapic_id == resp->bsp_lapic_id)
         continue;
 

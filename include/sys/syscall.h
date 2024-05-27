@@ -31,5 +31,3 @@ enum error_number
   revoke_first,
   not_enough_memory,
 };
-
-

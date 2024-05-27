@@ -1,10 +1,10 @@
+#include "kern/arch.h"
 #include "limits.h"
 #include "stdarg.h"
 #include "stdint.h"
 #include "stdio.h"
 #include "stream.h"
 #include "string.h"
-#include "kern/arch.h"
 #include "sys/cdefs.h"
 
 #define WRITE(data, size)                                                     \

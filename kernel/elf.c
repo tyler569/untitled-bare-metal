@@ -1,9 +1,9 @@
 #include "elf.h"
+#include "kern/arch.h"
+#include "kern/mem.h"
 #include "stdio.h"
 #include "string.h"
-#include "kern/arch.h"
 #include "sys/cdefs.h"
-#include "kern/mem.h"
 
 PURE static size_t
 n_phdrs (struct elf_ehdr *e)

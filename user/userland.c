@@ -47,10 +47,11 @@ get_mr (word_t i)
   return __ipc_buffer->msg[i];
 }
 
-void send(cptr_t cap, message_info_t info)
+void
+send (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall1(2, cap);
+  _syscall1 (2, cap);
 }
 
 [[noreturn]] static inline void

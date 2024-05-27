@@ -1,10 +1,10 @@
 #include "kern/task.h"
 #include "assert.h"
-#include "string.h"
-#include "sys/syscall.h"
 #include "kern/ipc.h"
 #include "kern/mem.h"
 #include "kern/per_cpu.h"
+#include "string.h"
+#include "sys/syscall.h"
 
 // struct list_head runnable_tasks[MAX_PRIORITY];
 LIST_HEAD (runnable_tasks);
@@ -57,7 +57,7 @@ create_task_from_elf_in_this_vm (struct task *t, struct elf_ehdr *elf)
   uintptr_t ipc_buffer_page = alloc_page ();
 
   add_vm_mapping (t->vm_root, ipc_buffer, ipc_buffer_page,
-				  PTE_PRESENT | PTE_USER | PTE_WRITE);
+                  PTE_PRESENT | PTE_USER | PTE_WRITE);
   set_frame_arg (&t->saved_state, 0, ipc_buffer);
 
   t->ipc_buffer_user = ipc_buffer;
@@ -67,7 +67,8 @@ create_task_from_elf_in_this_vm (struct task *t, struct elf_ehdr *elf)
 }
 
 void
-configure_task (struct task *t, cap_t cspace_root, cap_t vspace_root, uintptr_t ipc_buffer)
+configure_task (struct task *t, cap_t cspace_root, cap_t vspace_root,
+                uintptr_t ipc_buffer)
 {
   t->cspace_root = cspace_root;
   t->vspace_root = vspace_root;
@@ -107,17 +108,17 @@ invoke_tcb_method ()
   struct task *t = cap_ptr (target);
 
   assert (target.type == CAP_TCB);
-  
+
   switch (get_ipc_label ())
-	{
-	case TCB_RESUME:
-	  make_task_runnable (t);
-	  break;
-	default:
-	  return_ipc_error (invalid_argument, 0);
-	  return 1;
-	};
-  
+    {
+    case TCB_RESUME:
+      make_task_runnable (t);
+      break;
+    default:
+      return_ipc_error (invalid_argument, 0);
+      return 1;
+    };
+
   return 0;
 }
 
