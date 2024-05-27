@@ -1,10 +1,12 @@
-#include "sys/task.h"
+#include "kern/task.h"
 #include "assert.h"
 #include "string.h"
-#include "sys/mem.h"
-#include "sys/per_cpu.h"
-#include "sys/slab.h"
+#include "sys/syscall.h"
+#include "kern/ipc.h"
+#include "kern/mem.h"
+#include "kern/per_cpu.h"
 
+// struct list_head runnable_tasks[MAX_PRIORITY];
 LIST_HEAD (runnable_tasks);
 spin_lock_t runnable_tasks_lock;
 
@@ -51,7 +53,25 @@ create_task_from_elf_in_this_vm (struct task *t, struct elf_ehdr *elf)
 
   new_user_frame (&t->saved_state, elf_entry (elf), stack + PAGE_SIZE);
 
+  uintptr_t ipc_buffer = 0x7fffffe00000;
+  uintptr_t ipc_buffer_page = alloc_page ();
+
+  add_vm_mapping (t->vm_root, ipc_buffer, ipc_buffer_page,
+				  PTE_PRESENT | PTE_USER | PTE_WRITE);
+  set_frame_arg (&t->saved_state, 0, ipc_buffer);
+
+  t->ipc_buffer_user = ipc_buffer;
+  t->ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buffer_page);
+
   return t;
+}
+
+void
+configure_task (struct task *t, cap_t cspace_root, cap_t vspace_root, uintptr_t ipc_buffer)
+{
+  t->cspace_root = cspace_root;
+  t->vspace_root = vspace_root;
+  t->ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buffer);
 }
 
 void
@@ -77,6 +97,28 @@ make_task_runnable (struct task *t)
   spin_lock (&runnable_tasks_lock);
   append_to_list (&t->runnable_tasks, &runnable_tasks);
   spin_unlock (&runnable_tasks_lock);
+}
+
+int
+invoke_tcb_method ()
+{
+  cptr_t target_cptr = get_extra_cap (0);
+  cap_t target = lookup_cap (this_task->cspace_root, target_cptr, 64);
+  struct task *t = cap_ptr (target);
+
+  assert (target.type == CAP_TCB);
+  
+  switch (get_ipc_label ())
+	{
+	case TCB_RESUME:
+	  make_task_runnable (t);
+	  break;
+	default:
+	  return_ipc_error (invalid_argument, 0);
+	  return 1;
+	};
+  
+  return 0;
 }
 
 void

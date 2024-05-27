@@ -2,7 +2,7 @@
 #include "limine.h"
 #include "list.h"
 #include "stdio.h"
-#include "sys/arch.h"
+#include "kern/arch.h"
 #include "sys/slab.h"
 #include "x86_64.h"
 

@@ -2,8 +2,8 @@
 #include "kernel.h"
 #include "stdio.h"
 #include "stdlib.h"
-#include "sys/arch.h"
-#include "sys/mem.h"
+#include "kern/arch.h"
+#include "kern/mem.h"
 #include "sys/spinlock.h"
 
 #define MAX_EXTENTS 32

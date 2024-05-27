@@ -1,7 +1,7 @@
 #include "kernel.h"
 #include "limine.h"
 #include "stdio.h"
-#include "sys/mem.h"
+#include "kern/mem.h"
 #include "x86_64.h"
 
 static struct limine_memmap_request mmapinfo = {

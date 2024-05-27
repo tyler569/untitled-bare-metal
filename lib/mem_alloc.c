@@ -1,5 +1,5 @@
 #include "assert.h"
-#include "sys/arch.h"
+#include "kern/arch.h"
 #include "sys/cdefs.h"
 #include "sys/mem.h"
 #include "sys/slab.h"

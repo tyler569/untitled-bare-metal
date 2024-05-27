@@ -6,8 +6,8 @@
 #include "list.h"
 #include "stddef.h"
 #include "stdint.h"
-#include "sys/per_cpu.h"
-#include "sys/task.h"
+#include "kern/per_cpu.h"
+#include "kern/task.h"
 
 #endif // __ASSEMBLER__
 

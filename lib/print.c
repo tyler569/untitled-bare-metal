@@ -4,7 +4,7 @@
 #include "stdio.h"
 #include "stream.h"
 #include "string.h"
-#include "sys/arch.h"
+#include "kern/arch.h"
 #include "sys/cdefs.h"
 
 #define WRITE(data, size)                                                     \

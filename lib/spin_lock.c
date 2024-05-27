@@ -1,6 +1,6 @@
 #include "kernel.h"
 #include "stdatomic.h"
-#include "sys/arch.h"
+#include "kern/arch.h"
 
 struct spin_lock
 {

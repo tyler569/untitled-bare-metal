@@ -1,5 +1,5 @@
 #include "sys/cdefs.h"
-#include "sys/mem.h"
+#include "kern/mem.h"
 #include "x86_64.h"
 
 #define TYPE_INT 0x8E

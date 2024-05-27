@@ -6,8 +6,8 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "sys/arch.h"
-#include "sys/mem.h"
+#include "kern/arch.h"
+#include "kern/mem.h"
 
 void hexdump (const void *data, size_t len);
 

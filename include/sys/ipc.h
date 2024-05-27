@@ -1,10 +1,24 @@
+#pragma once
+
 #include "stdint.h"
 #include "sys/types.h"
 
 enum
 {
-  MESSAGE_MAX_LENGTH = 500,
-  MESSAGE_MAX_EXTRA_CAPS = 2,
+  MESSAGE_MAX_EXTRA_CAPS = 4,
+  MESSAGE_MAX_LENGTH = 512 - 5 - MESSAGE_MAX_EXTRA_CAPS,
+};
+
+enum object_method_bases
+{
+  tcb_methods = 0x1000,
+  frame_methods = 0x2000,
+  pml4_methods = 0x3000,
+  pdpt_methods = 0x4000,
+  pd_methods = 0x5000,
+  pt_methods = 0x6000,
+  cnode_methods = 0x7000,
+  untyped_methods = 0x8000,
 };
 
 static inline message_info_t
@@ -43,4 +57,5 @@ struct ipc_buffer
   cptr_t receive_index;
   word_t receive_depth;
 };
+
 

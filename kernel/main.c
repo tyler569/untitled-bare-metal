@@ -1,7 +1,7 @@
 #include "kernel.h"
 #include "rng.h"
 #include "stdio.h"
-#include "sys/task.h"
+#include "kern/task.h"
 
 struct task init_task;
 
