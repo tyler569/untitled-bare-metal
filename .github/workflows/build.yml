@@ -20,7 +20,7 @@ jobs:
       - name: build
         run: |
           mkdir -p build
-          cmake -B build -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchains/x86_64.txt
+          cmake -B build -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchains/x86_64.cmake
           cmake --build build
       - name: Upload ISO
         uses: actions/upload-artifact@v2
