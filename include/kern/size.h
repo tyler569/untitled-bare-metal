@@ -21,25 +21,25 @@ object_size (word_t object_type, word_t size_bits)
 {
   switch (object_type)
     {
-    case null_object:
+    case cap_null:
       return 0;
-    case tcb_object:
+    case cap_tcb:
       return BIT (tcb_size_bits);
-    case cnode_object:
+    case cap_cnode:
       return BIT (size_bits + cnode_slot_bits);
-    case frame_object:
+    case cap_frame:
       return BIT (frame_size_bits);
-    case pml4_object:
+    case cap_pml4:
       return BIT (pml4_size_bits);
-    case pdpt_object:
+    case cap_pdpt:
       return BIT (pdpt_size_bits);
-    case pd_object:
+    case cap_pd:
       return BIT (pd_size_bits);
-    case pt_object:
+    case cap_pt:
       return BIT (pt_size_bits);
-    case untyped_object:
+    case cap_untyped:
       return BIT (size_bits);
-    case endpoint_object:
+    case cap_endpoint:
       return BIT (endpoint_size_bits);
     default:
       assert (0 && "Invalid object type");

@@ -5,14 +5,9 @@
 #include "kern/per_cpu.h"
 #include "stdio.h"
 
-int invoke_untyped_cap (cap_t cap, word_t label);
+int invoke_cnode_cap (cap_t cap, message_info_t info);
 int invoke_tcb_method (cap_t cap, word_t label);
-
-void
-return_ipc_error (word_t err, word_t registers)
-{
-  set_ipc_info (new_message_info (err, 0, registers));
-}
+int invoke_untyped_cap (cap_t cap, word_t label);
 
 uintptr_t
 do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
@@ -28,7 +23,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
   switch (syscall_number)
     {
     case sys_exit:
-      printf ("Exit (num: %i)\n", syscall_number);
+      printf ("Exit ()\n");
       kill_tcb (this_tcb);
       schedule ();
       UNREACHABLE ();
@@ -43,7 +38,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         cptr_t cptr = (cptr_t)a0;
         message_info_t info = (message_info_t)a1;
 
-        printf ("Call (num: %i, cptr: %#lx, info: %#lx) ", syscall_number,
+        printf ("Call (dest: %#lx, info: %#lx) ",
                 cptr, info);
 
         cap_t cap;
@@ -52,23 +47,27 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         if (status != no_error)
           {
             printf ("-> Error\n");
-            return_ipc_error (status, 0);
+            return_ipc (status, 0);
             return 1;
           }
 
         switch (cap.type)
           {
-          case cap_untyped:
-            printf ("-> Untyped\n");
-            invoke_untyped_cap (cap, get_message_label (info));
-            break;
+		  case cap_cnode:
+			printf ("-> CNode\n");
+			invoke_cnode_cap (cap, info);
+			break;
           case cap_tcb:
             printf ("-> TCB\n");
             invoke_tcb_method (cap, get_message_label (info));
             break;
+          case cap_untyped:
+            printf ("-> Untyped\n");
+            invoke_untyped_cap (cap, get_message_label (info));
+            break;
           default:
             printf ("-> Unknown\n");
-            return_ipc_error (invalid_capability, 0);
+            return_ipc (invalid_capability, 0);
             return 1;
           }
         return 0;

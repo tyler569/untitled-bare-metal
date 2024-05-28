@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assert.h"
+#include "kern/cap.h"
 #include "list.h"
 #include "stddef.h"
 #include "stdint.h"
@@ -40,3 +41,8 @@ void add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys,
 
 void *kmem_alloc (size_t);
 uintptr_t alloc_page ();
+
+struct untyped_desc;
+
+void create_init_untyped_caps (cte_t *base, size_t *count,
+                               struct untyped_desc *desc);

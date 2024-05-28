@@ -6,6 +6,7 @@
 #include "kern/obj/tcb.h"
 #include "kern/size.h"
 #include "kern/syscall.h"
+#include "stdio.h"
 #include "string.h"
 #include "sys/types.h"
 
@@ -24,7 +25,7 @@ invoke_untyped_cap (cap_t untyped, word_t method)
 {
   if (cap_type (untyped) != cap_untyped)
     {
-      return_ipc_error (illegal_operation, 0);
+      return_ipc (illegal_operation, 0);
       return -1;
     }
 
@@ -33,9 +34,9 @@ invoke_untyped_cap (cap_t untyped, word_t method)
     case untyped_retype:
       {
         int len = get_ipc_length ();
-        if (len < 6)
+        if (len < 7)
           {
-            return_ipc_error (truncated_message, 0);
+            return_ipc (truncated_message, 0);
             return -1;
           }
 
@@ -44,24 +45,36 @@ invoke_untyped_cap (cap_t untyped, word_t method)
         cptr_t dest_cnode_ptr = get_mr (2);
         word_t index = get_mr (3);
         word_t depth = get_mr (4);
-        word_t num_objects = get_mr (5);
+		word_t offset = get_mr (5);
+        word_t num_objects = get_mr (6);
 
-        cap_t dest_cnode;
+		printf ("untyped_retype: type %lu, size_bits %lu, dest_cnode %lu, index %lu, depth %lu, offset %lu, num_objects %lu\n", type, size_bits, dest_cnode_ptr, index, depth, offset, num_objects);
+
+        cap_t dest_cspace_root;
+		cap_t dest_cnode;
 
         exception_t status = lookup_cap (this_tcb->cspace_root, dest_cnode_ptr,
-                                         64, &dest_cnode);
+                                         64, &dest_cspace_root);
 
         if (status != no_error)
           {
-            return_ipc_error (status, 0);
+            return_ipc (status, 0);
             return -1;
           }
 
+		status = lookup_cap (dest_cspace_root, index, 64, &dest_cnode);
+
+		if (status != no_error)
+		  {
+			return_ipc (status, 0);
+			return -1;
+		  }
+
         return invoke_untyped_retype (untyped, type, size_bits, dest_cnode,
-                                      index, depth, num_objects);
+                                      offset, depth, num_objects);
       }
     default:
-      return_ipc_error (illegal_operation, 0);
+      return_ipc (illegal_operation, 0);
       return -1;
     }
 }
@@ -71,7 +84,7 @@ invoke_untyped_retype (cap_t untyped, word_t type, word_t size_bits,
                        cap_t dest_cnode, word_t index, word_t depth,
                        word_t num_objects)
 {
-  size_t untyped_size = 1 << untyped.size_bits;
+  size_t untyped_size = BIT (untyped.size_bits);
   size_t obj_size = object_size (type, size_bits);
   size_t total_size = obj_size * num_objects;
   size_t untyped_offset = ALIGN_UP (untyped.badge, obj_size);
@@ -79,13 +92,14 @@ invoke_untyped_retype (cap_t untyped, word_t type, word_t size_bits,
 
   if (available_memory < total_size)
     {
-      return_ipc_error (not_enough_memory, 0);
+	  printf ("not enough memory to make %lu objects of type %lu (size %lu bytes). We have %lu bytes available.\n", num_objects, type, obj_size, available_memory);
+      return_ipc (not_enough_memory, 0);
       return -1;
     }
 
   if (cap_size (dest_cnode) < index + num_objects)
     {
-      return_ipc_error (range_error, 0);
+      return_ipc (range_error, 0);
       return -1;
     }
 
@@ -97,6 +111,8 @@ invoke_untyped_retype (cap_t untyped, word_t type, word_t size_bits,
   create_objects (type, size_bits, dest_slot_0, num_objects, usable_memory);
 
   untyped.badge = untyped_offset + total_size;
+
+  return_ipc(no_error, 0);
 
   return 0;
 }

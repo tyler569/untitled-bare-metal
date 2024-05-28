@@ -28,23 +28,6 @@ set_bits_pointer (word_t *bits, void *ptr)
 
 // clang-format on
 
-enum capability_type : unsigned char
-{
-  cap_null,
-  cap_untyped,
-  cap_endpoint,
-  cap_cnode,
-  cap_vspace,
-  cap_tcb,
-
-  cap_pml4,
-  cap_pdpt,
-  cap_pd,
-  cap_pt,
-
-  cap_frame,
-};
-
 union capability
 {
   word_t words[2];

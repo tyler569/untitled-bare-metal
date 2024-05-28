@@ -92,7 +92,7 @@ invoke_tcb_method (cap_t tcb, word_t method)
 {
   if (tcb.type != cap_tcb)
     {
-      return_ipc_error (invalid_argument, 0);
+      return_ipc (invalid_argument, 0);
       return 1;
     }
 
@@ -107,7 +107,7 @@ invoke_tcb_method (cap_t tcb, word_t method)
       printf ("echo\n");
       break;
     default:
-      return_ipc_error (invalid_argument, 0);
+      return_ipc (invalid_argument, 0);
       return 1;
     };
 

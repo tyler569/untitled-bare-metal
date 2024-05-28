@@ -62,12 +62,18 @@ create_init_untyped_caps (cte_t *base, size_t *count,
       if (regions[i].in_kernel_use)
         continue;
       regions[i].in_user_use = true;
+
+	  //
+	  // TODO PAGE_BITS
+	  //
       base[cap_i++].cap
-          = cap_untyped_new (regions[i].addr, regions[i].size_bits);
+          = cap_untyped_new (regions[i].addr, regions[i].size_bits + 12);
 
       desc[i].base = regions[i].addr;
-      desc[i].size_bits = regions[i].size_bits;
+      desc[i].size_bits = regions[i].size_bits + 12;
     }
+
+  *count = cap_i;
 }
 
 int

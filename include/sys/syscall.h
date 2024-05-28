@@ -30,34 +30,44 @@ enum error_number
   delete_first,
   revoke_first,
   not_enough_memory,
+  max_error_code,
 };
 
-enum object_type
+extern const char *const error_strings[];
+
+enum cap_type : unsigned char
 {
-  null_object,
-  tcb_object,
-  cnode_object,
-  frame_object,
-  pml4_object,
-  pdpt_object,
-  pd_object,
-  pt_object,
-  untyped_object,
-  endpoint_object,
+  cap_null,
+  cap_untyped,
+  cap_endpoint,
+  cap_cnode,
+  cap_vspace,
+  cap_tcb,
+
+  cap_pml4,
+  cap_pdpt,
+  cap_pd,
+  cap_pt,
+
+  cap_frame,
+
+  max_cap_type,
 };
+
+extern const char *const cap_type_strings[];
 
 enum object_method_bases
 {
-  null_base = null_object * 0x1000,
-  tcb_base = tcb_object * 0x1000,
-  cnode_base = cnode_object * 0x1000,
-  frame_base = frame_object * 0x1000,
-  pml4_base = pml4_object * 0x1000,
-  pdpt_base = pdpt_object * 0x1000,
-  pd_base = pd_object * 0x1000,
-  pt_base = pt_object * 0x1000,
-  untyped_base = untyped_object * 0x1000,
-  endpoint_base = endpoint_object * 0x1000,
+  null_base = cap_null * 0x1000,
+  tcb_base = cap_tcb * 0x1000,
+  cnode_base = cap_cnode * 0x1000,
+  frame_base = cap_frame * 0x1000,
+  pml4_base = cap_pml4 * 0x1000,
+  pdpt_base = cap_pdpt * 0x1000,
+  pd_base = cap_pd * 0x1000,
+  pt_base = cap_pt * 0x1000,
+  untyped_base = cap_untyped * 0x1000,
+  endpoint_base = cap_endpoint * 0x1000,
 };
 
 #include "sys/obj/cnode.h"

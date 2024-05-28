@@ -7,7 +7,7 @@ enum boot_capabilities
 {
   init_cap_null,
   init_cap_init_tcb,
-  init_cap_init_cnode,
+  init_cap_root_cnode,
   init_cap_init_vspace,
 };
 
