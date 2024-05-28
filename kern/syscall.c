@@ -38,8 +38,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         cptr_t cptr = (cptr_t)a0;
         message_info_t info = (message_info_t)a1;
 
-        printf ("Call (dest: %#lx, info: %#lx) ",
-                cptr, info);
+        printf ("Call (dest: %#lx, info: %#lx) ", cptr, info);
 
         cap_t cap;
         exception_t status
@@ -53,10 +52,10 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
 
         switch (cap.type)
           {
-		  case cap_cnode:
-			printf ("-> CNode\n");
-			invoke_cnode_cap (cap, info);
-			break;
+          case cap_cnode:
+            printf ("-> CNode\n");
+            invoke_cnode_cap (cap, info);
+            break;
           case cap_tcb:
             printf ("-> TCB\n");
             invoke_tcb_method (cap, get_message_label (info));

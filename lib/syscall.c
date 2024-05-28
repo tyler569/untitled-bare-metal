@@ -15,15 +15,10 @@ const char *const error_strings[] = {
 };
 
 const char *const cap_type_strings[] = {
-  [cap_null] = "null",
-  [cap_tcb] = "tcb",
-  [cap_cnode] = "cnode",
-  [cap_frame] = "frame",
-  [cap_pml4] = "pml4",
-  [cap_pdpt] = "pdpt",
-  [cap_pd] = "pd",
-  [cap_pt] = "pt",
-  [cap_untyped] = "untyped",
-  [cap_endpoint] = "endpoint",
+  [cap_null] = "null",       [cap_tcb] = "tcb",
+  [cap_cnode] = "cnode",     [cap_frame] = "frame",
+  [cap_pml4] = "pml4",       [cap_pdpt] = "pdpt",
+  [cap_pd] = "pd",           [cap_pt] = "pt",
+  [cap_untyped] = "untyped", [cap_endpoint] = "endpoint",
   [cap_vspace] = "vspace",
 };

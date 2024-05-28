@@ -63,9 +63,9 @@ create_init_untyped_caps (cte_t *base, size_t *count,
         continue;
       regions[i].in_user_use = true;
 
-	  //
-	  // TODO PAGE_BITS
-	  //
+      //
+      // TODO PAGE_BITS
+      //
       base[cap_i++].cap
           = cap_untyped_new (regions[i].addr, regions[i].size_bits + 12);
 

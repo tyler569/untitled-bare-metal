@@ -45,13 +45,16 @@ invoke_untyped_cap (cap_t untyped, word_t method)
         cptr_t dest_cnode_ptr = get_mr (2);
         word_t index = get_mr (3);
         word_t depth = get_mr (4);
-		word_t offset = get_mr (5);
+        word_t offset = get_mr (5);
         word_t num_objects = get_mr (6);
 
-		printf ("untyped_retype: type %lu, size_bits %lu, dest_cnode %lu, index %lu, depth %lu, offset %lu, num_objects %lu\n", type, size_bits, dest_cnode_ptr, index, depth, offset, num_objects);
+        printf ("untyped_retype: type %lu, size_bits %lu, dest_cnode %lu, "
+                "index %lu, depth %lu, offset %lu, num_objects %lu\n",
+                type, size_bits, dest_cnode_ptr, index, depth, offset,
+                num_objects);
 
         cap_t dest_cspace_root;
-		cap_t dest_cnode;
+        cap_t dest_cnode;
 
         exception_t status = lookup_cap (this_tcb->cspace_root, dest_cnode_ptr,
                                          64, &dest_cspace_root);
@@ -62,13 +65,13 @@ invoke_untyped_cap (cap_t untyped, word_t method)
             return -1;
           }
 
-		status = lookup_cap (dest_cspace_root, index, 64, &dest_cnode);
+        status = lookup_cap (dest_cspace_root, index, 64, &dest_cnode);
 
-		if (status != no_error)
-		  {
-			return_ipc (status, 0);
-			return -1;
-		  }
+        if (status != no_error)
+          {
+            return_ipc (status, 0);
+            return -1;
+          }
 
         return invoke_untyped_retype (untyped, type, size_bits, dest_cnode,
                                       offset, depth, num_objects);
@@ -92,7 +95,9 @@ invoke_untyped_retype (cap_t untyped, word_t type, word_t size_bits,
 
   if (available_memory < total_size)
     {
-	  printf ("not enough memory to make %lu objects of type %lu (size %lu bytes). We have %lu bytes available.\n", num_objects, type, obj_size, available_memory);
+      printf ("not enough memory to make %lu objects of type %lu (size %lu "
+              "bytes). We have %lu bytes available.\n",
+              num_objects, type, obj_size, available_memory);
       return_ipc (not_enough_memory, 0);
       return -1;
     }
@@ -112,7 +117,7 @@ invoke_untyped_retype (cap_t untyped, word_t type, word_t size_bits,
 
   untyped.badge = untyped_offset + total_size;
 
-  return_ipc(no_error, 0);
+  return_ipc (no_error, 0);
 
   return 0;
 }

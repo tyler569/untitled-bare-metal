@@ -67,13 +67,8 @@ write (FILE *, const void *str, unsigned long len)
 }
 
 void
-do_untyped_retype (cptr_t src,
-				   word_t type,
-				   word_t size_bits,
-				   cptr_t root,
-				   word_t index,
-				   word_t offset,
-				   word_t obj_count)
+do_untyped_retype (cptr_t src, word_t type, word_t size_bits, cptr_t root,
+                   word_t index, word_t offset, word_t obj_count)
 {
   message_info_t info = new_message_info (untyped_retype, 0, 7);
   set_mr (0, type);
@@ -88,10 +83,10 @@ do_untyped_retype (cptr_t src,
 
   word_t status = __ipc_buffer->tag;
   if (status != 0)
-	{
-	  printf ("do_untyped_retype failed: %lu\n", get_message_label (status));
-	  exit ();
-	}
+    {
+      printf ("do_untyped_retype failed: %lu\n", get_message_label (status));
+      exit ();
+    }
 }
 
 [[noreturn]] USED int
@@ -109,7 +104,8 @@ c_start (void *ipc_buffer, void *boot_info)
   message_info_t info = new_message_info (tcb_echo, 0, 0);
   call (init_cap_init_tcb, info);
 
-  do_untyped_retype (4, cap_tcb, 0, init_cap_root_cnode, init_cap_root_cnode, 100, 1);
+  do_untyped_retype (4, cap_tcb, 0, init_cap_root_cnode, init_cap_root_cnode,
+                     100, 1);
 
   info = new_message_info (cnode_debug_print, 0, 0);
   call (init_cap_root_cnode, info);
