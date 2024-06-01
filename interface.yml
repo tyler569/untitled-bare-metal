@@ -168,6 +168,7 @@ system_calls:
   - sys_nbrecv
   - sys_yield
 errors:
+  - no_error
   - invalid_argument
   - invalid_capability
   - illegal_operation
