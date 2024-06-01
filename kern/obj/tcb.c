@@ -2,6 +2,7 @@
 #include "assert.h"
 #include "kern/cap.h"
 #include "kern/mem.h"
+#include "kern/methods.h"
 #include "kern/per_cpu.h"
 #include "kern/size.h"
 #include "kern/syscall.h"
@@ -84,74 +85,67 @@ make_tcb_runnable (struct tcb *t)
   spin_unlock (&runnable_tcbs_lock);
 }
 
-int
-invoke_tcb_method (cap_t tcb, word_t method)
+error_t
+tcb_resume (cap_t cap)
 {
-  if (tcb.type != cap_tcb)
-    {
-      return_ipc (invalid_argument, 0);
-      return 1;
-    }
+  struct tcb *tcb = cap_ptr (cap);
+  make_tcb_runnable (tcb);
+  return no_error;
+}
 
-  struct tcb *t = cap_ptr (tcb);
+error_t
+tcb_echo (cap_t cap)
+{
+  (void)cap;
 
-  switch (method)
-    {
-    case tcb_resume:
-      make_tcb_runnable (t);
-      break;
-    case tcb_echo:
-      printf ("echo\n");
-      break;
-    case tcb_read_registers:
-      {
-        frame_t *regs = (frame_t *)get_mr (0);
-        copy_frame (regs, &t->saved_state);
-        return_ipc (no_error, 0);
-        break;
-      }
-    case tcb_write_registers:
-      {
-        frame_t *regs = (frame_t *)get_mr (0);
-        copy_frame (&t->saved_state, regs);
-        return_ipc (no_error, 0);
-        break;
-      }
-    case tcb_configure:
-      {
-        cptr_t cspace_root = get_cap (0);
-        cptr_t vspace_root = get_cap (1);
-        uintptr_t ipc_buffer = get_mr (0);
+  printf ("echo\n");
+  return no_error;
+}
 
-        cap_t cspace;
-        cap_t vspace;
-        if (lookup_cap (this_tcb->cspace_root, cspace_root, 64, &cspace))
-          {
-            return_ipc (failed_lookup, 1);
-            set_mr (0, 0);
-            return 1;
-          }
-        if (lookup_cap (this_tcb->cspace_root, vspace_root, 64, &vspace))
-          {
-            return_ipc (failed_lookup, 1);
-            set_mr (0, 1);
-            return 1;
-          }
+error_t
+tcb_read_registers (cap_t cap, bool suspend_source, word_t arch_flags,
+                    word_t count, frame_t *regs)
+{
+  (void)suspend_source;
+  (void)arch_flags;
+  (void)count;
 
-        t->cspace_root = cspace;
-        t->vspace_root = vspace;
-        t->vm_root = get_vm_root (); // TODO HACK
-        t->ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buffer);
+  struct tcb *tcb = cap_ptr (cap);
+  copy_frame (regs, &tcb->saved_state);
+  return no_error;
+}
 
-        return_ipc (no_error, 0);
-        break;
-      }
-    default:
-      return_ipc (invalid_argument, 0);
-      return 1;
-    };
+error_t
+tcb_write_registers (cap_t cap, bool resume_target, word_t arch_flags,
+                     word_t count, frame_t *regs)
+{
+  (void)resume_target;
+  (void)arch_flags;
+  (void)count;
 
-  return 0;
+  struct tcb *tcb = cap_ptr (cap);
+  copy_frame (&tcb->saved_state, regs);
+  return no_error;
+}
+
+error_t
+tcb_configure (cap_t obj, word_t fault_ep, cap_t cspace_root,
+               word_t cspace_root_data, cap_t vspace_root,
+               word_t vspace_root_data, word_t buffer, cap_t buffer_frame)
+{
+  (void)fault_ep;
+  (void)cspace_root_data;
+  (void)vspace_root_data;
+  (void)buffer;
+  (void)buffer_frame;
+
+  struct tcb *tcb = cap_ptr (obj);
+
+  tcb->cspace_root = cspace_root;
+  tcb->vspace_root = vspace_root;
+  tcb->vm_root = get_vm_root (); // TODO HACK
+  tcb->ipc_buffer = 0;
+  return no_error;
 }
 
 void

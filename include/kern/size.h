@@ -10,7 +10,7 @@ enum object_size_bits
   tcb_size_bits = 9,
 
   frame_size_bits = 12,
-  pml4_size_bits = 12,
+  vspace_size_bits = 12,
   pdpt_size_bits = 12,
   pd_size_bits = 12,
   pt_size_bits = 12,
@@ -27,15 +27,15 @@ object_size (word_t object_type, word_t size_bits)
       return BIT (tcb_size_bits);
     case cap_cnode:
       return BIT (size_bits + cnode_slot_bits);
-    case cap_frame:
+    case cap_x86_64_page:
       return BIT (frame_size_bits);
-    case cap_pml4:
-      return BIT (pml4_size_bits);
-    case cap_pdpt:
+    case cap_vspace:
+      return BIT (vspace_size_bits);
+    case cap_x86_64_pdpt:
       return BIT (pdpt_size_bits);
-    case cap_pd:
+    case cap_x86_64_pd:
       return BIT (pd_size_bits);
-    case cap_pt:
+    case cap_x86_64_pt:
       return BIT (pt_size_bits);
     case cap_untyped:
       return BIT (size_bits);

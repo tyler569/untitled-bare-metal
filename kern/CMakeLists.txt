@@ -14,7 +14,6 @@ add_executable(untitled_bare_metal
   ../lib/sort.c
   ../lib/spin_lock.c
   ../lib/string.c
-  ../lib/syscall.c
 )
 
 add_compile_definitions(

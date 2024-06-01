@@ -166,18 +166,18 @@ cap_tcb_new (void *tcb)
   return cap;
 }
 
-static inline cap_t
-cap_pml4_new (uintptr_t pml4_phy)
-{
-  cap_t cap = { .type = cap_pml4 };
-  cap_set_ptr (&cap, (void *)pml4_phy);
-  return cap;
-}
+// static inline cap_t
+// cap_pml4_new (uintptr_t pml4_phy)
+// {
+//   cap_t cap = { .type = cap_x86_64_pml4 };
+//   cap_set_ptr (&cap, (void *)pml4_phy);
+//   return cap;
+// }
 
 static inline cap_t
 cap_pdpt_new (uintptr_t pdpt_phy)
 {
-  cap_t cap = { .type = cap_pdpt };
+  cap_t cap = { .type = cap_x86_64_pdpt };
   cap_set_ptr (&cap, (void *)pdpt_phy);
   return cap;
 }
@@ -185,7 +185,7 @@ cap_pdpt_new (uintptr_t pdpt_phy)
 static inline cap_t
 cap_pd_new (uintptr_t pd_phy)
 {
-  cap_t cap = { .type = cap_pd };
+  cap_t cap = { .type = cap_x86_64_pd };
   cap_set_ptr (&cap, (void *)pd_phy);
   return cap;
 }
@@ -193,15 +193,15 @@ cap_pd_new (uintptr_t pd_phy)
 static inline cap_t
 cap_pt_new (uintptr_t pt_phy)
 {
-  cap_t cap = { .type = cap_pt };
+  cap_t cap = { .type = cap_x86_64_pt };
   cap_set_ptr (&cap, (void *)pt_phy);
   return cap;
 }
 
 static inline cap_t
-cap_frame_new (uintptr_t frame_phy)
+cap_page_new (uintptr_t frame_phy)
 {
-  cap_t cap = { .type = cap_frame };
+  cap_t cap = { .type = cap_x86_64_page };
   cap_set_ptr (&cap, (void *)frame_phy);
   return cap;
 }

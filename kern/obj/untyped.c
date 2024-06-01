@@ -13,79 +13,12 @@
 cap_t root_untyped_capabilities[MAX_UNTYPED_ROOT_CAPS];
 size_t root_untyped_cap_count = 0;
 
-int invoke_untyped_retype (cap_t untyped, word_t type, word_t size_bits,
-                           cap_t dest_cnode, word_t index, word_t depth,
-                           word_t num_objects);
-
 int create_objects (word_t type, word_t size_bits, cte_t *dest_slot_0,
                     word_t num_objects, uintptr_t usable_memory);
 
-int
-invoke_untyped_cap (cap_t untyped, word_t method)
-{
-  if (cap_type (untyped) != cap_untyped)
-    {
-      return_ipc (illegal_operation, 0);
-      return -1;
-    }
-
-  switch (method)
-    {
-    case untyped_retype:
-      {
-        int len = get_ipc_length ();
-        if (len < 7)
-          {
-            return_ipc (truncated_message, 0);
-            return -1;
-          }
-
-        word_t type = get_mr (0);
-        word_t size_bits = get_mr (1);
-        cptr_t dest_cnode_ptr = get_mr (2);
-        word_t index = get_mr (3);
-        word_t depth = get_mr (4);
-        word_t offset = get_mr (5);
-        word_t num_objects = get_mr (6);
-
-        printf ("untyped_retype: type %lu, size_bits %lu, dest_cnode %lu, "
-                "index %lu, depth %lu, offset %lu, num_objects %lu\n",
-                type, size_bits, dest_cnode_ptr, index, depth, offset,
-                num_objects);
-
-        cap_t dest_cspace_root;
-        cap_t dest_cnode;
-
-        exception_t status = lookup_cap (this_tcb->cspace_root, dest_cnode_ptr,
-                                         64, &dest_cspace_root);
-
-        if (status != no_error)
-          {
-            return_ipc (status, 0);
-            return -1;
-          }
-
-        status = lookup_cap (dest_cspace_root, index, 64, &dest_cnode);
-
-        if (status != no_error)
-          {
-            return_ipc (status, 0);
-            return -1;
-          }
-
-        return invoke_untyped_retype (untyped, type, size_bits, dest_cnode,
-                                      offset, depth, num_objects);
-      }
-    default:
-      return_ipc (illegal_operation, 0);
-      return -1;
-    }
-}
-
-int
-invoke_untyped_retype (cap_t untyped, word_t type, word_t size_bits,
-                       cap_t dest_cnode, word_t index, word_t depth,
-                       word_t num_objects)
+error_t
+untyped_retype (cap_t untyped, word_t type, word_t size_bits, cap_t dest_cnode,
+                word_t index, word_t depth, word_t num_objects)
 {
   size_t untyped_size = BIT (untyped.size_bits);
   size_t obj_size = object_size (type, size_bits);

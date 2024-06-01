@@ -31,8 +31,12 @@ types:
         parameters:
           - { name: index, type: word_t }
           - { name: depth, type: uint8_t }
+      - name: debug_print
+        parameters: []
   - name: tcb
     methods:
+      - name: echo
+        parameters: []
       - name: configure
         parameters:
           - { name: fault_ep, type: word_t }
@@ -94,6 +98,8 @@ types:
           - { name: node_depth, type: uint8_t }
           - { name: node_offset, type: word_t }
           - { name: num_objects, type: word_t }
+  - name: vspace
+    methods: []
   - name: x86_io_port
     methods:
       - name: in8
@@ -178,3 +184,4 @@ errors:
   - delete_first
   - revoke_first
   - not_enough_memory
+  - failed_lookup

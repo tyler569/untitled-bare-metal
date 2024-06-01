@@ -10,9 +10,10 @@ enum
 };
 
 static inline message_info_t
-new_message_info (word_t label, word_t extra_caps, word_t length)
+new_message_info (word_t label, word_t caps_unwrapped, word_t extra_caps,
+                  word_t length)
 {
-  return (label << 12) | (extra_caps << 10) | length;
+  return (label << 12) | (extra_caps << 10) | (caps_unwrapped << 8) | length;
 }
 
 static inline word_t
@@ -28,9 +29,15 @@ get_message_extra_caps (message_info_t tag)
 }
 
 static inline word_t
+get_message_caps_unwrapped (message_info_t tag)
+{
+  return (tag >> 8) & 0x3;
+}
+
+static inline word_t
 get_message_length (message_info_t tag)
 {
-  return tag & 0x3ff;
+  return tag & 0xff;
 }
 
 struct ipc_buffer

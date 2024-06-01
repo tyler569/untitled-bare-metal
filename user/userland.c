@@ -77,6 +77,8 @@ call (cptr_t cap, message_info_t info)
   _syscall2 (sys_call, cap, info);
 }
 
+#include "sys/user_method_stubs.h"
+
 [[noreturn]] static inline void
 exit ()
 {
@@ -92,29 +94,7 @@ write (FILE *, const void *str, unsigned long len)
 }
 
 void
-do_untyped_retype (cptr_t src, word_t type, word_t size_bits, cptr_t root,
-                   word_t index, word_t offset, word_t obj_count)
-{
-  message_info_t info = new_message_info (untyped_retype, 0, 7);
-  set_mr (0, type);
-  set_mr (1, size_bits);
-  set_mr (2, root);   // root of destination cspace
-  set_mr (3, index);  // index of destination cnode in destination cspace
-  set_mr (4, 64);     // depth of destination cnode
-  set_mr (5, offset); // offset in destination cnode
-  set_mr (6, obj_count);
-
-  call (src, info);
-
-  word_t status = __ipc_buffer->tag;
-  if (status != 0)
-    {
-      printf ("do_untyped_retype failed: %lu\n", get_message_label (status));
-      exit ();
-    }
-}
-
-void thread_entry (uintptr_t arg)
+thread_entry (uintptr_t arg)
 {
   printf ("Hello, World from userland thread! Arg is %lu\n", arg);
   exit ();
@@ -132,41 +112,28 @@ c_start (void *ipc_buffer, void *boot_info)
   printf ("  .n_untypeds = %lu\n", bi->n_untypeds);
 
   // Send a message to the kernel
-  message_info_t info = new_message_info (tcb_echo, 0, 0);
-  call (init_cap_init_tcb, info);
+  tcb_echo (init_cap_init_tcb);
 
-  do_untyped_retype (4, cap_tcb, 0, init_cap_root_cnode, init_cap_root_cnode,
-                     100, 1);
+  untyped_retype (4, cap_tcb, 0, init_cap_root_cnode, init_cap_root_cnode, 64,
+                  100, 1);
 
-  info = new_message_info (cnode_debug_print, 0, 0);
-  call (init_cap_root_cnode, info);
+  cnode_debug_print (init_cap_root_cnode);
 
-  info = new_message_info (tcb_configure, 2, 1);
-  set_cap (0, 2); // cspace root
-  set_cap (1, 3); // vspace root
-  set_mr (0, 0); // ipc buffer
-  call (100, info);
+  tcb_configure (100, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0, 0, 0);
 
   frame_t frame;
-
-  info = new_message_info (tcb_read_registers, 0, 1);
-  set_mr (0, (word_t)&frame);
-  call (init_cap_init_tcb, info);
+  tcb_read_registers (init_cap_init_tcb, false, 0, 0, &frame);
 
   frame.rip = (uintptr_t)thread_entry;
   frame.rsp = (uintptr_t)thread_stack + sizeof (thread_stack);
   frame.rdi = 42;
 
-  info = new_message_info (tcb_write_registers, 0, 1);
-  set_mr (0, (word_t)&frame);
-  call (100, info);
+  tcb_write_registers (100, false, 0, 0, &frame);
 
   printf ("Starting new userland thread\n");
-  info = new_message_info (tcb_resume, 0, 0);
-  call (100, info);
+  tcb_resume (100);
 
-  info = new_message_info (tcb_echo, 0, 0);
-  call (100, info);
+  tcb_echo (100);
 
   exit ();
 }
