@@ -10,20 +10,11 @@
 
 #define MAX_PRIORITY 254
 
-enum tcb_state
-{
-  TASK_STATE_RUNNABLE,
-  TASK_STATE_RUNNING,
-  TASK_STATE_BLOCKED,
-  TASK_STATE_ZOMBIE,
-  TASK_STATE_DEAD,
-  TASK_STATE_SENDING,
-  TASK_STATE_RECEIVING,
-};
-
 enum tcb_methods
 {
   tcb_configure = tcb_base,
+  tcb_read_registers,
+  tcb_write_registers,
   tcb_resume,
   tcb_set_prio,
   tcb_echo,

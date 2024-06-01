@@ -39,7 +39,7 @@ get_mr (word_t i)
 }
 
 word_t
-get_extra_cap (word_t i)
+get_cap (word_t i)
 {
   if (this_tcb && this_tcb->ipc_buffer)
     return this_tcb->ipc_buffer->caps_or_badges[i];

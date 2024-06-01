@@ -5,6 +5,19 @@
 #include "sys/ipc.h"
 #include "sys/syscall.h"
 
+#define PAGE_SIZE 4096
+uint8_t __attribute__ ((aligned (PAGE_SIZE))) thread_stack[PAGE_SIZE * 4];
+uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
+
+struct frame
+{
+  uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
+  uint64_t rdi, rsi, rbp, rbx, rdx, rcx, rax;
+  uint64_t int_no, err_code;
+  uint64_t rip, cs, rflags, rsp, ss;
+};
+typedef struct frame frame_t;
+
 static uintptr_t
 _syscall0 (int syscall_num)
 {
@@ -36,6 +49,18 @@ word_t
 get_mr (word_t i)
 {
   return __ipc_buffer->msg[i];
+}
+
+void
+set_cap (word_t i, word_t val)
+{
+  __ipc_buffer->caps_or_badges[i] = val;
+}
+
+word_t
+get_cap (word_t i)
+{
+  return __ipc_buffer->caps_or_badges[i];
 }
 
 void
@@ -89,6 +114,12 @@ do_untyped_retype (cptr_t src, word_t type, word_t size_bits, cptr_t root,
     }
 }
 
+void thread_entry (uintptr_t arg)
+{
+  printf ("Hello, World from userland thread! Arg is %lu\n", arg);
+  exit ();
+}
+
 [[noreturn]] USED int
 c_start (void *ipc_buffer, void *boot_info)
 {
@@ -110,14 +141,35 @@ c_start (void *ipc_buffer, void *boot_info)
   info = new_message_info (cnode_debug_print, 0, 0);
   call (init_cap_root_cnode, info);
 
+  info = new_message_info (tcb_configure, 2, 1);
+  set_cap (0, 2); // cspace root
+  set_cap (1, 3); // vspace root
+  set_mr (0, 0); // ipc buffer
+  call (100, info);
+
+  frame_t frame;
+
+  info = new_message_info (tcb_read_registers, 0, 1);
+  set_mr (0, (word_t)&frame);
+  call (init_cap_init_tcb, info);
+
+  frame.rip = (uintptr_t)thread_entry;
+  frame.rsp = (uintptr_t)thread_stack + sizeof (thread_stack);
+  frame.rdi = 42;
+
+  info = new_message_info (tcb_write_registers, 0, 1);
+  set_mr (0, (word_t)&frame);
+  call (100, info);
+
+  printf ("Starting new userland thread\n");
+  info = new_message_info (tcb_resume, 0, 0);
+  call (100, info);
+
   info = new_message_info (tcb_echo, 0, 0);
   call (100, info);
 
   exit ();
 }
-
-#define PAGE_SIZE 4096
-uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
 
 [[noreturn]] USED __attribute__ ((naked)) void
 _start ()

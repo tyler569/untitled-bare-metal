@@ -22,9 +22,6 @@ create_tcb (struct tcb *t)
 {
   memset (t, 0, sizeof (struct tcb));
 
-  init_list (&t->runnable_tcbs);
-  init_list (&t->send_receive_pending_node);
-
   return t;
 }
 
@@ -106,6 +103,49 @@ invoke_tcb_method (cap_t tcb, word_t method)
     case tcb_echo:
       printf ("echo\n");
       break;
+    case tcb_read_registers:
+      {
+        frame_t *regs = (frame_t *)get_mr (0);
+        copy_frame (regs, &t->saved_state);
+        return_ipc (no_error, 0);
+        break;
+      }
+    case tcb_write_registers:
+      {
+        frame_t *regs = (frame_t *)get_mr (0);
+        copy_frame (&t->saved_state, regs);
+        return_ipc (no_error, 0);
+        break;
+      }
+    case tcb_configure:
+      {
+        cptr_t cspace_root = get_cap (0);
+        cptr_t vspace_root = get_cap (1);
+        uintptr_t ipc_buffer = get_mr (0);
+
+        cap_t cspace;
+        cap_t vspace;
+        if (lookup_cap (this_tcb->cspace_root, cspace_root, 64, &cspace))
+          {
+            return_ipc (failed_lookup, 1);
+            set_mr (0, 0);
+            return 1;
+          }
+        if (lookup_cap (this_tcb->cspace_root, vspace_root, 64, &vspace))
+          {
+            return_ipc (failed_lookup, 1);
+            set_mr (0, 1);
+            return 1;
+          }
+
+        t->cspace_root = cspace;
+        t->vspace_root = vspace;
+        t->vm_root = get_vm_root (); // TODO HACK
+        t->ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buffer);
+
+        return_ipc (no_error, 0);
+        break;
+      }
     default:
       return_ipc (invalid_argument, 0);
       return 1;

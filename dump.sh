@@ -2,7 +2,7 @@
 
 file="${1-build/kern/untitled_bare_metal}"
 objdump_binary="llvm-objdump"
-format=""
+format="intel"
 
 if [ ! -f "$file" ]; then
     echo "Error: $file does not exist"

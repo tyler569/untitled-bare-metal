@@ -6,6 +6,17 @@
 #include "kern/per_cpu.h"
 #include "sys/obj/tcb.h"
 
+enum tcb_state
+{
+  TASK_STATE_RUNNABLE,
+  TASK_STATE_RUNNING,
+  TASK_STATE_BLOCKED,
+  TASK_STATE_ZOMBIE,
+  TASK_STATE_DEAD,
+  TASK_STATE_SENDING,
+  TASK_STATE_RECEIVING,
+};
+
 struct tcb
 {
   enum tcb_state state;
