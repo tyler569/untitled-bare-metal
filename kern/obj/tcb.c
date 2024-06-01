@@ -148,7 +148,7 @@ tcb_configure (cap_t obj, word_t fault_ep, cap_t cspace_root,
   return no_error;
 }
 
-void
+[[noreturn]] void
 switch_tcb (struct tcb *t)
 {
   struct tcb *current = this_tcb;

@@ -119,7 +119,8 @@ c_start (void *ipc_buffer, void *boot_info)
 
   cnode_debug_print (init_cap_root_cnode);
 
-  tcb_configure (100, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0, 0, 0);
+  tcb_configure (100, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0, 0,
+                 0);
 
   frame_t frame;
   tcb_read_registers (init_cap_init_tcb, false, 0, 0, &frame);

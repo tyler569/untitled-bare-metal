@@ -1,6 +1,7 @@
 #include "kern/syscall.h"
 #include "kern/cap.h"
 #include "kern/ipc.h"
+#include "kern/obj/endpoint.h"
 #include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
 #include "stdio.h"
@@ -20,34 +21,47 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
   if (syscall_number != sys_debug_write)
     printf ("Task %#lx ", (uintptr_t)this_tcb & 0xff);
 
-  switch (syscall_number)
+  if (syscall_number == sys_exit)
     {
-    case sys_exit:
-      printf ("Exit ()\n");
+      printf ("sys_exit ()\n");
       kill_tcb (this_tcb);
       schedule ();
-      UNREACHABLE ();
-    case sys_debug_write:
-      // printf ("Write (num: %i, str: %#lx, len: %lu)\n", syscall_number, a0,
-      //         a1);
-      // printf ("  -> \"%.*s\"\n", (int)a1, (const char *)a0);
+      unreachable ();
+    }
+  else if (syscall_number == sys_debug_write)
+    {
       write_debug (nullptr, (const void *)a0, a1);
-      break;
+      return no_error;
+    }
+
+  cptr_t cptr = (cptr_t)a0;
+  message_info_t info = (message_info_t)a1;
+
+  cap_t obj;
+  error_t l = lookup_cap (this_tcb->cspace_root, cptr, 64, &obj);
+  if (l != no_error)
+    {
+      return_ipc (l, 0);
+      return l;
+    }
+
+  switch (syscall_number)
+    {
     case sys_call:
-      {
-        cptr_t cptr = (cptr_t)a0;
-        message_info_t info = (message_info_t)a1;
+      return dispatch_method (obj, info);
+    case sys_send:
+      printf ("sys_send (dest: %#lx, info: %#lx)\n", cptr, info);
 
-        printf ("Call (dest: %#lx, info: %#lx)\n", cptr, info);
+      if (obj.type != cap_endpoint)
+        {
+          return_ipc (illegal_operation, 0);
+          return illegal_operation;
+        }
 
-        dispatch_method (cptr, info);
-        return 0;
-      }
+      return invoke_endpoint_send (obj, info);
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
-
-      printf ("Unknown syscall\n");
-      break;
+      return no_error;
     }
 
   return ret;

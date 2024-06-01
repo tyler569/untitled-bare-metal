@@ -2,7 +2,8 @@
 #include "kern/cap.h"
 #include "kern/syscall.h"
 
-error_t cnode_debug_print (cap_t obj)
+error_t
+cnode_debug_print (cap_t obj)
 {
   cte_t *cte = cap_ptr (obj);
   size_t size = cap_size (obj);

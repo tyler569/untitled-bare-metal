@@ -22,7 +22,7 @@ struct tcb
   enum tcb_state state;
 
   struct list_head runnable_tcbs;
-  struct list_head send_receive_pending_node;
+  struct list_head send_receive_node;
 
   struct ipc_buffer *ipc_buffer;
   uintptr_t ipc_buffer_user;
@@ -44,7 +44,7 @@ struct tcb *create_tcb_from_elf_in_this_vm (struct tcb *,
 void kill_tcb (struct tcb *t);
 void destroy_tcb (struct tcb *t);
 
-void switch_tcb (struct tcb *t);
+[[noreturn]] void switch_tcb (struct tcb *t);
 void save_tcb_state (struct tcb *t);
 void make_tcb_runnable (struct tcb *t);
 struct tcb *pick_next_tcb ();

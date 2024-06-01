@@ -7,6 +7,7 @@ add_executable(untitled_bare_metal
   ipc.c
   syscall.c
   obj/cnode.c
+  obj/endpoint.c
   obj/tcb.c
   obj/untyped.c
   ../lib/hexdump.c
