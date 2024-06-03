@@ -27,8 +27,11 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
 
   uintptr_t ret = 0;
 
-  if (syscall_number != sys_debug_write)
+  if (syscall_number != sys_debug_write && syscall_number != sys_exit)
     printf ("Task %#lx a0:%#lx ", (uintptr_t)this_tcb & 0xfff, a0);
+
+  if (syscall_number == sys_exit)
+    printf ("Task %#lx ", (uintptr_t)this_tcb & 0xfff);
 
   if (syscall_number == sys_exit)
     {
