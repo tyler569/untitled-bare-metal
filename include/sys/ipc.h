@@ -6,7 +6,7 @@
 enum
 {
   MESSAGE_MAX_EXTRA_CAPS = 4,
-  MESSAGE_MAX_LENGTH = 512 - 5 - MESSAGE_MAX_EXTRA_CAPS,
+  MESSAGE_MAX_LENGTH = 128 - 5 - MESSAGE_MAX_EXTRA_CAPS,
 };
 
 static inline message_info_t

@@ -3,10 +3,10 @@
 #include "kern/syscall.h"
 
 error_t
-cnode_debug_print (cap_t obj)
+cnode_debug_print (cap_t *obj)
 {
-  cte_t *cte = cap_ptr (obj);
-  size_t size = cap_size (obj);
+  cte_t *cte = cap_ptr (*obj);
+  size_t size = cap_size (*obj);
 
   printf ("CNode %p\n", cte);
   printf ("  size:: %lu\n", size);

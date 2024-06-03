@@ -219,3 +219,17 @@ lookup_cap (cap_t cspace_root, word_t index, word_t depth, cap_t *cap)
   *cap = cte[index].cap;
   return no_error;
 }
+
+static inline cap_t *
+lookup_cap_ref (cap_t cspace_root, word_t index, word_t depth, error_t *err)
+{
+  assert (depth == 64); // for now
+  assert (cap_type (cspace_root) == cap_cnode);
+
+  cte_t *cte = cap_ptr (cspace_root);
+  size_t length = cap_size (cspace_root);
+  assert (index < length);
+
+  *err = no_error;
+  return &cte[index].cap;
+}

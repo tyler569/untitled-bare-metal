@@ -21,7 +21,7 @@
 
 #define IA32_EFER_SCE 0x1
 
-#define CR4_FSGSBASE 0x100
+#define CR4_FSGSBASE (1 << 16)
 
 #define KERNEL_CS 0x08l
 #define KERNEL_SS 0x10l

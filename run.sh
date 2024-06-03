@@ -39,4 +39,5 @@ exec qemu-system-x86_64 -s -vga std \
   -M smm=off \
   $video \
   $debugopt \
+  -cpu max \
   $gdbserver |& tee last_output

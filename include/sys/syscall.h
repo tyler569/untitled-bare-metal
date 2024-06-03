@@ -140,6 +140,7 @@ enum syscall_number
 {
   sys_exit,
   sys_debug_write,
+  sys_set_tls,
   sys_send,
   sys_recv,
   sys_call,

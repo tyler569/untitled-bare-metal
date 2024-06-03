@@ -15,6 +15,7 @@ enum tcb_state
   TASK_STATE_DEAD,
   TASK_STATE_SENDING,
   TASK_STATE_RECEIVING,
+  TASK_STATE_CALLING,
 };
 
 struct tcb
@@ -26,6 +27,12 @@ struct tcb
 
   struct ipc_buffer *ipc_buffer;
   uintptr_t ipc_buffer_user;
+  uintptr_t endpoint_badge;
+
+  bool expects_reply;
+  struct tcb *reply_to;
+
+  uintptr_t tls_base;
 
   cap_t cspace_root;
   cap_t vspace_root;

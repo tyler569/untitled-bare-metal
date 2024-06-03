@@ -74,6 +74,12 @@ init_fsgs ()
 }
 
 void
+set_tls_base (uintptr_t base)
+{
+  write_msr (IA32_FS_BASE, base);
+}
+
+void
 init_gdt (per_cpu_t *cpu)
 {
   cpu->arch.gdt[5].base_low = (uintptr_t)&cpu->arch.tss;

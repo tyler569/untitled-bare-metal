@@ -3,188 +3,189 @@
 #include "sys/syscall.h"
 
 __attribute__ ((weak)) error_t
-cnode_copy (cap_t, word_t, uint8_t, cap_t, word_t, uint8_t, cap_rights_t)
+cnode_copy (cap_t *, word_t, uint8_t, cap_t, word_t, uint8_t, cap_rights_t)
 {
   printf ("unimplemented kernel method cnode_copy\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-cnode_delete (cap_t, word_t, uint8_t)
+cnode_delete (cap_t *, word_t, uint8_t)
 {
   printf ("unimplemented kernel method cnode_delete\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-cnode_mint (cap_t, word_t, uint8_t, cap_t, word_t, uint8_t, cap_rights_t,
+cnode_mint (cap_t *, word_t, uint8_t, cap_t, word_t, uint8_t, cap_rights_t,
             word_t)
 {
   printf ("unimplemented kernel method cnode_mint\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-cnode_revoke (cap_t, word_t, uint8_t)
+cnode_revoke (cap_t *, word_t, uint8_t)
 {
   printf ("unimplemented kernel method cnode_revoke\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-cnode_debug_print (cap_t)
+cnode_debug_print (cap_t *)
 {
   printf ("unimplemented kernel method cnode_debug_print\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_echo (cap_t)
+tcb_echo (cap_t *)
 {
   printf ("unimplemented kernel method tcb_echo\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_configure (cap_t, word_t, cap_t, word_t, cap_t, word_t, word_t, cap_t)
+tcb_configure (cap_t *, word_t, cap_t, word_t, cap_t, word_t, word_t, cap_t)
 {
   printf ("unimplemented kernel method tcb_configure\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_copy_registers (cap_t, cap_t, bool, bool, bool, bool, word_t)
+tcb_copy_registers (cap_t *, cap_t, bool, bool, bool, bool, word_t)
 {
   printf ("unimplemented kernel method tcb_copy_registers\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_read_registers (cap_t, bool, word_t, word_t, user_context_t *)
+tcb_read_registers (cap_t *, bool, word_t, word_t, user_context_t *)
 {
   printf ("unimplemented kernel method tcb_read_registers\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_resume (cap_t)
+tcb_resume (cap_t *)
 {
   printf ("unimplemented kernel method tcb_resume\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_set_affinity (cap_t, word_t)
+tcb_set_affinity (cap_t *, word_t)
 {
   printf ("unimplemented kernel method tcb_set_affinity\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_set_ipc_buffer (cap_t, word_t, cap_t)
+tcb_set_ipc_buffer (cap_t *, word_t, cap_t)
 {
   printf ("unimplemented kernel method tcb_set_ipc_buffer\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_set_space (cap_t, word_t, cap_t, word_t, cap_t, word_t)
+tcb_set_space (cap_t *, word_t, cap_t, word_t, cap_t, word_t)
 {
   printf ("unimplemented kernel method tcb_set_space\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_set_tls_base (cap_t, word_t)
+tcb_set_tls_base (cap_t *, word_t)
 {
   printf ("unimplemented kernel method tcb_set_tls_base\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_suspend (cap_t)
+tcb_suspend (cap_t *)
 {
   printf ("unimplemented kernel method tcb_suspend\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-tcb_write_registers (cap_t, bool, word_t, word_t, user_context_t *)
+tcb_write_registers (cap_t *, bool, word_t, word_t, user_context_t *)
 {
   printf ("unimplemented kernel method tcb_write_registers\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-untyped_retype (cap_t, word_t, word_t, cap_t, word_t, uint8_t, word_t, word_t)
+untyped_retype (cap_t *, word_t, word_t, cap_t, word_t, uint8_t, word_t,
+                word_t)
 {
   printf ("unimplemented kernel method untyped_retype\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_in8 (cap_t, word_t, word_t)
+x86_io_port_in8 (cap_t *, word_t, word_t)
 {
   printf ("unimplemented kernel method x86_io_port_in8\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_in16 (cap_t, word_t, word_t)
+x86_io_port_in16 (cap_t *, word_t, word_t)
 {
   printf ("unimplemented kernel method x86_io_port_in16\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_in32 (cap_t, word_t, word_t)
+x86_io_port_in32 (cap_t *, word_t, word_t)
 {
   printf ("unimplemented kernel method x86_io_port_in32\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_out8 (cap_t, word_t, word_t)
+x86_io_port_out8 (cap_t *, word_t, word_t)
 {
   printf ("unimplemented kernel method x86_io_port_out8\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_out16 (cap_t, word_t, word_t)
+x86_io_port_out16 (cap_t *, word_t, word_t)
 {
   printf ("unimplemented kernel method x86_io_port_out16\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_out32 (cap_t, word_t, word_t)
+x86_io_port_out32 (cap_t *, word_t, word_t)
 {
   printf ("unimplemented kernel method x86_io_port_out32\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_64_pdpt_map (cap_t, cap_t, word_t, x86_vm_attributes_t)
+x86_64_pdpt_map (cap_t *, cap_t, word_t, x86_vm_attributes_t)
 {
   printf ("unimplemented kernel method x86_64_pdpt_map\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_64_pdpt_unmap (cap_t)
+x86_64_pdpt_unmap (cap_t *)
 {
   printf ("unimplemented kernel method x86_64_pdpt_unmap\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_64_pd_map (cap_t, cap_t, word_t, x86_vm_attributes_t)
+x86_64_pd_map (cap_t *, cap_t, word_t, x86_vm_attributes_t)
 {
   printf ("unimplemented kernel method x86_64_pd_map\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_64_pd_unmap (cap_t)
+x86_64_pd_unmap (cap_t *)
 {
   printf ("unimplemented kernel method x86_64_pd_unmap\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_64_pt_map (cap_t, cap_t, word_t, x86_vm_attributes_t)
+x86_64_pt_map (cap_t *, cap_t, word_t, x86_vm_attributes_t)
 {
   printf ("unimplemented kernel method x86_64_pt_map\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_64_pt_unmap (cap_t)
+x86_64_pt_unmap (cap_t *)
 {
   printf ("unimplemented kernel method x86_64_pt_unmap\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_64_page_map (cap_t, cap_t, word_t, x86_vm_attributes_t)
+x86_64_page_map (cap_t *, cap_t, word_t, x86_vm_attributes_t)
 {
   printf ("unimplemented kernel method x86_64_page_map\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_64_page_unmap (cap_t)
+x86_64_page_unmap (cap_t *)
 {
   printf ("unimplemented kernel method x86_64_page_unmap\n");
   return illegal_operation;

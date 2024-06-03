@@ -13,7 +13,7 @@ if grep -q '(0x.*) <.*>' last_output; then
     grep '(0x.*) <.*>' last_output | \
         sed 's/.*(0x\(.*\)) .*/\1/g' | \
         xargs "$addr2line_binary" -fips -e $file
-elif grep -q '^\s\+[0-9]\+:' last_output; then
+elif grep -q '^\s\+[0-9]\+:.*IP=' last_output; then
     grep '^\s\+[0-9]\+:' last_output | \
         awk '{print $7}' | \
         cut -c4- | \
