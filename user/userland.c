@@ -127,11 +127,19 @@ thread_entry (void *ipc_buffer, uintptr_t arg)
   printf ("Hello, World from userland thread! Arg is %lu\n", arg);
 
   message_info_t info = new_message_info (0, 0, 0, 1);
-  set_mr (0, 42);
+  for (word_t i = 0; i < 100; i++)
+    {
+      set_mr (0, i);
+      send (101, info);
+    }
+
+  info = new_message_info (1, 0, 0, 0);
   send (101, info);
 
   exit ();
 }
+
+extern char __executable_start;
 
 [[noreturn]] int
 c_start (void *ipc_buffer, void *boot_info)
@@ -141,6 +149,7 @@ c_start (void *ipc_buffer, void *boot_info)
   struct boot_info *bi = boot_info;
 
   printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
+  printf ("executable_start: %p\n", &__executable_start);
 
   printf ("Boot info: %p\n", bi);
   printf ("  .n_untypeds = %lu\n", bi->n_untypeds);
@@ -152,7 +161,7 @@ c_start (void *ipc_buffer, void *boot_info)
   // cnode_debug_print (init_cap_root_cnode);
 
   tcb_configure (100, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0,
-				 (word_t)ipc_buffer + 1024, 0);
+                 (word_t)ipc_buffer + 1024, 0);
 
   frame_t frame;
   tcb_read_registers (init_cap_init_tcb, false, 0, 0, &frame);
@@ -167,10 +176,16 @@ c_start (void *ipc_buffer, void *boot_info)
   printf ("Starting new userland thread\n");
   tcb_resume (100);
 
-  word_t badge;
-  message_info_t resp = recv (101, &badge);
-  printf ("Received message on endpoint 101, badge %lu\n", badge);
-  printf ("Message info: %#lx, mr0: %lu\n", resp, get_mr (0));
+  while (true)
+    {
+      word_t badge;
+      message_info_t resp = recv (101, &badge);
+      if (get_message_length (resp) > 0)
+        printf ("received %lu\n", get_mr (0));
+
+      if (get_message_label (resp) == 1)
+        break;
+    }
 
   exit ();
 }
