@@ -29,14 +29,15 @@ send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
 }
 
 [[noreturn]] static void
-queue_message_on_endpoint (struct endpoint *e, word_t info, word_t badge, bool is_call)
+queue_message_on_endpoint (struct endpoint *e, word_t info, word_t badge,
+                           bool is_call)
 {
   append_to_list (&this_tcb->send_receive_node, &e->list);
 
   if (is_call)
-	this_tcb->state = TASK_STATE_CALLING;
+    this_tcb->state = TASK_STATE_CALLING;
   else
-	this_tcb->state = TASK_STATE_SENDING;
+    this_tcb->state = TASK_STATE_SENDING;
 
   if (this_tcb->ipc_buffer)
     this_tcb->ipc_buffer->tag = info;
@@ -81,12 +82,13 @@ endpoint_send (struct endpoint *e, word_t message_info, word_t badge,
                bool is_call)
 {
   if (is_list_empty (&e->list))
-	queue_message_on_endpoint (e, message_info, badge, is_call);
+    queue_message_on_endpoint (e, message_info, badge, is_call);
   else
     {
       struct tcb *tcb = CONTAINER_OF (first_item (&e->list), struct tcb,
                                       send_receive_node);
-      bool send_blocked = tcb->state == TASK_STATE_SENDING || tcb->state == TASK_STATE_CALLING;
+      bool send_blocked = tcb->state == TASK_STATE_SENDING
+                          || tcb->state == TASK_STATE_CALLING;
       bool recv_blocked = tcb->state == TASK_STATE_RECEIVING;
 
       if (send_blocked)
@@ -101,36 +103,37 @@ endpoint_send (struct endpoint *e, word_t message_info, word_t badge,
     }
 }
 
-static void maybe_init_endpoint (struct endpoint *e)
+static void
+maybe_init_endpoint (struct endpoint *e)
 {
   if (e->list.next)
-	return;
+    return;
 
   init_list (&e->list);
 }
 
 [[noreturn]] error_t
-invoke_endpoint_send (cap_t *cap, word_t message_info)
+invoke_endpoint_send (cte_t *cap, word_t message_info)
 {
-  assert (cap_type (*cap) == cap_endpoint);
+  assert (cap_type (cap) == cap_endpoint);
 
-  struct endpoint *e = cap_ptr (*cap);
+  struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
-  endpoint_send (e, message_info, cap->badge, false);
+  endpoint_send (e, message_info, cap->cap.badge, false);
   unreachable ();
 }
 
 error_t
-invoke_endpoint_recv (cap_t *cap)
+invoke_endpoint_recv (cte_t *cap)
 {
-  assert (cap_type (*cap) == cap_endpoint);
+  assert (cap_type (cap) == cap_endpoint);
 
-  struct endpoint *e = cap_ptr (*cap);
+  struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
   if (is_list_empty (&e->list))
-	{
-	  queue_receiver_on_endpoint (e);
-	}
+    {
+      queue_receiver_on_endpoint (e);
+    }
   else
     {
       receive_message_from_blocked_sender (e,
@@ -141,20 +144,20 @@ invoke_endpoint_recv (cap_t *cap)
 }
 
 [[noreturn]] error_t
-invoke_endpoint_call (cap_t *cap, word_t message_info)
+invoke_endpoint_call (cte_t *cap, word_t message_info)
 {
-  assert (cap_type (*cap) == cap_endpoint);
+  assert (cap_type (cap) == cap_endpoint);
 
   this_tcb->expects_reply = true;
 
-  struct endpoint *e = cap_ptr (*cap);
+  struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
-  endpoint_send (e, message_info, cap->badge, true);
+  endpoint_send (e, message_info, cap->cap.badge, true);
   unreachable ();
 }
 
 error_t
-invoke_reply (word_t message_info)
+invoke_reply (cte_t *, word_t message_info)
 {
   struct tcb *receiver = this_tcb->reply_to;
   if (!receiver || receiver->state != TASK_STATE_CALLING)

@@ -87,16 +87,16 @@ make_tcb_runnable (struct tcb *t)
 }
 
 error_t
-tcb_resume (cap_t *cap)
+tcb_resume (cte_t *cap)
 {
-  struct tcb *tcb = cap_ptr (*cap);
+  struct tcb *tcb = cap_ptr (cap);
   printf ("tcb_resume: %p\n", tcb);
   make_tcb_runnable (tcb);
   return no_error;
 }
 
 error_t
-tcb_echo (cap_t *cap)
+tcb_echo (cte_t *cap)
 {
   (void)cap;
 
@@ -105,35 +105,35 @@ tcb_echo (cap_t *cap)
 }
 
 error_t
-tcb_read_registers (cap_t *cap, bool suspend_source, word_t arch_flags,
+tcb_read_registers (cte_t *cap, bool suspend_source, word_t arch_flags,
                     word_t count, frame_t *regs)
 {
   (void)suspend_source;
   (void)arch_flags;
   (void)count;
 
-  struct tcb *tcb = cap_ptr (*cap);
+  struct tcb *tcb = cap_ptr (cap);
   copy_frame (regs, &tcb->saved_state);
   return no_error;
 }
 
 error_t
-tcb_write_registers (cap_t *cap, bool resume_target, word_t arch_flags,
+tcb_write_registers (cte_t *cap, bool resume_target, word_t arch_flags,
                      word_t count, frame_t *regs)
 {
   (void)resume_target;
   (void)arch_flags;
   (void)count;
 
-  struct tcb *tcb = cap_ptr (*cap);
+  struct tcb *tcb = cap_ptr (cap);
   copy_frame (&tcb->saved_state, regs);
   return no_error;
 }
 
 error_t
-tcb_configure (cap_t *obj, word_t fault_ep, cap_t cspace_root,
-               word_t cspace_root_data, cap_t vspace_root,
-               word_t vspace_root_data, word_t buffer, cap_t buffer_frame)
+tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
+               word_t cspace_root_data, cte_t *vspace_root,
+               word_t vspace_root_data, word_t buffer, cte_t *buffer_frame)
 {
   (void)fault_ep;
   (void)cspace_root_data;
@@ -141,19 +141,19 @@ tcb_configure (cap_t *obj, word_t fault_ep, cap_t cspace_root,
   (void)buffer;
   (void)buffer_frame;
 
-  struct tcb *tcb = cap_ptr (*obj);
+  struct tcb *tcb = cap_ptr (slot);
 
-  tcb->cspace_root = cspace_root;
-  tcb->vspace_root = vspace_root;
+  tcb->cspace_root = cspace_root->cap;
+  tcb->vspace_root = vspace_root->cap;
   tcb->vm_root = get_vm_root (); // TODO HACK
   tcb->ipc_buffer = (struct ipc_buffer *)buffer;
   return no_error;
 }
 
 error_t
-tcb_set_tls_base (cap_t *cap, word_t tls_base)
+tcb_set_tls_base (cte_t *cap, word_t tls_base)
 {
-  struct tcb *tcb = cap_ptr (*cap);
+  struct tcb *tcb = cap_ptr (cap);
   tcb->tls_base = tls_base;
   if (tcb == this_tcb)
     set_tls_base (tls_base);

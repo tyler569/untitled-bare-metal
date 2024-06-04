@@ -52,6 +52,12 @@ cap_ptr (cap_t cap)
   return bits_pointer (cap.words[0]);
 }
 
+static inline void
+cap_set_ptr (cap_t *cap, void *ptr)
+{
+  set_bits_pointer (&cap->words[0], ptr);
+}
+
 static inline word_t
 cap_type (cap_t cap)
 {
@@ -65,9 +71,21 @@ cap_size (cap_t cap)
 }
 
 static inline void
-cap_set_ptr (cap_t *cap, void *ptr)
+cap_set_size (cap_t *cap, word_t size_bits)
 {
-  set_bits_pointer (&cap->words[0], ptr);
+  cap->size_bits = size_bits;
+}
+
+static inline word_t
+cap_rights (cap_t cap)
+{
+  return cap.rights;
+}
+
+static inline void
+cap_set_rights (cap_t *cap, word_t rights)
+{
+  cap->rights = rights;
 }
 
 struct cdt_node
@@ -233,3 +251,86 @@ lookup_cap_ref (cap_t cspace_root, word_t index, word_t depth, error_t *err)
   *err = no_error;
   return &cte[index].cap;
 }
+
+static inline cte_t *
+lookup_cap_slot (cap_t cspace_root, word_t index, word_t depth, error_t *err)
+{
+  assert (depth == 64); // for now
+  assert (cap_type (cspace_root) == cap_cnode);
+
+  cte_t *cte = cap_ptr (cspace_root);
+  size_t length = cap_size (cspace_root);
+  assert (index < length);
+
+  *err = no_error;
+  return &cte[index];
+}
+
+static inline word_t
+cte_ptr_type (cte_t *cte)
+{
+  return cap_type (cte->cap);
+}
+
+static inline void *
+cte_ptr (cte_t *cte)
+{
+  return cap_ptr (cte->cap);
+}
+
+static inline void
+cte_set_ptr (cte_t *cte, void *ptr)
+{
+  cap_set_ptr (&cte->cap, ptr);
+}
+
+static inline word_t
+cte_size (cte_t *cte)
+{
+  return cap_size (cte->cap);
+}
+
+static inline void
+cte_set_size (cte_t *cte, word_t size)
+{
+  cte->cap.size_bits = size;
+}
+
+static inline word_t
+cte_rights (cte_t *cte)
+{
+  return cte->cap.rights;
+}
+
+static inline void
+cte_set_rights (cte_t *cte, word_t rights)
+{
+  cte->cap.rights = rights;
+}
+
+#define cap_type(c) _Generic ((c), cap_t: cap_type, cte_t *: cte_ptr_type) (c)
+#define cap_ptr(c) _Generic ((c), cap_t: cap_ptr, cte_t *: cte_ptr) (c)
+#define cap_size(c) _Generic ((c), cap_t: cap_size, cte_t *: cte_size) (c)
+#define cap_rights(c)                                                         \
+  _Generic ((c), cap_t: cap_rights, cte_t *: cte_rights) (c)
+#define cap_set_ptr(c, p)                                                     \
+  _Generic ((c), cap_t: cap_set_ptr, cte_t *: cte_set_ptr) (c, p)
+#define cap_set_size(c, s)                                                    \
+  _Generic ((c), cap_t: cap_set_size, cte_t *: cte_set_size) (c, s)
+#define cap_set_rights(c, r)                                                  \
+  _Generic ((c), cap_t: cap_set_rights, cte_t *: cte_set_rights) (c, r)
+
+static inline const char *
+cte_type_string (cte_t *cte)
+{
+  return cap_type_string (cte_ptr_type (cte));
+}
+
+static inline const char *
+cap_value_type_string (cap_t cap)
+{
+  return cap_type_string (cap_type (cap));
+}
+
+#define cap_type_string(t)                                                    \
+  _Generic ((t), word_t: cap_type_string, cap_t: cap_value_type_string, cte_t *: cte_type_string) (t)

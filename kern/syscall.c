@@ -11,8 +11,8 @@
 #include "kern/methods.h"
 #include "kern/syscall_dispatch.c"
 
-#define GET_CAP(cptr, obj, err)                                               \
-  obj = lookup_cap_ref (this_tcb->cspace_root, cptr, 64, &err);                   \
+#define GET_CAP(cptr, slot, err)                                               \
+  slot = lookup_cap_slot (this_tcb->cspace_root, cptr, 64, &err);               \
   if (err != no_error)                                                        \
     {                                                                         \
       return_ipc (err, 0);                                                    \
@@ -46,47 +46,47 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       return no_error;
     }
 
-  cap_t *obj;
   error_t err;
+  cte_t *slot;
 
   switch (syscall_number)
     {
     case sys_call:
-      GET_CAP (a0, obj, err);
+      GET_CAP (a0, slot, err);
 
-      if (obj->type != cap_endpoint)
-        return dispatch_method (obj, a1);
+      if (cap_type (slot) != cap_endpoint)
+        return dispatch_method (slot, a1);
       else
         {
           printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
-          invoke_endpoint_call (obj, a1);
+          invoke_endpoint_call (slot, a1);
         }
     case sys_reply:
       printf ("sys_reply (info: %#lx)\n", a0);
-      return invoke_reply (a0);
+      return invoke_reply (nullptr, a0); // TODO TCB reply cap
     case sys_send:
-      GET_CAP (a0, obj, err);
+      GET_CAP (a0, slot, err);
       printf ("sys_send (dest: %#lx, info: %#lx)\n", a0, a1);
 
-      if (obj->type != cap_endpoint)
+      if (cap_type (slot) != cap_endpoint)
         {
           return_ipc (illegal_operation, 0);
           return illegal_operation;
         }
 
-      return invoke_endpoint_send (obj, a1);
+      return invoke_endpoint_send (slot, a1);
     case sys_recv:
-      GET_CAP (a0, obj, err);
+      GET_CAP (a0, slot, err);
 
       printf ("sys_recv (dest: %#lx)\n", a0);
 
-      if (obj->type != cap_endpoint)
+      if (cap_type (slot) != cap_endpoint)
         {
           return_ipc (illegal_operation, 0);
           return illegal_operation;
         }
 
-      return invoke_endpoint_recv (obj);
+      return invoke_endpoint_recv (slot);
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
       return no_error;
