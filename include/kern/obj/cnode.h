@@ -5,7 +5,7 @@
 #include "sys/obj/cnode.h"
 
 static inline cte_t *
-cte_for (cap_t root_cnode, word_t index, word_t depth)
+cte_for (cte_t *root_cnode, word_t index, word_t depth)
 {
   assert (depth == 64);
   cte_t *cte = cap_ptr (root_cnode);

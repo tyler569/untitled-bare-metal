@@ -11,8 +11,8 @@
 #include "kern/methods.h"
 #include "kern/syscall_dispatch.c"
 
-#define GET_CAP(cptr, slot, err)                                               \
-  slot = lookup_cap_slot (this_tcb->cspace_root, cptr, 64, &err);               \
+#define GET_CAP(cptr, slot, err)                                              \
+  slot = lookup_cap_slot_this_tcb (cptr, &err);                               \
   if (err != no_error)                                                        \
     {                                                                         \
       return_ipc (err, 0);                                                    \
@@ -26,6 +26,9 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
   (void)a2, (void)a3, (void)a4, (void)a5, (void)f;
 
   uintptr_t ret = 0;
+
+  if (this_tcb)
+    this_tcb->current_user_frame = f;
 
   if (syscall_number != sys_debug_write && syscall_number != sys_exit)
     printf ("Task %#lx a0:%#lx ", (uintptr_t)this_tcb & 0xfff, a0);
@@ -87,6 +90,10 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         }
 
       return invoke_endpoint_recv (slot);
+    case sys_yield:
+      printf ("sys_yield ()\n");
+      schedule ();
+      unreachable ();
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
       return no_error;

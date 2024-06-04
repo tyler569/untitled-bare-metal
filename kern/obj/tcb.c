@@ -53,15 +53,6 @@ create_tcb_from_elf_in_this_vm (struct tcb *t, struct elf_ehdr *elf)
 }
 
 void
-configure_tcb (struct tcb *t, cap_t cspace_root, cap_t vspace_root,
-               uintptr_t ipc_buffer)
-{
-  t->cspace_root = cspace_root;
-  t->vspace_root = vspace_root;
-  t->ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buffer);
-}
-
-void
 destroy_tcb (struct tcb *t)
 {
   assert (is_list_empty (&t->runnable_tcbs));
@@ -143,10 +134,15 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
 
   struct tcb *tcb = cap_ptr (slot);
 
-  tcb->cspace_root = cspace_root->cap;
-  tcb->vspace_root = vspace_root->cap;
-  tcb->vm_root = get_vm_root (); // TODO HACK
-  tcb->ipc_buffer = (struct ipc_buffer *)buffer;
+  copy_cap (&tcb->cspace_root, cspace_root);
+  copy_cap (&tcb->vspace_root, vspace_root);
+  copy_cap (&tcb->ipc_buffer_frame, buffer_frame);
+
+  tcb->ipc_buffer_user = buffer;
+
+  tcb->vm_root = get_vm_root ();                 // TODO HACK
+  tcb->ipc_buffer = (struct ipc_buffer *)buffer; // TODO HACK
+
   return no_error;
 }
 

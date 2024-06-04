@@ -34,8 +34,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        src_root
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        src_root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -112,8 +111,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        src_root
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        src_root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -245,8 +243,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        cspace_root
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        cspace_root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -254,8 +251,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             set_mr (0, 0);
             return error;
           }
-        vspace_root
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (1), 64, &error);
+        vspace_root = lookup_cap_slot_this_tcb (get_cap (1), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 1\n");
@@ -263,8 +259,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             set_mr (0, 1);
             return error;
           }
-        buffer_frame
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (2), 64, &error);
+        buffer_frame = lookup_cap_slot_this_tcb (get_cap (2), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 2\n");
@@ -314,8 +309,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        source
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        source = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -449,8 +443,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        buffer_frame
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        buffer_frame = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -493,8 +486,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        cspace_root
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        cspace_root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -502,8 +494,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             set_mr (0, 0);
             return error;
           }
-        vspace_root
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (1), 64, &error);
+        vspace_root = lookup_cap_slot_this_tcb (get_cap (1), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 1\n");
@@ -642,8 +633,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        root
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -868,8 +858,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        vspace
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -936,8 +925,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        vspace
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -1004,8 +992,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        vspace
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");
@@ -1072,8 +1059,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return truncated_message;
           }
 
-        vspace
-            = lookup_cap_slot (this_tcb->cspace_root, get_cap (0), 64, &error);
+        vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
           {
             printf ("lookup_cap failed for cap 0\n");

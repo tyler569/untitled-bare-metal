@@ -49,17 +49,19 @@ queue_message_on_endpoint (struct endpoint *e, word_t info, word_t badge,
 }
 
 static void
-receive_message_from_blocked_sender (struct endpoint *e, word_t *info,
-                                     word_t *badge)
+receive_message_from_blocked_sender (struct endpoint *e)
 {
   struct list_head *next = pop_from_list (&e->list);
   struct tcb *sender = CONTAINER_OF (next, struct tcb, send_receive_node);
 
-  *info = sender->ipc_buffer->tag;
-  *badge = sender->endpoint_badge;
+  message_info_t info = (message_info_t)sender->ipc_buffer->tag;
+
+  this_tcb->ipc_buffer->tag = info;
+  this_tcb->current_user_frame->rax = sender->ipc_buffer->tag;
+  this_tcb->current_user_frame->rdi = sender->endpoint_badge;
 
   word_t tmp;
-  for (size_t i = 0; i < get_message_length (*info); i++)
+  for (size_t i = 0; i < get_message_length (info); i++)
     {
       tmp = sender->ipc_buffer->msg[i];
       this_tcb->ipc_buffer->msg[i] = tmp;
@@ -136,9 +138,7 @@ invoke_endpoint_recv (cte_t *cap)
     }
   else
     {
-      receive_message_from_blocked_sender (e,
-                                           &this_tcb->current_user_frame->rax,
-                                           &this_tcb->current_user_frame->rdi);
+      receive_message_from_blocked_sender (e);
       return no_error;
     }
 }

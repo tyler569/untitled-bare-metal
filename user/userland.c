@@ -103,6 +103,12 @@ recv (cptr_t cap, word_t *sender)
   return _syscall22 (sys_recv, cap, 0, sender);
 }
 
+void
+yield ()
+{
+  _syscall0 (sys_yield);
+}
+
 #include "sys/user_method_stubs.h"
 
 [[noreturn]] static inline void
@@ -127,7 +133,7 @@ thread_entry (void *ipc_buffer, uintptr_t arg)
   printf ("Hello, World from userland thread! Arg is %lu\n", arg);
 
   message_info_t info = new_message_info (0, 0, 0, 1);
-  for (word_t i = 0; i < 100; i++)
+  for (word_t i = 0; i < 10; i++)
     {
       set_mr (0, i);
       send (101, info);
@@ -175,13 +181,17 @@ c_start (void *ipc_buffer, void *boot_info)
 
   printf ("Starting new userland thread\n");
   tcb_resume (100);
+  yield ();
 
   while (true)
     {
       word_t badge;
+      word_t msg = 1;
       message_info_t resp = recv (101, &badge);
       if (get_message_length (resp) > 0)
-        printf ("received %lu\n", get_mr (0));
+        printf ("received %lu\n", (msg = get_mr (0)));
+      if (msg % 2 == 0)
+        yield ();
 
       if (get_message_label (resp) == 1)
         break;

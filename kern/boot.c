@@ -40,7 +40,7 @@ create_init_tcb (void *init_elf)
   bi->n_untypeds = 32;
   create_init_untyped_caps (init_cnode + 4, &bi->n_untypeds, bi->untypeds);
 
-  init_tcb.cspace_root = init_cnode_cap;
+  init_tcb.cspace_root.cap = init_cnode_cap;
 
   make_tcb_runnable (&init_tcb);
 }

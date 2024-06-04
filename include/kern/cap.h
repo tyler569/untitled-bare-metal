@@ -224,47 +224,22 @@ cap_page_new (uintptr_t frame_phy)
   return cap;
 }
 
-static inline exception_t
-lookup_cap (cap_t cspace_root, word_t index, word_t depth, cap_t *cap)
-{
-  assert (depth == 64); // for now
-  assert (cap_type (cspace_root) == cap_cnode);
-
-  cte_t *cte = cap_ptr (cspace_root);
-  size_t length = cap_size (cspace_root);
-  assert (index < length);
-
-  *cap = cte[index].cap;
-  return no_error;
-}
-
-static inline cap_t *
-lookup_cap_ref (cap_t cspace_root, word_t index, word_t depth, error_t *err)
-{
-  assert (depth == 64); // for now
-  assert (cap_type (cspace_root) == cap_cnode);
-
-  cte_t *cte = cap_ptr (cspace_root);
-  size_t length = cap_size (cspace_root);
-  assert (index < length);
-
-  *err = no_error;
-  return &cte[index].cap;
-}
-
 static inline cte_t *
-lookup_cap_slot (cap_t cspace_root, word_t index, word_t depth, error_t *err)
+lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
 {
   assert (depth == 64); // for now
-  assert (cap_type (cspace_root) == cap_cnode);
+  assert (cap_type (cspace_root->cap) == cap_cnode);
 
-  cte_t *cte = cap_ptr (cspace_root);
-  size_t length = cap_size (cspace_root);
+  cte_t *cte = cap_ptr (cspace_root->cap);
+  size_t length = cap_size (cspace_root->cap);
   assert (index < length);
 
   *err = no_error;
   return &cte[index];
 }
+
+#define lookup_cap_slot_this_tcb(index, err)                                  \
+  lookup_cap_slot (&this_tcb->cspace_root, index, 64, err)
 
 static inline word_t
 cte_ptr_type (cte_t *cte)
@@ -333,4 +308,15 @@ cap_value_type_string (cap_t cap)
 }
 
 #define cap_type_string(t)                                                    \
-  _Generic ((t), word_t: cap_type_string, cap_t: cap_value_type_string, cte_t *: cte_type_string) (t)
+  _Generic ((t),                                                              \
+      word_t: cap_type_string,                                                \
+      cap_t: cap_value_type_string,                                           \
+      cte_t *: cte_type_string) (t)
+
+static inline void
+copy_cap (cte_t *dest, cte_t *src)
+{
+  dest->cap = src->cap;
+
+  // TODO: insert into CDT
+}

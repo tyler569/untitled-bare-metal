@@ -34,8 +34,10 @@ struct tcb
 
   uintptr_t tls_base;
 
-  cap_t cspace_root;
-  cap_t vspace_root;
+  cte_t cspace_root;
+  cte_t vspace_root;
+  cte_t ipc_buffer_frame;
+  cte_t reply;
 
   uintptr_t vm_root;
 
