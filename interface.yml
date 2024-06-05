@@ -98,8 +98,6 @@ types:
           - { name: node_depth, type: uint8_t }
           - { name: node_offset, type: word_t }
           - { name: num_objects, type: word_t }
-  - name: vspace
-    methods: []
   - name: x86_io_port
     methods:
       - name: in8
@@ -126,6 +124,8 @@ types:
         parameters:
           - { name: port, type: word_t }
           - { name: value, type: word_t }
+  - name: x86_64_pml4
+    methods: []
   - name: x86_64_pdpt
     methods:
       - name: map

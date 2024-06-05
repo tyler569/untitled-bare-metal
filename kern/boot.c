@@ -35,7 +35,7 @@ create_init_tcb (void *init_elf)
 
   init_cnode[1].cap = cap_tcb_new (&init_tcb);
   init_cnode[2].cap = init_cnode_cap;
-  init_cnode[3].cap = cap_vspace_new (get_vm_root ());
+  init_cnode[3].cap = cap_x86_64_pml4_new (get_vm_root ());
 
   bi->n_untypeds = 32;
   create_init_untyped_caps (init_cnode + 4, &bi->n_untypeds, bi->untypeds);

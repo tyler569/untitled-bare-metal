@@ -81,7 +81,6 @@ error_t
 tcb_resume (cte_t *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
-  printf ("tcb_resume: %p\n", tcb);
   make_tcb_runnable (tcb);
   return no_error;
 }

@@ -170,13 +170,6 @@ cap_cnode_new (void *cnode, uintptr_t size_bits)
 }
 
 static inline cap_t
-cap_vspace_new (uintptr_t root_phy)
-{
-  cap_t cap = { .type = cap_vspace, .badge = root_phy };
-  return cap;
-}
-
-static inline cap_t
 cap_tcb_new (void *tcb)
 {
   cap_t cap = { .type = cap_tcb };
@@ -184,16 +177,16 @@ cap_tcb_new (void *tcb)
   return cap;
 }
 
-// static inline cap_t
-// cap_pml4_new (uintptr_t pml4_phy)
-// {
-//   cap_t cap = { .type = cap_x86_64_pml4 };
-//   cap_set_ptr (&cap, (void *)pml4_phy);
-//   return cap;
-// }
+static inline cap_t
+cap_x86_64_pml4_new (uintptr_t pml4_phy)
+{
+  cap_t cap = { .type = cap_x86_64_pml4 };
+  cap_set_ptr (&cap, (void *)pml4_phy);
+  return cap;
+}
 
 static inline cap_t
-cap_pdpt_new (uintptr_t pdpt_phy)
+cap_x86_64_pdpt_new (uintptr_t pdpt_phy)
 {
   cap_t cap = { .type = cap_x86_64_pdpt };
   cap_set_ptr (&cap, (void *)pdpt_phy);
@@ -201,7 +194,7 @@ cap_pdpt_new (uintptr_t pdpt_phy)
 }
 
 static inline cap_t
-cap_pd_new (uintptr_t pd_phy)
+cap_x86_64_pd_new (uintptr_t pd_phy)
 {
   cap_t cap = { .type = cap_x86_64_pd };
   cap_set_ptr (&cap, (void *)pd_phy);
@@ -209,7 +202,7 @@ cap_pd_new (uintptr_t pd_phy)
 }
 
 static inline cap_t
-cap_pt_new (uintptr_t pt_phy)
+cap_x86_64_pt_new (uintptr_t pt_phy)
 {
   cap_t cap = { .type = cap_x86_64_pt };
   cap_set_ptr (&cap, (void *)pt_phy);
@@ -217,7 +210,7 @@ cap_pt_new (uintptr_t pt_phy)
 }
 
 static inline cap_t
-cap_page_new (uintptr_t frame_phy)
+cap_x86_64_page_new (uintptr_t frame_phy)
 {
   cap_t cap = { .type = cap_x86_64_page };
   cap_set_ptr (&cap, (void *)frame_phy);

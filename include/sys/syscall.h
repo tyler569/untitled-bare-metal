@@ -11,8 +11,8 @@ enum object_type
   cap_cnode,
   cap_tcb,
   cap_untyped,
-  cap_vspace,
   cap_x86_io_port,
+  cap_x86_64_pml4,
   cap_x86_64_pdpt,
   cap_x86_64_pd,
   cap_x86_64_pt,
@@ -35,10 +35,10 @@ cap_type_string (word_t type)
       return "tcb";
     case cap_untyped:
       return "untyped";
-    case cap_vspace:
-      return "vspace";
     case cap_x86_io_port:
       return "x86_io_port";
+    case cap_x86_64_pml4:
+      return "x86_64_pml4";
     case cap_x86_64_pdpt:
       return "x86_64_pdpt";
     case cap_x86_64_pd:
