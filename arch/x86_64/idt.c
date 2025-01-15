@@ -111,12 +111,14 @@ init_ap_idt ()
   load_idt (&idt_ptr);
 }
 
+char __attribute__ ((aligned (16))) int_stacks[INT_STACK_SIZE * 3];
+
 void
 init_int_stacks ()
 {
-  void *int_stack = kmem_alloc (INT_STACK_SIZE);
-  void *nmi_stack = kmem_alloc (INT_STACK_SIZE);
-  void *df_stack = kmem_alloc (INT_STACK_SIZE);
+  void *int_stack = int_stacks;
+  void *nmi_stack = int_stacks + INT_STACK_SIZE;
+  void *df_stack = int_stacks + 2 * INT_STACK_SIZE;
 
   this_cpu->kernel_stack_top = (uintptr_t)int_stack + INT_STACK_SIZE;
   this_cpu->arch.tss.rsp[0] = this_cpu->kernel_stack_top;

@@ -160,6 +160,12 @@ c_start (void *ipc_buffer, void *boot_info)
   printf ("Boot info: %p\n", bi);
   printf ("  .n_untypeds = %lu\n", bi->n_untypeds);
 
+  for (word_t i = 0; i < bi->n_untypeds; i++)
+    {
+      printf ("  .untyped[%lu]: paddr = %016lx, size = %lu\n", i,
+              bi->untypeds[i].base, 1ul << bi->untypeds[i].size_bits);
+    }
+
   untyped_retype (4, cap_tcb, 0, init_cap_root_cnode, init_cap_root_cnode, 64,
                   100, 1);
   untyped_retype (4, cap_endpoint, 0, init_cap_root_cnode, init_cap_root_cnode,

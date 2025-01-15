@@ -39,7 +39,6 @@ uintptr_t physical_of (uintptr_t addr);
 void add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys,
                      int flags);
 
-void *kmem_alloc (size_t);
 uintptr_t alloc_page ();
 
 struct untyped_desc;
