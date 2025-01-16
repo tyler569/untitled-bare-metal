@@ -3,6 +3,7 @@
 #include "kern/ipc.h"
 #include "kern/obj/tcb.h"
 #include "kern/syscall.h"
+#include "string.h"
 
 [[noreturn]] static void
 send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
@@ -10,12 +11,8 @@ send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
 {
   (void)badge;
 
-  word_t tmp;
-  for (size_t i = 0; i < get_message_length (info); i++)
-    {
-      tmp = this_tcb->ipc_buffer->msg[i];
-      receiver->ipc_buffer->msg[i] = tmp;
-    }
+  word_t size = get_message_length (info) * sizeof (word_t);
+  memcpy (receiver->ipc_buffer->msg, this_tcb->ipc_buffer->msg, size);
 
   receiver->ipc_buffer->tag = info;
   receiver->saved_state.rax = info;
@@ -26,6 +23,7 @@ send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
 
   receiver->state = TASK_STATE_RUNNABLE;
   switch_tcb (receiver);
+  unreachable ();
 }
 
 [[noreturn]] static void
@@ -60,12 +58,8 @@ receive_message_from_blocked_sender (struct endpoint *e)
   this_tcb->current_user_frame->rax = sender->ipc_buffer->tag;
   this_tcb->current_user_frame->rdi = sender->endpoint_badge;
 
-  word_t tmp;
-  for (size_t i = 0; i < get_message_length (info); i++)
-    {
-      tmp = sender->ipc_buffer->msg[i];
-      this_tcb->ipc_buffer->msg[i] = tmp;
-    }
+  word_t size = get_message_length (info) * sizeof (word_t);
+  memcpy (this_tcb->ipc_buffer->msg, sender->ipc_buffer->msg, size);
 
   make_tcb_runnable (sender);
 }
