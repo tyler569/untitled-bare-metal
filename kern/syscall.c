@@ -36,24 +36,19 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
   if (syscall_number == sys_exit)
     printf ("Task %#lx ", (uintptr_t)this_tcb & 0xfff);
 
-  if (syscall_number == sys_exit)
-    {
-      printf ("sys_exit ()\n");
-      kill_tcb (this_tcb);
-      schedule ();
-      unreachable ();
-    }
-  else if (syscall_number == sys_debug_write)
-    {
-      write_debug (nullptr, (const void *)a0, a1);
-      return no_error;
-    }
-
   error_t err;
   cte_t *slot;
 
   switch (syscall_number)
     {
+    case sys_exit:
+      printf ("sys_exit ()\n");
+      kill_tcb (this_tcb);
+      schedule ();
+      unreachable ();
+    case sys_debug_write:
+      write_debug (nullptr, (const void *)a0, a1);
+      return no_error;
     case sys_call:
       GET_CAP (a0, slot, err);
 
