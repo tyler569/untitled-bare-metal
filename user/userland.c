@@ -9,16 +9,16 @@
 uint8_t __attribute__ ((aligned (PAGE_SIZE))) thread_stack[PAGE_SIZE * 4];
 uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
 
-__thread struct ipc_buffer *__ipc_buffer;
+thread_local struct ipc_buffer *__ipc_buffer;
 
 struct thread_local_storage
 {
-  uintptr_t ipc_buffer;
-  struct thread_local_storage *self;
+  char data[512-8];
+  void *self;
 };
 
-struct thread_local_storage tls1 = { 0, &tls1 };
-struct thread_local_storage tls2 = { 0, &tls2 };
+struct thread_local_storage tls1 = { {}, (void *)&tls1.self };
+struct thread_local_storage tls2 = { {}, (void *)&tls2.self };
 
 struct frame
 {
@@ -121,7 +121,7 @@ exit ()
 long
 write (FILE *, const void *str, unsigned long len)
 {
-  _syscall2 (1, (uintptr_t)str, len);
+  _syscall2 (sys_debug_write, (uintptr_t)str, len);
   return (long)len;
 }
 
@@ -152,6 +152,9 @@ c_start (void *ipc_buffer, void *boot_info)
 {
   asm volatile ("wrfsbase %0" ::"r"(&tls1.self));
   __ipc_buffer = ipc_buffer;
+
+  tcb_set_tls_base (init_cap_init_tcb, (uintptr_t)&tls1.self);
+
   struct boot_info *bi = boot_info;
 
   printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
@@ -174,6 +177,7 @@ c_start (void *ipc_buffer, void *boot_info)
 
   tcb_configure (100, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0,
                  (word_t)ipc_buffer + 1024, 0);
+  tcb_set_tls_base (100, (uintptr_t)&tls2.self);
 
   frame_t frame;
   tcb_read_registers (init_cap_init_tcb, false, 0, 0, &frame);
