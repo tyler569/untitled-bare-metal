@@ -13,7 +13,7 @@ thread_local struct ipc_buffer *__ipc_buffer;
 
 struct thread_local_storage
 {
-  char data[512-8];
+  char data[512 - 8];
   void *self;
 };
 
