@@ -163,12 +163,12 @@ issue_port_cap()
                                           0x0,
                                           0xffff,
                                           init_cap_root_cnode,
-                                          64,
-                                          102
+                                          102,
+                                          64
                                          );
   if (err != 0)
     {
-      printf ("Failed to issue port_e9_cap\n");
+      printf ("Failed to issue port_e9_cap: %s\n", error_string(err));
       return;
     }
 

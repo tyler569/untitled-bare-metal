@@ -860,9 +860,9 @@ dispatch_method (cte_t *slot, message_info_t info)
       {
         word_t first_port = (word_t)get_mr (0);
         word_t last_port = (word_t)get_mr (1);
-        word_t node_index = (word_t)get_mr (2);
-        uint8_t node_depth = (uint8_t)get_mr (3);
-        word_t node_offset = (word_t)get_mr (4);
+        word_t index = (word_t)get_mr (2);
+        uint8_t depth = (uint8_t)get_mr (3);
+        cte_t *root;
 
         printf ("x86_64_io_port_control_issue ");
 
@@ -873,24 +873,33 @@ dispatch_method (cte_t *slot, message_info_t info)
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
-        if (get_message_length (info) < 5)
+        if (get_message_length (info) < 4)
           {
             return_ipc (truncated_message, 0);
             return illegal_operation;
           }
-        if (get_message_extra_caps (info) < 0)
+        if (get_message_extra_caps (info) < 1)
           {
             return_ipc (truncated_message, 0);
             return truncated_message;
           }
 
-        printf ("(cap:%s, first_port=%#lx, last_port=%#lx, node_index=%#lx, "
-                "node_depth=%hhu, node_offset=%#lx)\n",
-                cap_type_string (slot), first_port, last_port, node_index,
-                node_depth, node_offset);
+        root = lookup_cap_slot_this_tcb (get_cap (0), &error);
+        if (error != no_error)
+          {
+            printf ("lookup_cap failed for cap 0\n");
+            return_ipc (error, 1);
+            set_mr (0, 0);
+            return error;
+          }
 
-        return x86_64_io_port_control_issue (
-            slot, first_port, last_port, node_index, node_depth, node_offset);
+        printf ("(cap:%s, first_port=%#lx, last_port=%#lx, root=cap:%s, "
+                "index=%#lx, depth=%hhu)\n",
+                cap_type_string (slot), first_port, last_port,
+                cap_type_string (root), index, depth);
+
+        return x86_64_io_port_control_issue (slot, first_port, last_port, root,
+                                             index, depth);
         break;
       }
     case METHOD_x86_64_pdpt_map:

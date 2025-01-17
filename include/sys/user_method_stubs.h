@@ -246,17 +246,15 @@ x86_64_io_port_out32 (cptr_t obj, word_t port, word_t value)
 }
 static inline int
 x86_64_io_port_control_issue (cptr_t obj, word_t first_port, word_t last_port,
-                              word_t node_index, uint8_t node_depth,
-                              word_t node_offset)
+                              cptr_t root, word_t index, uint8_t depth)
 {
   set_mr (0, (word_t)first_port);
   set_mr (1, (word_t)last_port);
-  set_mr (2, (word_t)node_index);
-  set_mr (3, (word_t)node_depth);
-  set_mr (4, (word_t)node_offset);
-
+  set_mr (2, (word_t)index);
+  set_mr (3, (word_t)depth);
+  set_cap (0, root);
   message_info_t info
-      = new_message_info (METHOD_x86_64_io_port_control_issue, 0, 0, 5);
+      = new_message_info (METHOD_x86_64_io_port_control_issue, 0, 1, 4);
   return _syscall2 (sys_call, obj, info);
 }
 static inline int

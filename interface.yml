@@ -130,9 +130,9 @@ types:
         parameters:
           - { name: first_port, type: word_t }
           - { name: last_port, type: word_t }
-          - { name: node_index, type: word_t }
-          - { name: node_depth, type: uint8_t }
-          - { name: node_offset, type: word_t }
+          - { name: root, type: cptr_t }
+          - { name: index, type: word_t }
+          - { name: depth, type: uint8_t }
   - name: x86_64_pml4
     methods: []
   - name: x86_64_pdpt
