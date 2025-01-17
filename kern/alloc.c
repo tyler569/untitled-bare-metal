@@ -91,8 +91,9 @@ init_page_mmap ()
   for (size_t i = 0; i < extent_count; i++)
     allocate_aligned_regions (&extents[i]);
 
-//   qsort (regions, region_count, sizeof (struct power_of_two_region),
-//          (int (*) (const void *, const void *))compare_power_of_two_regions);
+  //   qsort (regions, region_count, sizeof (struct power_of_two_region),
+  //          (int (*) (const void *, const void
+  //          *))compare_power_of_two_regions);
 }
 
 uintptr_t

@@ -151,32 +151,21 @@ struct boot_info *bi = nullptr;
 int port_cap = 0;
 
 void
-issue_port_cap()
+issue_port_cap ()
 {
   if (port_cap != 0)
     {
       return;
     }
 
-  int err = x86_64_io_port_control_issue (
-                                          init_cap_io_port_control,
-                                          0x0,
-                                          0xffff,
-                                          init_cap_root_cnode,
-                                          102,
-                                          64
-                                         );
-  if (err != 0)
-    {
-      printf ("Failed to issue port_e9_cap: %s\n", error_string(err));
-      return;
-    }
+  x86_64_io_port_control_issue (init_cap_io_port_control, 0x0, 0xffff,
+                                init_cap_root_cnode, 102, 64);
 
   port_cap = 102;
 }
 
 void
-print_to_e9(const char *string)
+print_to_e9 (const char *string)
 {
   issue_port_cap ();
 
@@ -217,10 +206,10 @@ c_start (void *ipc_buffer, void *boot_info)
 
   int untyped = init_cap_first_untyped;
 
-  untyped_retype (untyped, cap_tcb, 0, init_cap_root_cnode, init_cap_root_cnode, 64,
-                  100, 1);
-  untyped_retype (untyped, cap_endpoint, 0, init_cap_root_cnode, init_cap_root_cnode,
-                  64, 101, 1);
+  untyped_retype (untyped, cap_tcb, 0, init_cap_root_cnode,
+                  init_cap_root_cnode, 64, 100, 1);
+  untyped_retype (untyped, cap_endpoint, 0, init_cap_root_cnode,
+                  init_cap_root_cnode, 64, 101, 1);
   // cnode_debug_print (init_cap_root_cnode);
 
   tcb_configure (100, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0,
