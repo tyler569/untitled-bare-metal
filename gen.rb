@@ -127,7 +127,7 @@ class KMethod
 
       if (cap_type (slot) != #{type.type_name})
         {
-          printf ("invalid cap type\\n");
+          printf ("invalid cap type: %s\\n", cap_type_string (cap_type (slot)));
           return_ipc (illegal_operation, 0);
           return illegal_operation;
         }

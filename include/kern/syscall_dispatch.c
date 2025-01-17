@@ -19,7 +19,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_cnode)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -61,7 +62,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_cnode)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -96,7 +98,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_cnode)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -139,7 +142,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_cnode)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -167,7 +171,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_cnode)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -194,7 +199,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -228,7 +234,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -294,7 +301,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -340,7 +348,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -371,7 +380,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -399,7 +409,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -428,7 +439,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -471,7 +483,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -522,7 +535,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -549,7 +563,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -580,7 +595,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_tcb)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -618,7 +634,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_untyped)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -662,7 +679,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_io_port)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -692,7 +710,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_io_port)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -722,7 +741,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_io_port)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -752,7 +772,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_io_port)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -782,7 +803,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_io_port)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -812,7 +834,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_io_port)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -845,7 +868,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_io_port_control)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -879,7 +903,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_pdpt)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -916,7 +941,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_pdpt)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -946,7 +972,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_pd)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -983,7 +1010,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_pd)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -1013,7 +1041,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_pt)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -1050,7 +1079,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_pt)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -1080,7 +1110,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_page)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }
@@ -1117,7 +1148,8 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         if (cap_type (slot) != cap_x86_64_page)
           {
-            printf ("invalid cap type\n");
+            printf ("invalid cap type: %s\n",
+                    cap_type_string (cap_type (slot)));
             return_ipc (illegal_operation, 0);
             return illegal_operation;
           }

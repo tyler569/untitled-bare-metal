@@ -39,7 +39,7 @@ create_init_tcb (void *init_elf)
   init_cnode[init_cap_io_port_control].cap = cap_x86_64_io_port_control_new ();
 
   bi->n_untypeds = 32;
-  create_init_untyped_caps (init_cnode + 4, &bi->n_untypeds, bi->untypeds);
+  create_init_untyped_caps (init_cnode + init_cap_first_untyped, &bi->n_untypeds, bi->untypeds);
 
   init_tcb.cspace_root.cap = init_cnode_cap;
 
