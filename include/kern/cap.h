@@ -178,6 +178,32 @@ cap_tcb_new (void *tcb)
 }
 
 static inline cap_t
+cap_x86_64_io_port_control_new()
+{
+  cap_t cap = { .type = cap_x86_64_io_port_control };
+  return cap;
+}
+
+static inline cap_t
+cap_x86_64_io_port_new(uint16_t first_port, uint16_t last_port)
+{
+  cap_t cap = { .type = cap_x86_64_io_port, .ptr = first_port, .badge = last_port };
+  return cap;
+}
+
+static inline uint16_t
+cap_x86_64_io_port_first_port(cap_t cap)
+{
+  return cap.ptr;
+}
+
+static inline uint16_t
+cap_x86_64_io_port_last_port(cap_t cap)
+{
+  return cap.badge;
+}
+
+static inline cap_t
 cap_x86_64_pml4_new (uintptr_t pml4_phy)
 {
   cap_t cap = { .type = cap_x86_64_pml4 };

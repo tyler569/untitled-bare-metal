@@ -98,7 +98,7 @@ types:
           - { name: node_depth, type: uint8_t }
           - { name: node_offset, type: word_t }
           - { name: num_objects, type: word_t }
-  - name: x86_io_port
+  - name: x86_64_io_port
     methods:
       - name: in8
         parameters:
@@ -124,6 +124,15 @@ types:
         parameters:
           - { name: port, type: word_t }
           - { name: value, type: word_t }
+  - name: x86_64_io_port_control
+    methods:
+      - name: issue
+        parameters:
+          - { name: first_port, type: word_t }
+          - { name: last_port, type: word_t }
+          - { name: node_index, type: word_t }
+          - { name: node_depth, type: uint8_t }
+          - { name: node_offset, type: word_t }
   - name: x86_64_pml4
     methods: []
   - name: x86_64_pdpt

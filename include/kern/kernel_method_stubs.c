@@ -109,39 +109,45 @@ untyped_retype (cte_t *, word_t, word_t, cte_t *, word_t, uint8_t, word_t,
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_in8 (cte_t *, word_t, word_t)
+x86_64_io_port_in8 (cte_t *, word_t, word_t)
 {
-  printf ("unimplemented kernel method x86_io_port_in8\n");
+  printf ("unimplemented kernel method x86_64_io_port_in8\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_in16 (cte_t *, word_t, word_t)
+x86_64_io_port_in16 (cte_t *, word_t, word_t)
 {
-  printf ("unimplemented kernel method x86_io_port_in16\n");
+  printf ("unimplemented kernel method x86_64_io_port_in16\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_in32 (cte_t *, word_t, word_t)
+x86_64_io_port_in32 (cte_t *, word_t, word_t)
 {
-  printf ("unimplemented kernel method x86_io_port_in32\n");
+  printf ("unimplemented kernel method x86_64_io_port_in32\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_out8 (cte_t *, word_t, word_t)
+x86_64_io_port_out8 (cte_t *, word_t, word_t)
 {
-  printf ("unimplemented kernel method x86_io_port_out8\n");
+  printf ("unimplemented kernel method x86_64_io_port_out8\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_out16 (cte_t *, word_t, word_t)
+x86_64_io_port_out16 (cte_t *, word_t, word_t)
 {
-  printf ("unimplemented kernel method x86_io_port_out16\n");
+  printf ("unimplemented kernel method x86_64_io_port_out16\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t
-x86_io_port_out32 (cte_t *, word_t, word_t)
+x86_64_io_port_out32 (cte_t *, word_t, word_t)
 {
-  printf ("unimplemented kernel method x86_io_port_out32\n");
+  printf ("unimplemented kernel method x86_64_io_port_out32\n");
+  return illegal_operation;
+}
+__attribute__ ((weak)) error_t
+x86_64_io_port_control_issue (cte_t *, word_t, word_t, word_t, uint8_t, word_t)
+{
+  printf ("unimplemented kernel method x86_64_io_port_control_issue\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) error_t

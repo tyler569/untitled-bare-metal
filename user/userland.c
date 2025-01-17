@@ -147,6 +147,50 @@ thread_entry (void *ipc_buffer, uintptr_t arg)
 
 extern char __executable_start;
 
+struct boot_info *bi = nullptr;
+int port_cap = 0;
+
+void
+issue_port_cap()
+{
+  if (port_cap != 0)
+    {
+      return;
+    }
+
+  int err = x86_64_io_port_control_issue (
+                                          init_cap_io_port_control,
+                                          0x0,
+                                          0xffff,
+                                          init_cap_root_cnode,
+                                          64,
+                                          102
+                                         );
+  if (err != 0)
+    {
+      printf ("Failed to issue port_e9_cap\n");
+      return;
+    }
+
+  port_cap = 102;
+}
+
+void
+print_to_e9(const char *string)
+{
+  issue_port_cap ();
+
+  if (port_cap == 0)
+    {
+      return;
+    }
+
+  for (const char *c = string; *c; c++)
+    {
+      x86_64_io_port_out8 (port_cap, 0xe9, *c);
+    }
+}
+
 [[noreturn]] int
 c_start (void *ipc_buffer, void *boot_info)
 {
@@ -155,10 +199,12 @@ c_start (void *ipc_buffer, void *boot_info)
 
   tcb_set_tls_base (init_cap_init_tcb, (uintptr_t)&tls1.self);
 
-  struct boot_info *bi = boot_info;
+  bi = boot_info;
 
   printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
   printf ("executable_start: %p\n", &__executable_start);
+
+  print_to_e9 ("[E9] Hello World!\n");
 
   printf ("Boot info: %p\n", bi);
   printf ("  .n_untypeds = %lu\n", bi->n_untypeds);
@@ -169,9 +215,11 @@ c_start (void *ipc_buffer, void *boot_info)
               bi->untypeds[i].base, 1ul << bi->untypeds[i].size_bits);
     }
 
-  untyped_retype (4, cap_tcb, 0, init_cap_root_cnode, init_cap_root_cnode, 64,
+  int untyped = init_cap_first_untyped;
+
+  untyped_retype (untyped, cap_tcb, 0, init_cap_root_cnode, init_cap_root_cnode, 64,
                   100, 1);
-  untyped_retype (4, cap_endpoint, 0, init_cap_root_cnode, init_cap_root_cnode,
+  untyped_retype (untyped, cap_endpoint, 0, init_cap_root_cnode, init_cap_root_cnode,
                   64, 101, 1);
   // cnode_debug_print (init_cap_root_cnode);
 

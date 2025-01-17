@@ -653,14 +653,14 @@ dispatch_method (cte_t *slot, message_info_t info)
                                node_depth, node_offset, num_objects);
         break;
       }
-    case METHOD_x86_io_port_in8:
+    case METHOD_x86_64_io_port_in8:
       {
         word_t port = (word_t)get_mr (0);
         word_t result = (word_t)get_mr (1);
 
-        printf ("x86_io_port_in8 ");
+        printf ("x86_64_io_port_in8 ");
 
-        if (cap_type (slot) != cap_x86_io_port)
+        if (cap_type (slot) != cap_x86_64_io_port)
           {
             printf ("invalid cap type\n");
             return_ipc (illegal_operation, 0);
@@ -680,17 +680,17 @@ dispatch_method (cte_t *slot, message_info_t info)
         printf ("(cap:%s, port=%#lx, result=%#lx)\n", cap_type_string (slot),
                 port, result);
 
-        return x86_io_port_in8 (slot, port, result);
+        return x86_64_io_port_in8 (slot, port, result);
         break;
       }
-    case METHOD_x86_io_port_in16:
+    case METHOD_x86_64_io_port_in16:
       {
         word_t port = (word_t)get_mr (0);
         word_t result = (word_t)get_mr (1);
 
-        printf ("x86_io_port_in16 ");
+        printf ("x86_64_io_port_in16 ");
 
-        if (cap_type (slot) != cap_x86_io_port)
+        if (cap_type (slot) != cap_x86_64_io_port)
           {
             printf ("invalid cap type\n");
             return_ipc (illegal_operation, 0);
@@ -710,17 +710,17 @@ dispatch_method (cte_t *slot, message_info_t info)
         printf ("(cap:%s, port=%#lx, result=%#lx)\n", cap_type_string (slot),
                 port, result);
 
-        return x86_io_port_in16 (slot, port, result);
+        return x86_64_io_port_in16 (slot, port, result);
         break;
       }
-    case METHOD_x86_io_port_in32:
+    case METHOD_x86_64_io_port_in32:
       {
         word_t port = (word_t)get_mr (0);
         word_t result = (word_t)get_mr (1);
 
-        printf ("x86_io_port_in32 ");
+        printf ("x86_64_io_port_in32 ");
 
-        if (cap_type (slot) != cap_x86_io_port)
+        if (cap_type (slot) != cap_x86_64_io_port)
           {
             printf ("invalid cap type\n");
             return_ipc (illegal_operation, 0);
@@ -740,17 +740,17 @@ dispatch_method (cte_t *slot, message_info_t info)
         printf ("(cap:%s, port=%#lx, result=%#lx)\n", cap_type_string (slot),
                 port, result);
 
-        return x86_io_port_in32 (slot, port, result);
+        return x86_64_io_port_in32 (slot, port, result);
         break;
       }
-    case METHOD_x86_io_port_out8:
+    case METHOD_x86_64_io_port_out8:
       {
         word_t port = (word_t)get_mr (0);
         word_t value = (word_t)get_mr (1);
 
-        printf ("x86_io_port_out8 ");
+        printf ("x86_64_io_port_out8 ");
 
-        if (cap_type (slot) != cap_x86_io_port)
+        if (cap_type (slot) != cap_x86_64_io_port)
           {
             printf ("invalid cap type\n");
             return_ipc (illegal_operation, 0);
@@ -770,17 +770,17 @@ dispatch_method (cte_t *slot, message_info_t info)
         printf ("(cap:%s, port=%#lx, value=%#lx)\n", cap_type_string (slot),
                 port, value);
 
-        return x86_io_port_out8 (slot, port, value);
+        return x86_64_io_port_out8 (slot, port, value);
         break;
       }
-    case METHOD_x86_io_port_out16:
+    case METHOD_x86_64_io_port_out16:
       {
         word_t port = (word_t)get_mr (0);
         word_t value = (word_t)get_mr (1);
 
-        printf ("x86_io_port_out16 ");
+        printf ("x86_64_io_port_out16 ");
 
-        if (cap_type (slot) != cap_x86_io_port)
+        if (cap_type (slot) != cap_x86_64_io_port)
           {
             printf ("invalid cap type\n");
             return_ipc (illegal_operation, 0);
@@ -800,17 +800,17 @@ dispatch_method (cte_t *slot, message_info_t info)
         printf ("(cap:%s, port=%#lx, value=%#lx)\n", cap_type_string (slot),
                 port, value);
 
-        return x86_io_port_out16 (slot, port, value);
+        return x86_64_io_port_out16 (slot, port, value);
         break;
       }
-    case METHOD_x86_io_port_out32:
+    case METHOD_x86_64_io_port_out32:
       {
         word_t port = (word_t)get_mr (0);
         word_t value = (word_t)get_mr (1);
 
-        printf ("x86_io_port_out32 ");
+        printf ("x86_64_io_port_out32 ");
 
-        if (cap_type (slot) != cap_x86_io_port)
+        if (cap_type (slot) != cap_x86_64_io_port)
           {
             printf ("invalid cap type\n");
             return_ipc (illegal_operation, 0);
@@ -830,7 +830,43 @@ dispatch_method (cte_t *slot, message_info_t info)
         printf ("(cap:%s, port=%#lx, value=%#lx)\n", cap_type_string (slot),
                 port, value);
 
-        return x86_io_port_out32 (slot, port, value);
+        return x86_64_io_port_out32 (slot, port, value);
+        break;
+      }
+    case METHOD_x86_64_io_port_control_issue:
+      {
+        word_t first_port = (word_t)get_mr (0);
+        word_t last_port = (word_t)get_mr (1);
+        word_t node_index = (word_t)get_mr (2);
+        uint8_t node_depth = (uint8_t)get_mr (3);
+        word_t node_offset = (word_t)get_mr (4);
+
+        printf ("x86_64_io_port_control_issue ");
+
+        if (cap_type (slot) != cap_x86_64_io_port_control)
+          {
+            printf ("invalid cap type\n");
+            return_ipc (illegal_operation, 0);
+            return illegal_operation;
+          }
+        if (get_message_length (info) < 5)
+          {
+            return_ipc (truncated_message, 0);
+            return illegal_operation;
+          }
+        if (get_message_extra_caps (info) < 0)
+          {
+            return_ipc (truncated_message, 0);
+            return truncated_message;
+          }
+
+        printf ("(cap:%s, first_port=%#lx, last_port=%#lx, node_index=%#lx, "
+                "node_depth=%hhu, node_offset=%#lx)\n",
+                cap_type_string (slot), first_port, last_port, node_index,
+                node_depth, node_offset);
+
+        return x86_64_io_port_control_issue (
+            slot, first_port, last_port, node_index, node_depth, node_offset);
         break;
       }
     case METHOD_x86_64_pdpt_map:

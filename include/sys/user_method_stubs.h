@@ -189,57 +189,74 @@ untyped_retype (cptr_t obj, word_t type, word_t size_bits, cptr_t root,
   return _syscall2 (sys_call, obj, info);
 }
 static inline int
-x86_io_port_in8 (cptr_t obj, word_t port, word_t result)
+x86_64_io_port_in8 (cptr_t obj, word_t port, word_t result)
 {
   set_mr (0, (word_t)port);
   set_mr (1, (word_t)result);
 
-  message_info_t info = new_message_info (METHOD_x86_io_port_in8, 0, 0, 2);
+  message_info_t info = new_message_info (METHOD_x86_64_io_port_in8, 0, 0, 2);
   return _syscall2 (sys_call, obj, info);
 }
 static inline int
-x86_io_port_in16 (cptr_t obj, word_t port, word_t result)
+x86_64_io_port_in16 (cptr_t obj, word_t port, word_t result)
 {
   set_mr (0, (word_t)port);
   set_mr (1, (word_t)result);
 
-  message_info_t info = new_message_info (METHOD_x86_io_port_in16, 0, 0, 2);
+  message_info_t info = new_message_info (METHOD_x86_64_io_port_in16, 0, 0, 2);
   return _syscall2 (sys_call, obj, info);
 }
 static inline int
-x86_io_port_in32 (cptr_t obj, word_t port, word_t result)
+x86_64_io_port_in32 (cptr_t obj, word_t port, word_t result)
 {
   set_mr (0, (word_t)port);
   set_mr (1, (word_t)result);
 
-  message_info_t info = new_message_info (METHOD_x86_io_port_in32, 0, 0, 2);
+  message_info_t info = new_message_info (METHOD_x86_64_io_port_in32, 0, 0, 2);
   return _syscall2 (sys_call, obj, info);
 }
 static inline int
-x86_io_port_out8 (cptr_t obj, word_t port, word_t value)
+x86_64_io_port_out8 (cptr_t obj, word_t port, word_t value)
 {
   set_mr (0, (word_t)port);
   set_mr (1, (word_t)value);
 
-  message_info_t info = new_message_info (METHOD_x86_io_port_out8, 0, 0, 2);
+  message_info_t info = new_message_info (METHOD_x86_64_io_port_out8, 0, 0, 2);
   return _syscall2 (sys_call, obj, info);
 }
 static inline int
-x86_io_port_out16 (cptr_t obj, word_t port, word_t value)
+x86_64_io_port_out16 (cptr_t obj, word_t port, word_t value)
 {
   set_mr (0, (word_t)port);
   set_mr (1, (word_t)value);
 
-  message_info_t info = new_message_info (METHOD_x86_io_port_out16, 0, 0, 2);
+  message_info_t info
+      = new_message_info (METHOD_x86_64_io_port_out16, 0, 0, 2);
   return _syscall2 (sys_call, obj, info);
 }
 static inline int
-x86_io_port_out32 (cptr_t obj, word_t port, word_t value)
+x86_64_io_port_out32 (cptr_t obj, word_t port, word_t value)
 {
   set_mr (0, (word_t)port);
   set_mr (1, (word_t)value);
 
-  message_info_t info = new_message_info (METHOD_x86_io_port_out32, 0, 0, 2);
+  message_info_t info
+      = new_message_info (METHOD_x86_64_io_port_out32, 0, 0, 2);
+  return _syscall2 (sys_call, obj, info);
+}
+static inline int
+x86_64_io_port_control_issue (cptr_t obj, word_t first_port, word_t last_port,
+                              word_t node_index, uint8_t node_depth,
+                              word_t node_offset)
+{
+  set_mr (0, (word_t)first_port);
+  set_mr (1, (word_t)last_port);
+  set_mr (2, (word_t)node_index);
+  set_mr (3, (word_t)node_depth);
+  set_mr (4, (word_t)node_offset);
+
+  message_info_t info
+      = new_message_info (METHOD_x86_64_io_port_control_issue, 0, 0, 5);
   return _syscall2 (sys_call, obj, info);
 }
 static inline int

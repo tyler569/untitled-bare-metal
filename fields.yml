@@ -1,0 +1,19 @@
+---
+types:
+  - name: "null"
+    fields: []
+  - name: endpoint
+    fields:
+      - name: ptr
+        type: "void *"
+        bits: 46
+  - name: cnode
+  - name: tcb
+  - name: untyped
+  - name: x86_64_io_port
+  - name: x86_64_io_port_control
+  - name: x86_64_pml4
+  - name: x86_64_pdpt
+  - name: x86_64_pd
+  - name: x86_64_pt
+  - name: x86_64_page

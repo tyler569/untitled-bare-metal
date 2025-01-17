@@ -39,12 +39,15 @@ error_t tcb_write_registers (cte_t *slot, bool resume_target,
 error_t untyped_retype (cte_t *slot, word_t type, word_t size_bits,
                         cte_t *root, word_t node_index, uint8_t node_depth,
                         word_t node_offset, word_t num_objects);
-error_t x86_io_port_in8 (cte_t *slot, word_t port, word_t result);
-error_t x86_io_port_in16 (cte_t *slot, word_t port, word_t result);
-error_t x86_io_port_in32 (cte_t *slot, word_t port, word_t result);
-error_t x86_io_port_out8 (cte_t *slot, word_t port, word_t value);
-error_t x86_io_port_out16 (cte_t *slot, word_t port, word_t value);
-error_t x86_io_port_out32 (cte_t *slot, word_t port, word_t value);
+error_t x86_64_io_port_in8 (cte_t *slot, word_t port, word_t result);
+error_t x86_64_io_port_in16 (cte_t *slot, word_t port, word_t result);
+error_t x86_64_io_port_in32 (cte_t *slot, word_t port, word_t result);
+error_t x86_64_io_port_out8 (cte_t *slot, word_t port, word_t value);
+error_t x86_64_io_port_out16 (cte_t *slot, word_t port, word_t value);
+error_t x86_64_io_port_out32 (cte_t *slot, word_t port, word_t value);
+error_t x86_64_io_port_control_issue (cte_t *slot, word_t first_port,
+                                      word_t last_port, word_t node_index,
+                                      uint8_t node_depth, word_t node_offset);
 error_t x86_64_pdpt_map (cte_t *slot, cte_t *vspace, word_t vaddr,
                          x86_vm_attributes_t attr);
 error_t x86_64_pdpt_unmap (cte_t *slot);

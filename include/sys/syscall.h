@@ -11,7 +11,8 @@ enum object_type
   cap_cnode,
   cap_tcb,
   cap_untyped,
-  cap_x86_io_port,
+  cap_x86_64_io_port,
+  cap_x86_64_io_port_control,
   cap_x86_64_pml4,
   cap_x86_64_pdpt,
   cap_x86_64_pd,
@@ -35,8 +36,10 @@ cap_type_string (word_t type)
       return "tcb";
     case cap_untyped:
       return "untyped";
-    case cap_x86_io_port:
-      return "x86_io_port";
+    case cap_x86_64_io_port:
+      return "x86_64_io_port";
+    case cap_x86_64_io_port_control:
+      return "x86_64_io_port_control";
     case cap_x86_64_pml4:
       return "x86_64_pml4";
     case cap_x86_64_pdpt:
@@ -72,12 +75,13 @@ enum method_id
   METHOD_tcb_suspend,
   METHOD_tcb_write_registers,
   METHOD_untyped_retype,
-  METHOD_x86_io_port_in8,
-  METHOD_x86_io_port_in16,
-  METHOD_x86_io_port_in32,
-  METHOD_x86_io_port_out8,
-  METHOD_x86_io_port_out16,
-  METHOD_x86_io_port_out32,
+  METHOD_x86_64_io_port_in8,
+  METHOD_x86_64_io_port_in16,
+  METHOD_x86_64_io_port_in32,
+  METHOD_x86_64_io_port_out8,
+  METHOD_x86_64_io_port_out16,
+  METHOD_x86_64_io_port_out32,
+  METHOD_x86_64_io_port_control_issue,
   METHOD_x86_64_pdpt_map,
   METHOD_x86_64_pdpt_unmap,
   METHOD_x86_64_pd_map,
