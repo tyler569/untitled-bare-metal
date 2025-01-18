@@ -108,7 +108,7 @@ maybe_init_endpoint (struct endpoint *e)
   init_list (&e->list);
 }
 
-[[noreturn]] error_t
+[[noreturn]] message_info_t
 invoke_endpoint_send (cte_t *cap, word_t message_info)
 {
   assert (cap_type (cap) == cap_endpoint);
@@ -119,7 +119,7 @@ invoke_endpoint_send (cte_t *cap, word_t message_info)
   unreachable ();
 }
 
-error_t
+message_info_t
 invoke_endpoint_recv (cte_t *cap)
 {
   assert (cap_type (cap) == cap_endpoint);
@@ -127,17 +127,15 @@ invoke_endpoint_recv (cte_t *cap)
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
   if (is_list_empty (&e->list))
-    {
-      queue_receiver_on_endpoint (e);
-    }
+    queue_receiver_on_endpoint (e);
   else
     {
       receive_message_from_blocked_sender (e);
-      return no_error;
+      return return_ipc (no_error, 0);
     }
 }
 
-[[noreturn]] error_t
+[[noreturn]] message_info_t
 invoke_endpoint_call (cte_t *cap, word_t message_info)
 {
   assert (cap_type (cap) == cap_endpoint);
@@ -150,14 +148,11 @@ invoke_endpoint_call (cte_t *cap, word_t message_info)
   unreachable ();
 }
 
-error_t
+message_info_t
 invoke_reply (cte_t *, word_t message_info)
 {
   struct tcb *receiver = this_tcb->reply_to;
   if (!receiver || receiver->state != TASK_STATE_CALLING)
-    {
-      return_ipc (illegal_operation, 0);
-      return illegal_operation;
-    }
+    return return_ipc (illegal_operation, 0);
   send_message_to_blocked_receiver (receiver, message_info, 0);
 }

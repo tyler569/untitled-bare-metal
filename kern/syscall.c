@@ -15,11 +15,10 @@
   slot = lookup_cap_slot_this_tcb (cptr, &err);                               \
   if (err != no_error)                                                        \
     {                                                                         \
-      return_ipc (err, 0);                                                    \
-      return err;                                                             \
+      return return_ipc (err, 0);                                             \
     }
 
-uintptr_t
+message_info_t
 do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
             uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *f)
 {
@@ -59,6 +58,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
           printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
           invoke_endpoint_call (slot, a1);
         }
+      unreachable ();
     case sys_reply:
       printf ("sys_reply (info: %#lx)\n", a0);
       return invoke_reply (nullptr, a0); // TODO TCB reply cap
@@ -67,10 +67,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       printf ("sys_send (dest: %#lx, info: %#lx)\n", a0, a1);
 
       if (cap_type (slot) != cap_endpoint)
-        {
-          return_ipc (illegal_operation, 0);
-          return illegal_operation;
-        }
+        return return_ipc (illegal_operation, 0);
 
       return invoke_endpoint_send (slot, a1);
     case sys_recv:
@@ -79,10 +76,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       printf ("sys_recv (dest: %#lx)\n", a0);
 
       if (cap_type (slot) != cap_endpoint)
-        {
-          return_ipc (illegal_operation, 0);
-          return illegal_operation;
-        }
+        return return_ipc (illegal_operation, 0);
 
       return invoke_endpoint_recv (slot);
     case sys_yield:
@@ -91,7 +85,8 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       unreachable ();
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
-      return no_error;
+      set_mr (0, -1);
+      return return_ipc (invalid_argument, 1);
     }
 
   return ret;
