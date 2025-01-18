@@ -6,10 +6,8 @@
 #include "sys/syscall.h"
 
 #define PAGE_SIZE 4096
-uint8_t __attribute__ ((aligned (PAGE_SIZE))) thread_stack[PAGE_SIZE * 4];
-uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
 
-thread_local struct ipc_buffer *__ipc_buffer;
+#include "lib.c"
 
 struct thread_local_storage
 {
@@ -20,159 +18,36 @@ struct thread_local_storage
 struct thread_local_storage tls1 = { {}, (void *)&tls1.self };
 struct thread_local_storage tls2 = { {}, (void *)&tls2.self };
 
-struct frame
-{
-  uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
-  uint64_t rdi, rsi, rbp, rbx, rdx, rcx, rax;
-  uint64_t int_no, err_code;
-  uint64_t rip, cs, rflags, rsp, ss;
-};
-typedef struct frame frame_t;
-
-static uintptr_t
-_syscall0 (int syscall_num)
-{
-  uintptr_t ret;
-  asm volatile ("syscall" : "=a"(ret) : "0"(syscall_num) : "rcx", "r11");
-  return ret;
-}
-
-static uintptr_t
-_syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
-{
-  uintptr_t ret;
-  asm volatile ("syscall"
-                : "=a"(ret)
-                : "0"(syscall_num), "D"(a1), "S"(a2)
-                : "rcx", "r11");
-  return ret;
-}
-
-static uintptr_t
-_syscall22 (int syscall_num, uintptr_t a1, uintptr_t a2, uintptr_t *out)
-{
-  uintptr_t ret;
-  asm volatile ("syscall"
-                : "=a"(ret), "=D"(*out)
-                : "0"(syscall_num), "1"(a1), "S"(a2)
-                : "rcx", "r11");
-  return ret;
-}
-
-void
-set_mr (word_t i, word_t val)
-{
-  __ipc_buffer->msg[i] = val;
-}
-
-word_t
-get_mr (word_t i)
-{
-  return __ipc_buffer->msg[i];
-}
-
-void
-set_cap (word_t i, word_t val)
-{
-  __ipc_buffer->caps_or_badges[i] = val;
-}
-
-word_t
-get_cap (word_t i)
-{
-  return __ipc_buffer->caps_or_badges[i];
-}
-
-void
-send (cptr_t cap, message_info_t info)
-{
-  __ipc_buffer->tag = info;
-  _syscall2 (sys_send, cap, info);
-}
-
-message_info_t
-call (cptr_t cap, message_info_t info, word_t *sender)
-{
-  __ipc_buffer->tag = info;
-  return _syscall22 (sys_call, cap, info, sender);
-}
-
-message_info_t
-recv (cptr_t cap, word_t *sender)
-{
-  return _syscall22 (sys_recv, cap, 0, sender);
-}
-
-void
-yield ()
-{
-  _syscall0 (sys_yield);
-}
-
-#include "sys/user_method_stubs.h"
-
-[[noreturn]] static inline void
-exit ()
-{
-  _syscall0 (0);
-  unreachable ();
-}
-
-long
-write (FILE *, const void *str, unsigned long len)
-{
-  _syscall2 (sys_debug_write, (uintptr_t)str, len);
-  return (long)len;
-}
-
-[[noreturn]] void
-thread_entry (void *ipc_buffer, uintptr_t arg)
-{
-  asm volatile ("wrfsbase %0" ::"r"(&tls2.self));
-  __ipc_buffer = ipc_buffer;
-  printf ("Hello, World from userland thread! Arg is %lu\n", arg);
-
-  message_info_t info = new_message_info (0, 0, 0, 1);
-  for (word_t i = 0; i < 10; i++)
-    {
-      set_mr (0, i);
-      send (101, info);
-    }
-
-  info = new_message_info (1, 0, 0, 0);
-  send (101, info);
-
-  exit ();
-}
-
 extern char __executable_start;
-
+thread_local struct ipc_buffer *__ipc_buffer;
 struct boot_info *bi = nullptr;
-int port_cap = 0;
+int next_unused_cap = -1;
+uint8_t __attribute__ ((aligned (PAGE_SIZE))) thread_stack[PAGE_SIZE * 4];
+uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
 
-void
-issue_port_cap ()
+
+cptr_t
+get_port_cap ()
 {
+  static cptr_t port_cap = 0;
+
   if (port_cap != 0)
     {
-      return;
+      return port_cap;
     }
 
-  x86_64_io_port_control_issue (init_cap_io_port_control, 0x0, 0xffff,
-                                init_cap_root_cnode, 102, 64);
+  port_cap = next_unused_cap++;
 
-  port_cap = 102;
+  x86_64_io_port_control_issue (init_cap_io_port_control, 0x0, 0xffff,
+                                init_cap_root_cnode, port_cap, 64);
+
+  return port_cap;
 }
 
 void
 print_to_e9 (const char *string)
 {
-  issue_port_cap ();
-
-  if (port_cap == 0)
-    {
-      return;
-    }
+  cptr_t port_cap = get_port_cap ();
 
   for (const char *c = string; *c; c++)
     {
@@ -180,20 +55,11 @@ print_to_e9 (const char *string)
     }
 }
 
-[[noreturn]] int
-c_start (void *ipc_buffer, void *boot_info)
+void
+print_bootinfo_information()
 {
-  asm volatile ("wrfsbase %0" ::"r"(&tls1.self));
-  __ipc_buffer = ipc_buffer;
-
-  tcb_set_tls_base (init_cap_init_tcb, (uintptr_t)&tls1.self);
-
-  bi = boot_info;
-
   printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
   printf ("executable_start: %p\n", &__executable_start);
-
-  print_to_e9 ("[E9] Hello World!\n");
 
   printf ("Boot info: %p\n", bi);
   printf ("  .untyped_range = [%zu, %zu)\n", bi->untyped_range.start,
@@ -207,38 +73,67 @@ c_start (void *ipc_buffer, void *boot_info)
       printf ("  .untyped[%lu]: paddr = %016lx, size = %lu\n", i,
               bi->untypeds[i].base, 1ul << bi->untypeds[i].size_bits);
     }
+}
 
+cptr_t
+create_thread (void *ipc_buffer, void *entry, cptr_t *endpoint)
+{
   int untyped = init_cap_first_untyped;
+  int tcb_cap = next_unused_cap++;
+  int endpoint_cap = next_unused_cap++;
+  *endpoint = endpoint_cap;
 
   untyped_retype (untyped, cap_tcb, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, 100, 1);
+                  init_cap_root_cnode, 64, tcb_cap, 1);
   untyped_retype (untyped, cap_endpoint, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, 101, 1);
-  // cnode_debug_print (init_cap_root_cnode);
+                  init_cap_root_cnode, 64, endpoint_cap, 1);
 
-  tcb_configure (100, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0,
+  tcb_configure (tcb_cap, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0,
                  (word_t)ipc_buffer + 1024, 0);
-  tcb_set_tls_base (100, (uintptr_t)&tls2.self);
+  tcb_set_tls_base (tcb_cap, (uintptr_t)&tls2.self);
 
   frame_t frame;
   tcb_read_registers (init_cap_init_tcb, false, 0, 0, &frame);
 
-  frame.rip = (uintptr_t)thread_entry;
+  frame.rip = (uintptr_t)entry;
   frame.rsp = (uintptr_t)thread_stack + sizeof (thread_stack);
   frame.rdi = (uintptr_t)ipc_buffer + 1024;
-  frame.rsi = 42;
+  frame.rsi = endpoint_cap;
 
-  tcb_write_registers (100, false, 0, 0, &frame);
+  tcb_write_registers (tcb_cap, false, 0, 0, &frame);
 
-  printf ("Starting new userland thread\n");
-  tcb_resume (100);
+  return tcb_cap;
+}
+
+[[noreturn]] int
+c_start (void *ipc_buffer, void *boot_info)
+{
+  asm volatile ("wrfsbase %0" ::"r"(&tls1.self));
+  __ipc_buffer = ipc_buffer;
+
+  tcb_set_tls_base (init_cap_init_tcb, (uintptr_t)&tls1.self);
+
+  bi = boot_info;
+  next_unused_cap = bi->empty_range.start;
+
+  print_to_e9 ("[E9] Hello World!\n");
+
+  print_bootinfo_information ();
+
+  cptr_t tcb_cap;
+  cptr_t endpoint_cap;
+
+  [[noreturn]] void thread_entry (void *ipc_buffer, uintptr_t arg);
+  tcb_cap = create_thread(ipc_buffer + 1024, thread_entry, &endpoint_cap);
+  tcb_resume (tcb_cap);
+
   yield ();
 
   while (true)
     {
       word_t badge;
       word_t msg = 1;
-      message_info_t resp = recv (101, &badge);
+      message_info_t resp = recv (endpoint_cap, &badge);
       if (get_message_length (resp) > 0)
         printf ("received %lu\n", (msg = get_mr (0)));
       if (msg % 2 == 0)
@@ -247,6 +142,26 @@ c_start (void *ipc_buffer, void *boot_info)
       if (get_message_label (resp) == 1)
         break;
     }
+
+  exit ();
+}
+
+[[noreturn]] void
+thread_entry (void *ipc_buffer, uintptr_t endpoint_cap)
+{
+  asm volatile ("wrfsbase %0" ::"r"(&tls2.self));
+  __ipc_buffer = ipc_buffer;
+  printf ("Hello, World from userland thread! Arg is %lu\n", endpoint_cap);
+
+  message_info_t info = new_message_info (0, 0, 0, 1);
+  for (word_t i = 0; i < 10; i++)
+    {
+      set_mr (0, i);
+      send (endpoint_cap, info);
+    }
+
+  info = new_message_info (1, 0, 0, 0);
+  send (endpoint_cap, info);
 
   exit ();
 }
