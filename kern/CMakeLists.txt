@@ -17,6 +17,10 @@ add_executable(untitled_bare_metal
   ../lib/string.c
 )
 
+target_include_directories(untitled_bare_metal PRIVATE
+  ${CMAKE_SOURCE_DIR}/limine
+)
+
 add_compile_definitions(
   __KERNEL__=1
 )

@@ -5,12 +5,6 @@
 #include "string.h"
 #include "sys/cdefs.h"
 
-PURE static size_t
-n_phdrs (struct elf_ehdr *e)
-{
-  return e->phnum;
-}
-
 PURE static struct elf_phdr *
 phdr (struct elf_ehdr *e, size_t i)
 {
@@ -34,7 +28,7 @@ elf_load (struct elf_ehdr *e)
 {
   uintptr_t root = get_vm_root ();
 
-  for (size_t i = 0; i < n_phdrs (e); i++)
+  for (size_t i = 0; i < e->phnum; i++)
     {
       struct elf_phdr *p = phdr (e, i);
 
