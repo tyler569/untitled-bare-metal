@@ -115,7 +115,7 @@ yield ()
 exit ()
 {
   _syscall0 (0);
-  UNREACHABLE ();
+  unreachable ();
 }
 
 long
