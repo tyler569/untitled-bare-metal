@@ -47,7 +47,7 @@ create_tcb_from_elf_in_this_vm (struct tcb *t, struct elf_ehdr *elf)
 
   elf_load (elf);
 
-  new_user_frame (&t->saved_state, elf_entry (elf), 0);
+  new_user_frame (&t->saved_state, elf->entry, 0);
 
   return t;
 }

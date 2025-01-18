@@ -40,8 +40,8 @@ create_init_tcb (void *init_elf)
 
   size_t n_untyped = BIT (INIT_CNODE_SIZE_BITS) - init_cap_first_untyped;
 
-  create_init_untyped_caps (init_cnode + init_cap_first_untyped,
-                            &n_untyped, bi->untypeds);
+  create_init_untyped_caps (init_cnode + init_cap_first_untyped, &n_untyped,
+                            bi->untypeds);
   bi->n_untypeds = n_untyped;
 
   bi->untyped_range = (struct cap_range){

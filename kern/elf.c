@@ -41,9 +41,3 @@ elf_load (struct elf_ehdr *e)
       memset ((char *)p->vaddr + p->filesz, 0, p->memsz - p->filesz);
     }
 }
-
-uintptr_t
-elf_entry (struct elf_ehdr *e)
-{
-  return e->entry;
-}
