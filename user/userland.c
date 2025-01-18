@@ -196,6 +196,10 @@ c_start (void *ipc_buffer, void *boot_info)
   print_to_e9 ("[E9] Hello World!\n");
 
   printf ("Boot info: %p\n", bi);
+  printf ("  .untyped_range = [%zu, %zu)\n", bi->untyped_range.start,
+          bi->untyped_range.end);
+  printf ("  .empty_range = [%zu, %zu)\n", bi->empty_range.start,
+          bi->empty_range.end);
   printf ("  .n_untypeds = %lu\n", bi->n_untypeds);
 
   for (word_t i = 0; i < bi->n_untypeds; i++)

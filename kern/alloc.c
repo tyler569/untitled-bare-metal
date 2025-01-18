@@ -55,32 +55,35 @@ void
 create_init_untyped_caps (cte_t *base, size_t *count,
                           struct untyped_desc *desc)
 {
-  size_t n = MIN (*count, region_count);
+  size_t n = *count;
   size_t cap_i = 0;
   for (size_t i = 0; i < n; i++)
     {
       if (regions[i].in_kernel_use)
         continue;
+
       regions[i].in_user_use = true;
 
-      //
-      // TODO PAGE_BITS
-      //
-      base[cap_i++].cap
+      base[cap_i].cap
           = cap_untyped_new (regions[i].addr, regions[i].size_bits + 12);
 
-      desc[i].base = regions[i].addr;
-      desc[i].size_bits = regions[i].size_bits + 12;
+      desc[cap_i].base = regions[i].addr;
+      desc[cap_i].size_bits = regions[i].size_bits + 12;
+
+      cap_i++;
+
+      if (i >= region_count - 1)
+        break;
     }
 
   *count = cap_i;
 }
 
 int
-compare_power_of_two_regions (const struct power_of_two_region *a,
-                              const struct power_of_two_region *b)
+power_of_two_region_compare (const void *a, const void *b)
 {
-  return a->size_bits - b->size_bits;
+  return ((struct power_of_two_region *)a)->size_bits
+         - ((struct power_of_two_region *)b)->size_bits;
 }
 
 void
@@ -91,9 +94,8 @@ init_page_mmap ()
   for (size_t i = 0; i < extent_count; i++)
     allocate_aligned_regions (&extents[i]);
 
-  //   qsort (regions, region_count, sizeof (struct power_of_two_region),
-  //          (int (*) (const void *, const void
-  //          *))compare_power_of_two_regions);
+  qsort (regions, region_count, sizeof (struct power_of_two_region),
+         power_of_two_region_compare);
 }
 
 uintptr_t

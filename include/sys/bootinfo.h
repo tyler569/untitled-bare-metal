@@ -1,7 +1,6 @@
 #pragma once
 
-#define INIT_CNODE_SIZE_BITS 8
-#define INIT_CNODE_SIZE (1 << INIT_CNODE_SIZE_BITS)
+#define INIT_CNODE_SIZE_BITS 10
 
 enum boot_capabilities
 {
@@ -14,7 +13,7 @@ enum boot_capabilities
   init_cap_first_untyped,
 };
 
-struct slot_region
+struct cap_range
 {
   cptr_t start;
   cptr_t end;
@@ -30,6 +29,9 @@ struct untyped_desc
 struct boot_info
 {
   word_t node_id;
+
+  struct cap_range untyped_range;
+  struct cap_range empty_range;
 
   size_t n_untypeds;
   struct untyped_desc untypeds[];

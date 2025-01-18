@@ -38,9 +38,21 @@ create_init_tcb (void *init_elf)
   init_cnode[init_cap_init_vspace].cap = cap_x86_64_pml4_new (get_vm_root ());
   init_cnode[init_cap_io_port_control].cap = cap_x86_64_io_port_control_new ();
 
-  bi->n_untypeds = 32;
+  size_t n_untyped = BIT (INIT_CNODE_SIZE_BITS) - init_cap_first_untyped;
+
   create_init_untyped_caps (init_cnode + init_cap_first_untyped,
-                            &bi->n_untypeds, bi->untypeds);
+                            &n_untyped, bi->untypeds);
+  bi->n_untypeds = n_untyped;
+
+  bi->untyped_range = (struct cap_range){
+    .start = init_cap_first_untyped,
+    .end = init_cap_first_untyped + n_untyped,
+  };
+
+  bi->empty_range = (struct cap_range){
+    .start = init_cap_first_untyped + n_untyped,
+    .end = BIT (INIT_CNODE_SIZE_BITS),
+  };
 
   init_tcb.cspace_root.cap = init_cnode_cap;
 
