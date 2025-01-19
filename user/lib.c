@@ -74,6 +74,20 @@ recv (cptr_t cap, word_t *sender)
   return _syscall22 (sys_recv, cap, 0, sender);
 }
 
+message_info_t
+reply (cptr_t cap, message_info_t info)
+{
+  __ipc_buffer->tag = info;
+  return _syscall2 (sys_reply, cap, info);
+}
+
+message_info_t
+reply_recv (cptr_t cap, message_info_t info, word_t *sender)
+{
+  __ipc_buffer->tag = info;
+  return _syscall22 (sys_replyrecv, cap, info, sender);
+}
+
 void
 yield ()
 {

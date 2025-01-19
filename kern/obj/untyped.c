@@ -1,4 +1,3 @@
-#include "sys/obj/untyped.h"
 #include "kern/cap.h"
 #include "kern/ipc.h"
 #include "kern/mem.h"
@@ -11,6 +10,7 @@
 #include "string.h"
 #include "sys/types.h"
 
+#define MAX_UNTYPED_ROOT_CAPS 256
 cap_t root_untyped_capabilities[MAX_UNTYPED_ROOT_CAPS];
 size_t root_untyped_cap_count = 0;
 

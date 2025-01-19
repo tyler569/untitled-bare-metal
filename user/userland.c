@@ -25,7 +25,6 @@ int next_unused_cap = -1;
 uint8_t __attribute__ ((aligned (PAGE_SIZE))) thread_stack[PAGE_SIZE * 4];
 uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
 
-
 cptr_t
 get_port_cap ()
 {
@@ -56,7 +55,7 @@ print_to_e9 (const char *string)
 }
 
 void
-print_bootinfo_information()
+print_bootinfo_information ()
 {
   printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
   printf ("executable_start: %p\n", &__executable_start);
@@ -105,6 +104,34 @@ create_thread (void *ipc_buffer, void *entry, cptr_t *endpoint)
   return tcb_cap;
 }
 
+void
+create_page_table ()
+{
+  int pml4_cap = next_unused_cap++;
+  int pdpt_cap = next_unused_cap++;
+  int pd_cap = next_unused_cap++;
+  int pt_cap = next_unused_cap++;
+  int page_cap = next_unused_cap++;
+
+  int untyped = init_cap_first_untyped + 1;
+
+  untyped_retype (untyped, cap_x86_64_pml4, 0, init_cap_root_cnode,
+                  init_cap_root_cnode, 64, pml4_cap, 1);
+  untyped_retype (untyped, cap_x86_64_pdpt, 0, init_cap_root_cnode,
+                  init_cap_root_cnode, 64, pdpt_cap, 1);
+  untyped_retype (untyped, cap_x86_64_pd, 0, init_cap_root_cnode,
+                  init_cap_root_cnode, 64, pd_cap, 1);
+  untyped_retype (untyped, cap_x86_64_pt, 0, init_cap_root_cnode,
+                  init_cap_root_cnode, 64, pt_cap, 1);
+  untyped_retype (untyped, cap_x86_64_page, 0, init_cap_root_cnode,
+                  init_cap_root_cnode, 64, page_cap, 1);
+
+  x86_64_pdpt_map (pdpt_cap, pml4_cap, 0, 0);
+  x86_64_pd_map (pd_cap, pml4_cap, 0, 0);
+  x86_64_pt_map (pt_cap, pml4_cap, 0, 0);
+  x86_64_page_map (page_cap, pml4_cap, 0x1000, 0);
+}
+
 [[noreturn]] int
 c_start (void *ipc_buffer, void *boot_info)
 {
@@ -120,11 +147,13 @@ c_start (void *ipc_buffer, void *boot_info)
 
   print_bootinfo_information ();
 
+  create_page_table ();
+
   cptr_t tcb_cap;
   cptr_t endpoint_cap;
 
   [[noreturn]] void thread_entry (void *ipc_buffer, uintptr_t arg);
-  tcb_cap = create_thread(ipc_buffer + 1024, thread_entry, &endpoint_cap);
+  tcb_cap = create_thread (ipc_buffer + 1024, thread_entry, &endpoint_cap);
   tcb_resume (tcb_cap);
 
   yield ();
@@ -133,7 +162,15 @@ c_start (void *ipc_buffer, void *boot_info)
     {
       word_t badge;
       word_t msg = 1;
+
       message_info_t resp = recv (endpoint_cap, &badge);
+
+      if (get_message_label (resp) == 2)
+        {
+          set_mr (0, get_mr (0) * 2);
+          resp = reply_recv (endpoint_cap, new_message_info (2, 0, 0, 1), &badge);
+        }
+
       if (get_message_length (resp) > 0)
         printf ("received %lu\n", (msg = get_mr (0)));
       if (msg % 2 == 0)
@@ -149,11 +186,16 @@ c_start (void *ipc_buffer, void *boot_info)
 [[noreturn]] void
 thread_entry (void *ipc_buffer, uintptr_t endpoint_cap)
 {
-  asm volatile ("wrfsbase %0" ::"r"(&tls2.self));
+  // asm volatile ("wrfsbase %0" ::"r"(&tls2.self));
   __ipc_buffer = ipc_buffer;
   printf ("Hello, World from userland thread! Arg is %lu\n", endpoint_cap);
 
-  message_info_t info = new_message_info (0, 0, 0, 1);
+  message_info_t info = new_message_info (2, 0, 0, 1);
+  // set_mr (0, 42);
+  // info = call (endpoint_cap, info, nullptr);
+  // printf ("Received response: %lu\n", get_mr (0));
+
+  info = new_message_info (0, 0, 0, 1);
   for (word_t i = 0; i < 10; i++)
     {
       set_mr (0, i);

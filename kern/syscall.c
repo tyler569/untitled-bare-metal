@@ -59,9 +59,6 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
           invoke_endpoint_call (slot, a1);
         }
       unreachable ();
-    case sys_reply:
-      printf ("sys_reply (info: %#lx)\n", a0);
-      return invoke_reply (nullptr, a0); // TODO TCB reply cap
     case sys_send:
       GET_CAP (a0, slot, err);
       printf ("sys_send (dest: %#lx, info: %#lx)\n", a0, a1);
@@ -79,6 +76,18 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         return return_ipc (illegal_operation, 0);
 
       return invoke_endpoint_recv (slot);
+    case sys_reply:
+      printf ("sys_reply (info: %#lx)\n", a0);
+      return invoke_reply (nullptr, a0); // TODO TCB reply cap
+    case sys_replyrecv:
+      GET_CAP (a0, slot, err);
+
+      printf ("sys_replyrecv (dest: %#lx, info: %#lx)\n", a0, a1);
+
+      if (cap_type (slot) != cap_endpoint)
+        return return_ipc (illegal_operation, 0);
+
+      return invoke_reply_recv (slot, a1);
     case sys_yield:
       printf ("sys_yield ()\n");
       schedule ();

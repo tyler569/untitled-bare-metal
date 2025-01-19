@@ -131,13 +131,9 @@ class KMethod
           return return_ipc (illegal_operation, 0);
         }
       if (get_message_length (info) < #{mr_parameters.length})
-        {
-          return return_ipc (truncated_message, 0);
-        }
+        return return_ipc (truncated_message, 0);
       if (get_message_extra_caps (info) < #{cap_parameters.length})
-        {
-          return return_ipc (truncated_message, 0);
-        }
+        return return_ipc (truncated_message, 0);
 
       #{cap_parameters.map.with_index do |param, i|
         <<~EOS

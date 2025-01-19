@@ -6,22 +6,10 @@
 #include "stddef.h"
 #include "stdint.h"
 
-enum physical_extent_flags
-{
-  PHYSICAL_EXTENT_FREE = 0,
-  PHYSICAL_EXTENT_USED = 1 << 0,
-};
-
 struct physical_extent
 {
-  enum physical_extent_flags flags;
   uintptr_t start;
   size_t len;
-};
-
-enum
-{
-  MAX_UNTYPED_ROOT_CAPS = 128,
 };
 
 #define PTE_PRESENT (1 << 0)

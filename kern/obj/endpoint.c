@@ -54,14 +54,17 @@ receive_message_from_blocked_sender (struct endpoint *e)
 
   message_info_t info = (message_info_t)sender->ipc_buffer->tag;
 
+  word_t size = get_message_length (info) * sizeof (word_t);
+  memcpy (this_tcb->ipc_buffer->msg, sender->ipc_buffer->msg, size);
+
   this_tcb->ipc_buffer->tag = info;
   this_tcb->current_user_frame->rax = sender->ipc_buffer->tag;
   this_tcb->current_user_frame->rdi = sender->endpoint_badge;
 
-  word_t size = get_message_length (info) * sizeof (word_t);
-  memcpy (this_tcb->ipc_buffer->msg, sender->ipc_buffer->msg, size);
-
-  make_tcb_runnable (sender);
+  if (sender->expects_reply)
+    this_tcb->reply_to = sender;
+  else
+    make_tcb_runnable (sender);
 }
 
 [[noreturn]] static void
@@ -151,8 +154,19 @@ invoke_endpoint_call (cte_t *cap, word_t message_info)
 message_info_t
 invoke_reply (cte_t *, word_t message_info)
 {
+  // TODO: this should use tcb->reply capability
   struct tcb *receiver = this_tcb->reply_to;
   if (!receiver || receiver->state != TASK_STATE_CALLING)
     return return_ipc (illegal_operation, 0);
   send_message_to_blocked_receiver (receiver, message_info, 0);
+}
+
+message_info_t
+invoke_reply_recv (cte_t *cap, word_t message_info)
+{
+  message_info_t err;
+  if ((err = invoke_reply (nullptr, message_info)))
+    return err;
+
+  return invoke_endpoint_recv (cap);
 }

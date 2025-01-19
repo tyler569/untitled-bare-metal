@@ -1,10 +1,16 @@
 #pragma once
 
 #include "assert.h"
+#include "elf.h"
 #include "kern/arch.h"
 #include "kern/cap.h"
 #include "kern/per_cpu.h"
-#include "sys/obj/tcb.h"
+#include "list.h"
+#include "spinlock.h"
+#include "sys/ipc.h"
+#include "sys/types.h"
+
+#define MAX_PRIORITY 254
 
 enum tcb_state
 {
