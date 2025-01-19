@@ -75,10 +75,10 @@ recv (cptr_t cap, word_t *sender)
 }
 
 message_info_t
-reply (cptr_t cap, message_info_t info)
+reply (message_info_t info)
 {
   __ipc_buffer->tag = info;
-  return _syscall2 (sys_reply, cap, info);
+  return _syscall2 (sys_reply, info, 0);
 }
 
 message_info_t

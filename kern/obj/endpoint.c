@@ -144,6 +144,7 @@ invoke_endpoint_call (cte_t *cap, word_t message_info)
   assert (cap_type (cap) == cap_endpoint);
 
   this_tcb->expects_reply = true;
+  this_tcb->state = TASK_STATE_CALLING;
 
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);

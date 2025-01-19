@@ -31,9 +31,7 @@ get_port_cap ()
   static cptr_t port_cap = 0;
 
   if (port_cap != 0)
-    {
-      return port_cap;
-    }
+    return port_cap;
 
   port_cap = next_unused_cap++;
 
@@ -49,9 +47,7 @@ print_to_e9 (const char *string)
   cptr_t port_cap = get_port_cap ();
 
   for (const char *c = string; *c; c++)
-    {
-      x86_64_io_port_out8 (port_cap, 0xe9, *c);
-    }
+    x86_64_io_port_out8 (port_cap, 0xe9, *c);
 }
 
 void
@@ -158,27 +154,17 @@ c_start (void *ipc_buffer, void *boot_info)
 
   yield ();
 
-  while (true)
-    {
-      word_t badge;
-      word_t msg = 1;
+  word_t badge;
 
-      message_info_t resp = recv (endpoint_cap, &badge);
+  set_mr (0, 30);
+  call (endpoint_cap, new_message_info (1, 0, 0, 1), &badge);
+  printf ("Method 1, Response: %lu\n", get_mr (0));
 
-      if (get_message_label (resp) == 2)
-        {
-          set_mr (0, get_mr (0) * 2);
-          resp = reply_recv (endpoint_cap, new_message_info (2, 0, 0, 1), &badge);
-        }
+  call (endpoint_cap, new_message_info (2, 0, 0, 1), &badge);
+  printf ("Method 2, Response: %lu\n", get_mr (0));
 
-      if (get_message_length (resp) > 0)
-        printf ("received %lu\n", (msg = get_mr (0)));
-      if (msg % 2 == 0)
-        yield ();
-
-      if (get_message_label (resp) == 1)
-        break;
-    }
+  call (endpoint_cap, new_message_info (3, 0, 0, 1), &badge);
+  printf ("Method 3, Response: %lu\n", get_mr (0));
 
   exit ();
 }
@@ -186,24 +172,37 @@ c_start (void *ipc_buffer, void *boot_info)
 [[noreturn]] void
 thread_entry (void *ipc_buffer, uintptr_t endpoint_cap)
 {
-  // asm volatile ("wrfsbase %0" ::"r"(&tls2.self));
   __ipc_buffer = ipc_buffer;
   printf ("Hello, World from userland thread! Arg is %lu\n", endpoint_cap);
 
-  message_info_t info = new_message_info (2, 0, 0, 1);
-  // set_mr (0, 42);
-  // info = call (endpoint_cap, info, nullptr);
-  // printf ("Received response: %lu\n", get_mr (0));
+  bool done = false;
+  message_info_t info, resp;
+  word_t badge;
 
-  info = new_message_info (0, 0, 0, 1);
-  for (word_t i = 0; i < 10; i++)
+  while (!done)
     {
-      set_mr (0, i);
-      send (endpoint_cap, info);
-    }
+      info = recv (endpoint_cap, &badge);
+      word_t label = get_message_label (info);
 
-  info = new_message_info (1, 0, 0, 0);
-  send (endpoint_cap, info);
+      switch (label)
+        {
+        case 0:
+          done = true;
+          break;
+        case 1:
+          set_mr(0, 42);
+          break;
+        case 2:
+          set_mr (0, get_mr (0) * 2);
+          break;
+        default:
+          set_mr (0, get_message_label (info));
+          break;
+        }
+
+      resp = new_message_info (label, 0, 0, 1);
+      reply (resp);
+    }
 
   exit ();
 }
