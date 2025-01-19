@@ -1,6 +1,18 @@
+#pragma once
+#include "stdint.h"
+
 extern thread_local struct ipc_buffer *__ipc_buffer;
 
-static uintptr_t
+struct frame
+{
+  uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
+  uint64_t rdi, rsi, rbp, rbx, rdx, rcx, rax;
+  uint64_t int_no, err_code;
+  uint64_t rip, cs, rflags, rsp, ss;
+};
+typedef struct frame frame_t;
+
+static inline uintptr_t
 _syscall0 (int syscall_num)
 {
   uintptr_t ret;
@@ -8,7 +20,7 @@ _syscall0 (int syscall_num)
   return ret;
 }
 
-static uintptr_t
+static inline uintptr_t
 _syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
 {
   uintptr_t ret;
@@ -19,7 +31,7 @@ _syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
   return ret;
 }
 
-static uintptr_t
+static inline uintptr_t
 _syscall22 (int syscall_num, uintptr_t a1, uintptr_t a2, uintptr_t *out)
 {
   uintptr_t ret;
@@ -30,65 +42,65 @@ _syscall22 (int syscall_num, uintptr_t a1, uintptr_t a2, uintptr_t *out)
   return ret;
 }
 
-void
+static inline void
 set_mr (word_t i, word_t val)
 {
   __ipc_buffer->msg[i] = val;
 }
 
-word_t
+static inline word_t
 get_mr (word_t i)
 {
   return __ipc_buffer->msg[i];
 }
 
-void
+static inline void
 set_cap (word_t i, word_t val)
 {
   __ipc_buffer->caps_or_badges[i] = val;
 }
 
-word_t
+static inline word_t
 get_cap (word_t i)
 {
   return __ipc_buffer->caps_or_badges[i];
 }
 
-void
+static inline void
 send (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
   _syscall2 (sys_send, cap, info);
 }
 
-message_info_t
+static inline message_info_t
 call (cptr_t cap, message_info_t info, word_t *sender)
 {
   __ipc_buffer->tag = info;
   return _syscall22 (sys_call, cap, info, sender);
 }
 
-message_info_t
+static inline message_info_t
 recv (cptr_t cap, word_t *sender)
 {
   return _syscall22 (sys_recv, cap, 0, sender);
 }
 
-message_info_t
+static inline message_info_t
 reply (message_info_t info)
 {
   __ipc_buffer->tag = info;
   return _syscall2 (sys_reply, info, 0);
 }
 
-message_info_t
+static inline message_info_t
 reply_recv (cptr_t cap, message_info_t info, word_t *sender)
 {
   __ipc_buffer->tag = info;
   return _syscall22 (sys_replyrecv, cap, info, sender);
 }
 
-void
+static inline void
 yield ()
 {
   _syscall0 (sys_yield);
@@ -103,16 +115,7 @@ exit ()
   unreachable ();
 }
 
-struct frame
-{
-  uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
-  uint64_t rdi, rsi, rbp, rbx, rdx, rcx, rax;
-  uint64_t int_no, err_code;
-  uint64_t rip, cs, rflags, rsp, ss;
-};
-typedef struct frame frame_t;
-
-long
+inline long
 write (FILE *, const void *str, unsigned long len)
 {
   _syscall2 (sys_debug_write, (uintptr_t)str, len);

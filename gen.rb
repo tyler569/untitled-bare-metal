@@ -257,10 +257,10 @@ File.open("include/#{HEADERS[:user_methods]}", 'w') do |f|
   f.puts
   f.puts "#include \"#{HEADERS[:global_constants]}\""
   f.puts
-  f.puts "word_t get_mr (word_t index);"
-  f.puts "void set_mr (word_t index, word_t value);"
-  f.puts "cptr_t get_cap (word_t index);"
-  f.puts "void set_cap (word_t index, cptr_t value);"
+  f.puts "static inline word_t get_mr (word_t index);"
+  f.puts "static inline void set_mr (word_t index, word_t value);"
+  f.puts "static inline cptr_t get_cap (word_t index);"
+  f.puts "static inline void set_cap (word_t index, cptr_t value);"
   f.puts
   type_objs.each do |type|
     type.kmethods.each do |method|

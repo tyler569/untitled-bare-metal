@@ -5,9 +5,11 @@
 #include "sys/ipc.h"
 #include "sys/syscall.h"
 
+#include "./lib.h"
+
 #define PAGE_SIZE 4096
 
-#include "lib.c"
+extern inline long write(FILE *, const void *str, unsigned long len);
 
 struct thread_local_storage
 {
@@ -17,13 +19,14 @@ struct thread_local_storage
 
 struct thread_local_storage tls1 = { {}, (void *)&tls1.self };
 struct thread_local_storage tls2 = { {}, (void *)&tls2.self };
+uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
+uint8_t __attribute__ ((aligned (PAGE_SIZE))) thread_stack[PAGE_SIZE * 4];
 
 extern char __executable_start;
+
 thread_local struct ipc_buffer *__ipc_buffer;
 struct boot_info *bi = nullptr;
 int next_unused_cap = -1;
-uint8_t __attribute__ ((aligned (PAGE_SIZE))) thread_stack[PAGE_SIZE * 4];
-uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
 
 cptr_t
 get_port_cap ()
@@ -53,6 +56,7 @@ print_to_e9 (const char *string)
 void
 print_bootinfo_information ()
 {
+  printf ("\n");
   printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
   printf ("executable_start: %p\n", &__executable_start);
 
@@ -68,6 +72,7 @@ print_bootinfo_information ()
       printf ("  .untyped[%lu]: paddr = %016lx, size = %lu\n", i,
               bi->untypeds[i].base, 1ul << bi->untypeds[i].size_bits);
     }
+  printf ("\n");
 }
 
 cptr_t
@@ -139,9 +144,9 @@ c_start (void *ipc_buffer, void *boot_info)
   bi = boot_info;
   next_unused_cap = bi->empty_range.start;
 
-  print_to_e9 ("[E9] Hello World!\n");
-
   print_bootinfo_information ();
+
+  print_to_e9 ("[E9] Hello World!\n");
 
   create_page_table ();
 

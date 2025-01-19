@@ -54,16 +54,9 @@ get_physical_extents (struct physical_extent *extents, size_t *extent_count)
 
   struct limine_memmap_response *resp = volatile_read (mmapinfo.response);
 
-  printf ("Limine memory map:\n");
-
   for (size_t i = 0; i < resp->entry_count; i++)
     {
       struct limine_memmap_entry *entry = resp->entries[i];
-
-      uintptr_t top = entry->base + entry->length;
-
-      printf ("  %11lx - %11lx: %s\n", entry->base, top,
-              limine_memmap_type_str[entry->type]);
 
       if (entry->type == LIMINE_MEMMAP_USABLE && *extent_count < max_extents)
         {

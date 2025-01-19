@@ -40,8 +40,6 @@ allocate_aligned_regions (struct physical_extent *extent)
       assert (max_len <= len);
       assert (max_len >> 12 > 0);
 
-      printf ("  %p: %zu pages\n", (void *)acc, max_len >> 12);
-
       regions[region_count].addr = acc;
       regions[region_count].size_bits = 63 - zeros - 12;
       region_count++;

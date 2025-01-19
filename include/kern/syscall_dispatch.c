@@ -24,13 +24,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 5)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         src_root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -63,13 +59,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, index=%#lx, depth=%hhu)\n", cap_type_string (slot),
                 index, depth);
@@ -96,13 +88,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 6)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         src_root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -136,13 +124,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, index=%#lx, depth=%hhu)\n", cap_type_string (slot),
                 index, depth);
@@ -162,13 +146,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s)\n", cap_type_string (slot));
 
@@ -187,13 +167,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s)\n", cap_type_string (slot));
 
@@ -219,13 +195,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 4)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 3)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         cspace_root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -280,13 +252,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 5)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         source = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -323,13 +291,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 4)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, suspend_source=%d, arch_flags=%#lx, count=%#lx, "
                 "regs=%p)\n",
@@ -352,13 +316,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s)\n", cap_type_string (slot));
 
@@ -378,13 +338,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, affinity=%#lx)\n", cap_type_string (slot), affinity);
 
@@ -405,13 +361,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         buffer_frame = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -445,13 +397,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 3)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         cspace_root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -492,13 +440,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, tls_base=%#lx)\n", cap_type_string (slot), tls_base);
 
@@ -517,13 +461,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s)\n", cap_type_string (slot));
 
@@ -546,13 +486,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 4)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, resume_target=%d, arch_flags=%#lx, count=%#lx, "
                 "regs=%p)\n",
@@ -582,13 +518,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 6)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -623,13 +555,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, port=%#lx, result=%#lx)\n", cap_type_string (slot),
                 port, result);
@@ -651,13 +579,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, port=%#lx, result=%#lx)\n", cap_type_string (slot),
                 port, result);
@@ -679,13 +603,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, port=%#lx, result=%#lx)\n", cap_type_string (slot),
                 port, result);
@@ -707,13 +627,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, port=%#lx, value=%#lx)\n", cap_type_string (slot),
                 port, value);
@@ -735,13 +651,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, port=%#lx, value=%#lx)\n", cap_type_string (slot),
                 port, value);
@@ -763,13 +675,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s, port=%#lx, value=%#lx)\n", cap_type_string (slot),
                 port, value);
@@ -794,13 +702,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 4)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         root = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -834,13 +738,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -868,13 +768,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s)\n", cap_type_string (slot));
 
@@ -896,13 +792,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -930,13 +822,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s)\n", cap_type_string (slot));
 
@@ -958,13 +846,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -992,13 +876,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s)\n", cap_type_string (slot));
 
@@ -1020,13 +900,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 2)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 1)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
         if (error != no_error)
@@ -1054,13 +930,9 @@ dispatch_method (cte_t *slot, message_info_t info)
             return return_ipc (illegal_operation, 0);
           }
         if (get_message_length (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
-          {
-            return return_ipc (truncated_message, 0);
-          }
+          return return_ipc (truncated_message, 0);
 
         printf ("(cap:%s)\n", cap_type_string (slot));
 

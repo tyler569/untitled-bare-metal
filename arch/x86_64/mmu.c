@@ -5,20 +5,6 @@
 #include "sys/cdefs.h"
 #include "x86_64.h"
 
-typedef uint64_t pte_t;
-
-#define PTE_PRESENT (1 << 0)
-#define PTE_WRITE (1 << 1)
-#define PTE_USER (1 << 2)
-#define PTE_PWT (1 << 3)
-#define PTE_PCD (1 << 4)
-#define PTE_ACCESSED (1 << 5)
-#define PTE_DIRTY (1 << 6)
-#define PTE_PSE (1 << 7)
-#define PTE_GLOBAL (1 << 8)
-#define PTE_PAT (1 << 12)
-#define PTE_NX (1ULL << 63)
-
 #define PTE_ADDR(pte) ((pte) & 0x000FFFFFFFFFF000)
 #define PTE(pte) (pte_t *)(direct_map_of (PTE_ADDR (pte)))
 
@@ -58,6 +44,34 @@ alloc_table ()
   void *table = (void *)direct_map_of (page);
   memset (table, 0, PAGE_SIZE);
   return page;
+}
+
+pte_t *
+get_pml4e (uintptr_t root, uintptr_t virt)
+{
+  pte_t *pml4 = PTE (root);
+  return &pml4[virt >> PML4_SHIFT & PML4_MASK];
+}
+
+pte_t *
+get_pdpte (uintptr_t root, uintptr_t virt)
+{
+  pte_t *pdpt = PTE (*get_pml4e (root, virt));
+  return &pdpt[(virt >> PDP_SHIFT) & PDP_MASK];
+}
+
+pte_t *
+get_pde (uintptr_t root, uintptr_t virt)
+{
+  pte_t *pd = PTE (*get_pdpte (root, virt));
+  return &pd[(virt >> PD_SHIFT) & PD_MASK];
+}
+
+pte_t *
+get_pte (uintptr_t root, uintptr_t virt)
+{
+  pte_t *pt = PTE (*get_pde (root, virt));
+  return &pt[(virt >> PT_SHIFT) & PT_MASK];
 }
 
 void

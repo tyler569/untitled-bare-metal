@@ -43,13 +43,25 @@
 #define FLAG_DF 0x0400
 #define FLAG_OF 0x0800
 
-#define PF_PRESENT 0x1
-#define PF_WRITE 0x2
-#define PF_USER 0x4
-#define PF_RESERVED 0x8
-#define PF_EXECUTE 0x10
-#define PF_PROTECTION_KEY 0x20
-#define PF_SHADOW_STACK 0x40
+// #define PF_PRESENT 0x1
+// #define PF_WRITE 0x2
+// #define PF_USER 0x4
+// #define PF_RESERVED 0x8
+// #define PF_EXECUTE 0x10
+// #define PF_PROTECTION_KEY 0x20
+// #define PF_SHADOW_STACK 0x40
+
+#define PTE_PRESENT (1 << 0)
+#define PTE_WRITE (1 << 1)
+#define PTE_USER (1 << 2)
+#define PTE_PWT (1 << 3)
+#define PTE_PCD (1 << 4)
+#define PTE_ACCESSED (1 << 5)
+#define PTE_DIRTY (1 << 6)
+#define PTE_PSE (1 << 7)
+#define PTE_GLOBAL (1 << 8)
+#define PTE_PAT (1 << 12)
+#define PTE_NX (1ULL << 63)
 
 #define TSS_RSP2 28
 #define TSS_STACK 168
@@ -73,6 +85,13 @@ void init_syscall ();
 void init_int_stacks ();
 
 extern per_cpu_t bsp_cpu;
+
+typedef uint64_t pte_t;
+
+pte_t *get_pml4e (uintptr_t root, uintptr_t addr);
+pte_t *get_pdpte (uintptr_t root, uintptr_t addr);
+pte_t *get_pde (uintptr_t root, uintptr_t addr);
+pte_t *get_pte (uintptr_t root, uintptr_t addr);
 
 void write_port_b (uint16_t port, uint8_t);
 uint8_t read_port_b (uint16_t port);
