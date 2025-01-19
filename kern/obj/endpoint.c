@@ -5,12 +5,10 @@
 #include "kern/syscall.h"
 #include "string.h"
 
-[[noreturn]] static void
+static void
 send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
-                                  word_t badge)
+                                  word_t badge, bool resume_now)
 {
-  (void)badge;
-
   word_t size = get_message_length (info) * sizeof (word_t);
   memcpy (receiver->ipc_buffer->msg, this_tcb->ipc_buffer->msg, size);
 
@@ -21,9 +19,14 @@ send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
   if (this_tcb->expects_reply)
     receiver->reply_to = this_tcb;
 
-  receiver->state = TASK_STATE_RUNNABLE;
-  switch_tcb (receiver);
-  unreachable ();
+  if (resume_now)
+    {
+      receiver->state = TASK_STATE_RUNNABLE;
+      switch_tcb (receiver);
+      unreachable ();
+    }
+  else
+    make_tcb_runnable (receiver);
 }
 
 [[noreturn]] static void
@@ -95,7 +98,8 @@ endpoint_send (struct endpoint *e, word_t message_info, word_t badge,
       else if (recv_blocked)
         {
           remove_from_list (&tcb->send_receive_node);
-          send_message_to_blocked_receiver (tcb, message_info, badge);
+          send_message_to_blocked_receiver (tcb, message_info, badge, true);
+          unreachable ();
         }
       else
         assert (false && "Neither send nor receive blocked");
@@ -111,7 +115,7 @@ maybe_init_endpoint (struct endpoint *e)
   init_list (&e->list);
 }
 
-[[noreturn]] message_info_t
+[[noreturn]] void
 invoke_endpoint_send (cte_t *cap, word_t message_info)
 {
   assert (cap_type (cap) == cap_endpoint);
@@ -152,22 +156,23 @@ invoke_endpoint_call (cte_t *cap, word_t message_info)
   unreachable ();
 }
 
-message_info_t
-invoke_reply (cte_t *, word_t message_info)
+void
+invoke_reply (word_t message_info)
 {
   // TODO: this should use tcb->reply capability
+
   struct tcb *receiver = this_tcb->reply_to;
   if (!receiver || receiver->state != TASK_STATE_CALLING)
-    return return_ipc (illegal_operation, 0);
-  send_message_to_blocked_receiver (receiver, message_info, 0);
+    {
+      printf ("Failed to deliver reply!\n");
+      kill_tcb (this_tcb);
+    }
+  send_message_to_blocked_receiver (receiver, message_info, 0, false);
 }
 
 message_info_t
 invoke_reply_recv (cte_t *cap, word_t message_info)
 {
-  message_info_t err;
-  if ((err = invoke_reply (nullptr, message_info)))
-    return err;
-
+  invoke_reply (message_info);
   return invoke_endpoint_recv (cap);
 }

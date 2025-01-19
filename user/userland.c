@@ -179,9 +179,10 @@ thread_entry (void *ipc_buffer, uintptr_t endpoint_cap)
   message_info_t info, resp;
   word_t badge;
 
+  info = recv (endpoint_cap, &badge);
+
   while (!done)
     {
-      info = recv (endpoint_cap, &badge);
       word_t label = get_message_label (info);
 
       switch (label)
@@ -190,7 +191,7 @@ thread_entry (void *ipc_buffer, uintptr_t endpoint_cap)
           done = true;
           break;
         case 1:
-          set_mr(0, 42);
+          set_mr (0, 42);
           break;
         case 2:
           set_mr (0, get_mr (0) * 2);
@@ -201,7 +202,7 @@ thread_entry (void *ipc_buffer, uintptr_t endpoint_cap)
         }
 
       resp = new_message_info (label, 0, 0, 1);
-      reply (resp);
+      info = reply_recv (endpoint_cap, resp, &badge);
     }
 
   exit ();

@@ -4,6 +4,7 @@
 #include "kern/cap.h"
 #include "kern/mem.h"
 #include "kern/methods.h"
+#include "kern/obj/endpoint.h"
 #include "kern/per_cpu.h"
 #include "kern/size.h"
 #include "kern/syscall.h"
@@ -170,11 +171,11 @@ switch_tcb (struct tcb *t)
 
   assert_eq (t->state, TASK_STATE_RUNNABLE);
 
-  t->state = TASK_STATE_RUNNING;
-
   this_cpu->current_tcb = t;
   set_vm_root (t->vm_root);
   set_tls_base (t->tls_base);
+  t->state = TASK_STATE_RUNNING;
+
   jump_to_userland_frame (&t->saved_state);
 }
 

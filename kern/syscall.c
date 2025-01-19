@@ -18,6 +18,13 @@
       return return_ipc (err, 0);                                             \
     }
 
+#define ASSERT_ENDPOINT(slot)                                                 \
+  if (cap_type (slot) != cap_endpoint)                                        \
+    {                                                                         \
+      printf ("Invalid cap type\n");                                          \
+      kill_tcb (this_tcb);                                                    \
+    }
+
 message_info_t
 do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
             uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *f)
@@ -63,29 +70,28 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       GET_CAP (a0, slot, err);
       printf ("sys_send (dest: %#lx, info: %#lx)\n", a0, a1);
 
-      if (cap_type (slot) != cap_endpoint)
-        return return_ipc (illegal_operation, 0);
+      ASSERT_ENDPOINT (slot);
 
-      return invoke_endpoint_send (slot, a1);
+      invoke_endpoint_send (slot, a1);
+      return 0;
     case sys_recv:
       GET_CAP (a0, slot, err);
 
       printf ("sys_recv (dest: %#lx)\n", a0);
 
-      if (cap_type (slot) != cap_endpoint)
-        return return_ipc (illegal_operation, 0);
+      ASSERT_ENDPOINT (slot);
 
       return invoke_endpoint_recv (slot);
     case sys_reply:
       printf ("sys_reply (info: %#lx)\n", a0);
-      return invoke_reply (nullptr, a0); // TODO TCB reply cap
+      invoke_reply (a0);
+      return 0;
     case sys_replyrecv:
       GET_CAP (a0, slot, err);
 
       printf ("sys_replyrecv (dest: %#lx, info: %#lx)\n", a0, a1);
 
-      if (cap_type (slot) != cap_endpoint)
-        return return_ipc (illegal_operation, 0);
+      ASSERT_ENDPOINT (slot);
 
       return invoke_reply_recv (slot, a1);
     case sys_yield:
@@ -94,8 +100,9 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       unreachable ();
     default:
       printf ("Syscall (num: %i, ?...)\n", syscall_number);
-      set_mr (0, -1);
-      return return_ipc (invalid_argument, 1);
+
+      printf ("Invalid syscall number\n");
+      kill_tcb (this_tcb);
     }
 
   return ret;
