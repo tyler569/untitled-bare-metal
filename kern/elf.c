@@ -1,5 +1,6 @@
 #include "elf.h"
 #include "kern/arch.h"
+#include "kern/elf.h"
 #include "kern/mem.h"
 #include "stdio.h"
 #include "string.h"

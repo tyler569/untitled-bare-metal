@@ -2,6 +2,7 @@
 #include "assert.h"
 #include "kern/arch.h"
 #include "kern/cap.h"
+#include "kern/elf.h"
 #include "kern/mem.h"
 #include "kern/methods.h"
 #include "kern/obj/endpoint.h"
