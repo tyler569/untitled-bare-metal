@@ -3,13 +3,14 @@
 #include "kern/mem.h"
 #include "kern/obj/cnode.h"
 #include "kern/obj/tcb.h"
+#include "stddef.h"
 #include "sys/bootinfo.h"
 
 struct tcb init_tcb;
 cte_t init_cnode[BIT (INIT_CNODE_SIZE_BITS)];
 
 void
-create_init_tcb (void *init_elf)
+create_init_tcb (void *init_elf, size_t init_elf_size)
 {
   create_tcb_from_elf_in_this_vm (&init_tcb, init_elf);
 
@@ -27,6 +28,17 @@ create_init_tcb (void *init_elf)
   set_frame_arg (&init_tcb.saved_state, 1, bootinfo);
 
   struct boot_info *bi = (struct boot_info *)direct_map_of (bootinfo_page);
+
+  uintptr_t init_elf_mapping = 0x100000000;
+
+  for (size_t i = 0; i < init_elf_size; i += PAGE_SIZE)
+    {
+      uintptr_t page_phy = physical_of ((uintptr_t)init_elf + i);
+      add_vm_mapping (init_tcb.vm_root, init_elf_mapping + i, page_phy,
+                      PTE_PRESENT | PTE_USER);
+    }
+
+  bi->init_elf = (void *)init_elf_mapping;
 
   init_tcb.ipc_buffer_user = ipc_buffer;
   init_tcb.ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buffer_page);

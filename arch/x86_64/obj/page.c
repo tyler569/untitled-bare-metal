@@ -28,7 +28,7 @@ table_missing (int level)
 message_info_t
 x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
-  (void)attr ;
+  (void)attr;
 
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
   uintptr_t pdpt_phy = (uintptr_t)cap_ptr (cte);
@@ -46,7 +46,7 @@ x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 message_info_t
 x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
-  (void)attr ;
+  (void)attr;
 
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
   uintptr_t pd_phy = (uintptr_t)cap_ptr (cte);
@@ -67,7 +67,7 @@ x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 message_info_t
 x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
-  (void)attr ;
+  (void)attr;
 
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
   uintptr_t pt_phy = (uintptr_t)cap_ptr (cte);

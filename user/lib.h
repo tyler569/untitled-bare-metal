@@ -1,5 +1,12 @@
 #pragma once
+#include "stddef.h"
 #include "stdint.h"
+#include "stdio.h"
+#include "sys/bootinfo.h"
+#include "sys/cdefs.h"
+#include "sys/ipc.h"
+#include "sys/syscall.h"
+#include "sys/types.h"
 
 extern thread_local struct ipc_buffer *__ipc_buffer;
 
@@ -11,6 +18,13 @@ struct frame
   uint64_t rip, cs, rflags, rsp, ss;
 };
 typedef struct frame frame_t;
+
+void cptr_alloc_init (struct boot_info *bi);
+cptr_t cptr_alloc ();
+cptr_t cptr_alloc_range (size_t n);
+void cptr_free (cptr_t cptr);
+
+int create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t *tcb, cptr_t *cspace);
 
 static inline uintptr_t
 _syscall0 (int syscall_num)
@@ -106,8 +120,6 @@ yield ()
   _syscall0 (sys_yield);
 }
 
-#include "sys/user_method_stubs.h"
-
 [[noreturn]] static inline void
 exit ()
 {
@@ -121,3 +133,5 @@ write (FILE *, const void *str, unsigned long len)
   _syscall2 (sys_debug_write, (uintptr_t)str, len);
   return (long)len;
 }
+
+#include "sys/user_method_stubs.h"

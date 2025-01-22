@@ -1,4 +1,5 @@
 #pragma once
+#include "sys/types.h"
 
 #define INIT_CNODE_SIZE_BITS 10
 
@@ -29,6 +30,8 @@ struct untyped_desc
 struct boot_info
 {
   word_t node_id;
+
+  void *init_elf;
 
   struct cap_range untyped_range;
   struct cap_range empty_range;

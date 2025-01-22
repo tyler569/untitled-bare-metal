@@ -9,7 +9,37 @@ constexpr size_t bitmap_size = 512;
 constexpr size_t bits_per_word = 64;
 uint64_t bitmap[bitmap_size];
 
-cptr_t cptr_alloc()
+static inline void
+cptr_set_range (cptr_t start, cptr_t end)
+{
+  for (size_t i = start; i < end; i++)
+    {
+      size_t idx = i / bits_per_word;
+      size_t bit = i % bits_per_word;
+      bitmap[idx] |= (1ULL << bit);
+    }
+}
+
+static inline void
+cptr_clear_range (cptr_t start, cptr_t end)
+{
+  for (size_t i = start; i < end; i++)
+    {
+      size_t idx = i / bits_per_word;
+      size_t bit = i % bits_per_word;
+      bitmap[idx] &= ~(1ULL << bit);
+    }
+}
+
+void
+cptr_alloc_init (struct boot_info *bi)
+{
+  cptr_set_range (0, BIT (INIT_CNODE_SIZE_BITS));
+  cptr_clear_range (bi->empty_range.start, bi->empty_range.end);
+}
+
+cptr_t
+cptr_alloc ()
 {
   for (size_t i = 0; i < bitmap_size; i++)
     if (bitmap[i] != 0xFFFFFFFFFFFFFFFF)
@@ -22,14 +52,16 @@ cptr_t cptr_alloc()
   return -1;
 }
 
-cptr_t cptr_alloc_range (size_t n)
+cptr_t
+cptr_alloc_range (size_t n)
 {
   for (size_t i = 0; i < bitmap_size; i++)
     if (bitmap[i] != 0xFFFFFFFFFFFFFFFF)
       for (size_t j = 0; j < 64; j++)
         for (size_t j = 0; j < bits_per_word; j++)
           {
-            // Check if there is enough space for `n` bits starting at position (i * 64 + j).
+            // Check if there is enough space for `n` bits starting at position
+            // (i * 64 + j).
             bool found = true;
             for (size_t k = 0; k < n; k++)
               {
@@ -59,7 +91,8 @@ cptr_t cptr_alloc_range (size_t n)
   return -1;
 }
 
-void cptr_free(cptr_t cptr)
+void
+cptr_free (cptr_t cptr)
 {
   bitmap[cptr / 64] &= ~(1 << (cptr % 64));
 }

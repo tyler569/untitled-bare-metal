@@ -9,7 +9,9 @@
 
 #define PAGE_SIZE 4096
 
-extern inline long write(FILE *, const void *str, unsigned long len);
+extern inline long write (FILE *, const void *str, unsigned long len);
+
+[[noreturn]] void thread_entry (void *ipc_buffer, uintptr_t arg);
 
 struct thread_local_storage
 {
@@ -26,7 +28,6 @@ extern char __executable_start;
 
 thread_local struct ipc_buffer *__ipc_buffer;
 struct boot_info *bi = nullptr;
-int next_unused_cap = -1;
 
 cptr_t
 get_port_cap ()
@@ -36,7 +37,7 @@ get_port_cap ()
   if (port_cap != 0)
     return port_cap;
 
-  port_cap = next_unused_cap++;
+  port_cap = cptr_alloc ();
 
   x86_64_io_port_control_issue (init_cap_io_port_control, 0x0, 0xffff,
                                 init_cap_root_cnode, port_cap, 64);
@@ -79,8 +80,8 @@ cptr_t
 create_thread (void *ipc_buffer, void *entry, cptr_t *endpoint)
 {
   int untyped = init_cap_first_untyped;
-  int tcb_cap = next_unused_cap++;
-  int endpoint_cap = next_unused_cap++;
+  int tcb_cap = cptr_alloc ();
+  int endpoint_cap = cptr_alloc ();
   *endpoint = endpoint_cap;
 
   untyped_retype (untyped, cap_tcb, 0, init_cap_root_cnode,
@@ -105,34 +106,6 @@ create_thread (void *ipc_buffer, void *entry, cptr_t *endpoint)
   return tcb_cap;
 }
 
-void
-create_page_table ()
-{
-  int pml4_cap = next_unused_cap++;
-  int pdpt_cap = next_unused_cap++;
-  int pd_cap = next_unused_cap++;
-  int pt_cap = next_unused_cap++;
-  int page_cap = next_unused_cap++;
-
-  int untyped = init_cap_first_untyped + 1;
-
-  untyped_retype (untyped, cap_x86_64_pml4, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, pml4_cap, 1);
-  untyped_retype (untyped, cap_x86_64_pdpt, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, pdpt_cap, 1);
-  untyped_retype (untyped, cap_x86_64_pd, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, pd_cap, 1);
-  untyped_retype (untyped, cap_x86_64_pt, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, pt_cap, 1);
-  untyped_retype (untyped, cap_x86_64_page, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, page_cap, 1);
-
-  x86_64_pdpt_map (pdpt_cap, pml4_cap, 0, 0);
-  x86_64_pd_map (pd_cap, pml4_cap, 0, 0);
-  x86_64_pt_map (pt_cap, pml4_cap, 0, 0);
-  x86_64_page_map (page_cap, pml4_cap, 0x1000, 0);
-}
-
 [[noreturn]] int
 c_start (void *ipc_buffer, void *boot_info)
 {
@@ -142,18 +115,17 @@ c_start (void *ipc_buffer, void *boot_info)
   tcb_set_tls_base (init_cap_init_tcb, (uintptr_t)&tls1.self);
 
   bi = boot_info;
-  next_unused_cap = bi->empty_range.start;
+  cptr_alloc_init (bi);
 
   print_bootinfo_information ();
 
   print_to_e9 ("[E9] Hello World!\n");
 
-  create_page_table ();
+  create_process (bi->init_elf, 0, 0, nullptr, nullptr);
 
   cptr_t tcb_cap;
   cptr_t endpoint_cap;
 
-  [[noreturn]] void thread_entry (void *ipc_buffer, uintptr_t arg);
   tcb_cap = create_thread (ipc_buffer + 1024, thread_entry, &endpoint_cap);
   tcb_resume (tcb_cap);
 

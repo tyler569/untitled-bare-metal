@@ -35,6 +35,8 @@ add_compile_definitions(__UNTITLED_BARE_METAL__=1)
 
 add_executable(userland
   user/userland.c
+  user/exec.c
+  user/cptr_alloc.c
   lib/print.c
   lib/string.c
 )
