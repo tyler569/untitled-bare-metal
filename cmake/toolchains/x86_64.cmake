@@ -1,7 +1,7 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 set(triple x86_64-unknown-none)
-set(compiler clang)
+set(compiler clang-19)
 
 set(CMAKE_ASM_COMPILER ${compiler})
 set(CMAKE_ASM_COMPILER_TARGET ${triple})

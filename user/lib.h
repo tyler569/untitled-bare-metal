@@ -24,7 +24,13 @@ cptr_t cptr_alloc ();
 cptr_t cptr_alloc_range (size_t n);
 void cptr_free (cptr_t cptr);
 
-int create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t *tcb, cptr_t *cspace);
+cptr_t create_buffer (cptr_t untyped, size_t pages);
+int map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr);
+int map_buffer (cptr_t untyped, cptr_t vspace, cptr_t buffer, size_t pages,
+                uintptr_t addr);
+
+int create_process (void *elf_data, size_t elf_size, cptr_t untyped,
+                    cptr_t *tcb, cptr_t *cspace);
 
 static inline uintptr_t
 _syscall0 (int syscall_num)

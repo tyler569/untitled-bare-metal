@@ -119,9 +119,21 @@ c_start (void *ipc_buffer, void *boot_info)
 
   print_bootinfo_information ();
 
-  print_to_e9 ("[E9] Hello World!\n");
+  print_to_e9 ("Hello World!");
 
-  create_process (bi->init_elf, 0, 0, nullptr, nullptr);
+  // create_process (bi->init_elf, 0, 0, nullptr, nullptr);
+
+  cptr_t untyped = init_cap_first_untyped;
+
+  cptr_t buffer_base = create_buffer (untyped, 4);
+  map_buffer (untyped, init_cap_init_vspace, buffer_base, 4, 0x700000);
+  unsigned char *buffer = (unsigned char *)0x700000;
+
+  for (size_t i = 0; i < 4 * 4096; i++)
+    buffer[i] = 0xaa;
+  for (size_t i = 0; i < 4 * 4096; i++)
+    if (buffer[i] != 0xaa)
+      printf ("Buffer not zeroed\n");
 
   cptr_t tcb_cap;
   cptr_t endpoint_cap;

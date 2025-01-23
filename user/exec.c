@@ -10,10 +10,19 @@
 
 static inline struct elf_phdr *get_phdr (struct elf_ehdr *, size_t);
 cptr_t allocate_pages (cptr_t untyped, size_t);
-cptr_t create_page_tables (cptr_t untyped, uintptr_t min_address, uintptr_t max_address);
+cptr_t create_page_tables (cptr_t untyped, uintptr_t min_address,
+                           uintptr_t max_address);
+
+#define assert(x)                                                             \
+  if (!(x))                                                                   \
+    {                                                                         \
+      printf ("assertion failed: %s\n", #x);                                  \
+      unreachable ();                                                         \
+    }
 
 int
-create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t *tcb, cptr_t *cspace)
+create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t *tcb,
+                cptr_t *cspace)
 {
   (void)elf_size;
   (void)untyped;
@@ -45,8 +54,9 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t *tcb, cp
             highest_addr = end;
           needed_pages += (end - start + 0xfff) / 0x1000;
 
-          printf ("want to load %010lx-%010lx to %016lx-%016lx, needs %zu pages\n", fstart,
-                  fend, start, end, (end - start + 0xfff) / 0x1000);
+          printf (
+              "want to load %010lx-%010lx to %016lx-%016lx, needs %zu pages\n",
+              fstart, fend, start, end, (end - start + 0xfff) / 0x1000);
         }
     }
 
@@ -70,42 +80,58 @@ cptr_t
 allocate (cptr_t untyped, word_t type, size_t n)
 {
   cptr_t cptr = cptr_alloc_range (n);
-  untyped_retype (untyped, type, 0, init_cap_root_cnode, init_cap_root_cnode, 64, cptr, n);
+  untyped_retype (untyped, type, 0, init_cap_root_cnode, init_cap_root_cnode,
+                  64, cptr, n);
   return cptr;
 }
 
-#define allocate_pages(untyped, n) allocate(untyped, cap_x86_64_page_table, n)
-#define allocate_pml4(untyped) allocate(untyped, cap_x86_64_pml4, 1)
-#define allocate_pdpt(untyped) allocate(untyped, cap_x86_64_pdpt, 1)
-#define allocate_pd(untyped) allocate(untyped, cap_x86_64_pd, 1)
-#define allocate_pt(untyped) allocate(untyped, cap_x86_64_pt, 1)
-
-constexpr uintptr_t page_size = 0x1000;
-constexpr uintptr_t page_table_size = page_size * 512;
-constexpr uintptr_t page_directory_size = page_table_size * 512;
-
 cptr_t
-create_page_tables (cptr_t untyped, uintptr_t min_address, uintptr_t max_address)
+create_buffer (cptr_t untyped, size_t pages)
 {
-  min_address &= page_directory_size - 1;
-  max_address = (max_address + page_directory_size - 1) & ~(page_directory_size - 1);
+  return allocate (untyped, cap_x86_64_page, pages);
+}
 
-  // assert (max_address > min_address);
-  // assert (max_address < page_directory_size);
-
-  cptr_t pml4 = allocate_pml4 (untyped);
-
-  cptr_t pdpt = allocate_pdpt (untyped);
-  x86_64_pdpt_map (pml4, pdpt, 0, 0);
-
-  cptr_t pd = allocate_pd (untyped);
-  x86_64_pd_map (pml4, pd, 0, 0);
-
-  for (uintptr_t i = min_address; i < max_address; i += 0x200000)
+int
+map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
+{
+  while (1)
     {
-      cptr_t pt = allocate_pt (untyped);
-      x86_64_pd_map (pd, pt, i, 0);
+      int err = x86_64_page_map (page, vspace, addr, 0x7);
+
+      if (err != failed_lookup)
+        return err;
+
+      switch (get_mr (0))
+        {
+        case 3:
+          cptr_t pdpt = allocate (untyped, cap_x86_64_pdpt, 1);
+          assert (x86_64_pdpt_map (pdpt, vspace, addr, 0x7) == no_error);
+          break;
+        case 2:
+          cptr_t pd = allocate (untyped, cap_x86_64_pd, 1);
+          assert (x86_64_pd_map (pd, vspace, addr, 0x7) == no_error);
+          break;
+        case 1:
+          cptr_t pt = allocate (untyped, cap_x86_64_pt, 1);
+          assert (x86_64_pt_map (pt, vspace, addr, 0x7) == no_error);
+          break;
+        default:
+          assert (0);
+        }
+    }
+}
+
+int
+map_buffer (cptr_t untyped, cptr_t vspace, cptr_t buffer, size_t pages,
+            uintptr_t addr)
+{
+  int err;
+  for (size_t i = 0; i < pages; i++)
+    {
+      err = map_page (untyped, vspace, buffer + i, addr + i * 0x1000);
+      if (err != 0)
+        return err;
     }
 
-  return pml4;
+  return no_error;
 }
