@@ -22,7 +22,7 @@ static message_info_t
 table_missing (int level)
 {
   set_mr (0, level);
-  return return_ipc (invalid_argument, 1);
+  return return_ipc (failed_lookup, 1);
 }
 
 message_info_t
@@ -97,15 +97,15 @@ x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   pte_t *pml4e = get_pml4e (root_phy, vaddr);
   if ((*pml4e & PTE_PRESENT) == 0)
-    return table_missing (4);
+    return table_missing (3);
 
   pte_t *pdpte = get_pdpte (root_phy, vaddr);
   if ((*pdpte & PTE_PRESENT) == 0)
-    return table_missing (3);
+    return table_missing (2);
 
   pte_t *pde = get_pde (root_phy, vaddr);
   if ((*pde & PTE_PRESENT) == 0)
-    return table_missing (2);
+    return table_missing (1);
 
   pte_t *pte = get_pte (root_phy, vaddr);
   if ((*pte & PTE_PRESENT) != 0)
