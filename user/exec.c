@@ -1,6 +1,7 @@
 #include "elf.h"
 #include "stdint.h"
 #include "stdio.h"
+#include "string.h"
 #include "sys/bootinfo.h"
 #include "sys/cdefs.h"
 #include "sys/ipc.h"
@@ -9,9 +10,17 @@
 #include "./lib.h"
 
 static inline struct elf_phdr *get_phdr (struct elf_ehdr *, size_t);
+cptr_t allocate (cptr_t untyped, word_t type, size_t n);
 cptr_t allocate_pages (cptr_t untyped, size_t);
 cptr_t create_page_tables (cptr_t untyped, uintptr_t min_address,
                            uintptr_t max_address);
+
+buffer_t create_buffer (cptr_t untyped, size_t pages);
+int map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer,
+                uintptr_t addr);
+
+buffer_t map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
+                   struct elf_phdr *phdr);
 
 #define assert(x)                                                             \
   if (!(x))                                                                   \
@@ -21,20 +30,20 @@ cptr_t create_page_tables (cptr_t untyped, uintptr_t min_address,
     }
 
 int
-create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t *tcb,
-                cptr_t *cspace)
+create_process (void *elf_data, size_t elf_size, cptr_t untyped,
+                cptr_t our_vspace, cptr_t *tcb, cptr_t *cspace)
 {
   (void)elf_size;
   (void)untyped;
   (void)tcb;
   (void)cspace;
 
+  cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
+
   struct elf_ehdr *ehdr = (struct elf_ehdr *)elf_data;
   // if (!is_valid_elf (ehdr))
   //   return -1;
 
-  size_t needed_pages = 0;
-  uintptr_t lowest_addr = 0;
   uintptr_t highest_addr = 0;
 
   for (int i = 0; i < ehdr->phnum; i++)
@@ -42,30 +51,43 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t *tcb,
       struct elf_phdr *phdr = get_phdr (ehdr, i);
       if (phdr->type == PT_LOAD)
         {
-          uintptr_t start = phdr->vaddr;
-          uintptr_t end = start + phdr->memsz;
+          buffer_t buffer = map_phdr (untyped, our_vspace, ehdr, phdr);
+          // unmap buffer
+          map_buffer (untyped, vspace, buffer, phdr->vaddr);
 
-          uintptr_t fstart = phdr->offset;
-          uintptr_t fend = fstart + phdr->filesz;
-
-          if (lowest_addr == 0 || start < lowest_addr)
-            lowest_addr = start;
-          if (end > highest_addr)
-            highest_addr = end;
-          needed_pages += (end - start + 0xfff) / 0x1000;
-
-          printf (
-              "want to load %010lx-%010lx to %016lx-%016lx, needs %zu pages\n",
-              fstart, fend, start, end, (end - start + 0xfff) / 0x1000);
+          if (phdr->vaddr + phdr->memsz > highest_addr)
+            highest_addr = phdr->vaddr + phdr->memsz;
         }
     }
 
-  size_t needed_page_tables = (highest_addr + 0x1ff) / 0x200000;
+  highest_addr += 0x1000;
+  highest_addr = (highest_addr + 0xfff) & ~0xfff;
+  uintptr_t ipc_addr = highest_addr;
 
-  printf ("lowest_addr: %#lx\n", lowest_addr);
-  printf ("highest_addr: %#lx\n", highest_addr);
-  printf ("needed_pages: %zu\n", needed_pages);
-  printf ("needed_page_tables: %zu\n", needed_page_tables);
+  buffer_t ipc_buffer = create_buffer (untyped, 1);
+  map_buffer (untyped, vspace, ipc_buffer, highest_addr);
+
+  constexpr size_t stack_pages = 4;
+
+  highest_addr += 0x2000;
+  uintptr_t stack_addr = highest_addr + stack_pages * 0x1000;
+
+  buffer_t stack_buffer = create_buffer (untyped, stack_pages);
+  map_buffer (untyped, vspace, stack_buffer, highest_addr);
+
+  *tcb = allocate (untyped, cap_tcb, 1);
+  tcb_configure (*tcb, 0, init_cap_root_cnode, 0, vspace, 0, ipc_addr,
+                 ipc_buffer.cptr_base);
+
+  frame_t regs = {};
+  regs.rip = ehdr->entry;
+  regs.rsp = stack_addr;
+  regs.rdi = ipc_addr;
+  regs.rsi = stack_addr;
+  regs.cs = 0x23;
+  regs.ss = 0x1b;
+
+  tcb_write_registers (*tcb, false, 0, sizeof (regs), &regs);
 
   return 0;
 }
@@ -85,10 +107,10 @@ allocate (cptr_t untyped, word_t type, size_t n)
   return cptr;
 }
 
-cptr_t
+buffer_t
 create_buffer (cptr_t untyped, size_t pages)
 {
-  return allocate (untyped, cap_x86_64_page, pages);
+  return (buffer_t){ allocate (untyped, cap_x86_64_page, pages), pages };
 }
 
 int
@@ -122,16 +144,46 @@ map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
 }
 
 int
-map_buffer (cptr_t untyped, cptr_t vspace, cptr_t buffer, size_t pages,
-            uintptr_t addr)
+map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer, uintptr_t addr)
 {
   int err;
-  for (size_t i = 0; i < pages; i++)
+  for (size_t i = 0; i < buffer.pages; i++)
     {
-      err = map_page (untyped, vspace, buffer + i, addr + i * 0x1000);
+      err = map_page (untyped, vspace, buffer.cptr_base + i,
+                      addr + i * 0x1000);
       if (err != 0)
         return err;
     }
 
   return no_error;
+}
+
+uintptr_t mappable_addr = 0x900000;
+
+uintptr_t
+map_buffer_to_mappable_space (cptr_t untyped, cptr_t vspace, buffer_t buffer)
+{
+  uintptr_t addr = mappable_addr;
+  int err = map_buffer (untyped, vspace, buffer, addr);
+  mappable_addr += buffer.pages * 0x1000;
+  if (err != 0)
+    return 0;
+  return addr;
+}
+
+void *
+data_for_phdr (struct elf_ehdr *ehdr, struct elf_phdr *phdr)
+{
+  return (void *)ehdr + phdr->offset;
+}
+
+buffer_t
+map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
+          struct elf_phdr *phdr)
+{
+  buffer_t buffer = create_buffer (untyped, (phdr->memsz + 0xfff) / 0x1000);
+  uintptr_t mapped_addr
+      = map_buffer_to_mappable_space (untyped, vspace, buffer);
+  memcpy ((void *)mapped_addr, data_for_phdr (ehdr, phdr), phdr->filesz);
+  return buffer;
 }

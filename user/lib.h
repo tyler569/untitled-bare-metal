@@ -8,7 +8,7 @@
 #include "sys/syscall.h"
 #include "sys/types.h"
 
-extern thread_local struct ipc_buffer *__ipc_buffer;
+extern struct ipc_buffer *__ipc_buffer;
 
 struct frame
 {
@@ -24,13 +24,20 @@ cptr_t cptr_alloc ();
 cptr_t cptr_alloc_range (size_t n);
 void cptr_free (cptr_t cptr);
 
-cptr_t create_buffer (cptr_t untyped, size_t pages);
+struct buffer
+{
+  cptr_t cptr_base;
+  size_t pages;
+};
+typedef struct buffer buffer_t;
+
+buffer_t create_buffer (cptr_t untyped, size_t pages);
 int map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr);
-int map_buffer (cptr_t untyped, cptr_t vspace, cptr_t buffer, size_t pages,
+int map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer,
                 uintptr_t addr);
 
 int create_process (void *elf_data, size_t elf_size, cptr_t untyped,
-                    cptr_t *tcb, cptr_t *cspace);
+                    cptr_t our_vspace, cptr_t *tcb, cptr_t *cspace);
 
 static inline uintptr_t
 _syscall0 (int syscall_num)

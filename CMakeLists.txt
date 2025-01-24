@@ -42,10 +42,19 @@ add_executable(userland
 )
 define_file_basename_for_sources(userland)
 
+add_executable(testproc
+  user/testproc.c
+  user/exec.c
+  user/cptr_alloc.c
+  lib/print.c
+  lib/string.c
+)
+define_file_basename_for_sources(testproc)
+
 add_subdirectory(kern)
 
 add_custom_command(
-  DEPENDS limine untitled_bare_metal userland "${CMAKE_SOURCE_DIR}/limine.cfg"
+  DEPENDS limine untitled_bare_metal userland testproc "${CMAKE_SOURCE_DIR}/limine.cfg"
   OUTPUT ${iso_file}
   COMMAND cp ${CMAKE_SOURCE_DIR}/limine.cfg ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-bios.sys ${iso_dir}/boot/limine
@@ -53,6 +62,7 @@ add_custom_command(
   COMMAND cp ${limine_dir}/limine-uefi-cd.bin ${iso_dir}/boot/limine
   COMMAND cp ${CMAKE_BINARY_DIR}/kern/untitled_bare_metal ${iso_dir}/boot
   COMMAND cp ${CMAKE_BINARY_DIR}/userland ${iso_dir}/boot
+  COMMAND cp ${CMAKE_BINARY_DIR}/testproc ${iso_dir}/boot
   COMMAND xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin
   -no-emul-boot -boot-load-size 4 --boot-info-table
   --efi-boot boot/limine/limine-uefi-cd.bin

@@ -13,20 +13,20 @@ extern inline long write (FILE *, const void *str, unsigned long len);
 
 [[noreturn]] void thread_entry (void *ipc_buffer, uintptr_t arg);
 
-struct thread_local_storage
-{
-  char data[512 - 8];
-  void *self;
-};
-
-struct thread_local_storage tls1 = { {}, (void *)&tls1.self };
-struct thread_local_storage tls2 = { {}, (void *)&tls2.self };
+// struct thread_local_storage
+// {
+//   char data[512 - 8];
+//   void *self;
+// };
+// 
+// struct thread_local_storage tls1 = { {}, (void *)&tls1.self };
+// struct thread_local_storage tls2 = { {}, (void *)&tls2.self };
 uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
 uint8_t __attribute__ ((aligned (PAGE_SIZE))) thread_stack[PAGE_SIZE * 4];
 
 extern char __executable_start;
 
-thread_local struct ipc_buffer *__ipc_buffer;
+struct ipc_buffer *__ipc_buffer;
 struct boot_info *bi = nullptr;
 
 cptr_t
@@ -76,43 +76,43 @@ print_bootinfo_information ()
   printf ("\n");
 }
 
-cptr_t
-create_thread (void *ipc_buffer, void *entry, cptr_t *endpoint)
-{
-  int untyped = init_cap_first_untyped;
-  int tcb_cap = cptr_alloc ();
-  int endpoint_cap = cptr_alloc ();
-  *endpoint = endpoint_cap;
-
-  untyped_retype (untyped, cap_tcb, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, tcb_cap, 1);
-  untyped_retype (untyped, cap_endpoint, 0, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, endpoint_cap, 1);
-
-  tcb_configure (tcb_cap, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0,
-                 (word_t)ipc_buffer + 1024, 0);
-  tcb_set_tls_base (tcb_cap, (uintptr_t)&tls2.self);
-
-  frame_t frame;
-  tcb_read_registers (init_cap_init_tcb, false, 0, 0, &frame);
-
-  frame.rip = (uintptr_t)entry;
-  frame.rsp = (uintptr_t)thread_stack + sizeof (thread_stack);
-  frame.rdi = (uintptr_t)ipc_buffer + 1024;
-  frame.rsi = endpoint_cap;
-
-  tcb_write_registers (tcb_cap, false, 0, 0, &frame);
-
-  return tcb_cap;
-}
+// cptr_t
+// create_thread (void *ipc_buffer, void *entry, cptr_t *endpoint)
+// {
+//   int untyped = init_cap_first_untyped;
+//   int tcb_cap = cptr_alloc ();
+//   int endpoint_cap = cptr_alloc ();
+//   *endpoint = endpoint_cap;
+// 
+//   untyped_retype (untyped, cap_tcb, 0, init_cap_root_cnode,
+//                   init_cap_root_cnode, 64, tcb_cap, 1);
+//   untyped_retype (untyped, cap_endpoint, 0, init_cap_root_cnode,
+//                   init_cap_root_cnode, 64, endpoint_cap, 1);
+// 
+//   tcb_configure (tcb_cap, 0, init_cap_root_cnode, 0, init_cap_init_vspace, 0,
+//                  (word_t)ipc_buffer + 1024, 0);
+//   tcb_set_tls_base (tcb_cap, (uintptr_t)&tls2.self);
+// 
+//   frame_t frame;
+//   tcb_read_registers (init_cap_init_tcb, false, 0, 0, &frame);
+// 
+//   frame.rip = (uintptr_t)entry;
+//   frame.rsp = (uintptr_t)thread_stack + sizeof (thread_stack);
+//   frame.rdi = (uintptr_t)ipc_buffer + 1024;
+//   frame.rsi = endpoint_cap;
+// 
+//   tcb_write_registers (tcb_cap, false, 0, 0, &frame);
+// 
+//   return tcb_cap;
+// }
 
 [[noreturn]] int
 c_start (void *ipc_buffer, void *boot_info)
 {
-  asm volatile ("wrfsbase %0" ::"r"(&tls1.self));
+  // asm volatile ("wrfsbase %0" ::"r"(&tls1.self));
   __ipc_buffer = ipc_buffer;
 
-  tcb_set_tls_base (init_cap_init_tcb, (uintptr_t)&tls1.self);
+  // tcb_set_tls_base (init_cap_init_tcb, (uintptr_t)&tls1.self);
 
   bi = boot_info;
   cptr_alloc_init (bi);
@@ -121,39 +121,44 @@ c_start (void *ipc_buffer, void *boot_info)
 
   print_to_e9 ("Hello World!");
 
-  // create_process (bi->init_elf, 0, 0, nullptr, nullptr);
-
   cptr_t untyped = init_cap_first_untyped;
 
-  cptr_t buffer_base = create_buffer (untyped, 4);
-  map_buffer (untyped, init_cap_init_vspace, buffer_base, 4, 0x700000);
-  unsigned char *buffer = (unsigned char *)0x700000;
+  // buffer_t buffer = create_buffer (untyped, 4);
+  // map_buffer (untyped, init_cap_init_vspace, buffer, 0x700000);
+  // unsigned char *buf = (unsigned char *)0x700000;
 
-  for (size_t i = 0; i < 4 * 4096; i++)
-    buffer[i] = 0xaa;
-  for (size_t i = 0; i < 4 * 4096; i++)
-    if (buffer[i] != 0xaa)
-      printf ("Buffer not zeroed\n");
+  // for (size_t i = 0; i < 4 * 4096; i++)
+  //   buf[i] = 0xaa;
+  // for (size_t i = 0; i < 4 * 4096; i++)
+  //   if (buf[i] != 0xaa)
+  //     printf ("Buffer not written to\n");
 
-  cptr_t tcb_cap;
-  cptr_t endpoint_cap;
-
-  tcb_cap = create_thread (ipc_buffer + 1024, thread_entry, &endpoint_cap);
-  tcb_resume (tcb_cap);
+  cptr_t proc_tcb_cap;
+  create_process (bi->init_elf, 0, untyped, init_cap_init_vspace,
+                  &proc_tcb_cap, nullptr);
+  tcb_resume (proc_tcb_cap);
 
   yield ();
 
-  word_t badge;
+  // cptr_t tcb_cap = 0;
+  // cptr_t endpoint_cap = 0;
 
-  set_mr (0, 30);
-  call (endpoint_cap, new_message_info (1, 0, 0, 1), &badge);
-  printf ("Method 1, Response: %lu\n", get_mr (0));
+  // tcb_cap = create_thread (ipc_buffer + 1024, thread_entry, &endpoint_cap);
+  // tcb_resume (tcb_cap);
 
-  call (endpoint_cap, new_message_info (2, 0, 0, 1), &badge);
-  printf ("Method 2, Response: %lu\n", get_mr (0));
+  // yield ();
 
-  call (endpoint_cap, new_message_info (3, 0, 0, 1), &badge);
-  printf ("Method 3, Response: %lu\n", get_mr (0));
+  // word_t badge;
+
+  // set_mr (0, 30);
+  // call (endpoint_cap, new_message_info (1, 0, 0, 1), &badge);
+  // printf ("Method 1, Response: %lu\n", get_mr (0));
+
+  // call (endpoint_cap, new_message_info (2, 0, 0, 1), &badge);
+  // printf ("Method 2, Response: %lu\n", get_mr (0));
+
+  // call (endpoint_cap, new_message_info (3, 0, 0, 1), &badge);
+  // printf ("Method 3, Response: %lu\n", get_mr (0));
 
   exit ();
 }
