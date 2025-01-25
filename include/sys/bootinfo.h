@@ -31,7 +31,8 @@ struct boot_info
 {
   word_t node_id;
 
-  void *init_elf;
+  void *initrd;
+  size_t initrd_size;
 
   struct cap_range untyped_range;
   struct cap_range empty_range;

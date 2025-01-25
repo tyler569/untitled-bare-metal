@@ -35,6 +35,14 @@ x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   pte_t *pml4e = get_pml4e (root_phy, vaddr);
 
+  // ensure kernel mappings are present in the new vspace
+  {
+    uintptr_t current_vm_root = get_vm_root ();
+    pte_t *current_pml4 = get_pml4e (current_vm_root, 0);
+    for (int i = 256; i < 512; i++)
+      pml4e[i] = current_pml4[i];
+  }
+
   if ((*pml4e & PTE_PRESENT) != 0)
     return already_mapped ();
 

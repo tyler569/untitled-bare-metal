@@ -33,36 +33,49 @@ add_compile_options(-iquote ${CMAKE_SOURCE_DIR}/include)
 
 add_compile_definitions(__UNTITLED_BARE_METAL__=1)
 
-add_executable(userland
-  user/userland.c
-  user/exec.c
-  user/cptr_alloc.c
-  lib/print.c
-  lib/string.c
-)
-define_file_basename_for_sources(userland)
+set(targets_to_archive userland testproc)
+set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
+set(archive_name "${CMAKE_BINARY_DIR}/initrd.tar")
+set(archive_binaries)
 
-add_executable(testproc
-  user/testproc.c
-  user/exec.c
-  user/cptr_alloc.c
-  lib/print.c
-  lib/string.c
+foreach (program ${targets_to_archive})
+  add_executable(${program}
+    user/${program}.c
+    user/exec.c
+    user/cptr_alloc.c
+    lib/num.c
+    lib/print.c
+    lib/string.c
+    lib/tar.c
+  )
+  define_file_basename_for_sources(${program})
+  get_target_property(target_output_name ${program} OUTPUT_NAME)
+  if (NOT target_output_name)
+    set(target_output_name ${program})
+  endif ()
+  list(APPEND archive_binaries ${target_output_name})
+endforeach ()
+
+find_program(tar_command NAMES gtar tar)
+
+add_custom_command(
+  DEPENDS ${archive_binaries}
+  OUTPUT ${archive_name}
+  COMMAND ${tar_command} -cf ${archive_name} ${archive_binaries}
 )
-define_file_basename_for_sources(testproc)
+add_custom_target(initrd_tarball DEPENDS ${archive_name})
 
 add_subdirectory(kern)
 
 add_custom_command(
-  DEPENDS limine untitled_bare_metal userland testproc "${CMAKE_SOURCE_DIR}/limine.cfg"
+  DEPENDS limine untitled_bare_metal ${archive_name} "${CMAKE_SOURCE_DIR}/limine.cfg"
   OUTPUT ${iso_file}
   COMMAND cp ${CMAKE_SOURCE_DIR}/limine.cfg ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-bios.sys ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-bios-cd.bin ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-uefi-cd.bin ${iso_dir}/boot/limine
   COMMAND cp ${CMAKE_BINARY_DIR}/kern/untitled_bare_metal ${iso_dir}/boot
-  COMMAND cp ${CMAKE_BINARY_DIR}/userland ${iso_dir}/boot
-  COMMAND cp ${CMAKE_BINARY_DIR}/testproc ${iso_dir}/boot
+  COMMAND cp ${archive_name} ${iso_dir}/boot
   COMMAND xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin
   -no-emul-boot -boot-load-size 4 --boot-info-table
   --efi-boot boot/limine/limine-uefi-cd.bin

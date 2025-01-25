@@ -2,6 +2,7 @@
 
 #include "stddef.h"
 #include "stdint.h"
+#include "string.h"
 #include "sys/cdefs.h"
 
 typedef uint16_t elf_half;
@@ -124,3 +125,9 @@ struct elf_dyn
   elf_sxword tag;
   elf_xword val;
 };
+
+static inline bool
+is_elf (struct elf_ehdr *e)
+{
+  return memcmp (e->ident, ELFMAGIC, 4) == 0;
+}

@@ -25,6 +25,8 @@ c_start (void *ipc_buffer)
 [[noreturn]] USED __attribute__ ((naked)) void
 _start ()
 {
-  asm volatile ("movq %%rdi, %%rsp\n\t"
-                "jmp c_start" ::: "rsp");
+  asm volatile ( // "movq %%rdi, %%rsp\n\t"
+      "nop\n\tnop\n\t"
+      "jmp c_start" ::
+          : "rsp");
 }

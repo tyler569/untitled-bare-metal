@@ -30,7 +30,6 @@ struct tcb
   struct list_head send_receive_node;
 
   struct ipc_buffer *ipc_buffer;
-  uintptr_t ipc_buffer_user;
   uintptr_t endpoint_badge;
 
   bool expects_reply;
@@ -42,8 +41,6 @@ struct tcb
   cte_t vspace_root;
   cte_t ipc_buffer_frame;
   cte_t reply;
-
-  uintptr_t vm_root;
 
   frame_t saved_state;
   frame_t *current_user_frame;

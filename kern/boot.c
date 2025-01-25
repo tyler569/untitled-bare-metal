@@ -5,13 +5,19 @@
 #include "kern/obj/tcb.h"
 #include "stddef.h"
 #include "sys/bootinfo.h"
+#include "tar.h"
 
 struct tcb init_tcb;
 cte_t init_cnode[BIT (INIT_CNODE_SIZE_BITS)];
 
 void
-create_init_tcb (void *init_elf, size_t init_elf_size)
+create_init_tcb (void *initrd, size_t initrd_size)
 {
+  struct elf_ehdr *init_elf = find_tar_entry (initrd, "userland");
+
+  assert (init_elf);
+  assert (is_elf (init_elf));
+
   create_tcb_from_elf_in_this_vm (&init_tcb, init_elf);
 
   uintptr_t ipc_buffer = 0x7fffffe00000;
@@ -20,10 +26,12 @@ create_init_tcb (void *init_elf, size_t init_elf_size)
   uintptr_t ipc_buffer_page = alloc_page ();
   uintptr_t bootinfo_page = alloc_page ();
 
-  add_vm_mapping (init_tcb.vm_root, ipc_buffer, ipc_buffer_page,
+  uintptr_t init_pml4 = get_vm_root ();
+
+  add_vm_mapping (init_pml4, ipc_buffer, ipc_buffer_page,
                   PTE_PRESENT | PTE_USER | PTE_WRITE);
   set_frame_arg (&init_tcb.saved_state, 0, ipc_buffer);
-  add_vm_mapping (init_tcb.vm_root, bootinfo, bootinfo_page,
+  add_vm_mapping (init_pml4, bootinfo, bootinfo_page,
                   PTE_PRESENT | PTE_USER | PTE_WRITE);
   set_frame_arg (&init_tcb.saved_state, 1, bootinfo);
 
@@ -31,24 +39,30 @@ create_init_tcb (void *init_elf, size_t init_elf_size)
 
   uintptr_t init_elf_mapping = 0x100000000;
 
-  for (size_t i = 0; i < init_elf_size; i += PAGE_SIZE)
+  for (size_t i = 0; i < initrd_size; i += PAGE_SIZE)
     {
-      uintptr_t page_phy = physical_of ((uintptr_t)init_elf + i);
-      add_vm_mapping (init_tcb.vm_root, init_elf_mapping + i, page_phy,
+      uintptr_t page_phy = physical_of ((uintptr_t)initrd + i);
+      add_vm_mapping (init_pml4, init_elf_mapping + i, page_phy,
                       PTE_PRESENT | PTE_USER);
     }
 
-  bi->init_elf = (void *)init_elf_mapping;
+  bi->initrd = (void *)init_elf_mapping;
+  bi->initrd_size = initrd_size;
 
-  init_tcb.ipc_buffer_user = ipc_buffer;
   init_tcb.ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buffer_page);
 
+  cap_t init_tcb_cap = cap_tcb_new (&init_tcb);
   cap_t init_cnode_cap = cap_cnode_new (init_cnode, INIT_CNODE_SIZE_BITS);
+  cap_t init_vspace_cap = cap_x86_64_pml4_new (direct_map_of (get_vm_root ()));
+  cap_t init_io_port_cap = cap_x86_64_io_port_control_new ();
 
-  init_cnode[init_cap_init_tcb].cap = cap_tcb_new (&init_tcb);
+  init_cnode[init_cap_init_tcb].cap = init_tcb_cap;
   init_cnode[init_cap_root_cnode].cap = init_cnode_cap;
-  init_cnode[init_cap_init_vspace].cap = cap_x86_64_pml4_new (get_vm_root ());
-  init_cnode[init_cap_io_port_control].cap = cap_x86_64_io_port_control_new ();
+  init_cnode[init_cap_init_vspace].cap = init_vspace_cap;
+  init_cnode[init_cap_io_port_control].cap = init_io_port_cap;
+
+  init_tcb.cspace_root.cap = init_cnode_cap;
+  init_tcb.vspace_root.cap = init_vspace_cap;
 
   size_t n_untyped = BIT (INIT_CNODE_SIZE_BITS) - init_cap_first_untyped;
 

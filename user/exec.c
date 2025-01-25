@@ -38,11 +38,11 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped,
   (void)tcb;
   (void)cspace;
 
-  cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
+  struct elf_ehdr *ehdr = elf_data;
+  if (!is_elf (ehdr))
+    return -1;
 
-  struct elf_ehdr *ehdr = (struct elf_ehdr *)elf_data;
-  // if (!is_valid_elf (ehdr))
-  //   return -1;
+  cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
 
   uintptr_t highest_addr = 0;
 
@@ -83,7 +83,6 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped,
   regs.rip = ehdr->entry;
   regs.rsp = stack_addr;
   regs.rdi = ipc_addr;
-  regs.rsi = stack_addr;
   regs.cs = 0x23;
   regs.ss = 0x1b;
 
@@ -184,6 +183,10 @@ map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
   buffer_t buffer = create_buffer (untyped, (phdr->memsz + 0xfff) / 0x1000);
   uintptr_t mapped_addr
       = map_buffer_to_mappable_space (untyped, vspace, buffer);
-  memcpy ((void *)mapped_addr, data_for_phdr (ehdr, phdr), phdr->filesz);
+
+  size_t offset = phdr->vaddr & 0xfff;
+
+  memcpy ((void *)(mapped_addr + offset), data_for_phdr (ehdr, phdr),
+          phdr->filesz);
   return buffer;
 }

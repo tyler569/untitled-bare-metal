@@ -34,7 +34,6 @@ create_tcb_in_this_vm (struct tcb *t, uintptr_t rip, uintptr_t rsp)
 {
   create_tcb (t);
 
-  t->vm_root = get_vm_root ();
   new_user_frame (&t->saved_state, rip, rsp);
 
   return t;
@@ -44,8 +43,6 @@ struct tcb *
 create_tcb_from_elf_in_this_vm (struct tcb *t, struct elf_ehdr *elf)
 {
   create_tcb (t);
-
-  t->vm_root = get_vm_root ();
 
   elf_load (elf);
 
@@ -122,6 +119,13 @@ tcb_write_registers (cte_t *cap, bool resume_target, word_t arch_flags,
   return no_error;
 }
 
+uintptr_t
+tcb_vm_root (struct tcb *t)
+{
+  void *vm_root_page = cap_ptr (&t->vspace_root);
+  return physical_of ((uintptr_t)vm_root_page);
+}
+
 error_t
 tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
                word_t cspace_root_data, cte_t *vspace_root,
@@ -131,18 +135,12 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
   (void)cspace_root_data;
   (void)vspace_root_data;
   (void)buffer;
-  (void)buffer_frame;
 
   struct tcb *tcb = cap_ptr (slot);
 
   copy_cap (&tcb->cspace_root, cspace_root);
   copy_cap (&tcb->vspace_root, vspace_root);
   copy_cap (&tcb->ipc_buffer_frame, buffer_frame);
-
-  tcb->ipc_buffer_user = buffer;
-
-  tcb->vm_root = get_vm_root ();                 // TODO HACK
-  tcb->ipc_buffer = (struct ipc_buffer *)buffer; // TODO HACK
 
   return no_error;
 }
@@ -173,7 +171,7 @@ switch_tcb (struct tcb *t)
   assert_eq (t->state, TASK_STATE_RUNNABLE);
 
   this_cpu->current_tcb = t;
-  set_vm_root (t->vm_root);
+  set_vm_root (tcb_vm_root (t));
   set_tls_base (t->tls_base);
   t->state = TASK_STATE_RUNNING;
 

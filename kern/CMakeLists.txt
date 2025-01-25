@@ -11,10 +11,12 @@ add_executable(untitled_bare_metal
   obj/tcb.c
   obj/untyped.c
   ../lib/hexdump.c
+  ../lib/num.c
   ../lib/print.c
   ../lib/sort.c
   ../lib/spin_lock.c
   ../lib/string.c
+  ../lib/tar.c
 )
 
 target_include_directories(untitled_bare_metal PRIVATE
