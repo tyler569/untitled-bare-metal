@@ -3,9 +3,13 @@
 #include "kern/cap.h"
 #include "kern/ipc.h"
 #include "kern/obj/endpoint.h"
+#include "kern/obj/notification.h"
 #include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
 #include "stdio.h"
+
+#define dbg_printf(...)
+#define err_printf(...) printf (__VA_ARGS__)
 
 #include "kern/kernel_method_stubs.c"
 #include "kern/methods.h"
@@ -19,9 +23,9 @@
     }
 
 #define ASSERT_ENDPOINT(slot)                                                 \
-  if (cap_type (slot) != cap_endpoint)                                        \
+  if (cap_type (slot) != cap_endpoint && cap_type (slot) != cap_notification) \
     {                                                                         \
-      printf ("Invalid cap type\n");                                          \
+      dbg_printf ("Invalid cap type\n");                                      \
       kill_tcb (this_tcb);                                                    \
     }
 
@@ -37,10 +41,10 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
     this_tcb->current_user_frame = f;
 
   if (syscall_number != sys_debug_write && syscall_number != sys_exit)
-    printf ("Task %#lx a0:%#lx ", (uintptr_t)this_tcb & 0xfff, a0);
+    dbg_printf ("Task %#lx a0:%#lx ", (uintptr_t)this_tcb & 0xfff, a0);
 
   if (syscall_number == sys_exit)
-    printf ("Task %#lx ", (uintptr_t)this_tcb & 0xfff);
+    dbg_printf ("Task %#lx ", (uintptr_t)this_tcb & 0xfff);
 
   error_t err;
   cte_t *slot;
@@ -48,7 +52,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
   switch (syscall_number)
     {
     case sys_exit:
-      printf ("sys_exit ()\n");
+      dbg_printf ("sys_exit ()\n");
       kill_tcb (this_tcb);
       schedule ();
       unreachable ();
@@ -62,46 +66,51 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         return dispatch_method (slot, a1);
       else
         {
-          printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
+          dbg_printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
           invoke_endpoint_call (slot, a1);
         }
       unreachable ();
     case sys_send:
       GET_CAP (a0, slot, err);
-      printf ("sys_send (dest: %#lx, info: %#lx)\n", a0, a1);
+      dbg_printf ("sys_send (dest: %#lx, info: %#lx)\n", a0, a1);
 
       ASSERT_ENDPOINT (slot);
 
-      invoke_endpoint_send (slot, a1);
+      if (cap_type (slot) == cap_notification)
+        invoke_notification_send (slot);
+      else if (cap_type (slot) == cap_endpoint)
+        invoke_endpoint_send (slot, a1);
       return 0;
     case sys_recv:
       GET_CAP (a0, slot, err);
 
-      printf ("sys_recv (dest: %#lx)\n", a0);
+      dbg_printf ("sys_recv (dest: %#lx)\n", a0);
 
       ASSERT_ENDPOINT (slot);
 
-      return invoke_endpoint_recv (slot);
+      if (cap_type (slot) == cap_notification)
+        invoke_notification_recv (slot);
+      else if (cap_type (slot) == cap_endpoint)
+        invoke_endpoint_recv (slot);
+      return 0;
     case sys_reply:
-      printf ("sys_reply (info: %#lx)\n", a0);
+      dbg_printf ("sys_reply (info: %#lx)\n", a0);
       invoke_reply (a0);
       return 0;
     case sys_replyrecv:
       GET_CAP (a0, slot, err);
 
-      printf ("sys_replyrecv (dest: %#lx, info: %#lx)\n", a0, a1);
+      dbg_printf ("sys_replyrecv (dest: %#lx, info: %#lx)\n", a0, a1);
 
       ASSERT_ENDPOINT (slot);
 
       return invoke_reply_recv (slot, a1);
     case sys_yield:
-      printf ("sys_yield ()\n");
+      dbg_printf ("sys_yield ()\n");
       schedule ();
       unreachable ();
     default:
-      printf ("Syscall (num: %i, ?...)\n", syscall_number);
-
-      printf ("Invalid syscall number\n");
+      err_printf ("Invalid syscall number: %d\n", syscall_number);
       kill_tcb (this_tcb);
     }
 

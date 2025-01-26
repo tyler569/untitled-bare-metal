@@ -32,6 +32,12 @@ main (cptr_t endpoint_cap)
         case 2:
           set_mr (0, get_mr (0) * 2);
           break;
+        case 3:
+          set_mr (0, get_mr (0) + 1);
+          break;
+        case 4:
+          set_mr (0, get_mr (0) + get_mr (1));
+          break;
         default:
           set_mr (0, get_message_label (info));
           break;

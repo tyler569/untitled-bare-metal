@@ -6,6 +6,7 @@
 enum object_size_bits
 {
   endpoint_size_bits = 4,
+  notification_size_bits = 5,
   cnode_slot_bits = 5,
   tcb_size_bits = 9,
 
@@ -29,6 +30,8 @@ object_size (word_t object_type, word_t size_bits)
       return BIT (size_bits + cnode_slot_bits);
     case cap_endpoint:
       return BIT (endpoint_size_bits);
+    case cap_notification:
+      return BIT (notification_size_bits);
     case cap_untyped:
       return BIT (size_bits);
     case cap_x86_64_pml4:

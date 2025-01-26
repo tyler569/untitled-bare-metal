@@ -4,6 +4,8 @@ types:
     methods: []
   - name: endpoint
     methods: []
+  - name: notification
+    methods: []
   - name: cnode
     methods:
       - name: copy

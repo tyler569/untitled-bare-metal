@@ -106,15 +106,30 @@ c_start (void *ipc_buffer, void *boot_info)
 
   word_t badge;
 
-  set_mr (0, 30);
-  call (endpoint_cap, new_message_info (1, 0, 0, 1), &badge);
-  printf ("Method 1, Response: %lu\n", get_mr (0));
+  // word_t number = 1;
+  word_t a = 0, b = 1;
 
-  call (endpoint_cap, new_message_info (2, 0, 0, 1), &badge);
-  printf ("Method 2, Response: %lu\n", get_mr (0));
+  while (true)
+    {
+      // set_mr (0, number);
+      // call (endpoint_cap, new_message_info (1, 0, 0, 1), &badge);
+      // printf ("Method 1, Response: %lu\n", (number = get_mr (0)));
 
-  call (endpoint_cap, new_message_info (3, 0, 0, 1), &badge);
-  printf ("Method 3, Response: %lu\n", get_mr (0));
+      // set_mr (0, number);
+      // call (endpoint_cap, new_message_info (2, 0, 0, 1), &badge);
+      // printf ("Method 2, Response: %lu\n", (number = get_mr (0)));
+
+      set_mr (0, a);
+      set_mr (1, b);
+      call (endpoint_cap, new_message_info (4, 0, 0, 2), &badge);
+      a = b;
+      b = get_mr (0);
+
+      if (b < a)
+        break;
+
+      printf ("Fibonacci: %lu\n", a);
+    }
 
   exit ();
 }

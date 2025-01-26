@@ -80,8 +80,8 @@ create_init_untyped_caps (cte_t *base, size_t *count,
 int
 power_of_two_region_compare (const void *a, const void *b)
 {
-  return ((struct power_of_two_region *)a)->size_bits
-         - ((struct power_of_two_region *)b)->size_bits;
+  return ((struct power_of_two_region *)b)->size_bits
+         - ((struct power_of_two_region *)a)->size_bits;
 }
 
 void

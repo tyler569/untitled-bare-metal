@@ -8,6 +8,7 @@ add_executable(untitled_bare_metal
   syscall.c
   obj/cnode.c
   obj/endpoint.c
+  obj/notification.c
   obj/tcb.c
   obj/untyped.c
   ../lib/hexdump.c

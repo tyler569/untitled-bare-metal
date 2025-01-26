@@ -124,11 +124,11 @@ class KMethod
       }
       #{cap_parameters.map { |param| "#{K_CAP_TYPE}#{param['name']};" }.join}
 
-      printf ("#{user_function_name} ");
+      dbg_printf ("#{user_function_name} ");
 
       if (cap_type (slot) != #{type.type_name})
         {
-          printf ("invalid cap type: %s\\n", cap_type_string (cap_type (slot)));
+          err_printf ("invalid cap type: %s\\n", cap_type_string (cap_type (slot)));
           return return_ipc (illegal_operation, 0);
         }
       if (get_message_length (info) < #{mr_parameters.length})
@@ -141,14 +141,14 @@ class KMethod
         #{param['name']} = lookup_cap_slot_this_tcb (get_cap (#{i}), &error);
         if (error != no_error)
           {
-            printf ("lookup_cap failed for cap #{i}\\n");
+            err_printf ("lookup_cap failed for cap #{i}\\n");
             set_mr (0, #{i});
             return return_ipc (error, 1);
           }
         EOS
       end.join}
 
-      printf ("(#{kernel_print_format})\\n", #{kernel_print_param_list});
+      dbg_printf ("(#{kernel_print_format})\\n", #{kernel_print_param_list});
 
       return #{kernel_function_name} (#{format_call_list(kernel_param_list)});
       break;
@@ -297,7 +297,7 @@ File.open("include/#{HEADERS[:kernel_stubs]}", 'w') do |f|
       # puts kernel stub
       f.puts "__attribute__((weak)) message_info_t"
       f.puts "#{method.kernel_function_name} (#{format_type_only_list(method.kernel_param_list)}) {"
-      f.puts "  printf(\"unimplemented kernel method #{method.kernel_function_name}\\n\");"
+      f.puts "  err_printf(\"unimplemented kernel method #{method.kernel_function_name}\\n\");"
       f.puts "  return illegal_operation;"
       f.puts "}"
     end
