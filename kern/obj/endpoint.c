@@ -9,6 +9,9 @@ static void
 send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
                                   word_t badge, bool resume_now)
 {
+  assert(receiver->ipc_buffer && "Receiver has no IPC buffer");
+  assert(this_tcb->ipc_buffer && "Sender has no IPC buffer");
+
   word_t size = get_message_length (info) * sizeof (word_t);
   memcpy (receiver->ipc_buffer->msg, this_tcb->ipc_buffer->msg, size);
 

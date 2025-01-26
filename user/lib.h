@@ -148,3 +148,12 @@ write (FILE *, const void *str, unsigned long len)
 }
 
 #include "sys/user_method_stubs.h"
+
+static inline cptr_t
+allocate (cptr_t untyped, word_t type, size_t n)
+{
+  cptr_t cptr = cptr_alloc_range (n);
+  untyped_retype (untyped, type, 0, init_cap_root_cnode, init_cap_root_cnode,
+                  64, cptr, n);
+  return cptr;
+}

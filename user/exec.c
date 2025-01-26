@@ -97,15 +97,6 @@ get_phdr (struct elf_ehdr *ehdr, size_t i)
   return (struct elf_phdr *)((char *)ehdr + ehdr->phoff + i * ehdr->phentsize);
 }
 
-cptr_t
-allocate (cptr_t untyped, word_t type, size_t n)
-{
-  cptr_t cptr = cptr_alloc_range (n);
-  untyped_retype (untyped, type, 0, init_cap_root_cnode, init_cap_root_cnode,
-                  64, cptr, n);
-  return cptr;
-}
-
 buffer_t
 create_buffer (cptr_t untyped, size_t pages)
 {

@@ -142,6 +142,8 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
   copy_cap (&tcb->vspace_root, vspace_root);
   copy_cap (&tcb->ipc_buffer_frame, buffer_frame);
 
+  tcb->ipc_buffer = cap_ptr (buffer_frame);
+
   return no_error;
 }
 
