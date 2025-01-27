@@ -73,7 +73,7 @@ c_start (void *ipc_buffer, void *boot_info)
   cptr_alloc_init (bi);
 
   print_bootinfo_information ();
-  print_to_e9 ("Hello World!");
+  print_to_e9 ("Hello World!\n");
 
   cptr_t untyped = init_cap_first_untyped;
 
@@ -107,8 +107,11 @@ c_start (void *ipc_buffer, void *boot_info)
 
   word_t notification_word = 0;
 
-  printf ("waiting for notification\n");
-  wait (notification_cap, &notification_word);
+  tcb_bind_notification (init_cap_init_tcb, notification_cap);
+
+  printf ("waiting for notification (but it's bound so not really)\n");
+  // wait (notification_cap, &notification_word);
+  recv (endpoint_cap, &notification_word);
   printf ("got notification; word is %lu\n", notification_word);
 
   word_t badge;

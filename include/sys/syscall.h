@@ -71,6 +71,7 @@ enum method_id
   METHOD_tcb_copy_registers,
   METHOD_tcb_read_registers,
   METHOD_tcb_resume,
+  METHOD_tcb_bind_notification,
   METHOD_tcb_set_affinity,
   METHOD_tcb_set_ipc_buffer,
   METHOD_tcb_set_space,

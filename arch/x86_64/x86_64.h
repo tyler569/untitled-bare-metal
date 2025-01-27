@@ -165,6 +165,7 @@ void irq12 ();
 void irq13 ();
 void irq14 ();
 void irq15 ();
+void isr255 ();
 
 void syscall_entry ();
 

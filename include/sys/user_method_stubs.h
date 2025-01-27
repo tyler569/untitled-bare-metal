@@ -128,6 +128,16 @@ tcb_resume (cptr_t obj)
   return get_message_label (_result);
 }
 static inline int
+tcb_bind_notification (cptr_t obj, cptr_t notification)
+{
+
+  set_cap (0, notification);
+  message_info_t _info
+      = new_message_info (METHOD_tcb_bind_notification, 0, 1, 0);
+  message_info_t _result = _syscall2 (sys_call, obj, _info);
+  return get_message_label (_result);
+}
+static inline int
 tcb_set_affinity (cptr_t obj, word_t affinity)
 {
   set_mr (0, (word_t)affinity);

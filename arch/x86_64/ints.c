@@ -16,8 +16,11 @@ print_interrupt_info (frame_t *f)
 {
   save_frame_on_tcb (f);
 
-  printf ("Interrupt %lu (%s) @ %#lx\n", f->int_no,
-          interrupt_acronyms[f->int_no], f->rip);
+  if (f->int_no < 32)
+    printf ("Interrupt %lu (%s) @ %#lx\n", f->int_no,
+            interrupt_acronyms[f->int_no], f->rip);
+  else
+    printf ("Interrupt %lu @ %#lx\n", f->int_no, f->rip);
 
   switch (f->int_no)
     {
@@ -31,6 +34,7 @@ print_interrupt_info (frame_t *f)
       halt_forever ();
     case 3:
       // print_frame (f);
+      // print_backtrace (f);
       return;
     case 13:
       printf ("General protection fault\n");
@@ -40,6 +44,11 @@ print_interrupt_info (frame_t *f)
     case 14:
       printf ("Page fault at %#lx\n", read_cr2 ());
       printf ("Error code: %#lx\n", f->err_code);
+      print_backtrace (f);
+      break;
+    case 255:
+      printf ("Error signaled\n");
+      print_frame (f);
       print_backtrace (f);
       break;
     default:

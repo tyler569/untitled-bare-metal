@@ -41,6 +41,7 @@ struct tcb
   cte_t vspace_root;
   cte_t ipc_buffer_frame;
   cte_t reply;
+  cte_t notification;
 
   frame_t saved_state;
   frame_t *current_user_frame;

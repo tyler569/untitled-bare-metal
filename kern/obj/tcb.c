@@ -6,6 +6,7 @@
 #include "kern/mem.h"
 #include "kern/methods.h"
 #include "kern/obj/endpoint.h"
+#include "kern/obj/notification.h"
 #include "kern/per_cpu.h"
 #include "kern/size.h"
 #include "kern/syscall.h"
@@ -143,6 +144,23 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
   copy_cap (&tcb->ipc_buffer_frame, buffer_frame);
 
   tcb->ipc_buffer = cap_ptr (buffer_frame);
+
+  return no_error;
+}
+
+error_t
+tcb_bind_notification (cte_t *cap, cte_t *notification)
+{
+  struct tcb *tcb = cap_ptr (cap);
+  if (cap_type (notification) != cap_notification)
+    return illegal_operation;
+
+  struct notification *n = cap_ptr (notification);
+  if (n->bound_tcb)
+    return illegal_operation;
+
+  copy_cap (&tcb->notification, notification);
+  n->bound_tcb = tcb;
 
   return no_error;
 }

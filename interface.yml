@@ -64,6 +64,9 @@ types:
           - { name: regs, type: "user_context_t *" }
       - name: resume
         parameters: []
+      - name: bind_notification
+        parameters:
+          - { name: notification, type: cptr_t }
       - name: set_affinity
         parameters:
           - { name: affinity, type: word_t }

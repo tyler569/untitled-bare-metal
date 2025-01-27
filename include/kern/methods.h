@@ -28,6 +28,7 @@ message_info_t tcb_read_registers (cte_t *slot, bool suspend_source,
                                    word_t arch_flags, word_t count,
                                    user_context_t *regs);
 message_info_t tcb_resume (cte_t *slot);
+message_info_t tcb_bind_notification (cte_t *slot, cte_t *notification);
 message_info_t tcb_set_affinity (cte_t *slot, word_t affinity);
 message_info_t tcb_set_ipc_buffer (cte_t *slot, word_t buffer,
                                    cte_t *buffer_frame);

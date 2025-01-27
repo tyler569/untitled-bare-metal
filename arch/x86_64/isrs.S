@@ -70,6 +70,7 @@ isrnoerr irq12 $44
 isrnoerr irq13 $45
 isrnoerr irq14 $46
 isrnoerr irq15 $47
+isrnoerr isr255 $255
 
 .global interrupt_entry
 interrupt_entry:

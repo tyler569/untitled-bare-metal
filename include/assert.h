@@ -1,5 +1,6 @@
 #pragma once
 
+#include "stdio.h"
 #include "sys/cdefs.h"
 
 [[noreturn]] void panic (const char *msg, ...);
@@ -8,7 +9,11 @@
   do                                                                          \
     {                                                                         \
       if (!(x))                                                               \
-        panic (FILE_AND_LINE ": assertion failed: %s", #x);                   \
+        {                                                                     \
+          printf (FILE_AND_LINE ": assertion failed: %s\n", #x);              \
+          asm volatile ("int $255");                                          \
+          panic ("assertion failed");                                         \
+        }                                                                     \
     }                                                                         \
   while (0)
 

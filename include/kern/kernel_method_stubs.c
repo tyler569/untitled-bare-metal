@@ -66,6 +66,12 @@ tcb_resume (cte_t *)
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
+tcb_bind_notification (cte_t *, cte_t *)
+{
+  err_printf ("unimplemented kernel method tcb_bind_notification\n");
+  return illegal_operation;
+}
+__attribute__ ((weak)) message_info_t
 tcb_set_affinity (cte_t *, word_t)
 {
   err_printf ("unimplemented kernel method tcb_set_affinity\n");

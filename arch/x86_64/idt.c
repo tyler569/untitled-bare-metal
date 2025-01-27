@@ -27,7 +27,7 @@ struct PACKED idt_ptr
 typedef struct idt_entry idt_entry_t;
 typedef struct idt_ptr idt_ptr_t;
 
-static idt_entry_t idt[48];
+static idt_entry_t idt[256];
 static idt_ptr_t idt_ptr = { sizeof (idt) - 1, (uintptr_t)idt };
 
 void
@@ -101,6 +101,7 @@ init_idt ()
   SET_IDT_GATE (45, irq13);
   SET_IDT_GATE (46, irq14);
   SET_IDT_GATE (47, irq15);
+  SET_IDT_GATE_ex (255, isr255, TYPE_USER_INT, 0);
 
   load_idt (&idt_ptr);
 }
