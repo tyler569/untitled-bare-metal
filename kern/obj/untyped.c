@@ -70,8 +70,8 @@ create_objects (word_t type, word_t size_bits, cte_t *dest_slot_0,
       void *obj_ptr = (void *)direct_map_of (obj_paddr);
       memset (obj_ptr, 0, obj_size);
 
-      printf ("Creating object of type %s at %p\n", cap_type_string (type),
-              obj_ptr);
+      // printf ("Creating object of type %s at %p\n", cap_type_string (type),
+      //         obj_ptr);
 
       dest_slot->cap.type = type;
       dest_slot->cap.size_bits = size_bits;

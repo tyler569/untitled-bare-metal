@@ -139,13 +139,10 @@ c_start (void *ipc_buffer, void *boot_info)
       a = b;
       b = get_mr (0);
 
-      if (b < a)
-        {
-          printf ("Overflow: %lu, %lu\n", a, b);
-          break;
-        }
-
       printf ("Fibonacci: %lu\n", a);
+
+      if (a > 100000)
+        break;
     }
 
   exit ();
