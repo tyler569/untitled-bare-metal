@@ -18,3 +18,6 @@ typedef uint64_t cap_rights_t;
 struct frame;
 typedef struct frame frame_t;
 typedef struct frame user_context_t;
+
+constexpr cap_rights_t cap_rights_none = 0;
+constexpr cap_rights_t cap_rights_all = 0xFFFFFFFFFFFFFFFF;

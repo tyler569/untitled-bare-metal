@@ -8,7 +8,7 @@
 #include "kern/per_cpu.h"
 #include "stdio.h"
 
-#define dbg_printf(...) printf (__VA_ARGS__)
+#define dbg_printf(...)
 #define err_printf(...) printf (__VA_ARGS__)
 
 #include "kern/kernel_method_stubs.c"

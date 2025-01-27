@@ -139,9 +139,9 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
 
   struct tcb *tcb = cap_ptr (slot);
 
-  copy_cap (&tcb->cspace_root, cspace_root);
-  copy_cap (&tcb->vspace_root, vspace_root);
-  copy_cap (&tcb->ipc_buffer_frame, buffer_frame);
+  copy_cap (&tcb->cspace_root, cspace_root, cap_rights_all);
+  copy_cap (&tcb->vspace_root, vspace_root, cap_rights_all);
+  copy_cap (&tcb->ipc_buffer_frame, buffer_frame, cap_rights_all);
 
   tcb->ipc_buffer = cap_ptr (buffer_frame);
 
@@ -159,7 +159,7 @@ tcb_bind_notification (cte_t *cap, cte_t *notification)
   if (n->bound_tcb)
     return illegal_operation;
 
-  copy_cap (&tcb->notification, notification);
+  copy_cap (&tcb->notification, notification, cap_rights_all);
   n->bound_tcb = tcb;
 
   return no_error;

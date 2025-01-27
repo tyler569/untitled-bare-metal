@@ -5,9 +5,14 @@
 #include "kern/syscall.h"
 #include "string.h"
 
+static inline struct tcb *
+first_tcb (struct endpoint *e)
+{
+  return CONTAINER_OF (e->list.next, struct tcb, send_receive_node);
+}
+
 static void
-send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
-                                  word_t badge, bool resume_now)
+send_message_directly (struct tcb *receiver, word_t info, word_t badge, bool resume_now)
 {
   assert (receiver->ipc_buffer && "Receiver has no IPC buffer");
   assert (this_tcb->ipc_buffer && "Sender has no IPC buffer");
@@ -30,6 +35,16 @@ send_message_to_blocked_receiver (struct tcb *receiver, word_t info,
     }
   else
     make_tcb_runnable (receiver);
+}
+
+static void
+send_message_to_blocked_receiver (struct endpoint *e, word_t info,
+                                  word_t badge, bool resume_now)
+{
+  struct list_head *next = pop_from_list (&e->list);
+  struct tcb *receiver = CONTAINER_OF (next, struct tcb, send_receive_node);
+
+  send_message_directly (receiver, info, badge, resume_now);
 }
 
 [[noreturn]] static void
@@ -85,31 +100,38 @@ queue_receiver_on_endpoint (struct endpoint *e)
   unreachable ();
 }
 
+static inline bool
+is_receive_blocked (struct endpoint *e)
+{
+  return is_list_empty (&e->list)
+         || first_tcb (e)->state == TASK_STATE_RECEIVING;
+}
+
+static inline bool
+is_send_blocked (struct endpoint *e)
+{
+  return is_list_empty (&e->list)
+         || first_tcb (e)->state == TASK_STATE_SENDING;
+}
+
 [[noreturn]] static void
 endpoint_send (struct endpoint *e, word_t message_info, word_t badge,
                bool is_call)
 {
-  if (is_list_empty (&e->list))
+  if (is_send_blocked (e))
     queue_message_on_endpoint (e, message_info, badge, is_call);
   else
-    {
-      struct tcb *tcb = CONTAINER_OF (first_item (&e->list), struct tcb,
-                                      send_receive_node);
-      bool send_blocked = tcb->state == TASK_STATE_SENDING
-                          || tcb->state == TASK_STATE_CALLING;
-      bool recv_blocked = tcb->state == TASK_STATE_RECEIVING;
+    send_message_to_blocked_receiver (e, message_info, badge, true);
+  assert (0);
+}
 
-      if (send_blocked)
-        queue_message_on_endpoint (e, message_info, badge, is_call);
-      else if (recv_blocked)
-        {
-          remove_from_list (&tcb->send_receive_node);
-          send_message_to_blocked_receiver (tcb, message_info, badge, true);
-          unreachable ();
-        }
-      else
-        assert (false && "Neither send nor receive blocked");
-    }
+static message_info_t
+endpoint_recv (struct endpoint *e, word_t *sender)
+{
+  if (is_receive_blocked (e))
+    queue_receiver_on_endpoint (e);
+  else
+    return receive_message_from_blocked_sender (e, sender);
 }
 
 static void
@@ -139,10 +161,7 @@ invoke_endpoint_recv (cte_t *cap, word_t *sender)
 
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
-  if (is_list_empty (&e->list))
-    queue_receiver_on_endpoint (e);
-  else
-    return receive_message_from_blocked_sender (e, sender);
+  return endpoint_recv (e, sender);
 }
 
 [[noreturn]] message_info_t
@@ -170,7 +189,7 @@ invoke_reply (word_t message_info)
       printf ("Failed to deliver reply!\n");
       kill_tcb (this_tcb);
     }
-  send_message_to_blocked_receiver (receiver, message_info, 0, false);
+  send_message_directly (receiver, message_info, 0, false);
 }
 
 message_info_t

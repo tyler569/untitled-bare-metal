@@ -15,8 +15,8 @@ main (cptr_t endpoint_cap)
   message_info_t info, resp;
   word_t badge;
 
-  printf ("signalling notification: %lu\n", endpoint_cap + 1);
-  signal (endpoint_cap + 1);
+  printf ("signalling notification: %lu\n", endpoint_cap + 2);
+  signal (endpoint_cap + 2);
   printf ("signal done\n");
 
   info = recv (endpoint_cap, &badge);

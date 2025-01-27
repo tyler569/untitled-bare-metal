@@ -2,6 +2,20 @@
 #include "kern/cap.h"
 #include "kern/syscall.h"
 
+cte_t *
+lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
+{
+  assert (depth == 64); // for now
+  assert (cap_type (cspace_root->cap) == cap_cnode);
+
+  cte_t *cte = cap_ptr (cspace_root->cap);
+  size_t length = cap_size (cspace_root->cap);
+  assert (index < length);
+
+  *err = no_error;
+  return &cte[index];
+}
+
 error_t
 cnode_debug_print (cap_t *obj)
 {
@@ -25,4 +39,62 @@ cnode_debug_print (cap_t *obj)
     }
 
   return no_error;
+}
+
+message_info_t
+cnode_copy (cte_t *obj, word_t src_offset, uint8_t src_depth, cte_t *root,
+            word_t dst_offset, uint8_t dst_depth, cap_rights_t rights)
+{
+  error_t err;
+  cte_t *dst = lookup_cap_slot (root, dst_offset, dst_depth, &err);
+  if (err != no_error)
+    return return_ipc (err, 0);
+
+  cte_t *src = lookup_cap_slot (obj, src_offset, src_depth, &err);
+  if (err != no_error)
+    return return_ipc (err, 0);
+
+  copy_cap (dst, src, rights);
+
+  return return_ipc (no_error, 0);
+}
+
+message_info_t
+cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
+{
+  error_t err;
+  cte_t *cte = lookup_cap_slot (obj, offset, depth, &err);
+  if (err != no_error)
+    return return_ipc (err, 0);
+
+  // TODO: distribution tree validity
+  cte->cap = cap_null_new ();
+
+  return return_ipc (no_error, 0);
+}
+
+message_info_t
+cnode_mint (cte_t *obj, word_t src_offset, uint8_t src_depth, cte_t *root,
+            word_t dst_offset, uint8_t dst_depth, cap_rights_t rights,
+            word_t badge)
+{
+  error_t err;
+  cte_t *dst = lookup_cap_slot (root, dst_offset, dst_depth, &err);
+  if (err != no_error)
+    return return_ipc (err, 0);
+
+  cte_t *src = lookup_cap_slot (obj, src_offset, src_depth, &err);
+  if (err != no_error)
+    return return_ipc (err, 0);
+
+  if (cap_type (src) != cap_endpoint && cap_type (src) != cap_notification)
+    return return_ipc (invalid_argument, 0);
+
+  if (src->cap.badge)
+    return return_ipc (invalid_argument, 0);
+
+  copy_cap (dst, src, rights);
+  dst->cap.badge = badge;
+
+  return return_ipc (no_error, 0);
 }

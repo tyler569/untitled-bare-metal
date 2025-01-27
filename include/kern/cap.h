@@ -244,19 +244,8 @@ cap_x86_64_page_new (uintptr_t frame_phy)
   return cap;
 }
 
-static inline cte_t *
-lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
-{
-  assert (depth == 64); // for now
-  assert (cap_type (cspace_root->cap) == cap_cnode);
-
-  cte_t *cte = cap_ptr (cspace_root->cap);
-  size_t length = cap_size (cspace_root->cap);
-  assert (index < length);
-
-  *err = no_error;
-  return &cte[index];
-}
+cte_t *lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
+                        error_t *err);
 
 #define lookup_cap_slot_this_tcb(index, err)                                  \
   lookup_cap_slot (&this_tcb->cspace_root, index, 64, err)
@@ -334,9 +323,10 @@ cap_value_type_string (cap_t cap)
       cte_t *: cte_type_string) (t)
 
 static inline void
-copy_cap (cte_t *dest, cte_t *src)
+copy_cap (cte_t *dest, cte_t *src, cap_rights_t rights)
 {
-  dest->cap = src->cap;
-
   // TODO: insert into CDT
+
+  dest->cap = src->cap;
+  dest->cap.rights &= rights;
 }

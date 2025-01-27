@@ -79,6 +79,10 @@ c_start (void *ipc_buffer, void *boot_info)
 
   cptr_t endpoint_cap = allocate (untyped, cap_endpoint, 1);
   cptr_t notification_cap = allocate (untyped, cap_notification, 1);
+  cptr_t badged_notification_cap = cptr_alloc ();
+
+  cnode_mint (init_cap_root_cnode, notification_cap, 64, init_cap_root_cnode,
+              badged_notification_cap, 64, cap_rights_all, 1);
 
   void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
 

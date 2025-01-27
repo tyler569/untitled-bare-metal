@@ -65,8 +65,6 @@ maybe_init_notification (struct notification *n)
   if (n->list.next)
     return;
 
-  n->word = 0;
-  n->bound_tcb = nullptr;
   init_list (&n->list);
 }
 
