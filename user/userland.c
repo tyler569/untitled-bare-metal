@@ -78,6 +78,7 @@ c_start (void *ipc_buffer, void *boot_info)
   cptr_t untyped = init_cap_first_untyped;
 
   cptr_t endpoint_cap = allocate (untyped, cap_endpoint, 1);
+  cptr_t notification_cap = allocate (untyped, cap_notification, 1);
 
   void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
 
@@ -102,7 +103,13 @@ c_start (void *ipc_buffer, void *boot_info)
       tcb_resume (proc_tcb_cap);
     }
 
-  yield ();
+  // yield ();
+
+  word_t notification_word = 0;
+
+  printf ("waiting for notification\n");
+  wait (notification_cap, &notification_word);
+  printf ("got notification; word is %lu\n", notification_word);
 
   word_t badge;
 
@@ -126,7 +133,10 @@ c_start (void *ipc_buffer, void *boot_info)
       b = get_mr (0);
 
       if (b < a)
-        break;
+        {
+          printf ("Overflow: %lu, %lu\n", a, b);
+          break;
+        }
 
       printf ("Fibonacci: %lu\n", a);
     }

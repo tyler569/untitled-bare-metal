@@ -19,13 +19,11 @@ init_syscall ()
 }
 
 USED void
-c_syscall_entry (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
-                 uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *f)
+c_syscall_entry (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
 {
   save_frame_on_tcb (f);
 
-  int ret = do_syscall (a0, a1, a2, a3, a4, a5, syscall_number, f);
-  f->rax = ret;
+  do_syscall (a0, a1, syscall_number, f);
 
   clear_frame_on_tcb (f);
 }

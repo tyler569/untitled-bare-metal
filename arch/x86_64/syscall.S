@@ -26,11 +26,9 @@ syscall_entry:
     push $0             // error code
     push $0             // int number
     PUSH_ALL            // save registers
-    mov %r10, %rcx      // fix 3rd parameter
-    push %rsp           // 8th parameter to the function
-    push %rax           // 7th paramter to the function
+    mov %rax, %rdx      // syscall_number is 3rd parameter
+    mov %rsp, %rcx      // stack pointer is frame_t * is 4th parameter
     call c_syscall_entry
-    add $16, %rsp       // caller pops parameters
     POP_ALL             // restore registers
     add $16, %rsp       // pop error code, int number
     pop %rcx            // user rip

@@ -52,8 +52,8 @@ queue_message_on_endpoint (struct endpoint *e, word_t info, word_t badge,
   unreachable ();
 }
 
-static void
-receive_message_from_blocked_sender (struct endpoint *e)
+static message_info_t
+receive_message_from_blocked_sender (struct endpoint *e, word_t *badge)
 {
   struct list_head *next = pop_from_list (&e->list);
   struct tcb *sender = CONTAINER_OF (next, struct tcb, send_receive_node);
@@ -64,13 +64,16 @@ receive_message_from_blocked_sender (struct endpoint *e)
   memcpy (this_tcb->ipc_buffer->msg, sender->ipc_buffer->msg, size);
 
   this_tcb->ipc_buffer->tag = info;
-  this_tcb->current_user_frame->rax = sender->ipc_buffer->tag;
+  this_tcb->current_user_frame->rax = info;
   this_tcb->current_user_frame->rdi = sender->endpoint_badge;
+  *badge = sender->endpoint_badge;
 
   if (sender->expects_reply)
     this_tcb->reply_to = sender;
   else
     make_tcb_runnable (sender);
+
+  return info;
 }
 
 [[noreturn]] static void
@@ -130,7 +133,7 @@ invoke_endpoint_send (cte_t *cap, word_t message_info)
 }
 
 message_info_t
-invoke_endpoint_recv (cte_t *cap)
+invoke_endpoint_recv (cte_t *cap, word_t *sender)
 {
   assert (cap_type (cap) == cap_endpoint);
 
@@ -139,10 +142,7 @@ invoke_endpoint_recv (cte_t *cap)
   if (is_list_empty (&e->list))
     queue_receiver_on_endpoint (e);
   else
-    {
-      receive_message_from_blocked_sender (e);
-      return return_ipc (no_error, 0);
-    }
+    return receive_message_from_blocked_sender (e, sender);
 }
 
 [[noreturn]] message_info_t
@@ -174,8 +174,8 @@ invoke_reply (word_t message_info)
 }
 
 message_info_t
-invoke_reply_recv (cte_t *cap, word_t message_info)
+invoke_reply_recv (cte_t *cap, word_t message_info, word_t *sender)
 {
   invoke_reply (message_info);
-  return invoke_endpoint_recv (cap);
+  return invoke_endpoint_recv (cap, sender);
 }

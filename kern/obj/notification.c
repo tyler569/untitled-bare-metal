@@ -69,7 +69,7 @@ invoke_notification_send (cte_t *cap)
 }
 
 message_info_t
-invoke_notification_recv (cte_t *cap)
+invoke_notification_recv (cte_t *cap, word_t *nfn_word)
 {
   assert (cap_type (cap) == cap_notification);
 
@@ -79,6 +79,8 @@ invoke_notification_recv (cte_t *cap)
   if (n->word == 0)
     queue_receiver_on_notification (n);
 
-  this_tcb->current_user_frame->rdi = n->word;
+  *nfn_word = n->word;
+  n->word = 0;
+
   return return_ipc (no_error, 0);
 }

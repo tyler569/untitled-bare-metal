@@ -8,9 +8,7 @@
 struct frame;
 typedef struct frame frame_t;
 
-message_info_t do_syscall (uintptr_t, uintptr_t, uintptr_t, uintptr_t,
-                           uintptr_t, uintptr_t, int syscall_number,
-                           frame_t *);
+void do_syscall (uintptr_t, uintptr_t, int syscall_number, frame_t *);
 
 MUST_USE
 static inline message_info_t

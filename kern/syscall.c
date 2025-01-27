@@ -19,7 +19,8 @@
   slot = lookup_cap_slot_this_tcb (cptr, &err);                               \
   if (err != no_error)                                                        \
     {                                                                         \
-      return return_ipc (err, 0);                                             \
+      info = return_ipc (err, 0);                                             \
+      break;                                                                  \
     }
 
 #define ASSERT_ENDPOINT(slot)                                                 \
@@ -29,23 +30,16 @@
       kill_tcb (this_tcb);                                                    \
     }
 
-message_info_t
-do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
-            uintptr_t a4, uintptr_t a5, int syscall_number, frame_t *f)
+void
+do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
 {
-  (void)a2, (void)a3, (void)a4, (void)a5, (void)f;
-
-  uintptr_t ret = 0;
-
-  if (this_tcb)
-    this_tcb->current_user_frame = f;
-
   if (syscall_number != sys_debug_write && syscall_number != sys_exit)
     dbg_printf ("Task %#lx a0:%#lx ", (uintptr_t)this_tcb & 0xfff, a0);
 
   if (syscall_number == sys_exit)
     dbg_printf ("Task %#lx ", (uintptr_t)this_tcb & 0xfff);
 
+  message_info_t info = 0;
   error_t err;
   cte_t *slot;
 
@@ -58,12 +52,15 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       unreachable ();
     case sys_debug_write:
       write_debug (nullptr, (const void *)a0, a1);
-      return no_error;
+      break;
     case sys_call:
       GET_CAP (a0, slot, err);
 
       if (cap_type (slot) != cap_endpoint)
-        return dispatch_method (slot, a1);
+        {
+          info = dispatch_method (slot, a1);
+          break;
+        }
       else
         {
           dbg_printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
@@ -80,7 +77,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
         invoke_notification_send (slot);
       else if (cap_type (slot) == cap_endpoint)
         invoke_endpoint_send (slot, a1);
-      return 0;
+      break;
     case sys_recv:
       GET_CAP (a0, slot, err);
 
@@ -89,14 +86,14 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       ASSERT_ENDPOINT (slot);
 
       if (cap_type (slot) == cap_notification)
-        invoke_notification_recv (slot);
+        info = invoke_notification_recv (slot, &f->rdi);
       else if (cap_type (slot) == cap_endpoint)
-        invoke_endpoint_recv (slot);
-      return 0;
+        info = invoke_endpoint_recv (slot, &f->rdi);
+      break;
     case sys_reply:
       dbg_printf ("sys_reply (info: %#lx)\n", a0);
       invoke_reply (a0);
-      return 0;
+      break;
     case sys_replyrecv:
       GET_CAP (a0, slot, err);
 
@@ -104,7 +101,8 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
 
       ASSERT_ENDPOINT (slot);
 
-      return invoke_reply_recv (slot, a1);
+      info = invoke_reply_recv (slot, a1, &f->rdi);
+      break;
     case sys_yield:
       dbg_printf ("sys_yield ()\n");
       schedule ();
@@ -114,5 +112,5 @@ do_syscall (uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3,
       kill_tcb (this_tcb);
     }
 
-  return ret;
+  set_frame_return (f, info);
 }

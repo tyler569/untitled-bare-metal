@@ -100,6 +100,12 @@ send (cptr_t cap, message_info_t info)
   _syscall2 (sys_send, cap, info);
 }
 
+static inline void
+signal (cptr_t cap)
+{
+  _syscall2 (sys_send, cap, 0);
+}
+
 static inline message_info_t
 call (cptr_t cap, message_info_t info, word_t *sender)
 {
@@ -111,6 +117,12 @@ static inline message_info_t
 recv (cptr_t cap, word_t *sender)
 {
   return _syscall22 (sys_recv, cap, 0, sender);
+}
+
+static inline void
+wait (cptr_t cap, word_t *nfn_word)
+{
+  _syscall22 (sys_recv, cap, 0, nfn_word);
 }
 
 static inline message_info_t
