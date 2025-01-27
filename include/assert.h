@@ -9,11 +9,7 @@
   do                                                                          \
     {                                                                         \
       if (!(x))                                                               \
-        {                                                                     \
-          printf (FILE_AND_LINE ": assertion failed: %s\n", #x);              \
-          asm volatile ("int $255");                                          \
-          panic ("assertion failed");                                         \
-        }                                                                     \
+        panic (FILE_AND_LINE ": assertion failed: %s", #x);                   \
     }                                                                         \
   while (0)
 

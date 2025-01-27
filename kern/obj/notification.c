@@ -46,7 +46,6 @@ notification_signal (struct notification *n, word_t badge)
     {
       if (n->bound_tcb && n->bound_tcb->state == TASK_STATE_RECEIVING)
         signal_bound_receiver_waiting_on_something_else (n->bound_tcb, badge);
-      printf ("RETURNING OUT OF SIGNAL\n");
       return;
     }
 
@@ -63,9 +62,6 @@ notification_signal (struct notification *n, word_t badge)
 static void
 maybe_init_notification (struct notification *n)
 {
-  printf ("n: %p\n", n);
-  assert (n);
-
   if (n->list.next)
     return;
 

@@ -23,6 +23,7 @@ panic (const char *msg, ...)
 
   printf ("\n");
 
+  debug_trap ();
   halt_forever ();
 }
 
@@ -55,10 +56,6 @@ void
 run_smoke_tests ()
 {
   printf ("Smoke tests:\n");
-
-  printf ("  Interrupt\n");
-  printf ("    ");
-  debug_trap ();
 
   printf ("  Sort\n");
   run_sort_test ();
