@@ -185,6 +185,7 @@ switch_tcb (struct tcb *t)
   set_vm_root (tcb_vm_root (t));
   set_tls_base (t->tls_base);
   t->state = TASK_STATE_RUNNING;
+  ensure_frame_valid_for_usermode (&t->saved_state);
 
   jump_to_userland_frame (&t->saved_state);
 }

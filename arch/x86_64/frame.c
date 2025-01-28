@@ -104,3 +104,10 @@ set_frame_return (frame_t *f, uintptr_t val)
 {
   f->rax = val;
 }
+
+void ensure_frame_valid_for_usermode (frame_t *f)
+{
+  f->cs = USER_CS;
+  f->ss = USER_SS;
+  f->rflags |= FLAG_IF;
+}

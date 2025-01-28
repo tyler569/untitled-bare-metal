@@ -22,7 +22,10 @@ halt_forever ()
 halt_forever_interrupts_enabled ()
 {
   while (true)
-    asm volatile ("hlt");
+    {
+      asm volatile ("sti");
+      asm volatile ("hlt");
+    }
 }
 
 void

@@ -28,6 +28,7 @@ void print_frame (frame_t *);
 void new_frame (frame_t *, uintptr_t rip, uintptr_t rsp);
 void new_user_frame (frame_t *, uintptr_t rip, uintptr_t rsp);
 void copy_frame (frame_t *dst, frame_t *src);
+void ensure_frame_valid_for_usermode (frame_t *);
 
 uintptr_t get_frame_arg (frame_t *, int);
 uintptr_t get_frame_syscall_arg (frame_t *, int);
