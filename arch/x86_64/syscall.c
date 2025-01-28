@@ -17,13 +17,3 @@ init_syscall ()
   write_msr (IA32_FMASK, mask);
   write_msr (IA32_EFER, efer | IA32_EFER_SCE);
 }
-
-USED void
-c_syscall_entry (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
-{
-  save_frame_on_tcb (f);
-
-  do_syscall (a0, a1, syscall_number, f);
-
-  clear_frame_on_tcb (f);
-}

@@ -1,6 +1,7 @@
 #include "kern/arch.h"
 #include "kern/kernel.h"
 #include "kern/mem.h"
+#include "kern/syscall.h"
 #include "limine.h"
 #include "sys/cdefs.h"
 #include "x86_64.h"
@@ -28,6 +29,18 @@ USED void
 c_interrupt_entry (frame_t *f)
 {
   save_frame_on_tcb (f);
+
   print_interrupt_info (f);
+
+  clear_frame_on_tcb (f);
+}
+
+USED void
+c_syscall_entry (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
+{
+  save_frame_on_tcb (f);
+
+  do_syscall (a0, a1, syscall_number, f);
+
   clear_frame_on_tcb (f);
 }
