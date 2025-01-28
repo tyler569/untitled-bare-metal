@@ -35,12 +35,6 @@ cnode_debug_print (cte_t *)
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_echo (cte_t *)
-{
-  err_printf ("unimplemented kernel method tcb_echo\n");
-  return illegal_operation;
-}
-__attribute__ ((weak)) message_info_t
 tcb_configure (cte_t *, word_t, cte_t *, word_t, cte_t *, word_t, word_t,
                cte_t *)
 {

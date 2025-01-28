@@ -68,14 +68,6 @@ cnode_debug_print (cptr_t obj)
   return get_message_label (_result);
 }
 static inline int
-tcb_echo (cptr_t obj)
-{
-
-  message_info_t _info = new_message_info (METHOD_tcb_echo, 0, 0, 0);
-  message_info_t _result = _syscall2 (sys_call, obj, _info);
-  return get_message_label (_result);
-}
-static inline int
 tcb_configure (cptr_t obj, word_t fault_ep, cptr_t cspace_root,
                word_t cspace_root_data, cptr_t vspace_root,
                word_t vspace_root_data, word_t buffer, cptr_t buffer_frame)

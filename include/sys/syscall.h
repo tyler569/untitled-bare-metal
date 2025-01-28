@@ -66,7 +66,6 @@ enum method_id
   METHOD_cnode_mint,
   METHOD_cnode_revoke,
   METHOD_cnode_debug_print,
-  METHOD_tcb_echo,
   METHOD_tcb_configure,
   METHOD_tcb_copy_registers,
   METHOD_tcb_read_registers,

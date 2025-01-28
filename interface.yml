@@ -37,8 +37,6 @@ types:
         parameters: []
   - name: tcb
     methods:
-      - name: echo
-        parameters: []
       - name: configure
         parameters:
           - { name: fault_ep, type: word_t }

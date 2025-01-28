@@ -15,7 +15,6 @@ message_info_t cnode_mint (cte_t *slot, word_t dest_index, uint8_t dest_depth,
                            word_t badge);
 message_info_t cnode_revoke (cte_t *slot, word_t index, uint8_t depth);
 message_info_t cnode_debug_print (cte_t *slot);
-message_info_t tcb_echo (cte_t *slot);
 message_info_t tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
                               word_t cspace_root_data, cte_t *vspace_root,
                               word_t vspace_root_data, word_t buffer,

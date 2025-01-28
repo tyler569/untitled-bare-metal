@@ -86,15 +86,6 @@ tcb_resume (cte_t *cap)
 }
 
 error_t
-tcb_echo (cte_t *cap)
-{
-  (void)cap;
-
-  printf ("echo\n");
-  return no_error;
-}
-
-error_t
 tcb_read_registers (cte_t *cap, bool suspend_source, word_t arch_flags,
                     word_t count, frame_t *regs)
 {

@@ -156,27 +156,6 @@ dispatch_method (cte_t *slot, message_info_t info)
         return cnode_debug_print (slot);
         break;
       }
-    case METHOD_tcb_echo:
-      {
-
-        dbg_printf ("tcb_echo ");
-
-        if (cap_type (slot) != cap_tcb)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return return_ipc (illegal_operation, 0);
-          }
-        if (get_message_length (info) < 0)
-          return return_ipc (truncated_message, 0);
-        if (get_message_extra_caps (info) < 0)
-          return return_ipc (truncated_message, 0);
-
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
-
-        return tcb_echo (slot);
-        break;
-      }
     case METHOD_tcb_configure:
       {
         word_t fault_ep = (word_t)get_mr (0);

@@ -47,6 +47,8 @@ print_interrupt_info (frame_t *f)
       printf ("Error code: %#lx\n", f->err_code);
       print_backtrace (f);
       break;
+    case 255:
+      return;
     default:
       print_backtrace (f);
     }
