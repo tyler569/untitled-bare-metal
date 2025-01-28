@@ -50,7 +50,7 @@ struct PACKED long_jump
 void
 jump_to_gdt ()
 {
-  struct long_jump lj = { &&target, 8 };
+  struct long_jump lj = { &&target, KERNEL_CS };
 
   asm volatile ("ljmpq *(%%rax)" : : "a"(&lj));
 target:

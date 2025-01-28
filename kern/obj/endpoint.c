@@ -12,7 +12,8 @@ first_tcb (struct endpoint *e)
 }
 
 static void
-send_message_directly (struct tcb *receiver, word_t info, word_t badge, bool resume_now)
+send_message_directly (struct tcb *receiver, word_t info, word_t badge,
+                       bool resume_now)
 {
   assert (receiver->ipc_buffer && "Receiver has no IPC buffer");
   assert (this_tcb->ipc_buffer && "Sender has no IPC buffer");
