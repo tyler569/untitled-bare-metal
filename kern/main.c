@@ -10,6 +10,8 @@ kernel_main ()
 
   run_smoke_tests ();
 
+  enable_interrupts ();
+
   void *initrd;
   size_t initrd_size;
   if (get_initrd_info (&initrd, &initrd_size))

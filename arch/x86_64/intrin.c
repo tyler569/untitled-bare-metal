@@ -25,6 +25,18 @@ halt_forever_interrupts_enabled ()
     asm volatile ("hlt");
 }
 
+void
+enable_interrupts ()
+{
+  asm volatile ("sti");
+}
+
+void
+disable_interrupts ()
+{
+  asm volatile ("cli");
+}
+
 #define DEFINE_PORT_IO(suffix, type)                                          \
   void write_port_##suffix (uint16_t port, type value)                        \
   {                                                                           \

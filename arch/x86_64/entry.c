@@ -18,6 +18,9 @@ kernel_entry ()
   init_syscall ();
   init_page_mmap ();
   init_int_stacks ();
+  init_pic ();
+  init_lapic ();
+  init_ioapic ();
   // init_aps ();
 
   kernel_main ();

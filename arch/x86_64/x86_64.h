@@ -83,6 +83,11 @@ void init_idt ();
 void init_aps ();
 void init_syscall ();
 void init_int_stacks ();
+void init_pic ();
+void init_ioapic ();
+void init_lapic ();
+
+void send_eoi (uint8_t irq);
 
 extern per_cpu_t bsp_cpu;
 

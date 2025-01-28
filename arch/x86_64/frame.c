@@ -31,6 +31,7 @@ new_user_frame (frame_t *f, uintptr_t rip, uintptr_t rsp)
   f->ss = USER_SS;
   f->rip = rip;
   f->rsp = rsp;
+  f->rflags = 0x202;
 }
 
 void

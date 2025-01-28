@@ -47,6 +47,10 @@ print_interrupt_info (frame_t *f)
       printf ("Error code: %#lx\n", f->err_code);
       print_backtrace (f);
       break;
+    case 32 ... 48:
+      printf ("Interrupt from external device\n");
+      send_eoi (f->int_no);
+      return;
     case 255:
       return;
     default:

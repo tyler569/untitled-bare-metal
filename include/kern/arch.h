@@ -14,6 +14,9 @@ void halt_until_interrupt ();
 [[noreturn]] void halt_forever ();
 [[noreturn]] void halt_forever_interrupts_enabled ();
 
+void disable_interrupts ();
+void enable_interrupts ();
+
 void relax_busy_loop ();
 
 struct stream;
