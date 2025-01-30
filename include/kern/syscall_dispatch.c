@@ -951,6 +951,115 @@ dispatch_method (cte_t *slot, message_info_t info)
         return x86_64_page_unmap (slot);
         break;
       }
+    case METHOD_irq_control_get:
+      {
+        word_t irq = (word_t)get_mr (0);
+        word_t index = (word_t)get_mr (1);
+        uint8_t depth = (uint8_t)get_mr (2);
+        cte_t *root;
+
+        dbg_printf ("irq_control_get ");
+
+        if (cap_type (slot) != cap_irq_control)
+          {
+            err_printf ("invalid cap type: %s\n",
+                        cap_type_string (cap_type (slot)));
+            return return_ipc (illegal_operation, 0);
+          }
+        if (get_message_length (info) < 3)
+          return return_ipc (truncated_message, 0);
+        if (get_message_extra_caps (info) < 1)
+          return return_ipc (truncated_message, 0);
+
+        root = lookup_cap_slot_this_tcb (get_cap (0), &error);
+        if (error != no_error)
+          {
+            err_printf ("lookup_cap failed for cap 0\n");
+            set_mr (0, 0);
+            return return_ipc (error, 1);
+          }
+
+        dbg_printf (
+            "(cap:%s, irq=%#lx, root=cap:%s, index=%#lx, depth=%hhu)\n",
+            cap_type_string (slot), irq, cap_type_string (root), index, depth);
+
+        return irq_control_get (slot, irq, root, index, depth);
+        break;
+      }
+    case METHOD_irq_handler_ack:
+      {
+
+        dbg_printf ("irq_handler_ack ");
+
+        if (cap_type (slot) != cap_irq_handler)
+          {
+            err_printf ("invalid cap type: %s\n",
+                        cap_type_string (cap_type (slot)));
+            return return_ipc (illegal_operation, 0);
+          }
+        if (get_message_length (info) < 0)
+          return return_ipc (truncated_message, 0);
+        if (get_message_extra_caps (info) < 0)
+          return return_ipc (truncated_message, 0);
+
+        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
+
+        return irq_handler_ack (slot);
+        break;
+      }
+    case METHOD_irq_handler_clear:
+      {
+
+        dbg_printf ("irq_handler_clear ");
+
+        if (cap_type (slot) != cap_irq_handler)
+          {
+            err_printf ("invalid cap type: %s\n",
+                        cap_type_string (cap_type (slot)));
+            return return_ipc (illegal_operation, 0);
+          }
+        if (get_message_length (info) < 0)
+          return return_ipc (truncated_message, 0);
+        if (get_message_extra_caps (info) < 0)
+          return return_ipc (truncated_message, 0);
+
+        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
+
+        return irq_handler_clear (slot);
+        break;
+      }
+    case METHOD_irq_handler_set_notification:
+      {
+
+        cte_t *notification;
+
+        dbg_printf ("irq_handler_set_notification ");
+
+        if (cap_type (slot) != cap_irq_handler)
+          {
+            err_printf ("invalid cap type: %s\n",
+                        cap_type_string (cap_type (slot)));
+            return return_ipc (illegal_operation, 0);
+          }
+        if (get_message_length (info) < 0)
+          return return_ipc (truncated_message, 0);
+        if (get_message_extra_caps (info) < 1)
+          return return_ipc (truncated_message, 0);
+
+        notification = lookup_cap_slot_this_tcb (get_cap (0), &error);
+        if (error != no_error)
+          {
+            err_printf ("lookup_cap failed for cap 0\n");
+            set_mr (0, 0);
+            return return_ipc (error, 1);
+          }
+
+        dbg_printf ("(cap:%s, notification=cap:%s)\n", cap_type_string (slot),
+                    cap_type_string (notification));
+
+        return irq_handler_set_notification (slot, notification);
+        break;
+      }
     default:
       return return_ipc (illegal_operation, 0);
     }

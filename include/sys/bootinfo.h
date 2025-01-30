@@ -10,6 +10,7 @@ enum boot_capabilities
   init_cap_root_cnode,
   init_cap_init_vspace,
   init_cap_io_port_control,
+  init_cap_irq_control,
 
   init_cap_first_untyped,
 };

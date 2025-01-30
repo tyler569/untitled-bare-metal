@@ -244,6 +244,19 @@ cap_x86_64_page_new (uintptr_t frame_phy)
   return cap;
 }
 
+static inline cap_t
+cap_irq_control_new ()
+{
+  return (cap_t){ .type = cap_irq_control };
+}
+
+static inline cap_t
+cap_irq_handler_new (word_t irq)
+{
+  cap_t cap = { .type = cap_irq_handler, .size_bits = irq };
+  return cap;
+}
+
 cte_t *lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
                         error_t *err);
 

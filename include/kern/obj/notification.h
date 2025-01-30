@@ -15,3 +15,5 @@ struct notification
 
 void invoke_notification_send (cte_t *cap);
 message_info_t invoke_notification_recv (cte_t *cap, word_t *nfn_word);
+
+void notification_signal (struct notification *n, word_t badge);

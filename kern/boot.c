@@ -55,11 +55,13 @@ create_init_tcb (void *initrd, size_t initrd_size)
   cap_t init_cnode_cap = cap_cnode_new (init_cnode, INIT_CNODE_SIZE_BITS);
   cap_t init_vspace_cap = cap_x86_64_pml4_new (direct_map_of (get_vm_root ()));
   cap_t init_io_port_cap = cap_x86_64_io_port_control_new ();
+  cap_t init_irq_control_cap = cap_irq_control_new ();
 
   init_cnode[init_cap_init_tcb].cap = init_tcb_cap;
   init_cnode[init_cap_root_cnode].cap = init_cnode_cap;
   init_cnode[init_cap_init_vspace].cap = init_vspace_cap;
   init_cnode[init_cap_io_port_control].cap = init_io_port_cap;
+  init_cnode[init_cap_irq_control].cap = init_irq_control_cap;
 
   init_tcb.cspace_root.cap = init_cnode_cap;
   init_tcb.vspace_root.cap = init_vspace_cap;

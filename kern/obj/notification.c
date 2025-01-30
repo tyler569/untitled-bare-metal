@@ -5,7 +5,7 @@
 #include "kern/syscall.h"
 #include "string.h"
 
-static void
+[[noreturn]] static void
 signal_waiting_receiver (struct tcb *receiver, word_t badge)
 {
   message_info_t tag = new_message_info (no_error, 0, 0, 0);
@@ -19,7 +19,7 @@ signal_waiting_receiver (struct tcb *receiver, word_t badge)
   unreachable ();
 }
 
-static void
+[[noreturn]] static void
 signal_bound_receiver_waiting_on_something_else (struct tcb *receiver,
                                                  word_t badge)
 {
@@ -38,18 +38,31 @@ queue_receiver_on_notification (struct notification *n)
 }
 
 static void
+maybe_init_notification (struct notification *n)
+{
+  if (n->list.next)
+    return;
+
+  init_list (&n->list);
+}
+
+void
 notification_signal (struct notification *n, word_t badge)
 {
-  n->word |= badge;
+  maybe_init_notification (n);
 
-  if (is_list_empty (&n->list))
+  n->word |= badge;
+  word_t nfn_word = n->word;
+
+  if (is_list_empty (&n->list) && n->bound_tcb && n->bound_tcb->state == TASK_STATE_RECEIVING)
     {
-      if (n->bound_tcb && n->bound_tcb->state == TASK_STATE_RECEIVING)
-        signal_bound_receiver_waiting_on_something_else (n->bound_tcb, badge);
-      return;
+      n->word = 0;
+      signal_bound_receiver_waiting_on_something_else (n->bound_tcb, nfn_word);
     }
 
-  word_t nfn_word = n->word;
+  if (is_list_empty (&n->list))
+    return;
+
   n->word = 0;
 
   struct tcb *tcb
@@ -57,15 +70,6 @@ notification_signal (struct notification *n, word_t badge)
   remove_from_list (&tcb->send_receive_node);
 
   signal_waiting_receiver (tcb, nfn_word);
-}
-
-static void
-maybe_init_notification (struct notification *n)
-{
-  if (n->list.next)
-    return;
-
-  init_list (&n->list);
 }
 
 void

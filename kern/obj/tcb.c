@@ -166,10 +166,11 @@ tcb_set_tls_base (cte_t *cap, word_t tls_base)
   return no_error;
 }
 
-[[noreturn]] void
+void
 switch_tcb (struct tcb *t)
 {
   struct tcb *current = this_tcb;
+  assert (current != t);
 
   // Save the current tcb unless it is dead.
   if (current && current->state != TASK_STATE_DEAD)
@@ -200,15 +201,15 @@ kill_tcb (struct tcb *t)
 struct tcb *
 pick_next_tcb ()
 {
-  struct tcb *t;
-
   spin_lock (&runnable_tcbs_lock);
   if (is_list_empty (&runnable_tcbs))
     {
       spin_unlock (&runnable_tcbs_lock);
       return nullptr;
     }
-  t = CONTAINER_OF (pop_from_list (&runnable_tcbs), struct tcb, runnable_tcbs);
+
+  struct tcb *t = CONTAINER_OF (pop_from_list (&runnable_tcbs), struct tcb,
+                                runnable_tcbs);
   spin_unlock (&runnable_tcbs_lock);
 
   return t;
@@ -217,7 +218,7 @@ pick_next_tcb ()
 void
 schedule ()
 {
-  struct tcb *current = this_tcb;
+  const struct tcb *current = this_tcb;
   struct tcb *next = pick_next_tcb ();
 
   // There is no tcb who wants to run, but the current one
@@ -227,7 +228,10 @@ schedule ()
 
   // There is no tcb who wants to run at all.
   if (!next)
-    halt_forever_interrupts_enabled ();
+    {
+      this_tcb = nullptr;
+      halt_forever_interrupts_enabled ();
+    }
 
   switch_tcb (next);
 }

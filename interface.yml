@@ -171,6 +171,23 @@ types:
           - { name: attr, type: x86_vm_attributes_t }
       - name: unmap
         parameters: []
+  - name: irq_control
+    methods:
+      - name: get
+        parameters:
+          - { name: irq, type: word_t }
+          - { name: root, type: cptr_t }
+          - { name: index, type: word_t }
+          - { name: depth, type: uint8_t }
+  - name: irq_handler
+    methods:
+      - name: ack
+        parameters: []
+      - name: clear
+        parameters: []
+      - name: set_notification
+        parameters:
+          - { name: notification, type: cptr_t }
 system_calls:
   - sys_exit
   - sys_debug_write

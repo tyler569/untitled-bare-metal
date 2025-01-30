@@ -64,3 +64,8 @@ message_info_t x86_64_pt_unmap (cte_t *slot);
 message_info_t x86_64_page_map (cte_t *slot, cte_t *vspace, word_t vaddr,
                                 x86_vm_attributes_t attr);
 message_info_t x86_64_page_unmap (cte_t *slot);
+message_info_t irq_control_get (cte_t *slot, word_t irq, cte_t *root,
+                                word_t index, uint8_t depth);
+message_info_t irq_handler_ack (cte_t *slot);
+message_info_t irq_handler_clear (cte_t *slot);
+message_info_t irq_handler_set_notification (cte_t *slot, cte_t *notification);

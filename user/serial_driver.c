@@ -16,11 +16,12 @@ constexpr uint16_t UART_BAUD_HIGH = 0x1;
 constexpr uint16_t UART_FIFO_CONTROL = 0x2;
 constexpr uint16_t UART_LINE_CONTROL = 0x3;
 constexpr uint16_t UART_MODEM_CONTROL = 0x4;
-// constexpr uint16_t UART_LINE_STATUS = 0x5;
+constexpr uint16_t UART_LINE_STATUS = 0x5;
 // constexpr uint16_t UART_MODEM_STATUS = 0x6;
 
 cptr_t serial_port_cap;
 cptr_t endpoint_cap;
+cptr_t irq_cap;
 
 char buffer[1024];
 
@@ -30,11 +31,12 @@ port_write (uint16_t port, uint8_t value)
   x86_64_io_port_out8 (serial_port_cap, SERIAL_PORT + port, value);
 }
 
-// uint8_t
-// port_read (uint16_t port)
-// {
-//   return x86_64_io_port_in8 (serial_port_cap, SERIAL_PORT + port);
-// }
+uint8_t
+port_read (uint16_t port)
+{
+  x86_64_io_port_in8 (serial_port_cap, SERIAL_PORT + port);
+  return get_mr (0);
+}
 
 void
 initialize_uart ()
@@ -50,17 +52,33 @@ initialize_uart ()
 }
 
 void
-write_uart (const char c)
+write_uart (const uint8_t c)
 {
   port_write (UART_DATA, c);
 }
 
+bool is_data_available ()
+{
+  return port_read (UART_LINE_STATUS) & 0x1;
+}
+
+void
+read_uart ()
+{
+  while (is_data_available ())
+    {
+      const uint8_t b = port_read (UART_DATA);
+      write_uart (b);
+    }
+}
+
 int
-main (void *, cptr_t cap, cptr_t ep)
+main (void *, cptr_t cap, cptr_t ep, cptr_t irq)
 {
   printf ("Hello from serial driver\n");
   serial_port_cap = cap;
   endpoint_cap = ep;
+  irq_cap = irq;
 
   initialize_uart ();
   printf ("UART initialized\n");
@@ -68,17 +86,23 @@ main (void *, cptr_t cap, cptr_t ep)
   while (true)
     {
       message_info_t info;
-      word_t badge;
+      word_t badge = 0;
       info = recv (ep, &badge);
 
-      switch (get_message_label (info))
+      if (badge == 0xFFFFFFFF)
         {
-        case 1:
-          write_uart ((char)get_mr (0));
-          break;
-        default:
-          break;
+          read_uart ();
+          irq_handler_ack (irq_cap);
         }
+      else
+        switch (get_message_label (info))
+          {
+          case 1:
+            write_uart (get_mr (0));
+            break;
+          default:
+            break;
+          }
     }
 }
 

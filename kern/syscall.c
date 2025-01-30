@@ -8,7 +8,7 @@
 #include "kern/per_cpu.h"
 #include "stdio.h"
 
-#define dbg_printf(...) printf (__VA_ARGS__)
+#define dbg_printf(...)
 #define err_printf(...) printf (__VA_ARGS__)
 
 #include "kern/kernel_method_stubs.c"
@@ -34,10 +34,10 @@ void
 do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
 {
   if (syscall_number != sys_debug_write && syscall_number != sys_exit)
-    dbg_printf ("Task %#lx a0:%#lx ", (uintptr_t)this_tcb & 0xfff, a0);
+    dbg_printf ("Task %p a0:%#lx ", this_tcb, a0);
 
   if (syscall_number == sys_exit)
-    dbg_printf ("Task %#lx ", (uintptr_t)this_tcb & 0xfff);
+    dbg_printf ("Task %p ", this_tcb);
 
   message_info_t info = 0;
   error_t err;

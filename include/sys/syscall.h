@@ -19,6 +19,8 @@ enum object_type
   cap_x86_64_pd,
   cap_x86_64_pt,
   cap_x86_64_page,
+  cap_irq_control,
+  cap_irq_handler,
   max_cap_type,
 };
 
@@ -53,6 +55,10 @@ cap_type_string (word_t type)
       return "x86_64_pt";
     case cap_x86_64_page:
       return "x86_64_page";
+    case cap_irq_control:
+      return "irq_control";
+    case cap_irq_handler:
+      return "irq_handler";
     default:
       return "unknown";
     }
@@ -93,6 +99,10 @@ enum method_id
   METHOD_x86_64_pt_unmap,
   METHOD_x86_64_page_map,
   METHOD_x86_64_page_unmap,
+  METHOD_irq_control_get,
+  METHOD_irq_handler_ack,
+  METHOD_irq_handler_clear,
+  METHOD_irq_handler_set_notification,
 };
 
 enum error_code

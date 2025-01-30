@@ -199,3 +199,27 @@ x86_64_page_unmap (cte_t *)
   err_printf ("unimplemented kernel method x86_64_page_unmap\n");
   return illegal_operation;
 }
+__attribute__ ((weak)) message_info_t
+irq_control_get (cte_t *, word_t, cte_t *, word_t, uint8_t)
+{
+  err_printf ("unimplemented kernel method irq_control_get\n");
+  return illegal_operation;
+}
+__attribute__ ((weak)) message_info_t
+irq_handler_ack (cte_t *)
+{
+  err_printf ("unimplemented kernel method irq_handler_ack\n");
+  return illegal_operation;
+}
+__attribute__ ((weak)) message_info_t
+irq_handler_clear (cte_t *)
+{
+  err_printf ("unimplemented kernel method irq_handler_clear\n");
+  return illegal_operation;
+}
+__attribute__ ((weak)) message_info_t
+irq_handler_set_notification (cte_t *, cte_t *)
+{
+  err_printf ("unimplemented kernel method irq_handler_set_notification\n");
+  return illegal_operation;
+}

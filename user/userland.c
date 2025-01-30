@@ -129,10 +129,22 @@ c_start (void *ipc_buffer, void *boot_info)
       x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff,
                                     init_cap_root_cnode, serial_port_cap, 64);
 
+      const cptr_t irq_cap = cptr_alloc ();
+      const cptr_t irq_nfn_cap = allocate (untyped, cap_notification, 1);
+      const cptr_t badged_irq_nfn_cap = cptr_alloc ();
+
+      irq_control_get (init_cap_irq_control, 4, init_cap_root_cnode, irq_cap,
+                       64);
+      cnode_mint (init_cap_root_cnode, badged_irq_nfn_cap, 64,
+                  init_cap_root_cnode, irq_nfn_cap, 64, cap_rights_all, 0xFFFF'FFFF);
+      tcb_bind_notification (proc_serial_driver_cap, irq_nfn_cap);
+      irq_handler_set_notification (irq_cap, badged_irq_nfn_cap);
+
       frame_t frame;
       tcb_read_registers (proc_serial_driver_cap, false, 0, 0, &frame);
       frame.rsi = serial_port_cap;
       frame.rdx = serial_endpoint;
+      frame.rcx = irq_cap;
       tcb_write_registers (proc_serial_driver_cap, false, 0, 0, &frame);
 
       tcb_resume (proc_serial_driver_cap);

@@ -19,7 +19,7 @@ print_interrupt_info (frame_t *f)
   if (f->int_no < 32)
     printf ("Interrupt %lu (%s) @ %#lx\n", f->int_no,
             interrupt_acronyms[f->int_no], f->rip);
-  else
+  else if (f->int_no >= 48)
     printf ("Interrupt %lu @ %#lx\n", f->int_no, f->rip);
 
   switch (f->int_no)
@@ -48,8 +48,11 @@ print_interrupt_info (frame_t *f)
       print_backtrace (f);
       break;
     case 32 ... 48:
-      printf ("Interrupt from external device\n");
       send_eoi (f->int_no);
+
+      void handle_irq (word_t irq);
+      handle_irq (f->int_no - 32);
+
       return;
     case 255:
       return;
