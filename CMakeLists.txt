@@ -28,7 +28,7 @@ endif ()
 
 project(untitled_bare_metal C ASM)
 
-add_compile_options(-Wall -Wextra -Wnewline-eof -fbuiltin)
+add_compile_options(-Wall -Wextra -fbuiltin)
 add_compile_options(-iquote ${CMAKE_SOURCE_DIR}/include)
 
 add_compile_definitions(__UNTITLED_BARE_METAL__=1)

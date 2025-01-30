@@ -1,9 +1,7 @@
 #include "kern/obj/notification.h"
 #include "kern/cap.h"
-#include "kern/ipc.h"
 #include "kern/obj/tcb.h"
 #include "kern/syscall.h"
-#include "string.h"
 
 [[noreturn]] static void
 signal_waiting_receiver (struct tcb *receiver, word_t badge)

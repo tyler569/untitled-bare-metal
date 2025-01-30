@@ -52,6 +52,26 @@ run_sort_test ()
   printf ("\n");
 }
 
+#define __cpuid_count(level, count, eax, ebx, ecx, edx) \
+  asm volatile ("cpuid" : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx) : "a" (level), "c" (count))
+
+#define __cpuid(level, eax, ebx, ecx, edx) \
+  __cpuid_count(level, 0, eax, ebx, ecx, edx)
+
+void get_xsave_size() {
+  uint32_t eax, ebx, ecx, edx;
+
+  // Check if CPU supports XSAVE
+  __cpuid(1, eax, ebx, ecx, edx);
+  if (!(ecx & (1 << 26))) {
+      printf("    XSAVE not supported.\n");
+      return;
+  }
+
+  __cpuid(0xD, eax, ebx, ecx, edx);
+  printf("    Required XSAVE area size: %u bytes\n", ebx);
+}
+
 void
 run_smoke_tests ()
 {
@@ -63,4 +83,7 @@ run_smoke_tests ()
 
   printf ("  Sort\n");
   run_sort_test ();
+
+  printf ("  XSAVE\n");
+  get_xsave_size ();
 }
