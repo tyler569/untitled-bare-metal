@@ -43,9 +43,9 @@ message_info_t untyped_retype (cte_t *slot, word_t type, word_t size_bits,
                                cte_t *root, word_t node_index,
                                uint8_t node_depth, word_t node_offset,
                                word_t num_objects);
-message_info_t x86_64_io_port_in8 (cte_t *slot, word_t port, word_t result);
-message_info_t x86_64_io_port_in16 (cte_t *slot, word_t port, word_t result);
-message_info_t x86_64_io_port_in32 (cte_t *slot, word_t port, word_t result);
+message_info_t x86_64_io_port_in8 (cte_t *slot, word_t port);
+message_info_t x86_64_io_port_in16 (cte_t *slot, word_t port);
+message_info_t x86_64_io_port_in32 (cte_t *slot, word_t port);
 message_info_t x86_64_io_port_out8 (cte_t *slot, word_t port, word_t value);
 message_info_t x86_64_io_port_out16 (cte_t *slot, word_t port, word_t value);
 message_info_t x86_64_io_port_out32 (cte_t *slot, word_t port, word_t value);

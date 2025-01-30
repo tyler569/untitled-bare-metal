@@ -106,15 +106,12 @@ types:
       - name: in8
         parameters:
           - { name: port, type: word_t }
-          - { name: result, type: word_t }
       - name: in16
         parameters:
           - { name: port, type: word_t }
-          - { name: result, type: word_t }
       - name: in32
         parameters:
           - { name: port, type: word_t }
-          - { name: result, type: word_t }
       - name: out8
         parameters:
           - { name: port, type: word_t }

@@ -558,7 +558,6 @@ dispatch_method (cte_t *slot, message_info_t info)
     case METHOD_x86_64_io_port_in8:
       {
         word_t port = (word_t)get_mr (0);
-        word_t result = (word_t)get_mr (1);
 
         dbg_printf ("x86_64_io_port_in8 ");
 
@@ -568,21 +567,19 @@ dispatch_method (cte_t *slot, message_info_t info)
                         cap_type_string (cap_type (slot)));
             return return_ipc (illegal_operation, 0);
           }
-        if (get_message_length (info) < 2)
+        if (get_message_length (info) < 1)
           return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
           return return_ipc (truncated_message, 0);
 
-        dbg_printf ("(cap:%s, port=%#lx, result=%#lx)\n",
-                    cap_type_string (slot), port, result);
+        dbg_printf ("(cap:%s, port=%#lx)\n", cap_type_string (slot), port);
 
-        return x86_64_io_port_in8 (slot, port, result);
+        return x86_64_io_port_in8 (slot, port);
         break;
       }
     case METHOD_x86_64_io_port_in16:
       {
         word_t port = (word_t)get_mr (0);
-        word_t result = (word_t)get_mr (1);
 
         dbg_printf ("x86_64_io_port_in16 ");
 
@@ -592,21 +589,19 @@ dispatch_method (cte_t *slot, message_info_t info)
                         cap_type_string (cap_type (slot)));
             return return_ipc (illegal_operation, 0);
           }
-        if (get_message_length (info) < 2)
+        if (get_message_length (info) < 1)
           return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
           return return_ipc (truncated_message, 0);
 
-        dbg_printf ("(cap:%s, port=%#lx, result=%#lx)\n",
-                    cap_type_string (slot), port, result);
+        dbg_printf ("(cap:%s, port=%#lx)\n", cap_type_string (slot), port);
 
-        return x86_64_io_port_in16 (slot, port, result);
+        return x86_64_io_port_in16 (slot, port);
         break;
       }
     case METHOD_x86_64_io_port_in32:
       {
         word_t port = (word_t)get_mr (0);
-        word_t result = (word_t)get_mr (1);
 
         dbg_printf ("x86_64_io_port_in32 ");
 
@@ -616,15 +611,14 @@ dispatch_method (cte_t *slot, message_info_t info)
                         cap_type_string (cap_type (slot)));
             return return_ipc (illegal_operation, 0);
           }
-        if (get_message_length (info) < 2)
+        if (get_message_length (info) < 1)
           return return_ipc (truncated_message, 0);
         if (get_message_extra_caps (info) < 0)
           return return_ipc (truncated_message, 0);
 
-        dbg_printf ("(cap:%s, port=%#lx, result=%#lx)\n",
-                    cap_type_string (slot), port, result);
+        dbg_printf ("(cap:%s, port=%#lx)\n", cap_type_string (slot), port);
 
-        return x86_64_io_port_in32 (slot, port, result);
+        return x86_64_io_port_in32 (slot, port);
         break;
       }
     case METHOD_x86_64_io_port_out8:

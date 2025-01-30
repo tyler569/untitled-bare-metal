@@ -8,13 +8,16 @@ gdbserver=""
 video="-display none"
 tee="|& tee last_output"
 
-while getopts "dmstv" opt; do
+while getopts "dmustv" opt; do
   case $opt in
     d)
       debugopt="-d int,cpu_reset"
       ;;
     m)
       debugopt="-monitor stdio"
+      ;;
+    u)
+      debugopt="-serial stdio"
       ;;
     s)
       gdbserver="-S"

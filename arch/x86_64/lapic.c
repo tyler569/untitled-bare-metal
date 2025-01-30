@@ -30,7 +30,7 @@ write_register (uint32_t reg, uint32_t value)
 // read_register (uint32_t reg)
 // {
 //   volatile uint32_t *preg = (volatile uint32_t *)direct_map_of (BASE + reg);
-// 
+//
 //   return *preg;
 // }
 

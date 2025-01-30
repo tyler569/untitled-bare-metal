@@ -24,7 +24,7 @@ write_register (uint32_t reg, uint32_t data)
 //       = (volatile uint32_t *)(direct_map_of (IOAPIC_BASE));
 //   volatile uint32_t *ioapic_data
 //       = (volatile uint32_t *)(direct_map_of (IOAPIC_BASE + 0x10));
-// 
+//
 //   *ioapic_reg = reg;
 //   return *ioapic_data;
 // }

@@ -84,6 +84,8 @@ c_start (void *ipc_buffer, void *boot_info)
   cnode_mint (init_cap_root_cnode, notification_cap, 64, init_cap_root_cnode,
               badged_notification_cap, 64, cap_rights_all, 1);
 
+  cptr_t serial_endpoint = allocate (untyped, cap_endpoint, 1);
+
   void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
 
   if (!proctest_elf)
@@ -107,7 +109,43 @@ c_start (void *ipc_buffer, void *boot_info)
       tcb_resume (proc_tcb_cap);
     }
 
+  void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
+
+  if (!serial_driver_elf)
+    printf ("Failed to find serial_driver in initrd\n");
+  else
+    {
+      cptr_t proc_serial_driver_cap;
+      int err = create_process (serial_driver_elf, 0, untyped,
+                                init_cap_init_vspace, &proc_serial_driver_cap,
+                                nullptr);
+
+      if (err)
+        printf ("Error creating serial_driver process: %d\n", err);
+      else
+        printf ("Successfully created serial_driver process\n");
+
+      cptr_t serial_port_cap = cptr_alloc ();
+      x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff,
+                                    init_cap_root_cnode, serial_port_cap, 64);
+
+      frame_t frame;
+      tcb_read_registers (proc_serial_driver_cap, false, 0, 0, &frame);
+      frame.rsi = serial_port_cap;
+      frame.rdx = serial_endpoint;
+      tcb_write_registers (proc_serial_driver_cap, false, 0, 0, &frame);
+
+      tcb_resume (proc_serial_driver_cap);
+    }
+
   // yield ();
+
+  for (const char *c = "Hello Serial"; *c; c++)
+    {
+      set_mr (0, *c);
+      message_info_t info = new_message_info (1, 0, 0, 1);
+      send (serial_endpoint, info);
+    }
 
   word_t notification_word = 0;
 

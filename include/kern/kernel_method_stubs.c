@@ -109,19 +109,19 @@ untyped_retype (cte_t *, word_t, word_t, cte_t *, word_t, uint8_t, word_t,
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_in8 (cte_t *, word_t, word_t)
+x86_64_io_port_in8 (cte_t *, word_t)
 {
   err_printf ("unimplemented kernel method x86_64_io_port_in8\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_in16 (cte_t *, word_t, word_t)
+x86_64_io_port_in16 (cte_t *, word_t)
 {
   err_printf ("unimplemented kernel method x86_64_io_port_in16\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_in32 (cte_t *, word_t, word_t)
+x86_64_io_port_in32 (cte_t *, word_t)
 {
   err_printf ("unimplemented kernel method x86_64_io_port_in32\n");
   return illegal_operation;
