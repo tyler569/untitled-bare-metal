@@ -3,7 +3,7 @@
 #include "kern/obj/tcb.h"
 #include "kern/syscall.h"
 
-[[noreturn]] static void
+static void
 signal_waiting_receiver (struct tcb *receiver, word_t badge)
 {
   message_info_t tag = new_message_info (no_error, 0, 0, 0);
@@ -14,10 +14,9 @@ signal_waiting_receiver (struct tcb *receiver, word_t badge)
 
   receiver->state = TASK_STATE_RUNNABLE;
   switch_tcb (receiver);
-  unreachable ();
 }
 
-[[noreturn]] static void
+static void
 signal_bound_receiver_waiting_on_something_else (struct tcb *receiver,
                                                  word_t badge)
 {
@@ -25,14 +24,13 @@ signal_bound_receiver_waiting_on_something_else (struct tcb *receiver,
   signal_waiting_receiver (receiver, badge);
 }
 
-[[noreturn]] static void
+static void
 queue_receiver_on_notification (struct notification *n)
 {
   append_to_list (&this_tcb->send_receive_node, &n->list);
   this_tcb->state = TASK_STATE_RECEIVING;
 
   schedule ();
-  unreachable ();
 }
 
 static void

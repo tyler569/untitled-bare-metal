@@ -85,4 +85,6 @@ create_init_tcb (void *initrd, size_t initrd_size)
   init_tcb.cspace_root.cap = init_cnode_cap;
 
   make_tcb_runnable (&init_tcb);
+  // this_cpu->return_to_tcb = &init_tcb;
+  schedule ();
 }

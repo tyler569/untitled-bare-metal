@@ -56,9 +56,10 @@ void kill_tcb (struct tcb *t);
 void destroy_tcb (struct tcb *t);
 
 void switch_tcb (struct tcb *t);
+void return_from_kernel_code ();
+
 void save_tcb_state (struct tcb *t);
 void make_tcb_runnable (struct tcb *t);
-struct tcb *pick_next_tcb ();
 void schedule ();
 
 void send_message (struct tcb *receiver, uintptr_t message);

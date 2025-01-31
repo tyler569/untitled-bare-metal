@@ -1,9 +1,11 @@
+#include "kern/arch.h"
 #include "kern/cap.h"
 #include "kern/obj/notification.h"
 #include "kern/syscall.h"
 
 struct irq_handler_data
 {
+  word_t irq;
   struct notification *n;
   word_t badge;
   bool in_service;
@@ -32,6 +34,7 @@ irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
 
   result_cte->cap = cap_irq_handler_new (irq);
   cap_set_ptr (result_cte, &irq_handlers[irq]);
+  irq_handlers[irq].irq = irq;
 
   return return_ipc (no_error, 0);
 }
@@ -48,6 +51,7 @@ message_info_t
 irq_handler_ack (cte_t *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
+  send_eoi (data->irq);
   data->in_service = false;
   return return_ipc (no_error, 0);
 }
@@ -64,13 +68,22 @@ irq_handler_set_notification (cte_t *obj, cte_t *notification)
   return return_ipc (no_error, 0);
 }
 
-void
+bool
 handle_irq (word_t irq)
 {
   struct irq_handler_data *data = &irq_handlers[irq];
+
+  // Tell the platform code not to EOI since we're waiting until ack()
+  // is called.
+  if (data->n && data->in_service)
+    return true;
+
   if (data->n && !data->in_service)
     {
       data->in_service = true;
       notification_signal (data->n, data->badge);
+      return true;
     }
+
+  return false;
 }

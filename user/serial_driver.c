@@ -51,12 +51,6 @@ initialize_uart ()
   port_write (UART_INT_ENABLE, 0x09);
 }
 
-void
-write_uart (const uint8_t c)
-{
-  port_write (UART_DATA, c);
-}
-
 bool is_data_available ()
 {
   return port_read (UART_LINE_STATUS) & 0x1;
@@ -68,11 +62,12 @@ read_uart ()
   while (is_data_available ())
     {
       const uint8_t b = port_read (UART_DATA);
-      write_uart (b);
+      port_write (UART_DATA, b);
     }
+  irq_handler_ack (irq_cap);
 }
 
-int
+[[noreturn]] int
 main (void *, cptr_t cap, cptr_t ep, cptr_t irq)
 {
   printf ("Hello from serial driver\n");
@@ -90,23 +85,14 @@ main (void *, cptr_t cap, cptr_t ep, cptr_t irq)
       info = recv (ep, &badge);
 
       if (badge == 0xFFFFFFFF)
-        {
-          read_uart ();
-          irq_handler_ack (irq_cap);
-        }
+        read_uart ();
       else
-        switch (get_message_label (info))
-          {
-          case 1:
-            write_uart (get_mr (0));
-            break;
-          default:
-            break;
-          }
+        if (get_message_label (info) == 1)
+           port_write (UART_DATA, get_mr (0));
     }
 }
 
-__attribute__ ((naked)) void
+__attribute__ ((naked, used)) void
 _start ()
 {
   asm ("mov %%rdi, %0" : "=m"(__ipc_buffer));

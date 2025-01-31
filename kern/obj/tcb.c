@@ -62,6 +62,8 @@ destroy_tcb (struct tcb *t)
 void
 save_tcb_state (struct tcb *t)
 {
+  assert (t->current_user_frame);
+
   copy_frame (&t->saved_state, t->current_user_frame);
 }
 
@@ -166,8 +168,14 @@ tcb_set_tls_base (cte_t *cap, word_t tls_base)
   return no_error;
 }
 
+void switch_tcb (struct tcb *t)
+{
+  assert_eq (t->state, TASK_STATE_RUNNABLE);
+  this_cpu->return_to_tcb = t;
+}
+
 void
-switch_tcb (struct tcb *t)
+switch_tcb_actual (struct tcb *t)
 {
   struct tcb *current = this_tcb;
   assert (current != t);
@@ -189,6 +197,17 @@ switch_tcb (struct tcb *t)
   ensure_frame_valid_for_usermode (&t->saved_state);
 
   jump_to_userland_frame (&t->saved_state);
+}
+
+void
+return_from_kernel_code ()
+{
+  if (this_cpu->return_to_tcb == this_tcb)
+    return;
+  else if (this_cpu->return_to_tcb)
+    switch_tcb_actual (this_cpu->return_to_tcb);
+  else
+    halt_forever_interrupts_enabled ();
 }
 
 void
@@ -228,10 +247,8 @@ schedule ()
 
   // There is no tcb who wants to run at all.
   if (!next)
-    {
-      this_tcb = nullptr;
-      halt_forever_interrupts_enabled ();
-    }
-
-  switch_tcb (next);
+    this_cpu->return_to_tcb = nullptr;
+  else
+    switch_tcb (next);
 }
+

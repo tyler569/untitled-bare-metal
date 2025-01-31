@@ -32,7 +32,6 @@ send_message_directly (struct tcb *receiver, word_t info, word_t badge,
     {
       receiver->state = TASK_STATE_RUNNABLE;
       switch_tcb (receiver);
-      unreachable ();
     }
   else
     make_tcb_runnable (receiver);
@@ -48,7 +47,7 @@ send_message_to_blocked_receiver (struct endpoint *e, word_t info,
   send_message_directly (receiver, info, badge, resume_now);
 }
 
-[[noreturn]] static void
+static void
 queue_message_on_endpoint (struct endpoint *e, word_t info, word_t badge,
                            bool is_call)
 {
@@ -65,7 +64,6 @@ queue_message_on_endpoint (struct endpoint *e, word_t info, word_t badge,
   this_tcb->endpoint_badge = badge;
 
   schedule ();
-  unreachable ();
 }
 
 static message_info_t
@@ -92,13 +90,12 @@ receive_message_from_blocked_sender (struct endpoint *e, word_t *badge)
   return info;
 }
 
-[[noreturn]] static void
+static void
 queue_receiver_on_endpoint (struct endpoint *e)
 {
   append_to_list (&this_tcb->send_receive_node, &e->list);
   this_tcb->state = TASK_STATE_RECEIVING;
   schedule ();
-  unreachable ();
 }
 
 static inline bool
@@ -115,7 +112,7 @@ is_send_blocked (struct endpoint *e)
          || first_tcb (e)->state == TASK_STATE_SENDING;
 }
 
-[[noreturn]] static void
+static void
 endpoint_send (struct endpoint *e, word_t message_info, word_t badge,
                bool is_call)
 {
@@ -123,7 +120,6 @@ endpoint_send (struct endpoint *e, word_t message_info, word_t badge,
     queue_message_on_endpoint (e, message_info, badge, is_call);
   else
     send_message_to_blocked_receiver (e, message_info, badge, true);
-  assert (0);
 }
 
 static message_info_t
@@ -133,6 +129,7 @@ endpoint_recv (struct endpoint *e, word_t *sender)
     queue_receiver_on_endpoint (e);
   else
     return receive_message_from_blocked_sender (e, sender);
+  return 0;
 }
 
 static void
@@ -144,7 +141,7 @@ maybe_init_endpoint (struct endpoint *e)
   init_list (&e->list);
 }
 
-[[noreturn]] void
+void
 invoke_endpoint_send (cte_t *cap, word_t message_info)
 {
   assert (cap_type (cap) == cap_endpoint);
@@ -152,7 +149,6 @@ invoke_endpoint_send (cte_t *cap, word_t message_info)
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
   endpoint_send (e, message_info, cap->cap.badge, false);
-  unreachable ();
 }
 
 message_info_t
@@ -165,7 +161,7 @@ invoke_endpoint_recv (cte_t *cap, word_t *sender)
   return endpoint_recv (e, sender);
 }
 
-[[noreturn]] message_info_t
+message_info_t
 invoke_endpoint_call (cte_t *cap, word_t message_info)
 {
   assert (cap_type (cap) == cap_endpoint);
@@ -176,7 +172,7 @@ invoke_endpoint_call (cte_t *cap, word_t message_info)
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
   endpoint_send (e, message_info, cap->cap.badge, true);
-  unreachable ();
+  return 0;
 }
 
 void

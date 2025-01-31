@@ -46,3 +46,5 @@ void set_vm_root (uintptr_t root);
 [[noreturn]] void jump_to_userland_frame (frame_t *);
 
 void set_tls_base (uintptr_t base);
+
+void send_eoi (uint8_t irq);

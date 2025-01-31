@@ -9,6 +9,7 @@ struct per_cpu
   struct arch_per_cpu arch;
   uintptr_t kernel_stack_top;
   struct tcb *current_tcb;
+  struct tcb *return_to_tcb;
   struct list_head list;
   bool printing_backtrace;
 };

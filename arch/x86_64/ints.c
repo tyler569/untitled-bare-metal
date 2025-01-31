@@ -16,7 +16,7 @@ print_interrupt_info (frame_t *f)
 {
   save_frame_on_tcb (f);
 
-  if (f->int_no < 32)
+  if (f->int_no < 33)
     printf ("Interrupt %lu (%s) @ %#lx\n", f->int_no,
             interrupt_acronyms[f->int_no], f->rip);
   else if (f->int_no >= 48)
@@ -48,10 +48,9 @@ print_interrupt_info (frame_t *f)
       print_backtrace (f);
       break;
     case 32 ... 48:
-      send_eoi (f->int_no);
-
-      void handle_irq (word_t irq);
-      handle_irq (f->int_no - 32);
+      bool handle_irq (word_t irq);
+      if (!handle_irq (f->int_no - 32))
+        send_eoi (f->int_no);
 
       return;
     case 255:

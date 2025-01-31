@@ -46,7 +46,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       dbg_printf ("sys_exit ()\n");
       kill_tcb (this_tcb);
       schedule ();
-      unreachable ();
+      break;
     case sys_debug_write:
       write_debug (nullptr, (const void *)a0, a1);
       break;
@@ -63,7 +63,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
           dbg_printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
           invoke_endpoint_call (slot, a1);
         }
-      unreachable ();
+      break;
     case sys_send:
       GET_CAP (a0, slot, err);
       dbg_printf ("sys_send (dest: %#lx, info: %#lx)\n", a0, a1);
@@ -103,7 +103,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
     case sys_yield:
       dbg_printf ("sys_yield ()\n");
       schedule ();
-      unreachable ();
+      break;
     default:
       err_printf ("Invalid syscall number: %d\n", syscall_number);
       kill_tcb (this_tcb);

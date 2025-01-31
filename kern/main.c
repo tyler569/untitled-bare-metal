@@ -18,7 +18,7 @@ kernel_main ()
     {
       printf ("Initrd found at %p, size %zu\n", initrd, initrd_size);
       create_init_tcb (initrd, initrd_size);
-      schedule ();
+      return_from_kernel_code ();
     }
   else
     printf ("No initrd found\n");
