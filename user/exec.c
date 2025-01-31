@@ -110,7 +110,7 @@ map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
     {
       int err = x86_64_page_map (page, vspace, addr, 0x7);
 
-      if (err != failed_lookup)
+      if (err != failed_lookup) // including "no_error"
         return err;
 
       switch (get_mr (0))
@@ -171,11 +171,11 @@ buffer_t
 map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
           struct elf_phdr *phdr)
 {
-  buffer_t buffer = create_buffer (untyped, (phdr->memsz + 0xfff) / 0x1000);
+  size_t offset = phdr->vaddr & 0xfff;
+
+  buffer_t buffer = create_buffer (untyped, (phdr->memsz + offset + 0xfff) / 0x1000);
   uintptr_t mapped_addr
       = map_buffer_to_mappable_space (untyped, vspace, buffer);
-
-  size_t offset = phdr->vaddr & 0xfff;
 
   memcpy ((void *)(mapped_addr + offset), data_for_phdr (ehdr, phdr),
           phdr->filesz);
