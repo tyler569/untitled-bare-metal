@@ -203,12 +203,18 @@ switch_tcb_actual (struct tcb *t)
 void
 return_from_kernel_code ()
 {
+  struct tcb *current = this_tcb;
+
   if (this_cpu->return_to_tcb == this_tcb)
     return;
   else if (this_cpu->return_to_tcb)
     switch_tcb_actual (this_cpu->return_to_tcb);
   else
-    halt_forever_interrupts_enabled ();
+    {
+      if (current && current->state != TASK_STATE_DEAD)
+        save_tcb_state (current);
+      halt_forever_interrupts_enabled ();
+    }
 }
 
 void
