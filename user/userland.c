@@ -86,6 +86,12 @@ c_start (void *ipc_buffer, void *boot_info)
 
   cptr_t serial_endpoint = allocate (untyped, cap_endpoint, 1);
 
+  cptr_t serial_data_available = allocate (untyped, cap_notification, 1);
+  cptr_t badged_serial_data_available = cptr_alloc ();
+
+  cnode_mint (init_cap_root_cnode, badged_serial_data_available, 64,
+              init_cap_root_cnode, serial_data_available, 64, cap_rights_all, 1);
+
   void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
 
   if (!proctest_elf)
@@ -145,6 +151,7 @@ c_start (void *ipc_buffer, void *boot_info)
       frame.rsi = serial_port_cap;
       frame.rdx = serial_endpoint;
       frame.rcx = irq_cap;
+      frame.r8 = badged_serial_data_available;
       tcb_write_registers (proc_serial_driver_cap, false, 0, 0, &frame);
 
       tcb_resume (proc_serial_driver_cap);
@@ -193,6 +200,30 @@ c_start (void *ipc_buffer, void *boot_info)
 
       if (a > 100000)
         break;
+    }
+
+  while (true)
+    {
+      word_t badge;
+      message_info_t info = new_message_info (2, 0, 0, 0);
+
+      wait (serial_data_available, &badge);
+
+      info = call (serial_endpoint, info, &badge);
+      size_t regs = get_message_length (info);
+
+      if (regs == 0)
+        continue;
+
+      for (size_t i = 0; i < regs; i++)
+        {
+          uint8_t byte = get_mr (i);
+
+          if (byte >= 'a' && byte <= 'z')
+            set_mr (i, byte + 'A' - 'a');
+        }
+
+      send (serial_endpoint, new_message_info (1, 0, 0, regs));
     }
 
   exit ();
