@@ -11,6 +11,7 @@ halt_until_interrupt ()
 [[noreturn]] void
 halt_forever ()
 {
+  this_cpu->current_tcb = nullptr;
   while (true)
     {
       asm volatile ("cli");
@@ -21,6 +22,7 @@ halt_forever ()
 [[noreturn]] void
 halt_forever_interrupts_enabled ()
 {
+  this_cpu->current_tcb = nullptr;
   while (true)
     {
       asm volatile ("sti");

@@ -14,12 +14,10 @@ const char *interrupt_acronyms[]
 void
 print_interrupt_info (frame_t *f)
 {
-  save_frame_on_tcb (f);
-
-  if (f->int_no < 33)
+  if (f->int_no < 32)
     printf ("Interrupt %lu (%s) @ %#lx\n", f->int_no,
             interrupt_acronyms[f->int_no], f->rip);
-  else if (f->int_no >= 48)
+  else
     printf ("Interrupt %lu @ %#lx\n", f->int_no, f->rip);
 
   switch (f->int_no)
@@ -58,8 +56,6 @@ print_interrupt_info (frame_t *f)
     default:
       print_backtrace (f);
     }
-
-  clear_frame_on_tcb (f);
 
   halt_forever ();
 }

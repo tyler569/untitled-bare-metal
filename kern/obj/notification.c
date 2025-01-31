@@ -54,6 +54,7 @@ notification_signal (struct notification *n, word_t badge)
     {
       n->word = 0;
       signal_bound_receiver_waiting_on_something_else (n->bound_tcb, nfn_word);
+      return;
     }
 
   if (is_list_empty (&n->list))
@@ -87,10 +88,17 @@ invoke_notification_recv (cte_t *cap, word_t *nfn_word)
   maybe_init_notification (n);
 
   if (n->bound_tcb && n->bound_tcb != this_tcb)
-    kill_tcb (this_tcb);
+    {
+      kill_tcb (this_tcb);
+      schedule ();
+      return new_message_info (invalid_argument, 0, 0, 0);
+    }
 
   if (n->word == 0)
-    queue_receiver_on_notification (n);
+    {
+      queue_receiver_on_notification (n);
+      return 0;
+    }
 
   *nfn_word = n->word;
   n->word = 0;
