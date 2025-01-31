@@ -51,7 +51,8 @@ initialize_uart ()
   port_write (UART_INT_ENABLE, 0x09);
 }
 
-bool is_data_available ()
+bool
+is_data_available ()
 {
   return port_read (UART_LINE_STATUS) & 0x1;
 }
@@ -86,9 +87,8 @@ main (void *, cptr_t cap, cptr_t ep, cptr_t irq)
 
       if (badge == 0xFFFFFFFF)
         read_uart ();
-      else
-        if (get_message_label (info) == 1)
-           port_write (UART_DATA, get_mr (0));
+      else if (get_message_label (info) == 1)
+        port_write (UART_DATA, get_mr (0));
     }
 }
 

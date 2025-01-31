@@ -54,7 +54,9 @@ init_lapic ()
   write_register (LINT0, 0x8700);
   write_register (LINT1, 0x8400);
 
+  // clang-format off
   init_lapic_timer (0x3, 100'000'000);
+  // clang-format on
 }
 
 void

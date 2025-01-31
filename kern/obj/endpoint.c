@@ -1,6 +1,7 @@
 #include "kern/obj/endpoint.h"
 #include "kern/cap.h"
 #include "kern/ipc.h"
+#include "kern/obj/notification.h"
 #include "kern/obj/tcb.h"
 #include "kern/syscall.h"
 #include "string.h"
@@ -155,6 +156,13 @@ message_info_t
 invoke_endpoint_recv (cte_t *cap, word_t *sender)
 {
   assert (cap_type (cap) == cap_endpoint);
+
+  if (this_tcb->bound_notification && this_tcb->bound_notification->word)
+    {
+      *sender = this_tcb->bound_notification->word;
+      this_tcb->bound_notification->word = 0;
+      return 0;
+    }
 
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);

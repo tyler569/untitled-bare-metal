@@ -16,6 +16,7 @@ while getopts "dmustv" opt; do
       ;;
     m)
       debugopt="-monitor stdio"
+      tee=""
       ;;
     u)
       debugopt="-serial stdio"

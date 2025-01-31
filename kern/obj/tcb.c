@@ -152,7 +152,7 @@ tcb_bind_notification (cte_t *cap, cte_t *notification)
   if (n->bound_tcb)
     return illegal_operation;
 
-  copy_cap (&tcb->notification, notification, cap_rights_all);
+  tcb->bound_notification = n;
   n->bound_tcb = tcb;
 
   return no_error;
@@ -168,7 +168,8 @@ tcb_set_tls_base (cte_t *cap, word_t tls_base)
   return no_error;
 }
 
-void switch_tcb (struct tcb *t)
+void
+switch_tcb (struct tcb *t)
 {
   assert_eq (t->state, TASK_STATE_RUNNABLE);
   this_cpu->return_to_tcb = t;
@@ -251,4 +252,3 @@ schedule ()
   else
     switch_tcb (next);
 }
-

@@ -50,7 +50,8 @@ notification_signal (struct notification *n, word_t badge)
   n->word |= badge;
   word_t nfn_word = n->word;
 
-  if (is_list_empty (&n->list) && n->bound_tcb && n->bound_tcb->state == TASK_STATE_RECEIVING)
+  if (is_list_empty (&n->list) && n->bound_tcb
+      && n->bound_tcb->state == TASK_STATE_RECEIVING)
     {
       n->word = 0;
       signal_bound_receiver_waiting_on_something_else (n->bound_tcb, nfn_word);
