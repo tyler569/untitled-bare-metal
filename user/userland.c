@@ -1,3 +1,4 @@
+#include "pci.h"
 #include "stdint.h"
 #include "stdio.h"
 #include "sys/bootinfo.h"
@@ -64,6 +65,81 @@ print_bootinfo_information ()
   printf ("\n");
 }
 
+cptr_t pci_io_port;
+
+uint32_t pci_read_l (uint32_t addr)
+{
+  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_ADDRESS, addr);
+  x86_64_io_port_in32 (pci_io_port, PCI_CONFIG_DATA);
+  return get_mr (0);
+}
+
+uint16_t pci_read_w (uint32_t addr)
+{
+  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_ADDRESS, addr);
+  x86_64_io_port_in16 (pci_io_port, PCI_CONFIG_DATA);
+  return get_mr (0);
+}
+
+uint8_t pci_read_b (uint32_t addr)
+{
+  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_ADDRESS, addr);
+  x86_64_io_port_in8 (pci_io_port, PCI_CONFIG_DATA);
+  return get_mr (0);
+}
+
+void pci_write_l (uint32_t addr, uint32_t value)
+{
+  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_ADDRESS, addr);
+  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_DATA, value);
+}
+
+void
+print_device_info (uint32_t pci_address)
+{
+  uint16_t vendor_id = pci_read_w (pci_address + PCI_VENDOR_ID);
+  uint16_t device_id = pci_read_w (pci_address + PCI_DEVICE_ID);
+  uint8_t class_code = pci_read_w (pci_address + PCI_CLASS);
+  uint8_t subclass = pci_read_w (pci_address + PCI_SUBCLASS);
+  uint8_t prog_if = pci_read_w (pci_address + PCI_PROG_IF);
+  uint8_t revision_id = pci_read_w (pci_address + PCI_REVISION_ID);
+  uint8_t irq = pci_read_b (pci_address + PCI_INTERRUPT_LINE);
+
+  printf ("PCI Device: %04x:%04x at addr %08x\n", vendor_id, device_id, pci_address);
+  printf ("  Class: %02x, Subclass: %02x, Prog IF: %02x, Revision: %02x IRQ: %02x\n",
+          class_code, subclass, prog_if, revision_id, irq);
+
+  for (uint32_t i = 0; i < 6; i++)
+    {
+      uint32_t bar = pci_read_l (pci_address + PCI_BAR0 + i * 4);
+      if (bar)
+        {
+          pci_write_l (pci_address + PCI_BAR0 + i * 4, 0xffffffff);
+          uint32_t mask = pci_read_l (pci_address + PCI_BAR0 + i * 4);
+          pci_write_l (pci_address + PCI_BAR0 + i * 4, bar);
+
+          if (bar & 1)
+            printf ("  - BAR%d: I/O %08x, Mask: %08x\n", i, bar & ~3, mask & ~3);
+          else
+            printf ("  - BAR%d: Mem %08x, Mask: %08x\n", i, bar & ~0xf, mask & ~0xf);
+        }
+
+    }
+}
+
+void
+enumerate_pci_bus ()
+{
+  for (uint32_t bus = 0; bus < 256; bus++)
+    for (uint32_t dev = 0; dev < 32; dev++)
+      for (uint32_t func = 0; func < 8; func++)
+        {
+          uint32_t addr = pci_addr(bus, dev, func, 0);
+          if (pci_read_l (addr) != 0xffffffff)
+            print_device_info (addr);
+        }
+}
+
 [[noreturn]] int
 c_start (void *ipc_buffer, void *boot_info)
 {
@@ -92,7 +168,14 @@ c_start (void *ipc_buffer, void *boot_info)
   cnode_mint (init_cap_root_cnode, badged_serial_data_available, 64,
               init_cap_root_cnode, serial_data_available, 64, cap_rights_all, 1);
 
+  pci_io_port = cptr_alloc ();
+
+  x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
+                                init_cap_root_cnode, pci_io_port, 64);
+
   void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
+
+  enumerate_pci_bus ();
 
   if (!proctest_elf)
     printf ("Failed to find testproc in initrd\n");

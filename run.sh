@@ -5,6 +5,7 @@ mem="128M"
 smp=2
 debugopt="-debugcon stdio"
 serialopt="-serial unix:/tmp/vm_uart.sock,server,nowait"
+netopt="-net nic,model=e1000 -net user"
 gdbserver=""
 video="-display none"
 tee="|& tee last_output"
@@ -46,5 +47,6 @@ exec qemu-system-x86_64 -s -vga std \
   $video \
   $debugopt \
   $serialopt \
+  $netopt \
   -cpu max \
   $gdbserver |& tee last_output
