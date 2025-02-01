@@ -7,7 +7,7 @@ debugopt="-debugcon stdio"
 serialopt="-serial unix:/tmp/vm_uart.sock,server,nowait"
 netopt="-net nic,model=e1000 -net user"
 gdbserver=""
-video="-display none"
+video="-display none -vga virtio"
 tee="|& tee last_output"
 
 while getopts "dmustv" opt; do
@@ -30,7 +30,7 @@ while getopts "dmustv" opt; do
       tee=""
       ;;
     v)
-      video=""
+      video="-vga virtio"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2

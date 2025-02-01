@@ -117,11 +117,24 @@ print_device_info (uint32_t pci_address)
           pci_write_l (pci_address + PCI_BAR0 + i * 4, 0xffffffff);
           uint32_t mask = pci_read_l (pci_address + PCI_BAR0 + i * 4);
           pci_write_l (pci_address + PCI_BAR0 + i * 4, bar);
-
+          bool is_io = bar & 1;
           if (bar & 1)
-            printf ("  - BAR%d: I/O %08x, Mask: %08x\n", i, bar & ~3, mask & ~3);
+            {
+              bar &= 0xfffffffc;
+              mask &= 0xfffffffc;
+            }
           else
-            printf ("  - BAR%d: Mem %08x, Mask: %08x\n", i, bar & ~0xf, mask & ~0xf);
+            {
+              mask &= 0xfffffff0;
+              bar &= 0xfffffff0;
+            }
+
+          uint32_t size = ~mask + 1;
+
+          if (is_io)
+            printf ("  - BAR%d: I/O %08x, Mask: %08x, Size: %x\n", i, bar, mask, size);
+          else
+            printf ("  - BAR%d: Mem %08x, Mask: %08x, Size: %x\n", i, bar, mask, size);
         }
 
     }
