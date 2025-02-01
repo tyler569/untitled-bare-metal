@@ -27,22 +27,33 @@ constexpr uint16_t PCI_BAR5 = 0x24;
 constexpr uint16_t PCI_INTERRUPT_LINE = 0x3C;
 constexpr uint16_t PCI_INTERRUPT_PIN = 0x3D;
 
-static inline uint32_t pci_addr(uint8_t bus, uint8_t device, uint8_t function, uint16_t offset) {
-    return (1 << 31) | (bus << 16) | (device << 11) | (function << 8) | (offset & 0xFC);
+static inline uint32_t
+pci_addr (uint8_t bus, uint8_t device, uint8_t function, uint16_t offset)
+{
+  return (1 << 31) | (bus << 16) | (device << 11) | (function << 8)
+         | (offset & 0xFC);
 }
 
-static inline uint32_t pci_bus(uint32_t address) {
-    return (address >> 16) & 0xFF;
+static inline uint32_t
+pci_bus (uint32_t address)
+{
+  return (address >> 16) & 0xFF;
 }
 
-static inline uint32_t pci_device(uint32_t address) {
-    return (address >> 11) & 0x1F;
+static inline uint32_t
+pci_device (uint32_t address)
+{
+  return (address >> 11) & 0x1F;
 }
 
-static inline uint32_t pci_function(uint32_t address) {
-    return (address >> 8) & 0x07;
+static inline uint32_t
+pci_function (uint32_t address)
+{
+  return (address >> 8) & 0x07;
 }
 
-static inline uint32_t pci_offset(uint32_t address) {
-    return address & 0xFC;
+static inline uint32_t
+pci_offset (uint32_t address)
+{
+  return address & 0xFC;
 }

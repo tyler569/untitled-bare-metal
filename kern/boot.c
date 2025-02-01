@@ -72,6 +72,14 @@ create_init_tcb (void *initrd, size_t initrd_size)
                             bi->untypeds);
   bi->n_untypeds = n_untyped;
 
+  size_t n_free_slots
+      = BIT (INIT_CNODE_SIZE_BITS) - init_cap_first_untyped - n_untyped;
+
+  create_init_untyped_device_caps (init_cnode + init_cap_first_untyped
+                                       + n_untyped,
+                                   &n_free_slots, bi->untypeds + n_untyped);
+  bi->n_untypeds += n_free_slots;
+
   bi->untyped_range = (struct cap_range){
     .start = init_cap_first_untyped,
     .end = init_cap_first_untyped + n_untyped,

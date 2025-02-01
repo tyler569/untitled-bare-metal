@@ -33,7 +33,8 @@ union capability
   word_t words[2];
   struct
   {
-    word_t reserved : 2;
+    word_t reserved : 1;
+    word_t is_device : 1;
     word_t ptr : 46;
     word_t size_bits : 6;
     word_t rights : 5;
@@ -149,6 +150,18 @@ static inline cap_t
 cap_untyped_new (uintptr_t paddr, uintptr_t size_bits)
 {
   cap_t cap = { .type = cap_untyped, .size_bits = size_bits };
+  cap_set_ptr (&cap, (void *)paddr);
+  return cap;
+}
+
+static inline cap_t
+cap_untyped_device_new (uintptr_t paddr, uintptr_t size_bits)
+{
+  cap_t cap = {
+    .type = cap_untyped,
+    .size_bits = size_bits,
+    .is_device = 1,
+  };
   cap_set_ptr (&cap, (void *)paddr);
   return cap;
 }

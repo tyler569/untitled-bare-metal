@@ -173,7 +173,8 @@ map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
 {
   size_t offset = phdr->vaddr & 0xfff;
 
-  buffer_t buffer = create_buffer (untyped, (phdr->memsz + offset + 0xfff) / 0x1000);
+  buffer_t buffer
+      = create_buffer (untyped, (phdr->memsz + offset + 0xfff) / 0x1000);
   uintptr_t mapped_addr
       = map_buffer_to_mappable_space (untyped, vspace, buffer);
 

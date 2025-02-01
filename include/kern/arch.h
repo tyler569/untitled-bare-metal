@@ -48,3 +48,8 @@ void set_vm_root (uintptr_t root);
 void set_tls_base (uintptr_t base);
 
 void send_eoi (uint8_t irq);
+
+uint32_t read_pci_l (uint32_t addr);
+uint16_t read_pci_w (uint32_t addr);
+uint8_t read_pci_b (uint32_t addr);
+void write_pci_l (uint32_t addr, uint32_t val);

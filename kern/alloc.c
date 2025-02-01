@@ -3,6 +3,7 @@
 #include "kern/cap.h"
 #include "kern/kernel.h"
 #include "kern/mem.h"
+#include "pci.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "sys/bootinfo.h"
@@ -74,6 +75,55 @@ create_init_untyped_caps (cte_t *base, size_t *count,
         break;
     }
 
+  *count = cap_i;
+}
+
+void
+create_init_untyped_device_caps (cte_t *base, size_t *count,
+                                 struct untyped_desc *desc)
+{
+  size_t n = *count;
+  size_t cap_i = 0;
+
+  for (uint32_t bus = 0; bus < 256; bus++)
+    for (uint32_t dev = 0; dev < 32; dev++)
+      for (uint32_t func = 0; func < 8; func++)
+        {
+          uint32_t addr = pci_addr (bus, dev, func, 0);
+          uint32_t id = read_pci_l (addr);
+          if (id == 0xffffffff)
+            continue;
+
+          for (uint32_t i = 0; i < 6; i++)
+            {
+              uint32_t bar = read_pci_l (addr + PCI_BAR0 + i * 4);
+              if (bar == 0 || bar & 1)
+                continue;
+
+              write_pci_l (addr + PCI_BAR0 + i * 4, 0xffffffff);
+              uint32_t mask = read_pci_l (addr + PCI_BAR0 + i * 4);
+              write_pci_l (addr + PCI_BAR0 + i * 4, bar);
+
+              bar &= 0xfffffff0;
+              mask &= 0xfffffff0;
+              size_t size = ~mask + 1;
+              size_t size_bits = 63 - __builtin_clzll (size);
+
+              cap_t cap = cap_untyped_device_new (bar, size_bits);
+              base[cap_i].cap = cap;
+
+              desc[cap_i].base = bar;
+              desc[cap_i].size_bits = size_bits;
+              desc[cap_i].is_device = true;
+
+              cap_i++;
+
+              if (cap_i >= n)
+                goto done;
+            }
+        }
+
+done:
   *count = cap_i;
 }
 

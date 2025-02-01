@@ -25,7 +25,7 @@ struct untyped_desc
 {
   word_t base;
   uint8_t size_bits;
-  uint8_t is_device;
+  bool is_device;
 };
 
 struct boot_info

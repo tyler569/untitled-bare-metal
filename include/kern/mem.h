@@ -33,3 +33,5 @@ struct untyped_desc;
 
 void create_init_untyped_caps (cte_t *base, size_t *count,
                                struct untyped_desc *desc);
+void create_init_untyped_device_caps (cte_t *base, size_t *count,
+                                      struct untyped_desc *desc);
