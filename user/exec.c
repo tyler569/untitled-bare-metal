@@ -29,21 +29,9 @@ buffer_t map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
       unreachable ();                                                         \
     }
 
-int
-create_process (void *elf_data, size_t elf_size, cptr_t untyped,
-                cptr_t our_vspace, cptr_t *tcb, cptr_t *cspace)
+uintptr_t
+map_elf_to_new_vspace (struct elf_ehdr *ehdr, cptr_t untyped, cptr_t vspace, cptr_t our_vspace)
 {
-  (void)elf_size;
-  (void)untyped;
-  (void)tcb;
-  (void)cspace;
-
-  struct elf_ehdr *ehdr = elf_data;
-  if (!is_elf (ehdr))
-    return -1;
-
-  cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
-
   uintptr_t highest_addr = 0;
 
   for (int i = 0; i < ehdr->phnum; i++)
@@ -59,6 +47,26 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped,
             highest_addr = phdr->vaddr + phdr->memsz;
         }
     }
+
+  return highest_addr;
+}
+
+int
+create_process (void *elf_data, size_t elf_size, cptr_t untyped,
+                cptr_t our_vspace, cptr_t *tcb, cptr_t *cspace)
+{
+  (void)elf_size;
+  (void)untyped;
+  (void)tcb;
+  (void)cspace;
+
+  struct elf_ehdr *ehdr = elf_data;
+  if (!is_elf (ehdr))
+    return -1;
+
+  cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
+
+  uintptr_t highest_addr = map_elf_to_new_vspace (ehdr, untyped, vspace, our_vspace);
 
   highest_addr += 0x1000;
   highest_addr = (highest_addr + 0xfff) & ~0xfff;

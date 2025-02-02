@@ -31,16 +31,6 @@ create_tcb (struct tcb *t)
 }
 
 struct tcb *
-create_tcb_in_this_vm (struct tcb *t, uintptr_t rip, uintptr_t rsp)
-{
-  create_tcb (t);
-
-  new_user_frame (&t->saved_state, rip, rsp);
-
-  return t;
-}
-
-struct tcb *
 create_tcb_from_elf_in_this_vm (struct tcb *t, struct elf_ehdr *elf)
 {
   create_tcb (t);
