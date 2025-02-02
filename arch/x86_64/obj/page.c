@@ -10,6 +10,14 @@
 
 #define MASK(n) ((1UL << (n)) - 1)
 
+/*
+ * TODO: unmap cannot be done without ASID - we need to be able to get from
+ * any page or page table cap back to _both_ the vspace it is a part of and
+ * its mapped address within that vspace. We can pack both of these in the
+ * badge field but only if we have a smaller representation of the vspace
+ * and that is the ASID.
+ */
+
 static message_info_t
 already_mapped ()
 {
