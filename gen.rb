@@ -115,6 +115,21 @@ class KMethod
     EOF
   end
 
+  def kernel_unmarshal_check_parameters_length
+    mr_parameters_check = <<~EOF
+    if (get_message_length (info) < #{mr_parameters.length})
+      return return_ipc (truncated_message, 0);
+    EOF
+    cap_parameters_check = <<~EOF
+    if (get_message_extra_caps (info) < #{cap_parameters.length})
+      return return_ipc (truncated_message, 0);
+    EOF
+    checks = []
+    checks << mr_parameters_check if mr_parameters.length > 0
+    checks << cap_parameters_check if cap_parameters.length > 0
+    checks.join("\n")
+  end
+
   def kernel_unmarshal_and_call
     <<~EOF
     case #{identifier_name}: {
@@ -131,10 +146,7 @@ class KMethod
           err_printf ("invalid cap type: %s\\n", cap_type_string (cap_type (slot)));
           return return_ipc (illegal_operation, 0);
         }
-      if (get_message_length (info) < #{mr_parameters.length})
-        return return_ipc (truncated_message, 0);
-      if (get_message_extra_caps (info) < #{cap_parameters.length})
-        return return_ipc (truncated_message, 0);
+      #{kernel_unmarshal_check_parameters_length}
 
       #{cap_parameters.map.with_index do |param, i|
         <<~EOS
