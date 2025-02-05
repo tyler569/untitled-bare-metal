@@ -4,7 +4,7 @@ on: [ push ]
 
 jobs:
   build-x86_64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
         with:
@@ -23,7 +23,7 @@ jobs:
           cmake -B build -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchains/x86_64.cmake
           cmake --build build
       - name: Upload ISO
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: untitled_bare_metal.iso
           path: untitled_bare_metal.iso
