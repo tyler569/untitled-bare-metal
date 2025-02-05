@@ -41,8 +41,9 @@ set(archive_binaries)
 foreach (program ${targets_to_archive})
   add_executable(${program}
     user/${program}.c
-    user/exec.c
     user/cptr_alloc.c
+    user/exec.c
+    user/lib.c
     lib/num.c
     lib/print.c
     lib/string.c

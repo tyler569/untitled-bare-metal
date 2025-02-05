@@ -2,8 +2,6 @@
 
 #include "./lib.h"
 
-extern inline long write (FILE *, const void *str, unsigned long len);
-
 struct ipc_buffer *__ipc_buffer;
 
 int
@@ -51,7 +49,7 @@ main (cptr_t endpoint_cap)
       info = reply_recv (endpoint_cap, resp, &badge);
     }
 
-  exit ();
+  exit (0);
   return 0;
 }
 
@@ -61,7 +59,7 @@ c_start (void *ipc_buffer, cptr_t endpoint_cap)
   __ipc_buffer = ipc_buffer;
 
   main (endpoint_cap);
-  exit ();
+  exit (0);
 }
 
 [[noreturn]] USED __attribute__ ((naked)) void

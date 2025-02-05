@@ -1,4 +1,5 @@
 #include "string.h"
+#include "ctype.h"
 
 void *
 memset (void *s, int c, size_t n)
@@ -102,53 +103,4 @@ strcmp (const char *s1, const char *s2)
       s2++;
     }
   return *(unsigned char *)s1 - *(unsigned char *)s2;
-}
-
-bool
-isdigit (char c)
-{
-  return c >= '0' && c <= '9';
-}
-
-bool
-islower (char c)
-{
-  return c >= 'a' && c <= 'z';
-}
-
-bool
-isupper (char c)
-{
-  return c >= 'A' && c <= 'Z';
-}
-
-bool
-isalpha (char c)
-{
-  return islower (c) || isupper (c);
-}
-
-bool
-isalnum (char c)
-{
-  return isalpha (c) || isdigit (c);
-}
-
-bool
-isprint (char c)
-{
-  return c >= 0x20 && c <= 0x7E;
-}
-
-bool
-isspace (char c)
-{
-  return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v'
-         || c == '\f';
-}
-
-bool
-isxdigit (char c)
-{
-  return isdigit (c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }

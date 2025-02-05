@@ -608,6 +608,12 @@ puts (const char *str)
   return ret;
 }
 
+int
+putchar (int c)
+{
+  return F_WRITE (w_stdout, &c, 1);
+}
+
 #ifdef __KERNEL__
 struct stream *w_stdout = &(struct stream){
   .vtbl = &(const struct stream_vtbl){

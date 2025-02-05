@@ -5,7 +5,6 @@
 #include "lib.h"
 
 struct ipc_buffer *__ipc_buffer;
-extern inline long write (FILE *, const void *str, unsigned long len);
 
 constexpr uint16_t SERIAL_PORT = 0x3f8;
 

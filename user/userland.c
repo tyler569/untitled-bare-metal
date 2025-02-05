@@ -11,8 +11,6 @@
 
 #define PAGE_SIZE 4096
 
-extern inline long write (FILE *, const void *str, unsigned long len);
-
 uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
 extern char __executable_start;
 struct ipc_buffer *__ipc_buffer;
@@ -331,7 +329,7 @@ c_start (void *ipc_buffer, void *boot_info)
       send (serial_endpoint, new_message_info (1, 0, 0, regs));
     }
 
-  exit ();
+  exit (0);
 }
 
 [[noreturn]] USED __attribute__ ((naked)) void

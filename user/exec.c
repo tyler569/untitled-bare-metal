@@ -30,7 +30,8 @@ buffer_t map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
     }
 
 uintptr_t
-map_elf_to_new_vspace (struct elf_ehdr *ehdr, cptr_t untyped, cptr_t vspace, cptr_t our_vspace)
+map_elf_to_new_vspace (struct elf_ehdr *ehdr, cptr_t untyped, cptr_t vspace,
+                       cptr_t our_vspace)
 {
   uintptr_t highest_addr = 0;
 
@@ -66,7 +67,8 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped,
 
   cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
 
-  uintptr_t highest_addr = map_elf_to_new_vspace (ehdr, untyped, vspace, our_vspace);
+  uintptr_t highest_addr
+      = map_elf_to_new_vspace (ehdr, untyped, vspace, our_vspace);
 
   highest_addr += 0x1000;
   highest_addr = (highest_addr + 0xfff) & ~0xfff;

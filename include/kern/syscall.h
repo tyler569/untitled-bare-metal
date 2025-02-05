@@ -11,7 +11,11 @@ typedef struct frame frame_t;
 void do_syscall (uintptr_t, uintptr_t, int syscall_number, frame_t *);
 
 // Used substantially in kern/syscall.c and generated syscall dispatch
-#define dbg_printf(...)
+#define dbg_printf(...)                                                       \
+  do                                                                          \
+    {                                                                         \
+    }                                                                         \
+  while (0)
 #define err_printf(...) printf (__VA_ARGS__)
 
 MUST_USE

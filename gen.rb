@@ -109,7 +109,7 @@ class KMethod
       #{mr_parameters.map.with_index { |param, i| "set_mr (#{i}, (word_t)#{param['name']});" }.join("\n")}
       #{cap_parameters.map.with_index { |param, i| "set_cap (#{i}, #{param['name']});" }.join("\n")}
       message_info_t _info = #{message_info};
-      message_info_t _result = _syscall2 (sys_call, obj, _info);
+      message_info_t _result = __call_kernel (obj, _info);
       return get_message_label (_result);
     }
     EOF
