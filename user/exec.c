@@ -15,10 +15,10 @@ get_phdr (struct elf_ehdr *ehdr, size_t i)
   return (struct elf_phdr *)((char *)ehdr + ehdr->phoff + i * ehdr->phentsize);
 }
 
-buffer_t
-create_buffer (cptr_t untyped, size_t pages)
+void *
+data_for_phdr (struct elf_ehdr *ehdr, struct elf_phdr *phdr)
 {
-  return (buffer_t){ allocate (untyped, cap_x86_64_page, pages), pages };
+  return (void *)ehdr + phdr->offset;
 }
 
 int
@@ -51,6 +51,12 @@ map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
     }
 }
 
+buffer_t
+create_buffer (cptr_t untyped, size_t pages)
+{
+  return (buffer_t){ allocate (untyped, cap_x86_64_page, pages), pages };
+}
+
 int
 map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer, uintptr_t addr)
 {
@@ -77,12 +83,6 @@ map_buffer_to_mappable_space (cptr_t untyped, cptr_t vspace, buffer_t buffer)
   if (err != 0)
     return 0;
   return addr;
-}
-
-void *
-data_for_phdr (struct elf_ehdr *ehdr, struct elf_phdr *phdr)
-{
-  return (void *)ehdr + phdr->offset;
 }
 
 buffer_t
@@ -124,20 +124,21 @@ map_elf_to_new_vspace (struct elf_ehdr *ehdr, cptr_t untyped, cptr_t vspace,
   return highest_addr;
 }
 
-int
-create_process (void *elf_data, size_t elf_size, cptr_t untyped,
-                cptr_t our_vspace, cptr_t *tcb, cptr_t *cspace)
+constexpr size_t stack_pages = 4;
+
+cptr_t
+create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t our_vspace)
 {
   (void)elf_size;
-  (void)untyped;
-  (void)tcb;
-  (void)cspace;
 
   struct elf_ehdr *ehdr = elf_data;
   if (!is_elf (ehdr))
-    return -1;
+    return 0;
 
+  cptr_t tcb = allocate (untyped, cap_tcb, 1);
   cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
+  buffer_t ipc_buffer = create_buffer (untyped, 1);
+  buffer_t stack_buffer = create_buffer (untyped, stack_pages);
 
   uintptr_t highest_addr
       = map_elf_to_new_vspace (ehdr, untyped, vspace, our_vspace);
@@ -146,19 +147,14 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped,
   highest_addr = (highest_addr + 0xfff) & ~0xfff;
   uintptr_t ipc_addr = highest_addr;
 
-  buffer_t ipc_buffer = create_buffer (untyped, 1);
   map_buffer (untyped, vspace, ipc_buffer, highest_addr);
-
-  constexpr size_t stack_pages = 4;
 
   highest_addr += 0x2000;
   uintptr_t stack_addr = highest_addr + stack_pages * 0x1000;
 
-  buffer_t stack_buffer = create_buffer (untyped, stack_pages);
   map_buffer (untyped, vspace, stack_buffer, highest_addr);
 
-  *tcb = allocate (untyped, cap_tcb, 1);
-  tcb_configure (*tcb, 0, init_cap_root_cnode, 0, vspace, 0, ipc_addr,
+  tcb_configure (tcb, 0, init_cap_root_cnode, 0, vspace, 0, ipc_addr,
                  ipc_buffer.cptr_base);
 
   frame_t regs = {};
@@ -168,7 +164,7 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped,
   regs.cs = 0x23;
   regs.ss = 0x1b;
 
-  tcb_write_registers (*tcb, false, 0, sizeof (regs), &regs);
+  tcb_write_registers (tcb, false, 0, sizeof (regs), &regs);
 
-  return 0;
+  return tcb;
 }

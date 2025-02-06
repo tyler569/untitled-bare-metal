@@ -43,8 +43,8 @@ int map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr);
 int map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer,
                 uintptr_t addr);
 
-int create_process (void *elf_data, size_t elf_size, cptr_t untyped,
-                    cptr_t our_vspace, cptr_t *tcb, cptr_t *cspace);
+cptr_t create_process (void *elf_data, size_t elf_size, cptr_t untyped,
+                    cptr_t our_vspace);
 
 static inline void
 set_mr (word_t i, word_t val)
