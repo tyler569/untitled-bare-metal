@@ -7,20 +7,20 @@
 enum object_type
 {
   cap_null,
-  cap_endpoint,
-  cap_notification,
-  cap_cnode,
-  cap_tcb,
-  cap_untyped,
-  cap_x86_64_io_port,
-  cap_x86_64_io_port_control,
-  cap_x86_64_pml4,
-  cap_x86_64_pdpt,
-  cap_x86_64_pd,
-  cap_x86_64_pt,
-  cap_x86_64_page,
-  cap_irq_control,
-  cap_irq_handler,
+  cap_Endpoint,
+  cap_Notification,
+  cap_CNode,
+  cap_TCB,
+  cap_Untyped,
+  cap_X86_IOPort,
+  cap_X86_IOPortControl,
+  cap_X86_64_PML4,
+  cap_X86_64_PDPT,
+  cap_X86_PD,
+  cap_X86_PT,
+  cap_X86_Page,
+  cap_IRQControl,
+  cap_IRQHandler,
   max_cap_type,
 };
 
@@ -31,34 +31,34 @@ cap_type_string (word_t type)
     {
     case cap_null:
       return "null";
-    case cap_endpoint:
-      return "endpoint";
-    case cap_notification:
-      return "notification";
-    case cap_cnode:
-      return "cnode";
-    case cap_tcb:
-      return "tcb";
-    case cap_untyped:
-      return "untyped";
-    case cap_x86_64_io_port:
-      return "x86_64_io_port";
-    case cap_x86_64_io_port_control:
-      return "x86_64_io_port_control";
-    case cap_x86_64_pml4:
-      return "x86_64_pml4";
-    case cap_x86_64_pdpt:
-      return "x86_64_pdpt";
-    case cap_x86_64_pd:
-      return "x86_64_pd";
-    case cap_x86_64_pt:
-      return "x86_64_pt";
-    case cap_x86_64_page:
-      return "x86_64_page";
-    case cap_irq_control:
-      return "irq_control";
-    case cap_irq_handler:
-      return "irq_handler";
+    case cap_Endpoint:
+      return "Endpoint";
+    case cap_Notification:
+      return "Notification";
+    case cap_CNode:
+      return "CNode";
+    case cap_TCB:
+      return "TCB";
+    case cap_Untyped:
+      return "Untyped";
+    case cap_X86_IOPort:
+      return "X86_IOPort";
+    case cap_X86_IOPortControl:
+      return "X86_IOPortControl";
+    case cap_X86_64_PML4:
+      return "X86_64_PML4";
+    case cap_X86_64_PDPT:
+      return "X86_64_PDPT";
+    case cap_X86_PD:
+      return "X86_PD";
+    case cap_X86_PT:
+      return "X86_PT";
+    case cap_X86_Page:
+      return "X86_Page";
+    case cap_IRQControl:
+      return "IRQControl";
+    case cap_IRQHandler:
+      return "IRQHandler";
     default:
       return "unknown";
     }
@@ -67,57 +67,57 @@ cap_type_string (word_t type)
 enum method_id
 {
   METHOD_invalid,
-  METHOD_cnode_copy,
-  METHOD_cnode_delete,
-  METHOD_cnode_mint,
-  METHOD_cnode_revoke,
-  METHOD_cnode_debug_print,
-  METHOD_tcb_configure,
-  METHOD_tcb_copy_registers,
-  METHOD_tcb_read_registers,
-  METHOD_tcb_resume,
-  METHOD_tcb_bind_notification,
-  METHOD_tcb_set_affinity,
-  METHOD_tcb_set_ipc_buffer,
-  METHOD_tcb_set_space,
-  METHOD_tcb_set_tls_base,
-  METHOD_tcb_suspend,
-  METHOD_tcb_write_registers,
-  METHOD_untyped_retype,
-  METHOD_x86_64_io_port_in8,
-  METHOD_x86_64_io_port_in16,
-  METHOD_x86_64_io_port_in32,
-  METHOD_x86_64_io_port_out8,
-  METHOD_x86_64_io_port_out16,
-  METHOD_x86_64_io_port_out32,
-  METHOD_x86_64_io_port_control_issue,
-  METHOD_x86_64_pdpt_map,
-  METHOD_x86_64_pdpt_unmap,
-  METHOD_x86_64_pd_map,
-  METHOD_x86_64_pd_unmap,
-  METHOD_x86_64_pt_map,
-  METHOD_x86_64_pt_unmap,
-  METHOD_x86_64_page_map,
-  METHOD_x86_64_page_unmap,
-  METHOD_irq_control_get,
-  METHOD_irq_handler_ack,
-  METHOD_irq_handler_clear,
-  METHOD_irq_handler_set_notification,
+  METHOD_CNode_Copy,
+  METHOD_CNode_Delete,
+  METHOD_CNode_Mint,
+  METHOD_CNode_Revoke,
+  METHOD_CNode_DebugPrint,
+  METHOD_TCB_Configure,
+  METHOD_TCB_CopyRegisters,
+  METHOD_TCB_ReadRegisters,
+  METHOD_TCB_Resume,
+  METHOD_TCB_BindNotification,
+  METHOD_TCB_SetAffinity,
+  METHOD_TCB_SetIPCBuffer,
+  METHOD_TCB_SetSpace,
+  METHOD_TCB_SetTLSBase,
+  METHOD_TCB_Suspend,
+  METHOD_TCB_WriteRegisters,
+  METHOD_Untyped_Retype,
+  METHOD_X86_IOPort_In8,
+  METHOD_X86_IOPort_In16,
+  METHOD_X86_IOPort_In32,
+  METHOD_X86_IOPort_Out8,
+  METHOD_X86_IOPort_Out16,
+  METHOD_X86_IOPort_Out32,
+  METHOD_X86_IOPortControl_Issue,
+  METHOD_X86_64_PDPT_Map,
+  METHOD_X86_64_PDPT_Unmap,
+  METHOD_X86_PD_Map,
+  METHOD_X86_PD_Unmap,
+  METHOD_X86_PT_Map,
+  METHOD_X86_PT_Unmap,
+  METHOD_X86_Page_Map,
+  METHOD_X86_Page_Unmap,
+  METHOD_IRQControl_get,
+  METHOD_IRQHandler_Ack,
+  METHOD_IRQHandler_Clear,
+  METHOD_IRQHandler_SetNotification,
 };
 
 enum error_code
 {
-  no_error,
-  invalid_argument,
-  invalid_capability,
-  illegal_operation,
-  range_error,
-  alignment_error,
-  truncated_message,
-  delete_first,
-  revoke_first,
-  not_enough_memory,
-  failed_lookup,
+  ubm_NoError,
+  ubm_InvalidArgument,
+  ubm_InvalidCapability,
+  ubm_IllegalOperation,
+  ubm_RangeError,
+  ubm_AlignmentError,
+  ubm_TruncatedMessage,
+  ubm_DeleteFirst,
+  ubm_RevokeFirst,
+  ubm_NotEnoughMemory,
+  ubm_FailedLookup,
   max_error_code,
 };
 
@@ -126,28 +126,28 @@ error_string (error_t error)
 {
   switch (error)
     {
-    case no_error:
-      return "no error";
-    case invalid_argument:
-      return "invalid argument";
-    case invalid_capability:
-      return "invalid capability";
-    case illegal_operation:
-      return "illegal operation";
-    case range_error:
-      return "range error";
-    case alignment_error:
-      return "alignment error";
-    case truncated_message:
-      return "truncated message";
-    case delete_first:
-      return "delete first";
-    case revoke_first:
-      return "revoke first";
-    case not_enough_memory:
-      return "not enough memory";
-    case failed_lookup:
-      return "failed lookup";
+    case ubm_NoError:
+      return "ubm NoError";
+    case ubm_InvalidArgument:
+      return "ubm InvalidArgument";
+    case ubm_InvalidCapability:
+      return "ubm InvalidCapability";
+    case ubm_IllegalOperation:
+      return "ubm IllegalOperation";
+    case ubm_RangeError:
+      return "ubm RangeError";
+    case ubm_AlignmentError:
+      return "ubm AlignmentError";
+    case ubm_TruncatedMessage:
+      return "ubm TruncatedMessage";
+    case ubm_DeleteFirst:
+      return "ubm DeleteFirst";
+    case ubm_RevokeFirst:
+      return "ubm RevokeFirst";
+    case ubm_NotEnoughMemory:
+      return "ubm NotEnoughMemory";
+    case ubm_FailedLookup:
+      return "ubm FailedLookup";
     default:
       return "unknown";
     }
@@ -155,14 +155,14 @@ error_string (error_t error)
 
 enum syscall_number
 {
-  sys_exit,
-  sys_debug_write,
-  sys_send,
-  sys_recv,
-  sys_call,
-  sys_reply,
-  sys_replyrecv,
-  sys_nbsend,
-  sys_nbrecv,
-  sys_yield,
+  sys_Exit,
+  sys_DebugWrite,
+  sys_Send,
+  sys_Recv,
+  sys_Call,
+  sys_Reply,
+  sys_ReplyRecv,
+  sys_NBSend,
+  sys_NBRecv,
+  sys_Yield,
 };

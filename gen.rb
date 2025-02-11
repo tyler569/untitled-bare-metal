@@ -32,7 +32,7 @@ class KMethod
   end
 
   def user_function_name
-    @type.name + '_' + @name
+    "ubm_" + @type.name + '_' + @name
   end
 
   def kernel_function_name

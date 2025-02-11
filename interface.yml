@@ -2,13 +2,13 @@
 types:
   - name: "null"
     methods: []
-  - name: endpoint
+  - name: Endpoint
     methods: []
-  - name: notification
+  - name: Notification
     methods: []
-  - name: cnode
+  - name: CNode
     methods:
-      - name: copy
+      - name: Copy
         parameters:
           - { name: dest_index, type: word_t }
           - { name: dest_depth, type: uint8_t }
@@ -16,11 +16,11 @@ types:
           - { name: src_index, type: word_t }
           - { name: src_depth, type: uint8_t }
           - { name: rights, type: cap_rights_t }
-      - name: delete
+      - name: Delete
         parameters:
           - { name: index, type: word_t }
           - { name: depth, type: uint8_t }
-      - name: mint
+      - name: Mint
         parameters:
           - { name: dest_index, type: word_t }
           - { name: dest_depth, type: uint8_t }
@@ -29,15 +29,15 @@ types:
           - { name: src_depth, type: uint8_t }
           - { name: rights, type: cap_rights_t }
           - { name: badge, type: word_t }
-      - name: revoke
+      - name: Revoke
         parameters:
           - { name: index, type: word_t }
           - { name: depth, type: uint8_t }
-      - name: debug_print
+      - name: DebugPrint
         parameters: []
-  - name: tcb
+  - name: TCB
     methods:
-      - name: configure
+      - name: Configure
         parameters:
           - { name: fault_ep, type: word_t }
           - { name: cspace_root, type: cptr_t }
@@ -46,7 +46,7 @@ types:
           - { name: vspace_root_data, type: word_t }
           - { name: buffer, type: word_t }
           - { name: buffer_frame, type: cptr_t }
-      - name: copy_registers
+      - name: CopyRegisters
         parameters:
           - { name: source, type: cptr_t }
           - { name: suspend_source, type: bool }
@@ -54,45 +54,45 @@ types:
           - { name: transfer_frame, type: bool }
           - { name: transfer_integer, type: bool }
           - { name: arch_flags, type: word_t }
-      - name: read_registers
+      - name: ReadRegisters
         parameters:
           - { name: suspend_source, type: bool }
           - { name: arch_flags, type: word_t }
           - { name: count, type: word_t }
           - { name: regs, type: "user_context_t *" }
-      - name: resume
+      - name: Resume
         parameters: []
-      - name: bind_notification
+      - name: BindNotification
         parameters:
           - { name: notification, type: cptr_t }
-      - name: set_affinity
+      - name: SetAffinity
         parameters:
           - { name: affinity, type: word_t }
-      - name: set_ipc_buffer
+      - name: SetIPCBuffer
         parameters:
           - { name: buffer, type: word_t }
           - { name: buffer_frame, type: cptr_t }
-      - name: set_space
+      - name: SetSpace
         parameters:
           - { name: fault_ep, type: word_t }
           - { name: cspace_root, type: cptr_t }
           - { name: cspace_root_data, type: word_t }
           - { name: vspace_root, type: cptr_t }
           - { name: vspace_root_data, type: word_t }
-      - name: set_tls_base
+      - name: SetTLSBase
         parameters:
           - { name: tls_base, type: word_t }
-      - name: suspend
+      - name: Suspend
         parameters: []
-      - name: write_registers
+      - name: WriteRegisters
         parameters:
           - { name: resume_target, type: bool }
           - { name: arch_flags, type: word_t }
           - { name: count, type: word_t }
           - { name: regs, type: "user_context_t *" }
-  - name: untyped
+  - name: Untyped
     methods:
-      - name: retype
+      - name: Retype
         parameters:
           - { name: type, type: word_t }
           - { name: size_bits, type: word_t }
@@ -101,77 +101,77 @@ types:
           - { name: node_depth, type: uint8_t }
           - { name: node_offset, type: word_t }
           - { name: num_objects, type: word_t }
-  - name: x86_64_io_port
+  - name: X86_IOPort
     methods:
-      - name: in8
+      - name: In8
         parameters:
           - { name: port, type: word_t }
-      - name: in16
+      - name: In16
         parameters:
           - { name: port, type: word_t }
-      - name: in32
+      - name: In32
         parameters:
           - { name: port, type: word_t }
-      - name: out8
-        parameters:
-          - { name: port, type: word_t }
-          - { name: value, type: word_t }
-      - name: out16
+      - name: Out8
         parameters:
           - { name: port, type: word_t }
           - { name: value, type: word_t }
-      - name: out32
+      - name: Out16
         parameters:
           - { name: port, type: word_t }
           - { name: value, type: word_t }
-  - name: x86_64_io_port_control
+      - name: Out32
+        parameters:
+          - { name: port, type: word_t }
+          - { name: value, type: word_t }
+  - name: X86_IOPortControl
     methods:
-      - name: issue
+      - name: Issue
         parameters:
           - { name: first_port, type: word_t }
           - { name: last_port, type: word_t }
           - { name: root, type: cptr_t }
           - { name: index, type: word_t }
           - { name: depth, type: uint8_t }
-  - name: x86_64_pml4
+  - name: X86_64_PML4
     methods: []
-  - name: x86_64_pdpt
+  - name: X86_64_PDPT
     methods:
-      - name: map
+      - name: Map
         parameters:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
-          - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
+          - { name: attr, type: X86_VMAttributes_t }
+      - name: Unmap
         parameters: []
-  - name: x86_64_pd
+  - name: X86_PD
     methods:
-      - name: map
+      - name: Map
         parameters:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
-          - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
+          - { name: attr, type: X86_VMAttributes_t }
+      - name: Unmap
         parameters: []
-  - name: x86_64_pt
+  - name: X86_PT
     methods:
-      - name: map
+      - name: Map
         parameters:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
-          - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
+          - { name: attr, type: X86_VMAttributes_t }
+      - name: Unmap
         parameters: []
-  - name: x86_64_page
+  - name: X86_Page
     methods:
-      - name: map
+      - name: Map
         parameters:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
-          - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
+          - { name: attr, type: X86_VMAttributes_t }
+      - name: Unmap
         parameters: []
-  - name: irq_control
+  - name: IRQControl
     methods:
       - name: get
         parameters:
@@ -179,35 +179,35 @@ types:
           - { name: root, type: cptr_t }
           - { name: index, type: word_t }
           - { name: depth, type: uint8_t }
-  - name: irq_handler
+  - name: IRQHandler
     methods:
-      - name: ack
+      - name: Ack
         parameters: []
-      - name: clear
+      - name: Clear
         parameters: []
-      - name: set_notification
+      - name: SetNotification
         parameters:
           - { name: notification, type: cptr_t }
 system_calls:
-  - sys_exit
-  - sys_debug_write
-  - sys_send
-  - sys_recv
-  - sys_call
-  - sys_reply
-  - sys_replyrecv
-  - sys_nbsend
-  - sys_nbrecv
-  - sys_yield
+  - sys_Exit
+  - sys_DebugWrite
+  - sys_Send
+  - sys_Recv
+  - sys_Call
+  - sys_Reply
+  - sys_ReplyRecv
+  - sys_NBSend
+  - sys_NBRecv
+  - sys_Yield
 errors:
-  - no_error
-  - invalid_argument
-  - invalid_capability
-  - illegal_operation
-  - range_error
-  - alignment_error
-  - truncated_message
-  - delete_first
-  - revoke_first
-  - not_enough_memory
-  - failed_lookup
+  - ubm_NoError
+  - ubm_InvalidArgument
+  - ubm_InvalidCapability
+  - ubm_IllegalOperation
+  - ubm_RangeError
+  - ubm_AlignmentError
+  - ubm_TruncatedMessage
+  - ubm_DeleteFirst
+  - ubm_RevokeFirst
+  - ubm_NotEnoughMemory
+  - ubm_FailedLookup

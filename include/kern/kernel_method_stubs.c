@@ -4,222 +4,221 @@
 #include "sys/syscall.h"
 
 __attribute__ ((weak)) message_info_t
-cnode_copy (cte_t *, word_t, uint8_t, cte_t *, word_t, uint8_t, cap_rights_t)
+CNode_Copy (cte_t *, word_t, uint8_t, cte_t *, word_t, uint8_t, cap_rights_t)
 {
-  err_printf ("unimplemented kernel method cnode_copy\n");
+  err_printf ("unimplemented kernel method CNode_Copy\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-cnode_delete (cte_t *, word_t, uint8_t)
+CNode_Delete (cte_t *, word_t, uint8_t)
 {
-  err_printf ("unimplemented kernel method cnode_delete\n");
+  err_printf ("unimplemented kernel method CNode_Delete\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-cnode_mint (cte_t *, word_t, uint8_t, cte_t *, word_t, uint8_t, cap_rights_t,
+CNode_Mint (cte_t *, word_t, uint8_t, cte_t *, word_t, uint8_t, cap_rights_t,
             word_t)
 {
-  err_printf ("unimplemented kernel method cnode_mint\n");
+  err_printf ("unimplemented kernel method CNode_Mint\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-cnode_revoke (cte_t *, word_t, uint8_t)
+CNode_Revoke (cte_t *, word_t, uint8_t)
 {
-  err_printf ("unimplemented kernel method cnode_revoke\n");
+  err_printf ("unimplemented kernel method CNode_Revoke\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-cnode_debug_print (cte_t *)
+CNode_DebugPrint (cte_t *)
 {
-  err_printf ("unimplemented kernel method cnode_debug_print\n");
+  err_printf ("unimplemented kernel method CNode_DebugPrint\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_configure (cte_t *, word_t, cte_t *, word_t, cte_t *, word_t, word_t,
+TCB_Configure (cte_t *, word_t, cte_t *, word_t, cte_t *, word_t, word_t,
                cte_t *)
 {
-  err_printf ("unimplemented kernel method tcb_configure\n");
+  err_printf ("unimplemented kernel method TCB_Configure\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_copy_registers (cte_t *, cte_t *, bool, bool, bool, bool, word_t)
+TCB_CopyRegisters (cte_t *, cte_t *, bool, bool, bool, bool, word_t)
 {
-  err_printf ("unimplemented kernel method tcb_copy_registers\n");
+  err_printf ("unimplemented kernel method TCB_CopyRegisters\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_read_registers (cte_t *, bool, word_t, word_t, user_context_t *)
+TCB_ReadRegisters (cte_t *, bool, word_t, word_t, user_context_t *)
 {
-  err_printf ("unimplemented kernel method tcb_read_registers\n");
+  err_printf ("unimplemented kernel method TCB_ReadRegisters\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_resume (cte_t *)
+TCB_Resume (cte_t *)
 {
-  err_printf ("unimplemented kernel method tcb_resume\n");
+  err_printf ("unimplemented kernel method TCB_Resume\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_bind_notification (cte_t *, cte_t *)
+TCB_BindNotification (cte_t *, cte_t *)
 {
-  err_printf ("unimplemented kernel method tcb_bind_notification\n");
+  err_printf ("unimplemented kernel method TCB_BindNotification\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_set_affinity (cte_t *, word_t)
+TCB_SetAffinity (cte_t *, word_t)
 {
-  err_printf ("unimplemented kernel method tcb_set_affinity\n");
+  err_printf ("unimplemented kernel method TCB_SetAffinity\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_set_ipc_buffer (cte_t *, word_t, cte_t *)
+TCB_SetIPCBuffer (cte_t *, word_t, cte_t *)
 {
-  err_printf ("unimplemented kernel method tcb_set_ipc_buffer\n");
+  err_printf ("unimplemented kernel method TCB_SetIPCBuffer\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_set_space (cte_t *, word_t, cte_t *, word_t, cte_t *, word_t)
+TCB_SetSpace (cte_t *, word_t, cte_t *, word_t, cte_t *, word_t)
 {
-  err_printf ("unimplemented kernel method tcb_set_space\n");
+  err_printf ("unimplemented kernel method TCB_SetSpace\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_set_tls_base (cte_t *, word_t)
+TCB_SetTLSBase (cte_t *, word_t)
 {
-  err_printf ("unimplemented kernel method tcb_set_tls_base\n");
+  err_printf ("unimplemented kernel method TCB_SetTLSBase\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_suspend (cte_t *)
+TCB_Suspend (cte_t *)
 {
-  err_printf ("unimplemented kernel method tcb_suspend\n");
+  err_printf ("unimplemented kernel method TCB_Suspend\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-tcb_write_registers (cte_t *, bool, word_t, word_t, user_context_t *)
+TCB_WriteRegisters (cte_t *, bool, word_t, word_t, user_context_t *)
 {
-  err_printf ("unimplemented kernel method tcb_write_registers\n");
+  err_printf ("unimplemented kernel method TCB_WriteRegisters\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-untyped_retype (cte_t *, word_t, word_t, cte_t *, word_t, uint8_t, word_t,
+Untyped_Retype (cte_t *, word_t, word_t, cte_t *, word_t, uint8_t, word_t,
                 word_t)
 {
-  err_printf ("unimplemented kernel method untyped_retype\n");
+  err_printf ("unimplemented kernel method Untyped_Retype\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_in8 (cte_t *, word_t)
+X86_IOPort_In8 (cte_t *, word_t)
 {
-  err_printf ("unimplemented kernel method x86_64_io_port_in8\n");
+  err_printf ("unimplemented kernel method X86_IOPort_In8\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_in16 (cte_t *, word_t)
+X86_IOPort_In16 (cte_t *, word_t)
 {
-  err_printf ("unimplemented kernel method x86_64_io_port_in16\n");
+  err_printf ("unimplemented kernel method X86_IOPort_In16\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_in32 (cte_t *, word_t)
+X86_IOPort_In32 (cte_t *, word_t)
 {
-  err_printf ("unimplemented kernel method x86_64_io_port_in32\n");
+  err_printf ("unimplemented kernel method X86_IOPort_In32\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_out8 (cte_t *, word_t, word_t)
+X86_IOPort_Out8 (cte_t *, word_t, word_t)
 {
-  err_printf ("unimplemented kernel method x86_64_io_port_out8\n");
+  err_printf ("unimplemented kernel method X86_IOPort_Out8\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_out16 (cte_t *, word_t, word_t)
+X86_IOPort_Out16 (cte_t *, word_t, word_t)
 {
-  err_printf ("unimplemented kernel method x86_64_io_port_out16\n");
+  err_printf ("unimplemented kernel method X86_IOPort_Out16\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_out32 (cte_t *, word_t, word_t)
+X86_IOPort_Out32 (cte_t *, word_t, word_t)
 {
-  err_printf ("unimplemented kernel method x86_64_io_port_out32\n");
+  err_printf ("unimplemented kernel method X86_IOPort_Out32\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_io_port_control_issue (cte_t *, word_t, word_t, cte_t *, word_t,
-                              uint8_t)
+X86_IOPortControl_Issue (cte_t *, word_t, word_t, cte_t *, word_t, uint8_t)
 {
-  err_printf ("unimplemented kernel method x86_64_io_port_control_issue\n");
+  err_printf ("unimplemented kernel method X86_IOPortControl_Issue\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_pdpt_map (cte_t *, cte_t *, word_t, x86_vm_attributes_t)
+X86_64_PDPT_Map (cte_t *, cte_t *, word_t, X86_VMAttributes_t)
 {
-  err_printf ("unimplemented kernel method x86_64_pdpt_map\n");
+  err_printf ("unimplemented kernel method X86_64_PDPT_Map\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_pdpt_unmap (cte_t *)
+X86_64_PDPT_Unmap (cte_t *)
 {
-  err_printf ("unimplemented kernel method x86_64_pdpt_unmap\n");
+  err_printf ("unimplemented kernel method X86_64_PDPT_Unmap\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_pd_map (cte_t *, cte_t *, word_t, x86_vm_attributes_t)
+X86_PD_Map (cte_t *, cte_t *, word_t, X86_VMAttributes_t)
 {
-  err_printf ("unimplemented kernel method x86_64_pd_map\n");
+  err_printf ("unimplemented kernel method X86_PD_Map\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_pd_unmap (cte_t *)
+X86_PD_Unmap (cte_t *)
 {
-  err_printf ("unimplemented kernel method x86_64_pd_unmap\n");
+  err_printf ("unimplemented kernel method X86_PD_Unmap\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_pt_map (cte_t *, cte_t *, word_t, x86_vm_attributes_t)
+X86_PT_Map (cte_t *, cte_t *, word_t, X86_VMAttributes_t)
 {
-  err_printf ("unimplemented kernel method x86_64_pt_map\n");
+  err_printf ("unimplemented kernel method X86_PT_Map\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_pt_unmap (cte_t *)
+X86_PT_Unmap (cte_t *)
 {
-  err_printf ("unimplemented kernel method x86_64_pt_unmap\n");
+  err_printf ("unimplemented kernel method X86_PT_Unmap\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_page_map (cte_t *, cte_t *, word_t, x86_vm_attributes_t)
+X86_Page_Map (cte_t *, cte_t *, word_t, X86_VMAttributes_t)
 {
-  err_printf ("unimplemented kernel method x86_64_page_map\n");
+  err_printf ("unimplemented kernel method X86_Page_Map\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-x86_64_page_unmap (cte_t *)
+X86_Page_Unmap (cte_t *)
 {
-  err_printf ("unimplemented kernel method x86_64_page_unmap\n");
+  err_printf ("unimplemented kernel method X86_Page_Unmap\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-irq_control_get (cte_t *, word_t, cte_t *, word_t, uint8_t)
+IRQControl_get (cte_t *, word_t, cte_t *, word_t, uint8_t)
 {
-  err_printf ("unimplemented kernel method irq_control_get\n");
+  err_printf ("unimplemented kernel method IRQControl_get\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-irq_handler_ack (cte_t *)
+IRQHandler_Ack (cte_t *)
 {
-  err_printf ("unimplemented kernel method irq_handler_ack\n");
+  err_printf ("unimplemented kernel method IRQHandler_Ack\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-irq_handler_clear (cte_t *)
+IRQHandler_Clear (cte_t *)
 {
-  err_printf ("unimplemented kernel method irq_handler_clear\n");
+  err_printf ("unimplemented kernel method IRQHandler_Clear\n");
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
-irq_handler_set_notification (cte_t *, cte_t *)
+IRQHandler_SetNotification (cte_t *, cte_t *)
 {
-  err_printf ("unimplemented kernel method irq_handler_set_notification\n");
+  err_printf ("unimplemented kernel method IRQHandler_SetNotification\n");
   return illegal_operation;
 }
