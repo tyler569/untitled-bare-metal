@@ -44,7 +44,7 @@ int map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer,
                 uintptr_t addr);
 
 cptr_t create_process (void *elf_data, size_t elf_size, cptr_t untyped,
-                    cptr_t our_vspace);
+                       cptr_t our_vspace);
 
 static inline void
 set_mr (word_t i, word_t val)

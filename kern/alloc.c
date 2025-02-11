@@ -30,23 +30,45 @@ size_t region_count = 0;
 void
 allocate_aligned_regions (struct physical_extent *extent)
 {
-  size_t len = extent->len;
-  uintptr_t acc = extent->start;
-  while (len > 0)
+  // size_t len = extent->len;
+  // uintptr_t acc = extent->start;
+  // while (len > 0)
+  //   {
+  //     // find the largest power of 2 that fits in len
+  //     int zeros = __builtin_clzll (len);
+  //     size_t max_len = 1 << (63 - zeros);
+
+  //     assert (max_len <= len);
+  //     assert (max_len >> 12 > 0);
+
+  //     regions[region_count].addr = acc;
+  //     regions[region_count].size_bits = 63 - zeros - 12;
+  //     region_count++;
+
+  //     acc += max_len;
+  //     len -= max_len;
+  //   }
+
+  uintptr_t start = extent->start;
+  uintptr_t end = extent->start + extent->len;
+
+  while (start < end)
     {
-      // find the largest power of 2 that fits in len
-      int zeros = __builtin_clzll (len);
-      size_t max_len = 1 << (63 - zeros);
+      // Determine the largest power-of-two block naturally aligned at 'start'
+      size_t block = start & -start; // This is a power of two.
 
-      assert (max_len <= len);
-      assert (max_len >> 12 > 0);
+      // If the block goes past 'end', reduce its size until it fits.
+      while (start + block > end)
+        block >>= 1; // Move to the next smaller power of two.
 
-      regions[region_count].addr = acc;
-      regions[region_count].size_bits = 63 - zeros - 12;
+      // Process this block (e.g. record it, use it, etc.)
+      // process_block(start, block);
+      regions[region_count].addr = start;
+      regions[region_count].size_bits = 63 - __builtin_clzll (block) - 12;
       region_count++;
 
-      acc += max_len;
-      len -= max_len;
+      // Move to the next block.
+      start += block;
     }
 }
 
@@ -142,8 +164,8 @@ init_page_mmap ()
   for (size_t i = 0; i < extent_count; i++)
     allocate_aligned_regions (&extents[i]);
 
-  qsort (regions, region_count, sizeof (struct power_of_two_region),
-         power_of_two_region_compare);
+  // qsort (regions, region_count, sizeof (struct power_of_two_region),
+  //        power_of_two_region_compare);
 }
 
 uintptr_t

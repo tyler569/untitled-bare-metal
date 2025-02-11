@@ -127,7 +127,8 @@ map_elf_to_new_vspace (struct elf_ehdr *ehdr, cptr_t untyped, cptr_t vspace,
 constexpr size_t stack_pages = 4;
 
 cptr_t
-create_process (void *elf_data, size_t elf_size, cptr_t untyped, cptr_t our_vspace)
+create_process (void *elf_data, size_t elf_size, cptr_t untyped,
+                cptr_t our_vspace)
 {
   (void)elf_size;
 

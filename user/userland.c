@@ -170,7 +170,16 @@ c_start (void *ipc_buffer, void *boot_info)
   print_bootinfo_information ();
   print_to_e9 ("Hello World!\n");
 
-  cptr_t untyped = init_cap_first_untyped;
+  word_t untyped;
+  word_t largest_untyped_size;
+  for (size_t i = 0; i < bi->n_untypeds; i++)
+    if (bi->untypeds[i].size_bits > largest_untyped_size)
+      {
+        untyped = init_cap_first_untyped + i;
+        largest_untyped_size = bi->untypeds[i].size_bits;
+      }
+
+  printf ("Largest untyped: %lx (size: %lu)\n", untyped, largest_untyped_size);
 
   cptr_t endpoint_cap = allocate (untyped, cap_endpoint, 1);
   cptr_t notification_cap = allocate (untyped, cap_notification, 1);
@@ -201,7 +210,8 @@ c_start (void *ipc_buffer, void *boot_info)
     printf ("Failed to find testproc in initrd\n");
   else
     {
-      cptr_t proc_tcb_cap = create_process (proctest_elf, 0, untyped, init_cap_init_vspace);
+      cptr_t proc_tcb_cap
+          = create_process (proctest_elf, 0, untyped, init_cap_init_vspace);
 
       frame_t frame;
       tcb_read_registers (proc_tcb_cap, false, 0, 0, &frame);
@@ -222,8 +232,8 @@ c_start (void *ipc_buffer, void *boot_info)
     printf ("Failed to find serial_driver in initrd\n");
   else
     {
-      cptr_t proc_serial_driver_cap = create_process (serial_driver_elf, 0, untyped,
-                                init_cap_init_vspace);
+      cptr_t proc_serial_driver_cap = create_process (
+          serial_driver_elf, 0, untyped, init_cap_init_vspace);
 
       if (proc_serial_driver_cap == 0)
         printf ("Error creating serial_driver process\n");
