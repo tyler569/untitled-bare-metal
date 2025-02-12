@@ -11,6 +11,8 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
 
   cte_t *cte = cap_ptr (cspace_root->cap);
   size_t length = cap_size (cspace_root->cap);
+  if (index >= length)
+    printf ("index: %lu, length: %lu\n", index, length);
   assert (index < length);
 
   *err = no_error;
@@ -47,11 +49,11 @@ cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
             word_t src_offset, uint8_t src_depth, cap_rights_t rights)
 {
   error_t err;
-  cte_t *dst = lookup_cap_slot (root, dst_offset, dst_depth, &err);
+  cte_t *dst = lookup_cap_slot (obj, dst_offset, dst_depth, &err);
   if (err != no_error)
     return return_ipc (err, 0);
 
-  cte_t *src = lookup_cap_slot (obj, src_offset, src_depth, &err);
+  cte_t *src = lookup_cap_slot (root, src_offset, src_depth, &err);
   if (err != no_error)
     return return_ipc (err, 0);
 
