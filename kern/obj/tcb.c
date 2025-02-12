@@ -69,11 +69,29 @@ make_tcb_runnable (struct tcb *t)
   spin_unlock (&runnable_tcbs_lock);
 }
 
+void
+suspend_tcb (struct tcb *t)
+{
+  t->state = TASK_STATE_SUSPENDED;
+
+  spin_lock (&runnable_tcbs_lock);
+  remove_from_list (&t->runnable_tcbs);
+  spin_unlock (&runnable_tcbs_lock);
+}
+
 error_t
 tcb_resume (cte_t *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
   make_tcb_runnable (tcb);
+  return no_error;
+}
+
+error_t
+tcb_suspend (cte_t *cap)
+{
+  struct tcb *tcb = cap_ptr (cap);
+  suspend_tcb (tcb);
   return no_error;
 }
 

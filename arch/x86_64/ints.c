@@ -17,8 +17,8 @@ print_interrupt_info (frame_t *f)
   if (f->int_no < 32)
     printf ("Interrupt %lu (%s) @ %#lx\n", f->int_no,
             interrupt_acronyms[f->int_no], f->rip);
-  else
-    printf ("Interrupt %lu @ %#lx\n", f->int_no, f->rip);
+  // else
+  //   printf ("Interrupt %lu @ %#lx\n", f->int_no, f->rip);
 
   switch (f->int_no)
     {

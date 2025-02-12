@@ -379,9 +379,12 @@ c_start (void *ipc_buffer, void *boot_info)
       if (regs == 0)
         continue;
 
+      printf ("Serial: ");
+
       for (size_t i = 0; i < regs; i++)
         {
           uint8_t byte = get_mr (i);
+          printf ("%c", byte);
 
           if (byte >= 'a' && byte <= 'z')
             set_mr (i, byte + 'A' - 'a');
