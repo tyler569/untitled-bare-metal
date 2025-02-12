@@ -33,7 +33,7 @@ add_compile_options(-iquote ${CMAKE_SOURCE_DIR}/include)
 
 add_compile_definitions(__UNTITLED_BARE_METAL__=1)
 
-set(targets_to_archive userland testproc serial_driver)
+set(targets_to_archive userland testproc serial_driver captest)
 set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
 set(archive_name "${CMAKE_BINARY_DIR}/initrd.tar")
 set(archive_binaries)

@@ -1,0 +1,20 @@
+ - X create the new cnode to be the root of the new cspace
+   - X write an allocation function that allows me to pass size_bits through
+ - X change the way threads are spawned to give them the new cspace
+   - X factor out buffers and mapping from exec to lib
+ - X update the lookup code to actually use the cspace on the thread
+ - define headers for the usermode processes
+   - calculator_server
+   - uart_driver
+ - pass page mapping bits through to usermode
+   - put the bits somewhere in an accessible header
+   - consume that header from both kernel mode and usermode
+ - unmap pages
+   - store the virtual address of pages on their caps
+   - store the asid of mapped pages on their caps
+     - define where we're going to put those bits
+     - update the capability structure
+     - update the mapping code
+ - support huge pages
+   - update the mapping/unmapping code to support huge pages
+

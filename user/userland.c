@@ -9,6 +9,8 @@
 
 #include "./lib.h"
 
+#include "./captest.h"
+
 #define PAGE_SIZE 4096
 
 uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
@@ -196,13 +198,7 @@ c_start (void *ipc_buffer, void *boot_info)
 
   printf ("Largest untyped: %lx (size: %lu)\n", untyped, largest_untyped_size);
 
-  cptr_t endpoint_cap = allocate (untyped, cap_endpoint, 1);
-  cptr_t notification_cap = allocate (untyped, cap_notification, 1);
-  cptr_t badged_notification_cap = cptr_alloc ();
-
-  cnode_mint (init_cap_root_cnode, badged_notification_cap, 64,
-              init_cap_root_cnode, notification_cap, 64, cap_rights_all, 1);
-
+  cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_endpoint = allocate (untyped, cap_endpoint, 1);
 
   cptr_t serial_data_available = allocate (untyped, cap_notification, 1);
@@ -220,10 +216,11 @@ c_start (void *ipc_buffer, void *boot_info)
   cptr_t cnode = allocate_with_size (untyped, cap_cnode, 6, 1);
   printf ("CNode: %lx\n", cnode);
 
-  enumerate_pci_bus ();
+  // enumerate_pci_bus ();
 
   void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
   void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
+  void *captest_elf = find_tar_entry (bi->initrd, "captest");
 
   if (!proctest_elf)
     {
@@ -237,20 +234,23 @@ c_start (void *ipc_buffer, void *boot_info)
       halt_forever ();
     }
 
+  if (!captest_elf)
+    {
+      printf ("Failed to find captest in initrd\n");
+      halt_forever ();
+    }
+
   {
     struct thread_data td = {
       .elf_header = proctest_elf,
       .untyped = untyped,
       .scratch_vspace = init_cap_init_vspace,
-      .arguments[0] = endpoint_cap,
+      .arguments[0] = calculator_endpoint,
     };
 
     int err = spawn_thread (&td);
     if (err)
-      {
-        printf ("Error spawning thread: %d\n", err);
-        halt_forever ();
-      }
+      printf ("Error spawning thread: %d\n", err);
     else
       {
         printf ("Successfully spawned thread\n");
@@ -285,15 +285,44 @@ c_start (void *ipc_buffer, void *boot_info)
     int err = spawn_thread (&td);
 
     if (err)
-      {
-        printf ("Error creating serial_driver process\n");
-        halt_forever ();
-      }
+      printf ("Error creating serial_driver process\n");
     else
       printf ("Successfully created serial_driver process\n");
 
     tcb_bind_notification (td.tcb, irq_nfn_cap);
     tcb_resume (td.tcb);
+  }
+
+  {
+    cptr_t ep_cap = allocate (untyped, cap_endpoint, 1);
+    cptr_t cnode_cap = allocate_with_size (untyped, cap_cnode, 1, 4);
+
+    cnode_copy (cnode_cap, captest_endpoint, 64, init_cap_root_cnode,
+                ep_cap, 64, cap_rights_all);
+
+    struct thread_data td = {
+      .elf_header = captest_elf,
+      .untyped = untyped,
+      .scratch_vspace = init_cap_init_vspace,
+      .cspace_root = cnode_cap,
+    };
+
+    int err = spawn_thread (&td);
+
+    if (err)
+      printf ("Error creating captest process\n");
+    else
+      {
+        printf ("Successfully created captest process\n");
+        tcb_resume (td.tcb);
+      }
+
+    for (int i = 0; i < 5; i++)
+      {
+        printf ("Calling captest\n");
+        word_t reply_badge;
+        call (ep_cap, 0, &reply_badge);
+      }
   }
 
   // yield ();
@@ -305,15 +334,6 @@ c_start (void *ipc_buffer, void *boot_info)
       send (serial_endpoint, info);
     }
 
-  word_t notification_word = 0;
-
-  tcb_bind_notification (init_cap_init_tcb, notification_cap);
-
-  printf ("waiting for notification (but it's bound so not really)\n");
-  // wait (notification_cap, &notification_word);
-  recv (endpoint_cap, &notification_word);
-  printf ("got notification; word is %lu\n", notification_word);
-
   word_t badge;
 
   // word_t number = 1;
@@ -322,16 +342,16 @@ c_start (void *ipc_buffer, void *boot_info)
   while (true)
     {
       // set_mr (0, number);
-      // call (endpoint_cap, new_message_info (1, 0, 0, 1), &badge);
+      // call (calculator_endpoint, new_message_info (1, 0, 0, 1), &badge);
       // printf ("Method 1, Response: %lu\n", (number = get_mr (0)));
 
       // set_mr (0, number);
-      // call (endpoint_cap, new_message_info (2, 0, 0, 1), &badge);
+      // call (calculator_endpoint, new_message_info (2, 0, 0, 1), &badge);
       // printf ("Method 2, Response: %lu\n", (number = get_mr (0)));
 
       set_mr (0, a);
       set_mr (1, b);
-      call (endpoint_cap, new_message_info (4, 0, 0, 2), &badge);
+      call (calculator_endpoint, new_message_info (4, 0, 0, 2), &badge);
       a = b;
       b = get_mr (0);
 
