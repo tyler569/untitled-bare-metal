@@ -187,8 +187,8 @@ c_start (void *ipc_buffer, void *boot_info)
   print_bootinfo_information ();
   print_to_e9 ("Hello World!\n");
 
-  word_t untyped;
-  word_t largest_untyped_size;
+  word_t untyped = 0;
+  word_t largest_untyped_size = 0;
   for (size_t i = 0; i < bi->n_untypeds; i++)
     if (bi->untypeds[i].size_bits > largest_untyped_size)
       {
