@@ -55,12 +55,19 @@ print_bootinfo_information ()
           bi->empty_range.end);
   printf ("  .n_untypeds = %lu\n", bi->n_untypeds);
 
+  size_t total_untyped_size = 0;
+
   for (word_t i = 0; i < bi->n_untypeds; i++)
     {
       printf ("  .untyped[%lu]: paddr = %016lx, size = %lu, is_device = %i\n",
               i, bi->untypeds[i].base, 1ul << bi->untypeds[i].size_bits,
               bi->untypeds[i].is_device);
+
+      if (!bi->untypeds[i].is_device)
+        total_untyped_size += 1ul << bi->untypeds[i].size_bits;
     }
+  printf ("Total untyped size: %zu (%zu MB)\n", total_untyped_size,
+          total_untyped_size / 1024 / 1024);
   printf ("\n");
 }
 
@@ -202,9 +209,9 @@ c_start (void *ipc_buffer, void *boot_info)
   x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
                                 init_cap_root_cnode, pci_io_port, 64);
 
-  void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
-
   enumerate_pci_bus ();
+
+  void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
 
   if (!proctest_elf)
     printf ("Failed to find testproc in initrd\n");
