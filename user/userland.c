@@ -10,6 +10,7 @@
 #include "./lib.h"
 
 #include "./captest.h"
+#include "./calculator_server.h"
 
 #define PAGE_SIZE 4096
 
@@ -218,11 +219,11 @@ c_start (void *ipc_buffer, void *boot_info)
 
   // enumerate_pci_bus ();
 
-  void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
+  void *calculator_elf = find_tar_entry (bi->initrd, "calculator_server");
   void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
   void *captest_elf = find_tar_entry (bi->initrd, "captest");
 
-  if (!proctest_elf)
+  if (!calculator_elf)
     {
       printf ("Failed to find testproc in initrd\n");
       halt_forever ();
@@ -242,7 +243,7 @@ c_start (void *ipc_buffer, void *boot_info)
 
   {
     struct thread_data td = {
-      .elf_header = proctest_elf,
+      .elf_header = calculator_elf,
       .untyped = untyped,
       .scratch_vspace = init_cap_init_vspace,
       .arguments[0] = calculator_endpoint,
@@ -341,17 +342,21 @@ c_start (void *ipc_buffer, void *boot_info)
 
   while (true)
     {
+      message_info_t info;
       // set_mr (0, number);
-      // call (calculator_endpoint, new_message_info (1, 0, 0, 1), &badge);
+      // info = new_message_info (calculator_ret42, 0, 0, 1);
+      // call (calculator_endpoint, info, &badge);
       // printf ("Method 1, Response: %lu\n", (number = get_mr (0)));
 
       // set_mr (0, number);
-      // call (calculator_endpoint, new_message_info (2, 0, 0, 1), &badge);
+      // info = new_message_info (calculator_double, 0, 0, 1);
+      // call (calculator_endpoint, info, &badge);
       // printf ("Method 2, Response: %lu\n", (number = get_mr (0)));
 
       set_mr (0, a);
       set_mr (1, b);
-      call (calculator_endpoint, new_message_info (4, 0, 0, 2), &badge);
+      info = new_message_info (calculator_add, 0, 0, 2);
+      call (calculator_endpoint, info, &badge);
       a = b;
       b = get_mr (0);
 
