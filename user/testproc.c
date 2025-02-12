@@ -54,10 +54,8 @@ main (cptr_t endpoint_cap)
 }
 
 void
-c_start (void *ipc_buffer, cptr_t endpoint_cap)
+c_start (cptr_t endpoint_cap)
 {
-  __ipc_buffer = ipc_buffer;
-
   main (endpoint_cap);
   exit (0);
 }
@@ -65,5 +63,6 @@ c_start (void *ipc_buffer, cptr_t endpoint_cap)
 [[noreturn]] USED __attribute__ ((naked)) void
 _start ()
 {
+  asm ("mov %%r15, %0" : "=m"(__ipc_buffer));
   asm volatile ("jmp c_start");
 }

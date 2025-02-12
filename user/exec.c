@@ -60,22 +60,24 @@ map_elf_to_new_vspace (struct elf_ehdr *ehdr, cptr_t untyped, cptr_t vspace,
   return highest_addr;
 }
 
-constexpr size_t stack_pages = 4;
+constexpr size_t default_stack_pages = 4;
 
-cptr_t
-create_process (void *elf_data, size_t elf_size, cptr_t untyped,
-                cptr_t our_vspace)
+int
+spawn_thread (struct thread_data *data)
 {
-  (void)elf_size;
-
-  struct elf_ehdr *ehdr = elf_data;
+  struct elf_ehdr *ehdr = data->elf_header;
   if (!is_elf (ehdr))
-    return 0;
+    return invalid_argument;
+
+  cptr_t untyped = data->untyped;
+  cptr_t our_vspace = data->scratch_vspace;
+  size_t stack_pages = data->stack_pages ?: default_stack_pages;
 
   cptr_t tcb = allocate (untyped, cap_tcb, 1);
   cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
   buffer_t ipc_buffer = create_buffer (untyped, 1);
   buffer_t stack_buffer = create_buffer (untyped, stack_pages);
+  cptr_t cspace_root = data->cspace_root ?: init_cap_root_cnode;
 
   uintptr_t highest_addr
       = map_elf_to_new_vspace (ehdr, untyped, vspace, our_vspace);
@@ -91,17 +93,29 @@ create_process (void *elf_data, size_t elf_size, cptr_t untyped,
 
   map_buffer (untyped, vspace, stack_buffer, highest_addr);
 
-  tcb_configure (tcb, 0, init_cap_root_cnode, 0, vspace, 0, ipc_addr,
+  tcb_configure (tcb, 0, cspace_root, 0, vspace, 0, ipc_addr,
                  ipc_buffer.cptr_base);
 
-  frame_t regs = {};
-  regs.rip = ehdr->entry;
-  regs.rsp = stack_addr;
-  regs.rdi = ipc_addr;
-  regs.cs = 0x23;
-  regs.ss = 0x1b;
+  frame_t regs = {
+    .rip = ehdr->entry,
+    .rsp = stack_addr,
+    .cs = 0x23,
+    .ss = 0x1b,
+    .r15 = ipc_addr,
+    .rdi = data->arguments[0],
+    .rsi = data->arguments[1],
+    .rdx = data->arguments[2],
+    .rcx = data->arguments[3],
+    .r8 = data->arguments[4],
+    .r9 = data->arguments[5],
+  };
 
   tcb_write_registers (tcb, false, 0, sizeof (regs), &regs);
 
-  return tcb;
+  data->tcb = tcb;
+  data->vspace = vspace;
+  data->ipc_buffer = ipc_buffer;
+  data->stack_buffer = stack_buffer;
+
+  return 0;
 }

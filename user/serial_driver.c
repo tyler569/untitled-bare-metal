@@ -99,7 +99,7 @@ read_from_buffer ()
 }
 
 [[noreturn]] int
-main (void *, cptr_t cap, cptr_t ep, cptr_t irq, cptr_t nfn)
+main (cptr_t cap, cptr_t ep, cptr_t irq, cptr_t nfn)
 {
   printf ("Hello from serial driver\n");
   serial_port_cap = cap;
@@ -116,7 +116,7 @@ main (void *, cptr_t cap, cptr_t ep, cptr_t irq, cptr_t nfn)
       word_t badge = 0;
       info = recv (ep, &badge);
 
-      if (badge == 0xFFFFFFFF)
+      if (badge == 0xFFFF)
         read_uart ();
       else if (get_message_label (info) == 1)
         write_uart (info);
@@ -128,6 +128,6 @@ main (void *, cptr_t cap, cptr_t ep, cptr_t irq, cptr_t nfn)
 __attribute__ ((naked, used)) void
 _start ()
 {
-  asm ("mov %%rdi, %0" : "=m"(__ipc_buffer));
+  asm ("mov %%r15, %0" : "=m"(__ipc_buffer));
   asm ("jmp main");
 }

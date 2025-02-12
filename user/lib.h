@@ -49,8 +49,26 @@ cptr_t allocate (cptr_t untyped, word_t type, size_t n);
 cptr_t allocate_with_size (cptr_t untyped, word_t type, size_t n,
                            uint8_t size_bits);
 
-cptr_t create_process (void *elf_data, size_t elf_size, cptr_t untyped,
-                       cptr_t our_vspace);
+struct thread_data
+{
+  void *elf_header;
+  size_t elf_size;
+  cptr_t untyped;
+  cptr_t scratch_vspace;
+
+  // optional
+  size_t stack_pages;
+  cptr_t cspace_root;
+  word_t arguments[6];
+
+  // filled in by spawn_thread
+  cptr_t tcb;
+  cptr_t vspace;
+  buffer_t ipc_buffer;
+  buffer_t stack_buffer;
+};
+
+int spawn_thread (struct thread_data *data);
 
 static inline void
 set_mr (word_t i, word_t val)

@@ -166,6 +166,14 @@ enumerate_pci_bus ()
         }
 }
 
+[[noreturn]] void
+halt_forever ()
+{
+  printf ("Halting forever\n");
+  tcb_suspend (init_cap_init_tcb);
+  unreachable ();
+}
+
 [[noreturn]] int
 c_start (void *ipc_buffer, void *boot_info)
 {
@@ -215,66 +223,78 @@ c_start (void *ipc_buffer, void *boot_info)
   enumerate_pci_bus ();
 
   void *proctest_elf = find_tar_entry (bi->initrd, "testproc");
-
-  if (!proctest_elf)
-    printf ("Failed to find testproc in initrd\n");
-  else
-    {
-      cptr_t proc_tcb_cap
-          = create_process (proctest_elf, 0, untyped, init_cap_init_vspace);
-
-      frame_t frame;
-      tcb_read_registers (proc_tcb_cap, false, 0, 0, &frame);
-      frame.rsi = endpoint_cap;
-      tcb_write_registers (proc_tcb_cap, false, 0, 0, &frame);
-
-      if (proc_tcb_cap == 0)
-        printf ("Error creating process\n");
-      else
-        printf ("Successfully created process\n");
-
-      tcb_resume (proc_tcb_cap);
-    }
-
   void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
 
-  if (!serial_driver_elf)
-    printf ("Failed to find serial_driver in initrd\n");
-  else
+  if (!proctest_elf)
     {
-      cptr_t proc_serial_driver_cap = create_process (
-          serial_driver_elf, 0, untyped, init_cap_init_vspace);
-
-      if (proc_serial_driver_cap == 0)
-        printf ("Error creating serial_driver process\n");
-      else
-        printf ("Successfully created serial_driver process\n");
-
-      cptr_t serial_port_cap = cptr_alloc ();
-      x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff,
-                                    init_cap_root_cnode, serial_port_cap, 64);
-
-      const cptr_t irq_cap = cptr_alloc ();
-      const cptr_t irq_nfn_cap = allocate (untyped, cap_notification, 1);
-      const cptr_t badged_irq_nfn_cap = cptr_alloc ();
-
-      irq_control_get (init_cap_irq_control, 4, init_cap_root_cnode, irq_cap,
-                       64);
-      cnode_mint (init_cap_root_cnode, badged_irq_nfn_cap, 64,
-                  init_cap_root_cnode, irq_nfn_cap, 64, cap_rights_all, 0xFFFF'FFFF);
-      tcb_bind_notification (proc_serial_driver_cap, irq_nfn_cap);
-      irq_handler_set_notification (irq_cap, badged_irq_nfn_cap);
-
-      frame_t frame;
-      tcb_read_registers (proc_serial_driver_cap, false, 0, 0, &frame);
-      frame.rsi = serial_port_cap;
-      frame.rdx = serial_endpoint;
-      frame.rcx = irq_cap;
-      frame.r8 = badged_serial_data_available;
-      tcb_write_registers (proc_serial_driver_cap, false, 0, 0, &frame);
-
-      tcb_resume (proc_serial_driver_cap);
+      printf ("Failed to find testproc in initrd\n");
+      halt_forever ();
     }
+
+  if (!serial_driver_elf)
+    {
+      printf ("Failed to find serial_driver in initrd\n");
+      halt_forever ();
+    }
+
+  {
+    struct thread_data td = {
+      .elf_header = proctest_elf,
+      .untyped = untyped,
+      .scratch_vspace = init_cap_init_vspace,
+      .arguments[0] = endpoint_cap,
+    };
+
+    int err = spawn_thread (&td);
+    if (err)
+      {
+        printf ("Error spawning thread: %d\n", err);
+        halt_forever ();
+      }
+    else
+      {
+        printf ("Successfully spawned thread\n");
+        tcb_resume (td.tcb);
+      }
+  }
+
+  {
+    cptr_t serial_port_cap = cptr_alloc ();
+    x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff,
+                                  init_cap_root_cnode, serial_port_cap, 64);
+
+    const cptr_t irq_cap = cptr_alloc ();
+    const cptr_t irq_nfn_cap = allocate (untyped, cap_notification, 1);
+    const cptr_t badged_irq_nfn_cap = cptr_alloc ();
+
+    irq_control_get (init_cap_irq_control, 4, init_cap_root_cnode, irq_cap,
+                     64);
+    cnode_mint (init_cap_root_cnode, badged_irq_nfn_cap, 64,
+                init_cap_root_cnode, irq_nfn_cap, 64, cap_rights_all, 0xFFFF);
+    irq_handler_set_notification (irq_cap, badged_irq_nfn_cap);
+
+    struct thread_data td = {
+      .elf_header = serial_driver_elf,
+      .untyped = untyped,
+      .scratch_vspace = init_cap_init_vspace,
+      .arguments[0] = serial_port_cap,
+      .arguments[1] = serial_endpoint,
+      .arguments[2] = irq_cap,
+      .arguments[3] = badged_serial_data_available,
+    };
+    int err = spawn_thread (&td);
+
+    if (err)
+      {
+        printf ("Error creating serial_driver process\n");
+        halt_forever ();
+      }
+    else
+      printf ("Successfully created serial_driver process\n");
+
+    tcb_bind_notification (td.tcb, irq_nfn_cap);
+    tcb_resume (td.tcb);
+  }
 
   // yield ();
 
