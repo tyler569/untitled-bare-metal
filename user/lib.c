@@ -119,6 +119,15 @@ allocate (cptr_t untyped, word_t type, size_t n)
   return cptr;
 }
 
+cptr_t
+allocate_with_size (cptr_t untyped, word_t type, size_t n, uint8_t size_bits)
+{
+  cptr_t cptr = cptr_alloc_range (n);
+  untyped_retype (untyped, type, size_bits, init_cap_root_cnode,
+                  init_cap_root_cnode, 64, cptr, n);
+  return cptr;
+}
+
 // memory management, mapping and unmapping
 
 int

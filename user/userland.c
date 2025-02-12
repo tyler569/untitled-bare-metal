@@ -209,6 +209,9 @@ c_start (void *ipc_buffer, void *boot_info)
   x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
                                 init_cap_root_cnode, pci_io_port, 64);
 
+  cptr_t cnode = allocate_with_size (untyped, cap_cnode, 6, 1);
+  printf ("CNode: %lx\n", cnode);
+
   enumerate_pci_bus ();
 
   void *proctest_elf = find_tar_entry (bi->initrd, "testproc");

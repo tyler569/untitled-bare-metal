@@ -45,6 +45,10 @@ int map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer,
 uintptr_t map_buffer_to_mappable_space (cptr_t untyped, cptr_t vspace,
                                         buffer_t buffer);
 
+cptr_t allocate (cptr_t untyped, word_t type, size_t n);
+cptr_t allocate_with_size (cptr_t untyped, word_t type, size_t n,
+                           uint8_t size_bits);
+
 cptr_t create_process (void *elf_data, size_t elf_size, cptr_t untyped,
                        cptr_t our_vspace);
 
