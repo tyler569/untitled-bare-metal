@@ -118,3 +118,69 @@ allocate (cptr_t untyped, word_t type, size_t n)
                   64, cptr, n);
   return cptr;
 }
+
+// memory management, mapping and unmapping
+
+int
+map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
+{
+  while (1)
+    {
+      int err = x86_64_page_map (page, vspace, addr, 0x7);
+
+      if (err != failed_lookup) // including "no_error"
+        return err;
+
+      switch (get_mr (0))
+        {
+        case 3:
+          cptr_t pdpt = allocate (untyped, cap_x86_64_pdpt, 1);
+          assert (x86_64_pdpt_map (pdpt, vspace, addr, 0x7) == no_error);
+          break;
+        case 2:
+          cptr_t pd = allocate (untyped, cap_x86_64_pd, 1);
+          assert (x86_64_pd_map (pd, vspace, addr, 0x7) == no_error);
+          break;
+        case 1:
+          cptr_t pt = allocate (untyped, cap_x86_64_pt, 1);
+          assert (x86_64_pt_map (pt, vspace, addr, 0x7) == no_error);
+          break;
+        default:
+          assert (0);
+        }
+    }
+}
+
+buffer_t
+create_buffer (cptr_t untyped, size_t pages)
+{
+  return (buffer_t){ allocate (untyped, cap_x86_64_page, pages), pages };
+}
+
+int
+map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer, uintptr_t addr)
+{
+  int err;
+  for (size_t i = 0; i < buffer.pages; i++)
+    {
+      err = map_page (untyped, vspace, buffer.cptr_base + i,
+                      addr + i * 0x1000);
+      if (err != 0)
+        return err;
+    }
+
+  return no_error;
+}
+
+uintptr_t mappable_addr = 0x900000;
+
+uintptr_t
+map_buffer_to_mappable_space (cptr_t untyped, cptr_t vspace, buffer_t buffer)
+{
+  uintptr_t addr = mappable_addr;
+  int err = map_buffer (untyped, vspace, buffer, addr);
+  mappable_addr += buffer.pages * 0x1000;
+  if (err != 0)
+    return 0;
+  return addr;
+}
