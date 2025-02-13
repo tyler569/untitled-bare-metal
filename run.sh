@@ -5,7 +5,7 @@ mem="128M"
 smp=2
 debugopt="-debugcon stdio"
 serialopt="-serial unix:/tmp/vm_uart.sock,server,nowait"
-netopt="-net nic,model=e1000 -net user"
+netopt="-net nic,model=e1000e -net user"
 gdbserver=""
 video="-display none -vga virtio"
 tee="|& tee last_output"

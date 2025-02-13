@@ -14,4 +14,3 @@ enum
 
   calculator_error_unknown = 5,
 };
-

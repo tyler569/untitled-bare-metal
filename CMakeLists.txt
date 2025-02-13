@@ -44,6 +44,7 @@ foreach (program ${targets_to_archive})
     user/cptr_alloc.c
     user/exec.c
     user/lib.c
+    user/pci.c
     lib/num.c
     lib/print.c
     lib/string.c

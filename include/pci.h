@@ -24,6 +24,7 @@ constexpr uint16_t PCI_BAR2 = 0x18;
 constexpr uint16_t PCI_BAR3 = 0x1C;
 constexpr uint16_t PCI_BAR4 = 0x20;
 constexpr uint16_t PCI_BAR5 = 0x24;
+constexpr uint16_t PCI_CAPABILITY_LIST = 0x34;
 constexpr uint16_t PCI_INTERRUPT_LINE = 0x3C;
 constexpr uint16_t PCI_INTERRUPT_PIN = 0x3D;
 

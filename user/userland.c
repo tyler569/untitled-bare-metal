@@ -8,9 +8,10 @@
 #include "tar.h"
 
 #include "./lib.h"
+#include "./pci_util.h"
 
-#include "./captest.h"
 #include "./calculator_server.h"
+#include "./captest.h"
 
 #define PAGE_SIZE 4096
 
@@ -76,99 +77,6 @@ print_bootinfo_information ()
 
 cptr_t pci_io_port;
 
-uint32_t
-pci_read_l (uint32_t addr)
-{
-  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_ADDRESS, addr);
-  x86_64_io_port_in32 (pci_io_port, PCI_CONFIG_DATA);
-  return get_mr (0);
-}
-
-uint16_t
-pci_read_w (uint32_t addr)
-{
-  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_ADDRESS, addr);
-  x86_64_io_port_in16 (pci_io_port, PCI_CONFIG_DATA);
-  return get_mr (0);
-}
-
-uint8_t
-pci_read_b (uint32_t addr)
-{
-  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_ADDRESS, addr);
-  x86_64_io_port_in8 (pci_io_port, PCI_CONFIG_DATA);
-  return get_mr (0);
-}
-
-void
-pci_write_l (uint32_t addr, uint32_t value)
-{
-  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_ADDRESS, addr);
-  x86_64_io_port_out32 (pci_io_port, PCI_CONFIG_DATA, value);
-}
-
-void
-print_device_info (uint32_t pci_address)
-{
-  uint16_t vendor_id = pci_read_w (pci_address + PCI_VENDOR_ID);
-  uint16_t device_id = pci_read_w (pci_address + PCI_DEVICE_ID);
-  uint8_t class_code = pci_read_w (pci_address + PCI_CLASS);
-  uint8_t subclass = pci_read_w (pci_address + PCI_SUBCLASS);
-  uint8_t prog_if = pci_read_w (pci_address + PCI_PROG_IF);
-  uint8_t revision_id = pci_read_w (pci_address + PCI_REVISION_ID);
-  uint8_t irq = pci_read_b (pci_address + PCI_INTERRUPT_LINE);
-
-  printf ("PCI Device: %04x:%04x at addr %08x\n", vendor_id, device_id,
-          pci_address);
-  printf ("  Class: %02x, Subclass: %02x, Prog IF: %02x, Revision: %02x IRQ: "
-          "%02x\n",
-          class_code, subclass, prog_if, revision_id, irq);
-
-  for (uint32_t i = 0; i < 6; i++)
-    {
-      uint32_t bar = pci_read_l (pci_address + PCI_BAR0 + i * 4);
-      if (bar)
-        {
-          pci_write_l (pci_address + PCI_BAR0 + i * 4, 0xffffffff);
-          uint32_t mask = pci_read_l (pci_address + PCI_BAR0 + i * 4);
-          pci_write_l (pci_address + PCI_BAR0 + i * 4, bar);
-          bool is_io = bar & 1;
-          if (bar & 1)
-            {
-              bar &= 0xfffffffc;
-              mask &= 0xfffffffc;
-            }
-          else
-            {
-              mask &= 0xfffffff0;
-              bar &= 0xfffffff0;
-            }
-
-          uint32_t size = ~mask + 1;
-
-          if (is_io)
-            printf ("  - BAR%d: I/O %08x, Mask: %08x, Size: %x\n", i, bar,
-                    mask, size);
-          else
-            printf ("  - BAR%d: Mem %08x, Mask: %08x, Size: %x\n", i, bar,
-                    mask, size);
-        }
-    }
-}
-
-void
-enumerate_pci_bus ()
-{
-  for (uint32_t bus = 0; bus < 256; bus++)
-    for (uint32_t dev = 0; dev < 32; dev++)
-      for (uint32_t func = 0; func < 8; func++)
-        {
-          uint32_t addr = pci_addr (bus, dev, func, 0);
-          if (pci_read_l (addr) != 0xffffffff)
-            print_device_info (addr);
-        }
-}
-
 [[noreturn]] void
 halt_forever ()
 {
@@ -217,7 +125,7 @@ c_start (void *ipc_buffer, void *boot_info)
   cptr_t cnode = allocate_with_size (untyped, cap_cnode, 6, 1);
   printf ("CNode: %lx\n", cnode);
 
-  // enumerate_pci_bus ();
+  enumerate_pci_bus (pci_io_port);
 
   void *calculator_elf = find_tar_entry (bi->initrd, "calculator_server");
   void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
@@ -298,8 +206,8 @@ c_start (void *ipc_buffer, void *boot_info)
     cptr_t ep_cap = allocate (untyped, cap_endpoint, 1);
     cptr_t cnode_cap = allocate_with_size (untyped, cap_cnode, 1, 4);
 
-    cnode_copy (cnode_cap, captest_endpoint, 64, init_cap_root_cnode,
-                ep_cap, 64, cap_rights_all);
+    cnode_copy (cnode_cap, captest_endpoint, 64, init_cap_root_cnode, ep_cap,
+                64, cap_rights_all);
 
     struct thread_data td = {
       .elf_header = captest_elf,
