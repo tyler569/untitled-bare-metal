@@ -81,7 +81,7 @@ invoke_notification_send (cte_t *cap)
 }
 
 message_info_t
-invoke_notification_recv (cte_t *cap, word_t *nfn_word)
+invoke_notification_recv (cte_t *cap)
 {
   assert (cap_type (cap) == cap_notification);
 
@@ -101,7 +101,6 @@ invoke_notification_recv (cte_t *cap, word_t *nfn_word)
       return 0;
     }
 
-  *nfn_word = n->word;
   n->word = 0;
 
   return return_ipc (no_error, 0);

@@ -128,8 +128,8 @@ map_huge_page ()
   int err = x86_64_huge_page_map (page, init_cap_init_vspace, 0x60'0000, 0xff);
   if (err != no_error)
     {
-      printf ("Failed to map huge page: %s\n", error_string (err));
-      return;
+    printf ("Failed to map huge page: %s\n", error_string (err));
+    return;
     }
   printf ("Mapped huge page\n");
 
@@ -142,8 +142,8 @@ map_huge_page ()
   err = x86_64_huge_page_map (page, init_cap_init_vspace, 0x120'0000, 0xff);
   if (err != no_error)
     {
-      printf ("Failed to map huge page: %s\n", error_string (err));
-      return;
+    printf ("Failed to map huge page: %s\n", error_string (err));
+    return;
     }
   printf ("Mapped huge page\n");
 
@@ -152,8 +152,8 @@ map_huge_page ()
       volatile uint8_t *ptr = (volatile uint8_t *)(0x120'0000 + i);
       if (*ptr != 0x42)
         {
-          printf ("Failed to read back value\n");
-          return;
+      printf ("Failed to read back value\n");
+      return;
         }
     }
 }
@@ -214,10 +214,10 @@ c_start (void *ipc_buffer, void *boot_info)
 
   {
     struct thread_data td = {
-        .elf_header = calculator_elf,
-        .untyped = untyped,
-        .scratch_vspace = init_cap_init_vspace,
-        .arguments[0] = calculator_endpoint,
+      .elf_header = calculator_elf,
+      .untyped = untyped,
+      .scratch_vspace = init_cap_init_vspace,
+      .arguments[0] = calculator_endpoint,
     };
 
     int err = spawn_thread (&td);
@@ -246,13 +246,13 @@ c_start (void *ipc_buffer, void *boot_info)
     irq_handler_set_notification (irq_cap, badged_irq_nfn_cap);
 
     struct thread_data td = {
-        .elf_header = serial_driver_elf,
-        .untyped = untyped,
-        .scratch_vspace = init_cap_init_vspace,
-        .arguments[0] = serial_port_cap,
-        .arguments[1] = serial_endpoint,
-        .arguments[2] = irq_cap,
-        .arguments[3] = badged_serial_data_available,
+      .elf_header = serial_driver_elf,
+      .untyped = untyped,
+      .scratch_vspace = init_cap_init_vspace,
+      .arguments[0] = serial_port_cap,
+      .arguments[1] = serial_endpoint,
+      .arguments[2] = irq_cap,
+      .arguments[3] = badged_serial_data_available,
     };
     int err = spawn_thread (&td);
 

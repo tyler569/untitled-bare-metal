@@ -83,9 +83,9 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       ASSERT_ENDPOINT (slot);
 
       if (cap_type (slot) == cap_notification)
-        info = invoke_notification_recv (slot, &f->rdi);
+        info = invoke_notification_recv (slot);
       else if (cap_type (slot) == cap_endpoint)
-        info = invoke_endpoint_recv (slot, &f->rdi);
+        info = invoke_endpoint_recv (slot);
       break;
     case sys_reply:
       dbg_printf ("sys_reply (info: %#lx)\n", a0);
@@ -98,7 +98,7 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
 
       ASSERT_ENDPOINT (slot);
 
-      info = invoke_reply_recv (slot, a1, &f->rdi);
+      info = invoke_reply_recv (slot, a1);
       break;
     case sys_yield:
       dbg_printf ("sys_yield ()\n");
