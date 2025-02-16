@@ -160,6 +160,15 @@ endpoint_send (struct endpoint *e, word_t message_info, word_t badge,
     send_message_to_blocked_receiver (e, message_info, badge, true);
 }
 
+static void
+endpoint_nbsend (struct endpoint *e, word_t message_info, word_t badge)
+{
+  if (is_send_blocked (e))
+    return;
+
+  send_message_to_blocked_receiver (e, message_info, badge, false);
+}
+
 static message_info_t
 endpoint_recv (struct endpoint *e)
 {
@@ -168,6 +177,15 @@ endpoint_recv (struct endpoint *e)
   else
     return receive_message_from_blocked_sender (e);
   return 0;
+}
+
+static void
+endpoint_nbrecv (struct endpoint *e)
+{
+  if (is_receive_blocked (e))
+    return;
+
+  receive_message_from_blocked_sender (e);
 }
 
 static void
@@ -191,6 +209,18 @@ invoke_endpoint_send (cte_t *cap, word_t message_info)
   endpoint_send (e, message_info, cap->cap.badge, false);
 }
 
+void
+invoke_endpoint_nbsend (cte_t *cap, word_t message_info)
+{
+  assert (cap_type (cap) == cap_endpoint);
+
+  this_tcb->expects_reply = false;
+
+  struct endpoint *e = cap_ptr (cap);
+  maybe_init_endpoint (e);
+  endpoint_nbsend (e, message_info, cap->cap.badge);
+}
+
 message_info_t
 invoke_endpoint_recv (cte_t *cap)
 {
@@ -207,6 +237,25 @@ invoke_endpoint_recv (cte_t *cap)
   maybe_init_endpoint (e);
   return endpoint_recv (e);
 }
+
+message_info_t
+invoke_endpoint_nbrecv (cte_t *cap)
+{
+  assert (cap_type (cap) == cap_endpoint);
+
+  if (this_tcb->bound_notification && this_tcb->bound_notification->word)
+    {
+      this_tcb->current_user_frame->rdi = this_tcb->bound_notification->word;
+      this_tcb->bound_notification->word = 0;
+      return 0;
+    }
+
+  struct endpoint *e = cap_ptr (cap);
+  maybe_init_endpoint (e);
+  endpoint_nbrecv (e);
+  return 0;
+}
+
 
 message_info_t
 invoke_endpoint_call (cte_t *cap, word_t message_info)

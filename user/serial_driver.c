@@ -81,7 +81,7 @@ read_from_buffer ()
   memset (buffer, 0, sizeof (buffer));
   buffer_size = 0;
 
-  send (serial_callback_endpoint_cap, resp);
+  nbsend (serial_callback_endpoint_cap, resp);
 }
 
 void
@@ -132,8 +132,6 @@ main ()
               printf ("Serial: Invalid number of extra caps\n");
               continue;
             }
-
-          printf ("Serial: Register read\n");
 
           cnode_copy (serial_cnode_cap, serial_callback_endpoint_cap, 64,
                       serial_cnode_cap, serial_staging_recv_cap, 64,

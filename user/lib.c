@@ -45,6 +45,13 @@ send (cptr_t cap, message_info_t info)
 }
 
 void
+nbsend (cptr_t cap, message_info_t info)
+{
+  __ipc_buffer->tag = info;
+  _syscall2 (sys_nbsend, cap, info);
+}
+
+void
 signal (cptr_t cap)
 {
   _syscall2 (sys_send, cap, 0);
@@ -68,6 +75,12 @@ message_info_t
 recv (cptr_t cap, word_t *sender)
 {
   return _syscall22 (sys_recv, cap, 0, sender);
+}
+
+message_info_t
+nbrecv (cptr_t cap, word_t *sender)
+{
+  return _syscall22 (sys_nbrecv, cap, 0, sender);
 }
 
 void
