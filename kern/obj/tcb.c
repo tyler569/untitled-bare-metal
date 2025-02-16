@@ -184,6 +184,26 @@ tcb_set_debug (cte_t *cap, word_t flags)
   return no_error;
 }
 
+error_t
+tcb_set_name (cte_t *cap, char *name, word_t len)
+{
+  struct tcb *tcb = cap_ptr (cap);
+  strncpy (tcb->name, name, len);
+  return no_error;
+}
+
+void
+print_this_tcb ()
+{
+  if (this_tcb)
+    if (this_tcb->name[0])
+      printf ("this_tcb: %p (known as %s)\n", this_tcb, this_tcb->name);
+    else
+      printf ("this_tcb: %p\n", this_tcb);
+  else
+    printf ("no tcb\n");
+}
+
 void
 switch_tcb (struct tcb *t)
 {

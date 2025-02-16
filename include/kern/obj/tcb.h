@@ -49,6 +49,7 @@ struct tcb
   frame_t *current_user_frame;
 
   bool debug;
+  char name[16];
 };
 
 void init_tcbs (void *init_elf);
@@ -70,5 +71,7 @@ void send_message (struct tcb *receiver, uintptr_t message);
 void receive_message ();
 
 int invoke_tcb_method (cap_t tcb, word_t method);
+
+void print_this_tcb ();
 
 #define this_tcb (this_cpu->current_tcb)

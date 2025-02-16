@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "kern/arch.h"
 #include "kern/mem.h"
+#include "kern/obj/tcb.h"
 #include "stdio.h"
 #include "string.h"
 #include "x86_64.h"
@@ -29,6 +30,7 @@ print_interrupt_info (frame_t *f)
       break;
     case 3:
       printf ("Debug trap\n");
+      print_this_tcb ();
       print_frame (f);
       print_backtrace (f);
       break;

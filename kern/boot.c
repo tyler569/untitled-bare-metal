@@ -20,6 +20,8 @@ create_init_tcb (void *initrd, size_t initrd_size)
 
   create_tcb_from_elf_in_this_vm (&init_tcb, init_elf);
 
+  strcpy (init_tcb.name, "bootstrap");
+
   uintptr_t ipc_buffer = 0x7fffffe00000;
   uintptr_t bootinfo = 0x7fffffe01000;
 

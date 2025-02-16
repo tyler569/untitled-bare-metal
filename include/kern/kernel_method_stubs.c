@@ -108,6 +108,12 @@ tcb_set_debug (cte_t *, word_t)
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
+tcb_set_name (cte_t *, char *, word_t)
+{
+  err_printf ("unimplemented kernel method tcb_set_name\n");
+  return illegal_operation;
+}
+__attribute__ ((weak)) message_info_t
 untyped_retype (cte_t *, word_t, word_t, cte_t *, word_t, uint8_t, word_t,
                 word_t)
 {

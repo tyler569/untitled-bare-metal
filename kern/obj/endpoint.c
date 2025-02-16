@@ -57,8 +57,8 @@ transfer_message (message_info_t info, struct tcb *sender,
       copy_cap (recv_slot, cap, cap_rights_all);
     }
 
-  if (this_tcb->expects_reply)
-    receiver->reply_to = this_tcb;
+  if (sender->expects_reply)
+    receiver->reply_to = sender;
 }
 
 static void
@@ -256,7 +256,6 @@ invoke_endpoint_nbrecv (cte_t *cap)
   return 0;
 }
 
-
 message_info_t
 invoke_endpoint_call (cte_t *cap, word_t message_info)
 {
@@ -280,6 +279,7 @@ invoke_reply (word_t message_info)
   if (!receiver || receiver->state != TASK_STATE_CALLING)
     {
       printf ("Failed to deliver reply!\n");
+      debug_trap ();
       kill_tcb (this_tcb);
     }
   send_message_directly (receiver, message_info, 0, false);

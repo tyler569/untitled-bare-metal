@@ -87,6 +87,7 @@ enum method_id
   METHOD_tcb_suspend,
   METHOD_tcb_write_registers,
   METHOD_tcb_set_debug,
+  METHOD_tcb_set_name,
   METHOD_untyped_retype,
   METHOD_x86_64_io_port_in8,
   METHOD_x86_64_io_port_in16,
@@ -114,16 +115,17 @@ enum method_id
 enum error_code
 {
   no_error,
+  alignment_error,
+  delete_first,
+  failed_lookup,
+  illegal_operation,
   invalid_argument,
   invalid_capability,
-  illegal_operation,
-  range_error,
-  alignment_error,
-  truncated_message,
-  delete_first,
-  revoke_first,
+  invalid_root,
   not_enough_memory,
-  failed_lookup,
+  range_error,
+  revoke_first,
+  truncated_message,
   max_error_code,
 };
 
@@ -134,26 +136,28 @@ error_string (error_t error)
     {
     case no_error:
       return "no error";
+    case alignment_error:
+      return "alignment error";
+    case delete_first:
+      return "delete first";
+    case failed_lookup:
+      return "failed lookup";
+    case illegal_operation:
+      return "illegal operation";
     case invalid_argument:
       return "invalid argument";
     case invalid_capability:
       return "invalid capability";
-    case illegal_operation:
-      return "illegal operation";
-    case range_error:
-      return "range error";
-    case alignment_error:
-      return "alignment error";
-    case truncated_message:
-      return "truncated message";
-    case delete_first:
-      return "delete first";
-    case revoke_first:
-      return "revoke first";
+    case invalid_root:
+      return "invalid root";
     case not_enough_memory:
       return "not enough memory";
-    case failed_lookup:
-      return "failed lookup";
+    case range_error:
+      return "range error";
+    case revoke_first:
+      return "revoke first";
+    case truncated_message:
+      return "truncated message";
     default:
       return "unknown";
     }
@@ -163,12 +167,12 @@ enum syscall_number
 {
   sys_exit,
   sys_debug_write,
-  sys_send,
-  sys_recv,
   sys_call,
+  sys_yield,
+  sys_send,
+  sys_nbsend,
+  sys_recv,
+  sys_nbrecv,
   sys_reply,
   sys_replyrecv,
-  sys_nbsend,
-  sys_nbrecv,
-  sys_yield,
 };

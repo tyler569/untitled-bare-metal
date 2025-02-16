@@ -111,6 +111,8 @@ spawn_thread (struct thread_data *data)
   };
 
   tcb_write_registers (tcb, false, 0, sizeof (regs), &regs);
+  if (data->name)
+    tcb_set_name (tcb, data->name, strlen (data->name));
 
   data->tcb = tcb;
   data->vspace = vspace;

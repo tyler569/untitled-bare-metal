@@ -60,6 +60,7 @@ struct thread_data
   size_t stack_pages;
   cptr_t cspace_root;
   word_t arguments[6];
+  char *name;
 
   // filled in by spawn_thread
   cptr_t tcb;

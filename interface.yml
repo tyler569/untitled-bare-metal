@@ -93,6 +93,10 @@ types:
       - name: set_debug
         parameters:
           - { name: flags, type: word_t }
+      - name: set_name
+        parameters:
+          - { name: name, type: "char *" }
+          - { name: len, type: word_t }
   - name: untyped
     methods:
       - name: retype
@@ -203,23 +207,24 @@ types:
 system_calls:
   - sys_exit
   - sys_debug_write
-  - sys_send
-  - sys_recv
   - sys_call
+  - sys_yield
+  - sys_send
+  - sys_nbsend
+  - sys_recv
+  - sys_nbrecv
   - sys_reply
   - sys_replyrecv
-  - sys_nbsend
-  - sys_nbrecv
-  - sys_yield
 errors:
   - no_error
+  - alignment_error
+  - delete_first
+  - failed_lookup
+  - illegal_operation
   - invalid_argument
   - invalid_capability
-  - illegal_operation
-  - range_error
-  - alignment_error
-  - truncated_message
-  - delete_first
-  - revoke_first
+  - invalid_root
   - not_enough_memory
-  - failed_lookup
+  - range_error
+  - revoke_first
+  - truncated_message
