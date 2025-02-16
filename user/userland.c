@@ -12,7 +12,6 @@
 #include "./pci_util.h"
 
 #include "./calculator_server.h"
-#include "./captest.h"
 
 #define PAGE_SIZE 4096
 
@@ -200,7 +199,6 @@ c_start (void *ipc_buffer, void *boot_info)
 
   void *calculator_elf = find_tar_entry (bi->initrd, "calculator_server");
   void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
-  void *captest_elf = find_tar_entry (bi->initrd, "captest");
 
   if (!calculator_elf)
     {
@@ -214,98 +212,58 @@ c_start (void *ipc_buffer, void *boot_info)
       halt_forever ();
     }
 
-  if (!captest_elf)
-    {
-      printf ("Failed to find captest in initrd\n");
-      halt_forever ();
-    }
+  {
+    struct thread_data td = {
+        .elf_header = calculator_elf,
+        .untyped = untyped,
+        .scratch_vspace = init_cap_init_vspace,
+        .arguments[0] = calculator_endpoint,
+    };
 
-    {
-      struct thread_data td = {
-          .elf_header = calculator_elf,
-          .untyped = untyped,
-          .scratch_vspace = init_cap_init_vspace,
-          .arguments[0] = calculator_endpoint,
-      };
+    int err = spawn_thread (&td);
+    if (err)
+      printf ("Error spawning thread: %d\n", err);
+    else
+      {
+        printf ("Successfully spawned thread\n");
+        tcb_resume (td.tcb);
+      }
+  }
 
-      int err = spawn_thread (&td);
-      if (err)
-        printf ("Error spawning thread: %d\n", err);
-      else
-        {
-          printf ("Successfully spawned thread\n");
-          tcb_resume (td.tcb);
-        }
-    }
+  {
+    cptr_t serial_port_cap = cptr_alloc ();
+    x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff,
+                                  init_cap_root_cnode, serial_port_cap, 64);
 
-    {
-      cptr_t serial_port_cap = cptr_alloc ();
-      x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff,
-                                    init_cap_root_cnode, serial_port_cap, 64);
+    const cptr_t irq_cap = cptr_alloc ();
+    const cptr_t irq_nfn_cap = allocate (untyped, cap_notification, 1);
+    const cptr_t badged_irq_nfn_cap = cptr_alloc ();
 
-      const cptr_t irq_cap = cptr_alloc ();
-      const cptr_t irq_nfn_cap = allocate (untyped, cap_notification, 1);
-      const cptr_t badged_irq_nfn_cap = cptr_alloc ();
+    irq_control_get (init_cap_irq_control, 4, init_cap_root_cnode, irq_cap,
+                     64);
+    cnode_mint (init_cap_root_cnode, badged_irq_nfn_cap, 64,
+                init_cap_root_cnode, irq_nfn_cap, 64, cap_rights_all, 0xFFFF);
+    irq_handler_set_notification (irq_cap, badged_irq_nfn_cap);
 
-      irq_control_get (init_cap_irq_control, 4, init_cap_root_cnode, irq_cap,
-                       64);
-      cnode_mint (init_cap_root_cnode, badged_irq_nfn_cap, 64,
-                  init_cap_root_cnode, irq_nfn_cap, 64, cap_rights_all, 0xFFFF);
-      irq_handler_set_notification (irq_cap, badged_irq_nfn_cap);
+    struct thread_data td = {
+        .elf_header = serial_driver_elf,
+        .untyped = untyped,
+        .scratch_vspace = init_cap_init_vspace,
+        .arguments[0] = serial_port_cap,
+        .arguments[1] = serial_endpoint,
+        .arguments[2] = irq_cap,
+        .arguments[3] = badged_serial_data_available,
+    };
+    int err = spawn_thread (&td);
 
-      struct thread_data td = {
-          .elf_header = serial_driver_elf,
-          .untyped = untyped,
-          .scratch_vspace = init_cap_init_vspace,
-          .arguments[0] = serial_port_cap,
-          .arguments[1] = serial_endpoint,
-          .arguments[2] = irq_cap,
-          .arguments[3] = badged_serial_data_available,
-      };
-      int err = spawn_thread (&td);
+    if (err)
+      printf ("Error creating serial_driver process\n");
+    else
+      printf ("Successfully created serial_driver process\n");
 
-      if (err)
-        printf ("Error creating serial_driver process\n");
-      else
-        printf ("Successfully created serial_driver process\n");
-
-      tcb_bind_notification (td.tcb, irq_nfn_cap);
-      tcb_resume (td.tcb);
-    }
-
-    {
-      cptr_t ep_cap = allocate (untyped, cap_endpoint, 1);
-      cptr_t cnode_cap = allocate_with_size (untyped, cap_cnode, 1, 4);
-
-      cnode_copy (cnode_cap, captest_endpoint, 64, init_cap_root_cnode, ep_cap,
-                  64, cap_rights_all);
-
-      struct thread_data td = {
-          .elf_header = captest_elf,
-          .untyped = untyped,
-          .scratch_vspace = init_cap_init_vspace,
-          .cspace_root = cnode_cap,
-      };
-
-      int err = spawn_thread (&td);
-
-      if (err)
-        printf ("Error creating captest process\n");
-      else
-        {
-          printf ("Successfully created captest process\n");
-          tcb_resume (td.tcb);
-        }
-
-      for (int i = 0; i < 5; i++)
-        {
-          printf ("Calling captest\n");
-          word_t reply_badge;
-          call (ep_cap, 0, &reply_badge);
-        }
-    }
-
-  // yield ();
+    tcb_bind_notification (td.tcb, irq_nfn_cap);
+    tcb_resume (td.tcb);
+  }
 
   for (const char *c = "Hello Serial"; *c; c++)
     {
@@ -315,23 +273,11 @@ c_start (void *ipc_buffer, void *boot_info)
     }
 
   word_t badge;
-
-  // word_t number = 1;
   word_t a = 0, b = 1;
 
   while (true)
     {
       message_info_t info;
-      // set_mr (0, number);
-      // info = new_message_info (calculator_ret42, 0, 0, 1);
-      // call (calculator_endpoint, info, &badge);
-      // printf ("Method 1, Response: %lu\n", (number = get_mr (0)));
-
-      // set_mr (0, number);
-      // info = new_message_info (calculator_double, 0, 0, 1);
-      // call (calculator_endpoint, info, &badge);
-      // printf ("Method 2, Response: %lu\n", (number = get_mr (0)));
-
       set_mr (0, a);
       set_mr (1, b);
       info = new_message_info (calculator_add, 0, 0, 2);

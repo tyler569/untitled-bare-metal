@@ -94,6 +94,14 @@ get_cap (word_t i)
   return __ipc_buffer->caps_or_badges[i];
 }
 
+static inline void
+set_receive_path (cptr_t root_cnode, word_t index, uint8_t depth)
+{
+  __ipc_buffer->receive_cnode = root_cnode;
+  __ipc_buffer->receive_index = index;
+  __ipc_buffer->receive_depth = depth;
+}
+
 void send (cptr_t cap, message_info_t info);
 void signal (cptr_t cap);
 message_info_t call (cptr_t cap, message_info_t info, word_t *sender);
