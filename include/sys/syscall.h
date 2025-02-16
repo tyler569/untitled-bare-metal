@@ -86,6 +86,7 @@ enum method_id
   METHOD_tcb_set_tls_base,
   METHOD_tcb_suspend,
   METHOD_tcb_write_registers,
+  METHOD_tcb_set_debug,
   METHOD_untyped_retype,
   METHOD_x86_64_io_port_in8,
   METHOD_x86_64_io_port_in16,

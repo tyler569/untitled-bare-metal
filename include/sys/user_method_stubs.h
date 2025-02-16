@@ -193,6 +193,15 @@ tcb_write_registers (cptr_t obj, bool resume_target, word_t arch_flags,
   return get_message_label (_result);
 }
 static inline int
+tcb_set_debug (cptr_t obj, word_t flags)
+{
+  set_mr (0, (word_t)flags);
+
+  message_info_t _info = new_message_info (METHOD_tcb_set_debug, 0, 0, 1);
+  message_info_t _result = __call_kernel (obj, _info);
+  return get_message_label (_result);
+}
+static inline int
 untyped_retype (cptr_t obj, word_t type, word_t size_bits, cptr_t root,
                 word_t node_index, uint8_t node_depth, word_t node_offset,
                 word_t num_objects)

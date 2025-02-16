@@ -3,6 +3,7 @@
 #include "sys/ipc.h"
 
 #include "lib.h"
+#include "serial_driver.h"
 
 struct ipc_buffer *__ipc_buffer;
 
@@ -19,24 +20,21 @@ constexpr uint16_t UART_MODEM_CONTROL = 0x4;
 constexpr uint16_t UART_LINE_STATUS = 0x5;
 // constexpr uint16_t UART_MODEM_STATUS = 0x6;
 
-cptr_t serial_port_cap;
-cptr_t endpoint_cap;
-cptr_t irq_cap;
-cptr_t notification_cap;
-
 uint8_t buffer[1024];
 size_t buffer_size = 0;
+
+bool have_receiver = false;
 
 void
 port_write (uint16_t port, uint8_t value)
 {
-  x86_64_io_port_out8 (serial_port_cap, SERIAL_PORT + port, value);
+  x86_64_io_port_out8 (serial_serial_port_cap, SERIAL_PORT + port, value);
 }
 
 uint8_t
 port_read (uint16_t port)
 {
-  x86_64_io_port_in8 (serial_port_cap, SERIAL_PORT + port);
+  x86_64_io_port_in8 (serial_serial_port_cap, SERIAL_PORT + port);
   return get_mr (0);
 }
 
@@ -60,18 +58,6 @@ is_data_available ()
 }
 
 void
-read_uart ()
-{
-  while (is_data_available () && buffer_size < sizeof (buffer) - 1)
-    {
-      const uint8_t b = port_read (UART_DATA);
-      buffer[buffer_size++] = b;
-    }
-  irq_handler_ack (irq_cap);
-  signal (notification_cap);
-}
-
-void
 write_uart (message_info_t info)
 {
   uint8_t buffer[256];
@@ -85,7 +71,7 @@ write_uart (message_info_t info)
 void
 read_from_buffer ()
 {
-  size_t to_send = buffer_size > 256 ? 256 : buffer_size;
+  size_t to_send = buffer_size > 100 ? 100 : buffer_size;
 
   message_info_t resp = new_message_info (0, 0, 0, to_send);
 
@@ -95,33 +81,65 @@ read_from_buffer ()
   memset (buffer, 0, sizeof (buffer));
   buffer_size = 0;
 
-  reply (resp);
+  send (serial_callback_endpoint_cap, resp);
+}
+
+void
+handle_irq ()
+{
+  while (is_data_available () && buffer_size < sizeof (buffer) - 1)
+    {
+      const uint8_t b = port_read (UART_DATA);
+      buffer[buffer_size++] = b;
+    }
+
+  irq_handler_ack (serial_irq_cap);
+
+  if (have_receiver)
+    read_from_buffer ();
 }
 
 [[noreturn]] int
-main (cptr_t cap, cptr_t ep, cptr_t irq, cptr_t nfn)
+main ()
 {
   printf ("Hello from serial driver\n");
-  serial_port_cap = cap;
-  endpoint_cap = ep;
-  irq_cap = irq;
-  notification_cap = nfn;
+
+  set_receive_path (serial_cnode_cap, serial_staging_recv_cap, 64);
+  printf ("Receive path set\n");
 
   initialize_uart ();
   printf ("UART initialized\n");
+
+  irq_handler_set_notification (serial_irq_cap,
+                                serial_badged_notification_cap);
+  tcb_bind_notification (serial_tcb_cap, serial_badged_notification_cap);
 
   while (true)
     {
       message_info_t info;
       word_t badge = 0;
-      info = recv (ep, &badge);
+
+      info = recv (serial_endpoint_cap, &badge);
 
       if (badge == 0xFFFF)
-        read_uart ();
-      else if (get_message_label (info) == 1)
+        handle_irq ();
+      else if (get_message_label (info) == serial_driver_write)
         write_uart (info);
-      else if (get_message_label (info) == 2)
-        read_from_buffer ();
+      else if (get_message_label (info) == serial_driver_register)
+        {
+          if (get_message_extra_caps (info) != 1)
+            {
+              printf ("Serial: Invalid number of extra caps\n");
+              continue;
+            }
+
+          printf ("Serial: Register read\n");
+
+          cnode_copy (serial_cnode_cap, serial_callback_endpoint_cap, 64,
+                      serial_cnode_cap, serial_staging_recv_cap, 64,
+                      cap_rights_all);
+          have_receiver = true;
+        }
     }
 }
 

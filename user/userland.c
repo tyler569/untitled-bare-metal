@@ -12,6 +12,7 @@
 #include "./pci_util.h"
 
 #include "./calculator_server.h"
+#include "./serial_driver.h"
 
 #define PAGE_SIZE 4096
 
@@ -128,8 +129,8 @@ map_huge_page ()
   int err = x86_64_huge_page_map (page, init_cap_init_vspace, 0x60'0000, 0xff);
   if (err != no_error)
     {
-    printf ("Failed to map huge page: %s\n", error_string (err));
-    return;
+      printf ("Failed to map huge page: %s\n", error_string (err));
+      return;
     }
   printf ("Mapped huge page\n");
 
@@ -142,8 +143,8 @@ map_huge_page ()
   err = x86_64_huge_page_map (page, init_cap_init_vspace, 0x120'0000, 0xff);
   if (err != no_error)
     {
-    printf ("Failed to map huge page: %s\n", error_string (err));
-    return;
+      printf ("Failed to map huge page: %s\n", error_string (err));
+      return;
     }
   printf ("Mapped huge page\n");
 
@@ -152,8 +153,8 @@ map_huge_page ()
       volatile uint8_t *ptr = (volatile uint8_t *)(0x120'0000 + i);
       if (*ptr != 0x42)
         {
-      printf ("Failed to read back value\n");
-      return;
+          printf ("Failed to read back value\n");
+          return;
         }
     }
 }
@@ -180,19 +181,12 @@ c_start (void *ipc_buffer, void *boot_info)
   cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_endpoint = allocate (untyped, cap_endpoint, 1);
 
-  cptr_t serial_data_available = allocate (untyped, cap_notification, 1);
-  cptr_t badged_serial_data_available = cptr_alloc ();
-
-  cnode_mint (init_cap_root_cnode, badged_serial_data_available, 64,
-              init_cap_root_cnode, serial_data_available, 64, cap_rights_all,
-              1);
-
   pci_io_port = cptr_alloc ();
 
   x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
                                 init_cap_root_cnode, pci_io_port, 64);
 
-  cptr_t cnode = allocate_with_size (untyped, cap_cnode, 6, 1);
+  cptr_t cnode = allocate_with_size (untyped, cap_cnode, 1, 6);
   printf ("CNode: %lx\n", cnode);
 
   enumerate_pci_bus (pci_io_port);
@@ -212,58 +206,70 @@ c_start (void *ipc_buffer, void *boot_info)
       halt_forever ();
     }
 
-  {
-    struct thread_data td = {
-      .elf_header = calculator_elf,
-      .untyped = untyped,
-      .scratch_vspace = init_cap_init_vspace,
-      .arguments[0] = calculator_endpoint,
-    };
+    {
+      struct thread_data td = {
+          .elf_header = calculator_elf,
+          .untyped = untyped,
+          .scratch_vspace = init_cap_init_vspace,
+          .arguments[0] = calculator_endpoint,
+      };
 
-    int err = spawn_thread (&td);
-    if (err)
-      printf ("Error spawning thread: %d\n", err);
-    else
-      {
-        printf ("Successfully spawned thread\n");
-        tcb_resume (td.tcb);
-      }
-  }
+      int err = spawn_thread (&td);
+      if (err)
+        printf ("Error spawning thread: %d\n", err);
+      else
+        {
+          printf ("Successfully spawned thread\n");
+          tcb_resume (td.tcb);
+        }
+    }
 
-  {
-    cptr_t serial_port_cap = cptr_alloc ();
-    x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff,
-                                  init_cap_root_cnode, serial_port_cap, 64);
+    {
+      cptr_t cnode = allocate_with_size (untyped, cap_cnode, 1, 4);
 
-    const cptr_t irq_cap = cptr_alloc ();
-    const cptr_t irq_nfn_cap = allocate (untyped, cap_notification, 1);
-    const cptr_t badged_irq_nfn_cap = cptr_alloc ();
+      // serial_cnode_cap
+      cnode_copy (cnode, serial_cnode_cap, 64, init_cap_root_cnode, cnode, 64,
+                  cap_rights_all);
 
-    irq_control_get (init_cap_irq_control, 4, init_cap_root_cnode, irq_cap,
-                     64);
-    cnode_mint (init_cap_root_cnode, badged_irq_nfn_cap, 64,
-                init_cap_root_cnode, irq_nfn_cap, 64, cap_rights_all, 0xFFFF);
-    irq_handler_set_notification (irq_cap, badged_irq_nfn_cap);
+      // serial_serial_port_cap
+      x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff,
+                                    cnode, serial_serial_port_cap, 64);
 
-    struct thread_data td = {
-      .elf_header = serial_driver_elf,
-      .untyped = untyped,
-      .scratch_vspace = init_cap_init_vspace,
-      .arguments[0] = serial_port_cap,
-      .arguments[1] = serial_endpoint,
-      .arguments[2] = irq_cap,
-      .arguments[3] = badged_serial_data_available,
-    };
-    int err = spawn_thread (&td);
+      // serial_endpoint_cap
+      cnode_copy (cnode, serial_endpoint_cap, 64, init_cap_root_cnode,
+                  serial_endpoint, 64, cap_rights_all);
 
-    if (err)
-      printf ("Error creating serial_driver process\n");
-    else
-      printf ("Successfully created serial_driver process\n");
+      // serial_notification_cap
+      untyped_retype (untyped, cap_notification, 0, init_cap_root_cnode, cnode,
+                      64, serial_notification_cap, 1);
 
-    tcb_bind_notification (td.tcb, irq_nfn_cap);
-    tcb_resume (td.tcb);
-  }
+      // serial_badged_notification_cap
+      cnode_mint (cnode, serial_badged_notification_cap, 64, cnode,
+                  serial_notification_cap, 64, cap_rights_all, 0xFFFF);
+
+      // serial_irq_cap
+      irq_control_get (init_cap_irq_control, 4, cnode, serial_irq_cap, 64);
+
+      struct thread_data td = {
+          .elf_header = serial_driver_elf,
+          .untyped = untyped,
+          .scratch_vspace = init_cap_init_vspace,
+          .cspace_root = cnode,
+      };
+      int err = spawn_thread (&td);
+
+      if (err)
+        printf ("Error creating serial_driver process\n");
+      else
+        printf ("Successfully created serial_driver process\n");
+
+      // serial_tcb_cap
+      cnode_copy (cnode, serial_tcb_cap, 64, init_cap_root_cnode, td.tcb, 64,
+                  cap_rights_all);
+
+      // tcb_set_debug (td.tcb, true);
+      tcb_resume (td.tcb);
+    }
 
   for (const char *c = "Hello Serial"; *c; c++)
     {
@@ -291,14 +297,14 @@ c_start (void *ipc_buffer, void *boot_info)
         break;
     }
 
+  cptr_t serial_recv_endpoint = allocate (untyped, cap_endpoint, 1);
+  set_cap (0, serial_recv_endpoint);
+  send (serial_endpoint, new_message_info (serial_driver_register, 0, 1, 0));
+
   while (true)
     {
       word_t badge;
-      message_info_t info = new_message_info (2, 0, 0, 0);
-
-      wait (serial_data_available, &badge);
-
-      info = call (serial_endpoint, info, &badge);
+      message_info_t info = recv (serial_recv_endpoint, &badge);
       size_t regs = get_message_length (info);
 
       if (regs == 0)
@@ -315,7 +321,8 @@ c_start (void *ipc_buffer, void *boot_info)
             set_mr (i, byte + 'A' - 'a');
         }
 
-      send (serial_endpoint, new_message_info (1, 0, 0, regs));
+      info = new_message_info (serial_driver_write, 0, 0, regs);
+      send (serial_endpoint, info);
     }
 
   exit (0);

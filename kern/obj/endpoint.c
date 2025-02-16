@@ -28,7 +28,7 @@ transfer_message (message_info_t info, struct tcb *sender,
     {
       error_t err;
       cptr_t send_cptr = sender->ipc_buffer->caps_or_badges[0];
-      cte_t *cap = lookup_cap_slot (&sender->cspace_root, send_cptr, 0, &err);
+      cte_t *cap = lookup_cap_slot (&sender->cspace_root, send_cptr, 64, &err);
 
       if (err)
         {
@@ -38,7 +38,7 @@ transfer_message (message_info_t info, struct tcb *sender,
 
       cte_t *recv_cnode_root
           = lookup_cap_slot (&receiver->cspace_root,
-                             receiver->ipc_buffer->receive_cnode, 0, &err);
+                             receiver->ipc_buffer->receive_cnode, 64, &err);
       if (err)
         {
           printf ("Failed to lookup receive cnode\n");
@@ -117,7 +117,8 @@ receive_message_from_blocked_sender (struct endpoint *e)
 
   message_info_t info = (message_info_t)sender->ipc_buffer->tag;
 
-  transfer_message (info, sender, this_tcb, this_tcb->current_user_frame, sender->endpoint_badge);
+  transfer_message (info, sender, this_tcb, this_tcb->current_user_frame,
+                    sender->endpoint_badge);
 
   if (sender->expects_reply)
     this_tcb->reply_to = sender;

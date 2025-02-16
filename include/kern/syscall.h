@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kern/ipc.h"
+#include "kern/obj/tcb.h"
 #include "stdio.h"
 #include "sys/syscall.h"
 #include "sys/types.h"
@@ -11,7 +12,11 @@ typedef struct frame frame_t;
 void do_syscall (uintptr_t, uintptr_t, int syscall_number, frame_t *);
 
 // Used substantially in kern/syscall.c and generated syscall dispatch
-#define dbg_printf(...) (void)0
+#define dbg_printf(...)                                                       \
+  do                                                                          \
+    if (this_tcb->debug)                                                      \
+      printf (__VA_ARGS__);                                                   \
+  while (0)
 #define err_printf(...) printf (__VA_ARGS__)
 
 MUST_USE

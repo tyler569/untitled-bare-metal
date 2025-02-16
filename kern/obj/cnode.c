@@ -5,9 +5,9 @@
 cte_t *
 lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
 {
-  assert (depth == 64); // for now
+  assert_eq (depth, 64); // for now
   // TODO: this should just return an error
-  assert (cap_type (cspace_root->cap) == cap_cnode);
+  assert_eq (cap_type (cspace_root->cap), cap_cnode);
 
   cte_t *cte = cap_ptr (cspace_root->cap);
   size_t length = cap_size (cspace_root->cap);

@@ -176,6 +176,14 @@ tcb_set_tls_base (cte_t *cap, word_t tls_base)
   return no_error;
 }
 
+error_t
+tcb_set_debug (cte_t *cap, word_t flags)
+{
+  struct tcb *tcb = cap_ptr (cap);
+  tcb->debug = flags != 0;
+  return no_error;
+}
+
 void
 switch_tcb (struct tcb *t)
 {

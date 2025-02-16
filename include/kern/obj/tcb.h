@@ -47,6 +47,8 @@ struct tcb
 
   frame_t saved_state;
   frame_t *current_user_frame;
+
+  bool debug;
 };
 
 void init_tcbs (void *init_elf);

@@ -90,6 +90,9 @@ types:
           - { name: arch_flags, type: word_t }
           - { name: count, type: word_t }
           - { name: regs, type: "user_context_t *" }
+      - name: set_debug
+        parameters:
+          - { name: flags, type: word_t }
   - name: untyped
     methods:
       - name: retype

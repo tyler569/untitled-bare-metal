@@ -39,6 +39,7 @@ message_info_t tcb_suspend (cte_t *slot);
 message_info_t tcb_write_registers (cte_t *slot, bool resume_target,
                                     word_t arch_flags, word_t count,
                                     user_context_t *regs);
+message_info_t tcb_set_debug (cte_t *slot, word_t flags);
 message_info_t untyped_retype (cte_t *slot, word_t type, word_t size_bits,
                                cte_t *root, word_t node_index,
                                uint8_t node_depth, word_t node_offset,
