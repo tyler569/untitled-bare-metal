@@ -361,6 +361,27 @@ x86_64_page_unmap (cptr_t obj)
   return get_message_label (_result);
 }
 static inline int
+x86_64_huge_page_map (cptr_t obj, cptr_t vspace, word_t vaddr,
+                      x86_vm_attributes_t attr)
+{
+  set_mr (0, (word_t)vaddr);
+  set_mr (1, (word_t)attr);
+  set_cap (0, vspace);
+  message_info_t _info
+      = new_message_info (METHOD_x86_64_huge_page_map, 0, 1, 2);
+  message_info_t _result = __call_kernel (obj, _info);
+  return get_message_label (_result);
+}
+static inline int
+x86_64_huge_page_unmap (cptr_t obj)
+{
+
+  message_info_t _info
+      = new_message_info (METHOD_x86_64_huge_page_unmap, 0, 0, 0);
+  message_info_t _result = __call_kernel (obj, _info);
+  return get_message_label (_result);
+}
+static inline int
 irq_control_get (cptr_t obj, word_t irq, cptr_t root, word_t index,
                  uint8_t depth)
 {

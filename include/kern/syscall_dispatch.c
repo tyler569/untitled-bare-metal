@@ -909,6 +909,58 @@ dispatch_method (cte_t *slot, message_info_t info)
         return x86_64_page_unmap (slot);
         break;
       }
+    case METHOD_x86_64_huge_page_map:
+      {
+        word_t vaddr = (word_t)get_mr (0);
+        x86_vm_attributes_t attr = (x86_vm_attributes_t)get_mr (1);
+        cte_t *vspace;
+
+        dbg_printf ("x86_64_huge_page_map ");
+
+        if (cap_type (slot) != cap_x86_64_huge_page)
+          {
+            err_printf ("invalid cap type: %s\n",
+                        cap_type_string (cap_type (slot)));
+            return return_ipc (illegal_operation, 0);
+          }
+        if (get_message_length (info) < 2)
+          return return_ipc (truncated_message, 0);
+
+        if (get_message_extra_caps (info) < 1)
+          return return_ipc (truncated_message, 0);
+
+        vspace = lookup_cap_slot_this_tcb (get_cap (0), &error);
+        if (error != no_error)
+          {
+            err_printf ("lookup_cap failed for cap 0\n");
+            set_mr (0, 0);
+            return return_ipc (error, 1);
+          }
+
+        dbg_printf ("(cap:%s, vspace=cap:%s, vaddr=%#lx, attr=%#lx)\n",
+                    cap_type_string (slot), cap_type_string (vspace), vaddr,
+                    attr);
+
+        return x86_64_huge_page_map (slot, vspace, vaddr, attr);
+        break;
+      }
+    case METHOD_x86_64_huge_page_unmap:
+      {
+
+        dbg_printf ("x86_64_huge_page_unmap ");
+
+        if (cap_type (slot) != cap_x86_64_huge_page)
+          {
+            err_printf ("invalid cap type: %s\n",
+                        cap_type_string (cap_type (slot)));
+            return return_ipc (illegal_operation, 0);
+          }
+
+        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
+
+        return x86_64_huge_page_unmap (slot);
+        break;
+      }
     case METHOD_irq_control_get:
       {
         word_t irq = (word_t)get_mr (0);

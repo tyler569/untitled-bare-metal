@@ -171,6 +171,15 @@ types:
           - { name: attr, type: x86_vm_attributes_t }
       - name: unmap
         parameters: []
+  - name: x86_64_huge_page
+    methods:
+      - name: map
+        parameters:
+          - { name: vspace, type: cptr_t }
+          - { name: vaddr, type: word_t }
+          - { name: attr, type: x86_vm_attributes_t }
+      - name: unmap
+        parameters: []
   - name: irq_control
     methods:
       - name: get

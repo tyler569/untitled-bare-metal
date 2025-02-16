@@ -200,6 +200,18 @@ x86_64_page_unmap (cte_t *)
   return illegal_operation;
 }
 __attribute__ ((weak)) message_info_t
+x86_64_huge_page_map (cte_t *, cte_t *, word_t, x86_vm_attributes_t)
+{
+  err_printf ("unimplemented kernel method x86_64_huge_page_map\n");
+  return illegal_operation;
+}
+__attribute__ ((weak)) message_info_t
+x86_64_huge_page_unmap (cte_t *)
+{
+  err_printf ("unimplemented kernel method x86_64_huge_page_unmap\n");
+  return illegal_operation;
+}
+__attribute__ ((weak)) message_info_t
 irq_control_get (cte_t *, word_t, cte_t *, word_t, uint8_t)
 {
   err_printf ("unimplemented kernel method irq_control_get\n");

@@ -135,3 +135,26 @@ x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   return return_ipc (no_error, 0);
 }
+
+message_info_t
+x86_64_huge_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
+{
+  uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
+  uintptr_t page_phy = physical_of ((uintptr_t)cap_ptr (cte));
+
+  pte_t *pml4e = get_pml4e (root_phy, vaddr);
+  if ((*pml4e & PTE_PRESENT) == 0)
+    return table_missing (3);
+
+  pte_t *pdpte = get_pdpte (root_phy, vaddr);
+  if ((*pdpte & PTE_PRESENT) == 0)
+    return table_missing (2);
+
+  pte_t *pde = get_pde (root_phy, vaddr);
+  if ((*pde & PTE_PRESENT) != 0)
+    return already_mapped ();
+
+  *pde = page_phy | PTE_PRESENT | PTE_USER | attr;
+
+  return return_ipc (no_error, 0);
+}

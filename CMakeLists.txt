@@ -47,6 +47,7 @@ foreach (program ${targets_to_archive})
     user/pci.c
     lib/num.c
     lib/print.c
+    lib/sort.c
     lib/string.c
     lib/tar.c
   )
