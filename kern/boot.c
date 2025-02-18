@@ -1,7 +1,5 @@
 #include "kern/cap.h"
-#include "kern/ipc.h"
 #include "kern/mem.h"
-#include "kern/obj/cnode.h"
 #include "kern/obj/tcb.h"
 #include "stddef.h"
 #include "sys/bootinfo.h"

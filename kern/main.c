@@ -1,6 +1,5 @@
 #include "kern/kernel.h"
 #include "kern/obj/tcb.h"
-#include "rng.h"
 #include "stdio.h"
 
 void

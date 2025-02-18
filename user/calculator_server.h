@@ -1,9 +1,3 @@
-#include "stdio.h"
-
-#include "./lib.h"
-
-struct ipc_buffer *__ipc_buffer;
-
 enum
 {
   calculator_quit = 0,

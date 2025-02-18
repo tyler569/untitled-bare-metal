@@ -3,9 +3,7 @@
 #include "stdint.h"
 #include "stdio.h"
 #include "sys/bootinfo.h"
-#include "sys/cdefs.h"
 #include "sys/ipc.h"
-#include "sys/syscall.h"
 #include "sys/types.h"
 
 #define assert(x)                                                             \
