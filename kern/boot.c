@@ -1,13 +1,37 @@
 #include "arch/x86_64/exports.h"
 #include "kern/cap.h"
+#include "kern/kernel.h"
 #include "kern/mem.h"
 #include "kern/obj/tcb.h"
+#include "limine.h"
 #include "stddef.h"
 #include "sys/bootinfo.h"
 #include "tar.h"
 
 struct tcb init_tcb;
 cte_t init_cnode[BIT (INIT_CNODE_SIZE_BITS)];
+
+static struct limine_module_request moduleinfo = {
+  .id = LIMINE_MODULE_REQUEST,
+};
+
+bool
+get_initrd_info (void **initrd_start, size_t *initrd_size)
+{
+  struct limine_module_response *resp = volatile_read (moduleinfo.response);
+
+  if (resp->module_count == 0)
+    return false;
+
+  *initrd_start = (void *)resp->modules[0]->address;
+  *initrd_size = resp->modules[0]->size;
+
+  return true;
+}
+
+static struct limine_framebuffer_request fbinfo = {
+  .id = LIMINE_FRAMEBUFFER_REQUEST,
+};
 
 void
 create_init_tcb (void *initrd, size_t initrd_size)
@@ -83,7 +107,6 @@ create_init_tcb (void *initrd, size_t initrd_size)
 
   create_init_untyped_caps (init_cnode + init_cap_first_untyped, &n_untyped,
                             bi->untypeds);
-  bi->n_untypeds = n_untyped;
 
   size_t n_free_slots
       = BIT (INIT_CNODE_SIZE_BITS) - init_cap_first_untyped - n_untyped;
@@ -91,7 +114,8 @@ create_init_tcb (void *initrd, size_t initrd_size)
   create_init_untyped_device_caps (init_cnode + init_cap_first_untyped
                                        + n_untyped,
                                    &n_free_slots, bi->untypeds + n_untyped);
-  bi->n_untypeds += n_free_slots;
+  n_untyped += n_free_slots;
+  bi->n_untypeds += n_untyped;
 
   bi->untyped_range = (struct cap_range){
     .start = init_cap_first_untyped,
@@ -103,9 +127,12 @@ create_init_tcb (void *initrd, size_t initrd_size)
     .end = BIT (INIT_CNODE_SIZE_BITS),
   };
 
+  bi->framebuffer_info = *volatile_read (fbinfo.response)->framebuffers[0];
+
   init_tcb.cspace_root.cap = init_cnode_cap;
 
+  // init_tcb.debug = true;
+
   make_tcb_runnable (&init_tcb);
-  // this_cpu->return_to_tcb = &init_tcb;
   schedule ();
 }

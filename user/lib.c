@@ -1,6 +1,5 @@
 #include "stddef.h"
 #include "stdint.h"
-#include "sys/cdefs.h"
 #include "sys/ipc.h"
 #include "sys/syscall.h"
 #include "sys/types.h"

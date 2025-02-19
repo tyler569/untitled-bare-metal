@@ -1,3 +1,4 @@
+#include "limine.h"
 #include "stdint.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -11,6 +12,7 @@
 
 #include "./calculator_server.h"
 #include "./serial_driver.h"
+#include <stddef.h>
 
 #define PAGE_SIZE 4096
 
@@ -68,6 +70,11 @@ print_bootinfo_information ()
   printf ("Total untyped size: %zu (%zu MB)\n", total_untyped_size,
           total_untyped_size / 1024 / 1024);
   printf ("\n");
+
+  printf ("  limine bootloader: %p\n", bi->framebuffer_info.address);
+  printf ("    size: %zx\n", bi->framebuffer_info.height
+                                 * bi->framebuffer_info.width
+                                 * bi->framebuffer_info.bpp / 8);
 }
 
 cptr_t pci_io_port;
@@ -301,6 +308,93 @@ serial_capitalization_server (cptr_t serial_write_endpoint,
     }
 }
 
+void *
+map_framebuffer (cptr_t untyped, size_t *fbsize)
+{
+  struct limine_framebuffer fbinfo = bi->framebuffer_info;
+  *fbsize = fbinfo.height * fbinfo.width * fbinfo.bpp / 8;
+  uintptr_t fbaddr = (uintptr_t)fbinfo.address - 0xffff800000000000;
+
+  cptr_t fbuntyped = 0;
+
+  for (size_t i = 0; i < bi->n_untypeds; i++)
+    {
+      if (!bi->untypeds[i].is_device)
+        continue;
+      if (bi->untypeds[i].base == fbaddr)
+        {
+          fbuntyped = init_cap_first_untyped + i;
+          break;
+        }
+    }
+
+  printf ("untyped = %zx\n", untyped);
+  printf ("fbuntyped = %zx\n", fbuntyped);
+
+  if (fbuntyped == 0)
+    {
+      printf ("Failed to find untyped for framebuffer\n");
+      return nullptr;
+    }
+
+  for (size_t page_offset = 0; page_offset < *fbsize; page_offset += 0x1000)
+    {
+      uintptr_t addr = fbaddr + page_offset;
+      cptr_t cptr = cptr_alloc ();
+      int err = untyped_retype (fbuntyped, cap_x86_64_page, 12,
+                                init_cap_root_cnode, init_cap_root_cnode, 64,
+                                cptr, 1);
+      if (err != no_error)
+        {
+          printf ("Error: could not allocate framebuffer page: (%s)\n",
+                  error_string (err));
+          return nullptr;
+        }
+
+      err = map_page (untyped, init_cap_init_vspace, cptr, addr);
+      if (err != no_error)
+        {
+          printf ("Error: could not map framebuffer page: (%s)\n",
+                  error_string (err));
+          return nullptr;
+        }
+    }
+
+  return (void *)fbaddr;
+}
+
+void
+draw_square (uint32_t *framebuffer, size_t r, size_t c, size_t w, size_t h,
+             uint32_t color)
+{
+  size_t width = bi->framebuffer_info.width;
+
+  for (size_t row = r; row < r + h; row++)
+    for (size_t col = c; col < c + w; col++)
+      framebuffer[row * width + col] = color;
+}
+
+void
+draw_circle (uint32_t *framebuffer, size_t r, size_t c, size_t radius,
+             uint32_t color)
+{
+  size_t width = bi->framebuffer_info.width;
+
+  for (size_t row = r - radius; row < r + radius; row++)
+    for (size_t col = c - radius; col < c + radius; col++)
+      {
+        if (row < 0 || row > bi->framebuffer_info.height)
+          continue;
+        if (col < 0 || col > bi->framebuffer_info.width)
+          continue;
+
+        size_t rr = row - r;
+        size_t cc = col - c;
+        if (rr * rr + cc * cc < radius * radius)
+          framebuffer[row * width + col] = color;
+      }
+}
+
 int
 main (void *boot_info)
 {
@@ -325,7 +419,20 @@ main (void *boot_info)
   x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
                                 init_cap_root_cnode, pci_io_port, 64);
 
-  enumerate_pci_bus (pci_io_port);
+  // enumerate_pci_bus (pci_io_port);
+
+  size_t fbsize;
+  void *fb = map_framebuffer (untyped, &fbsize);
+
+  for (size_t i = 0; i < fbsize; i++)
+    ((char *)fb)[i] = 0xff;
+
+  draw_square (fb, 100, 100, 100, 100, 0xff);
+  draw_square (fb, 200, 200, 100, 100, 0xff00);
+  draw_square (fb, 300, 300, 100, 100, 0xff0000);
+  draw_square (fb, 400, 400, 100, 100, 0xff000000);
+
+  draw_circle (fb, 150, 400, 50, 0xff0000);
 
   spawn_calculator_thread (untyped, calculator_endpoint);
   spawn_serial_driver (untyped, serial_write_endpoint, serial_read_endpoint);

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "assert.h"
 #include "kern/cap.h"
-#include "list.h"
 #include "stddef.h"
 #include "stdint.h"
 

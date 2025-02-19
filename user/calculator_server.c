@@ -42,7 +42,7 @@ main (cptr_t endpoint_cap)
         }
 
       if (err)
-        resp = new_message_info (err, 0, 0, 1);
+        resp = new_message_info (err, 0, 0, 0);
       else
         resp = new_message_info (label, 0, 0, 1);
 

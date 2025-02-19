@@ -3,8 +3,6 @@
 #include "stdio.h"
 #include "string.h"
 #include "sys/bootinfo.h"
-#include "sys/cdefs.h"
-#include "sys/ipc.h"
 #include "sys/syscall.h"
 
 #include "./lib.h"
