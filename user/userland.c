@@ -1,3 +1,4 @@
+#include "limine.h"
 #include "stdint.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -73,6 +74,11 @@ print_bootinfo_information ()
   printf ("Total untyped size: %zu (%zu MB)\n", total_untyped_size,
           total_untyped_size / 1024 / 1024);
   printf ("\n");
+
+  printf ("  limine bootloader: %p\n", bi->framebuffer_info.address);
+  printf ("    size: %zx\n", bi->framebuffer_info.height
+                                 * bi->framebuffer_info.width
+                                 * bi->framebuffer_info.bpp / 8);
 }
 
 cptr_t pci_io_port;
@@ -306,6 +312,59 @@ serial_capitalization_server (cptr_t serial_write_endpoint,
     }
 }
 
+void *
+map_framebuffer (cptr_t untyped, size_t *fbsize)
+{
+  struct limine_framebuffer fbinfo = bi->framebuffer_info;
+  *fbsize = fbinfo.height * fbinfo.width * fbinfo.bpp / 8;
+  uintptr_t fbaddr
+      = (uintptr_t)fbinfo.address - 0xffff800000000000;
+
+  cptr_t fbuntyped = 0;
+
+  for (size_t i = 0; i < bi->n_untypeds; i++)
+    {
+      if (!bi->untypeds[i].is_device)
+        continue;
+      if (bi->untypeds[i].base == fbaddr)
+        {
+          fbuntyped = init_cap_first_untyped + i;
+          break;
+        }
+    }
+
+  if (fbuntyped == 0)
+    {
+      printf ("Failed to find untyped for framebuffer\n");
+      return nullptr;
+    }
+
+  for (size_t page_offset = 0; page_offset < *fbsize; page_offset += 0x1000)
+    {
+      uintptr_t addr = fbaddr + page_offset;
+      cptr_t cptr = cptr_alloc ();
+      int err = untyped_retype (fbuntyped, cap_x86_64_page, 21,
+                                init_cap_root_cnode, init_cap_root_cnode, 64,
+                                cptr, 1);
+      if (err != no_error)
+        {
+          printf ("Error: could not allocate framebuffer page: (%s)\n",
+                  error_string (err));
+          return nullptr;
+        }
+
+      err = map_page (untyped, init_cap_init_vspace, cptr, addr);
+      if (err != no_error)
+        {
+          printf ("Error: could not map framebuffer page: (%s)\n",
+                  error_string (err));
+          return nullptr;
+        }
+    }
+
+  return (void *)fbaddr;
+}
+
 [[noreturn]] int
 c_start (void *ipc_buffer, void *boot_info)
 {
@@ -333,6 +392,12 @@ c_start (void *ipc_buffer, void *boot_info)
                                 init_cap_root_cnode, pci_io_port, 64);
 
   enumerate_pci_bus (pci_io_port);
+
+  size_t fbsize;
+  void *fb = map_framebuffer (untyped, &fbsize);
+
+  for (size_t i = 0; i < fbsize; i++)
+    ((char *)fb)[i] = 0xff;
 
   spawn_calculator_thread (untyped, calculator_endpoint);
   spawn_serial_driver (untyped, serial_write_endpoint, serial_read_endpoint);

@@ -1,14 +1,36 @@
 #include "kern/cap.h"
-#include "kern/ipc.h"
+#include "kern/kernel.h"
 #include "kern/mem.h"
-#include "kern/obj/cnode.h"
 #include "kern/obj/tcb.h"
+#include "limine.h"
 #include "stddef.h"
 #include "sys/bootinfo.h"
 #include "tar.h"
 
 struct tcb init_tcb;
 cte_t init_cnode[BIT (INIT_CNODE_SIZE_BITS)];
+
+static struct limine_module_request moduleinfo = {
+  .id = LIMINE_MODULE_REQUEST,
+};
+
+bool
+get_initrd_info (void **initrd_start, size_t *initrd_size)
+{
+  struct limine_module_response *resp = volatile_read (moduleinfo.response);
+
+  if (resp->module_count == 0)
+    return false;
+
+  *initrd_start = (void *)resp->modules[0]->address;
+  *initrd_size = resp->modules[0]->size;
+
+  return true;
+}
+
+static struct limine_framebuffer_request fbinfo = {
+  .id = LIMINE_FRAMEBUFFER_REQUEST,
+};
 
 void
 create_init_tcb (void *initrd, size_t initrd_size)
@@ -91,6 +113,8 @@ create_init_tcb (void *initrd, size_t initrd_size)
     .start = init_cap_first_untyped + n_untyped,
     .end = BIT (INIT_CNODE_SIZE_BITS),
   };
+
+  bi->framebuffer_info = *volatile_read (fbinfo.response)->framebuffers[0];
 
   init_tcb.cspace_root.cap = init_cnode_cap;
 

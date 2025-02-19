@@ -1,5 +1,6 @@
 #pragma once
 #include "sys/types.h"
+#include "limine.h"
 
 #define INIT_CNODE_SIZE_BITS 10
 
@@ -37,6 +38,8 @@ struct boot_info
 
   struct cap_range untyped_range;
   struct cap_range empty_range;
+
+  struct limine_framebuffer framebuffer_info;
 
   size_t n_untypeds;
   struct untyped_desc untypeds[];

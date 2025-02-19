@@ -1,7 +1,6 @@
 #include "assert.h"
 #include "kern/arch.h"
 #include "kern/cap.h"
-#include "kern/kernel.h"
 #include "kern/mem.h"
 #include "pci.h"
 #include "stdio.h"
