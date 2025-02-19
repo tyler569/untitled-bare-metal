@@ -2,7 +2,6 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "sys/bootinfo.h"
-#include "sys/cdefs.h"
 #include "sys/ipc.h"
 #include "sys/syscall.h"
 #include "tar.h"
@@ -15,9 +14,6 @@
 
 #define PAGE_SIZE 4096
 
-uint8_t __attribute__ ((aligned (PAGE_SIZE))) stack[PAGE_SIZE * 4];
-extern char __executable_start;
-struct ipc_buffer *__ipc_buffer;
 struct boot_info *bi = nullptr;
 
 cptr_t
@@ -50,7 +46,6 @@ print_bootinfo_information ()
 {
   printf ("\n");
   printf ("Hello, World from userland; ipc buffer %p!\n", __ipc_buffer);
-  printf ("executable_start: %p\n", &__executable_start);
 
   printf ("Boot info: %p\n", bi);
   printf ("  .untyped_range = [%zu, %zu)\n", bi->untyped_range.start,
@@ -306,11 +301,9 @@ serial_capitalization_server (cptr_t serial_write_endpoint,
     }
 }
 
-[[noreturn]] int
-c_start (void *ipc_buffer, void *boot_info)
+int
+main (void *boot_info)
 {
-  __ipc_buffer = ipc_buffer;
-
   bi = boot_info;
   cptr_alloc_init (bi);
 
@@ -343,11 +336,4 @@ c_start (void *ipc_buffer, void *boot_info)
   serial_capitalization_server(serial_write_endpoint, serial_read_endpoint);
 
   exit (0);
-}
-
-[[noreturn]] USED __attribute__ ((naked)) void
-_start ()
-{
-  asm volatile ("movq %0, %%rsp" ::"r"(stack + sizeof (stack)));
-  asm volatile ("jmp c_start");
 }

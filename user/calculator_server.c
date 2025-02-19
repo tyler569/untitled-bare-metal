@@ -3,8 +3,6 @@
 #include "./lib.h"
 #include "calculator_server.h"
 
-struct ipc_buffer *__ipc_buffer;
-
 int
 main (cptr_t endpoint_cap)
 {
@@ -55,19 +53,4 @@ main (cptr_t endpoint_cap)
     }
 
   exit (0);
-  return 0;
-}
-
-void
-c_start (cptr_t endpoint_cap)
-{
-  main (endpoint_cap);
-  exit (0);
-}
-
-[[noreturn]] USED __attribute__ ((naked)) void
-_start ()
-{
-  asm ("mov %%r15, %0" : "=m"(__ipc_buffer));
-  asm volatile ("jmp c_start");
 }

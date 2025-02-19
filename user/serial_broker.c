@@ -5,8 +5,6 @@
 #include "lib.h"
 #include "serial_driver.h"
 
-struct ipc_buffer *__ipc_buffer;
-
 [[noreturn]] int
 main ()
 {
@@ -40,11 +38,4 @@ main ()
           reply (info);
         }
     }
-}
-
-__attribute__ ((naked, used)) void
-_start ()
-{
-  asm ("mov %%r15, %0" : "=m"(__ipc_buffer));
-  asm ("jmp main");
 }

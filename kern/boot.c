@@ -1,3 +1,4 @@
+#include "arch/x86_64/exports.h"
 #include "kern/cap.h"
 #include "kern/mem.h"
 #include "kern/obj/tcb.h"
@@ -30,10 +31,22 @@ create_init_tcb (void *initrd, size_t initrd_size)
 
   add_vm_mapping (init_pml4, ipc_buffer, ipc_buffer_page,
                   PTE_PRESENT | PTE_USER | PTE_WRITE);
-  set_frame_arg (&init_tcb.saved_state, 0, ipc_buffer);
+  init_tcb.saved_state.r15 = ipc_buffer;
   add_vm_mapping (init_pml4, bootinfo, bootinfo_page,
                   PTE_PRESENT | PTE_USER | PTE_WRITE);
-  set_frame_arg (&init_tcb.saved_state, 1, bootinfo);
+  set_frame_arg (&init_tcb.saved_state, 0, bootinfo);
+
+  uintptr_t stack = 0x7ffffff00000;
+  constexpr size_t stack_pages = 4;
+
+  for (size_t i = 0; i < stack_pages; i++)
+    {
+      uintptr_t stack_page = alloc_page ();
+      add_vm_mapping (init_pml4, stack + PAGE_SIZE * i, stack_page,
+                      PTE_PRESENT | PTE_USER | PTE_WRITE);
+    }
+
+  init_tcb.saved_state.rsp = stack + PAGE_SIZE * stack_pages;
 
   struct boot_info *bi = (struct boot_info *)direct_map_of (bootinfo_page);
 

@@ -5,8 +5,6 @@
 #include "lib.h"
 #include "serial_driver.h"
 
-struct ipc_buffer *__ipc_buffer;
-
 constexpr uint16_t SERIAL_PORT = 0x3f8;
 
 constexpr uint16_t UART_DATA = 0x0;
@@ -114,11 +112,4 @@ main ()
       else if (get_message_label (info) == serial_driver_write)
         write_uart (info);
     }
-}
-
-__attribute__ ((naked, used)) void
-_start ()
-{
-  asm ("mov %%r15, %0" : "=m"(__ipc_buffer));
-  asm ("jmp main");
 }
