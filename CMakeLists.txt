@@ -29,7 +29,7 @@ endif ()
 project(untitled_bare_metal C ASM)
 
 add_compile_options(-Wall -Wextra -fbuiltin)
-add_compile_options(-iquote ${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/limine)
 
 add_compile_definitions(__UNTITLED_BARE_METAL__=1)
 
