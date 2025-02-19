@@ -18,27 +18,9 @@
 
 struct boot_info *bi = nullptr;
 
-cptr_t
-get_port_cap ()
-{
-  static cptr_t port_cap = 0;
-
-  if (port_cap != 0)
-    return port_cap;
-
-  port_cap = cptr_alloc ();
-
-  x86_64_io_port_control_issue (init_cap_io_port_control, 0x0, 0xffff,
-                                init_cap_root_cnode, port_cap, 64);
-
-  return port_cap;
-}
-
 void
-print_to_e9 (const char *string)
+print_to_e9 (cptr_t port_cap, const char *string)
 {
-  cptr_t port_cap = get_port_cap ();
-
   for (const char *c = string; *c; c++)
     x86_64_io_port_out8 (port_cap, 0xe9, *c);
 }
@@ -76,8 +58,6 @@ print_bootinfo_information ()
                                  * bi->framebuffer_info.width
                                  * bi->framebuffer_info.bpp / 8);
 }
-
-cptr_t pci_io_port;
 
 [[noreturn]] void
 halt_forever ()
@@ -309,10 +289,10 @@ serial_capitalization_server (cptr_t serial_write_endpoint,
 }
 
 void *
-map_framebuffer (cptr_t untyped, size_t *fbsize)
+map_framebuffer (cptr_t untyped)
 {
   struct limine_framebuffer fbinfo = bi->framebuffer_info;
-  *fbsize = fbinfo.height * fbinfo.width * fbinfo.bpp / 8;
+  size_t fbsize = fbinfo.height * fbinfo.width * fbinfo.bpp / 8;
   uintptr_t fbaddr = (uintptr_t)fbinfo.address - 0xffff800000000000;
 
   cptr_t fbuntyped = 0;
@@ -337,7 +317,7 @@ map_framebuffer (cptr_t untyped, size_t *fbsize)
       return nullptr;
     }
 
-  for (size_t page_offset = 0; page_offset < *fbsize; page_offset += 0x1000)
+  for (size_t page_offset = 0; page_offset < fbsize; page_offset += 0x1000)
     {
       uintptr_t addr = fbaddr + page_offset;
       cptr_t cptr = cptr_alloc ();
@@ -364,6 +344,17 @@ map_framebuffer (cptr_t untyped, size_t *fbsize)
 }
 
 void
+clear_fb (uint32_t *framebuffer, uint32_t color)
+{
+  size_t width = bi->framebuffer_info.width;
+  size_t height = bi->framebuffer_info.height;
+
+  for (size_t row = 0; row < height; row++)
+    for (size_t col = 0; col < width; col++)
+      framebuffer[row * width + col] = color;
+}
+
+void
 draw_square (uint32_t *framebuffer, size_t r, size_t c, size_t w, size_t h,
              uint32_t color)
 {
@@ -383,9 +374,9 @@ draw_circle (uint32_t *framebuffer, size_t r, size_t c, size_t radius,
   for (size_t row = r - radius; row < r + radius; row++)
     for (size_t col = c - radius; col < c + radius; col++)
       {
-        if (row < 0 || row > bi->framebuffer_info.height)
+        if (row < 0 || row >= bi->framebuffer_info.height)
           continue;
-        if (col < 0 || col > bi->framebuffer_info.width)
+        if (col < 0 || col >= bi->framebuffer_info.width)
           continue;
 
         size_t rr = row - r;
@@ -402,7 +393,6 @@ main (void *boot_info)
   cptr_alloc_init (bi);
 
   print_bootinfo_information ();
-  print_to_e9 ("Hello World!\n");
 
   setup_memory_information (bi);
 
@@ -410,29 +400,27 @@ main (void *boot_info)
 
   printf ("Largest untyped: %lx\n", untyped);
 
-  cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
-  cptr_t serial_write_endpoint = allocate (untyped, cap_endpoint, 1);
-  cptr_t serial_read_endpoint = allocate (untyped, cap_endpoint, 1);
-
-  pci_io_port = cptr_alloc ();
-
+  cptr_t pci_io_port = cptr_alloc ();
   x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
                                 init_cap_root_cnode, pci_io_port, 64);
+  enumerate_pci_bus (pci_io_port);
 
-  // enumerate_pci_bus (pci_io_port);
+  cptr_t e9_io_port = cptr_alloc ();
+  x86_64_io_port_control_issue (init_cap_io_port_control, 0xe9, 0xe9,
+                                init_cap_root_cnode, e9_io_port, 64);
+  print_to_e9 (e9_io_port, "Hello, E9 World!\n");
 
-  size_t fbsize;
-  void *fb = map_framebuffer (untyped, &fbsize);
-
-  for (size_t i = 0; i < fbsize; i++)
-    ((char *)fb)[i] = 0xff;
-
+  void *fb = map_framebuffer (untyped);
+  clear_fb (fb, 0xffffffff);
   draw_square (fb, 100, 100, 100, 100, 0xff);
   draw_square (fb, 200, 200, 100, 100, 0xff00);
   draw_square (fb, 300, 300, 100, 100, 0xff0000);
   draw_square (fb, 400, 400, 100, 100, 0xff000000);
-
   draw_circle (fb, 150, 400, 50, 0xff0000);
+
+  cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
+  cptr_t serial_write_endpoint = allocate (untyped, cap_endpoint, 1);
+  cptr_t serial_read_endpoint = allocate (untyped, cap_endpoint, 1);
 
   spawn_calculator_thread (untyped, calculator_endpoint);
   spawn_serial_driver (untyped, serial_write_endpoint, serial_read_endpoint);
