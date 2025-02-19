@@ -1,0 +1,16 @@
+{
+    "cmake.generator": "Ninja",
+    "cmake.configureSettings": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_TOOLCHAIN_FILE": "cmake/toolchains/x86_64.cmake"
+    },
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_style": "GNU",
+    "clangd.arguments": [
+        "-pretty",
+        "--background-index",
+        "--compile-commands-dir=build"
+    ],
+}

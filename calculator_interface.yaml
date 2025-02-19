@@ -1,0 +1,80 @@
+---
+- methods:
+  - name: add
+    description: Add two numbers
+    parameters:
+    - name: a
+      type: long
+      description: First number
+    - name: b
+      type: long
+      description: Second number
+    returns:
+    - type: long
+      description: Sum of the two numbers
+  - name: subtract
+    description: Subtract two numbers
+    parameters:
+    - name: a
+      type: long
+      description: First number
+    - name: b
+      type: long
+      description: Second number
+    returns:
+    - type: long
+      description: Difference of the two numbers
+  - name: multiply
+    description: Multiply two numbers
+    parameters:
+    - name: a
+      type: long
+      description: First number
+    - name: b
+      type: long
+      description: Second number
+    returns:
+    - type: long
+      description: Product of the two numbers
+  - name: divide
+    description: Divide two numbers
+    parameters:
+    - name: a
+      type: long
+      description: First number
+    - name: b
+      type: long
+      description: Second number
+    returns:
+    - type: long
+      description: Quotient of the two numbers
+  - name: power
+    description: Raise a number to a power
+    parameters:
+    - name: base
+      type: long
+      description: Base number
+    - name: exponent
+      type: long
+      description: Exponent
+    returns:
+    - type: long
+      description: Result of raising the base to the exponent
+  - name: sqrt
+    description: Calculate the square root of a number
+    parameters:
+    - name: number
+      type: long
+      description: Number to calculate the square root of
+    returns:
+    - type: long
+      description: Square root of the number
+  - name: factorial
+    description: Calculate the factorial of a number
+    parameters:
+    - name: number
+      type: long
+      description: Number to calculate the factorial of
+    returns:
+    - type: long
+      description: Factorial of the number
