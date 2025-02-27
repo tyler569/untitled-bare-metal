@@ -1,6 +1,5 @@
 #include "kern/obj/endpoint.h"
 #include "kern/cap.h"
-#include "kern/ipc.h"
 #include "kern/obj/notification.h"
 #include "kern/obj/tcb.h"
 #include "kern/syscall.h"

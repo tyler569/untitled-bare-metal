@@ -1,6 +1,5 @@
 #pragma once
 
-#include "assert.h"
 #include "sys/cdefs.h"
 #include "sys/syscall.h"
 #include "sys/types.h"

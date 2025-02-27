@@ -1,4 +1,3 @@
-#include "stdio.h"
 #include "string.h"
 #include "sys/cdefs.h"
 #include "x86_64.h"

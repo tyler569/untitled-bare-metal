@@ -1,8 +1,6 @@
 #include "kern/arch.h"
 #include "kern/kernel.h"
 #include "limine.h"
-#include "list.h"
-#include "slab.h"
 #include "stdio.h"
 #include "x86_64.h"
 

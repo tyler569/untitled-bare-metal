@@ -1,4 +1,3 @@
-#include "kern/kernel.h"
 #include "kern/mem.h"
 #include "stdatomic.h"
 #include "string.h"

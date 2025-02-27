@@ -1,7 +1,5 @@
 #pragma once
 
-#include "sys/cdefs.h"
-
 struct list_head
 {
   struct list_head *next;

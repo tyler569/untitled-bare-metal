@@ -1,7 +1,6 @@
 #include "assert.h"
 #include "kern/arch.h"
-#include "kern/mem.h"
-#include "stdio.h"
+#include "kern/obj/tcb.h"
 #include "string.h"
 #include "x86_64.h"
 

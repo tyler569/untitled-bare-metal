@@ -1,5 +1,6 @@
+#include "arch/x86_64/exports.h"
+#include "kern/per_cpu.h"
 #include "stdio.h"
-#include "x86_64.h"
 
 void
 print_backtrace (frame_t *f)

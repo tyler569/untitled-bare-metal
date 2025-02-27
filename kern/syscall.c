@@ -1,15 +1,11 @@
 #include "kern/syscall.h"
 #include "kern/arch.h"
 #include "kern/cap.h"
-#include "kern/ipc.h"
 #include "kern/obj/endpoint.h"
 #include "kern/obj/notification.h"
 #include "kern/obj/tcb.h"
-#include "kern/per_cpu.h"
-#include "stdio.h"
 
 #include "kern/kernel_method_stubs.c"
-#include "kern/methods.h"
 #include "kern/syscall_dispatch.c"
 
 #define GET_CAP(cptr, slot, err)                                              \

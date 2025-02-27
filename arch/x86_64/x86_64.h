@@ -3,9 +3,7 @@
 #ifndef __ASSEMBLER__
 
 #include "arch/x86_64/exports.h"
-#include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
-#include "list.h"
 #include "stddef.h"
 #include "stdint.h"
 

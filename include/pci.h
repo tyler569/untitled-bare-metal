@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdint.h"
-#include "sys/types.h"
 
 constexpr uint16_t PCI_CONFIG_ADDRESS = 0xCF8;
 constexpr uint16_t PCI_CONFIG_DATA = 0xCFC;

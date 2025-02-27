@@ -1,5 +1,4 @@
 #include "kern/syscall.h"
-#include "sys/cdefs.h"
 #include "x86_64.h"
 
 void

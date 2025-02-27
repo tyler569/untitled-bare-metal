@@ -2,7 +2,6 @@
 #include "kern/mem.h"
 #include "limine.h"
 #include "stdio.h"
-#include "x86_64.h"
 
 static struct limine_memmap_request mmapinfo = {
   .id = LIMINE_MEMMAP_REQUEST,

@@ -3,7 +3,6 @@
 #include "list.h"
 #include "spinlock.h"
 #include "stddef.h"
-#include "sys/cdefs.h"
 
 struct slab_cache
 {

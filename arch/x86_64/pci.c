@@ -1,5 +1,4 @@
 #include "pci.h"
-#include "sys/types.h"
 #include "x86_64.h"
 
 uint32_t

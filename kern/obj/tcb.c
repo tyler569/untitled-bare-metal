@@ -5,14 +5,12 @@
 #include "kern/elf.h"
 #include "kern/mem.h"
 #include "kern/methods.h"
-#include "kern/obj/endpoint.h"
 #include "kern/obj/notification.h"
 #include "kern/per_cpu.h"
 #include "kern/size.h"
 #include "kern/syscall.h"
 #include "stdio.h"
 #include "string.h"
-#include "sys/bootinfo.h"
 #include "sys/syscall.h"
 
 static_assert (sizeof (struct tcb) <= BIT (tcb_size_bits),

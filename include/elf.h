@@ -3,7 +3,6 @@
 #include "stddef.h"
 #include "stdint.h"
 #include "string.h"
-#include "sys/cdefs.h"
 
 typedef uint16_t elf_half;
 typedef uint32_t elf_word;

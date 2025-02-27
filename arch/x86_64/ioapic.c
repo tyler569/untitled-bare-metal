@@ -1,4 +1,3 @@
-#include "assert.h"
 #include "kern/mem.h"
 #include "x86_64.h"
 
