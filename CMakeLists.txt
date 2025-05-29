@@ -9,7 +9,7 @@ include(UserPrograms)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O1 -std=gnu23")
 set(limine_dir "${CMAKE_SOURCE_DIR}/limine")
-set(iso_file "${CMAKE_SOURCE_DIR}/untitled_bare_metal.iso")
+set(iso_file "${CMAKE_BINARY_DIR}/untitled_bare_metal.iso")
 set(iso_dir "${CMAKE_BINARY_DIR}/isodir")
 file(MAKE_DIRECTORY ${iso_dir}/boot/limine)
 

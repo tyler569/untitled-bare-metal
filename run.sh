@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-iso="untitled_bare_metal.iso"
+iso="build/untitled_bare_metal.iso"
 mem="128M"
 smp=2
 debugopt="-debugcon stdio"
