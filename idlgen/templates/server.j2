@@ -1,0 +1,37 @@
+#include "{{ interface | lower }}.h"
+#include "lib.h"
+
+void {{ interface | lower }}_server(cptr_t endpoint_cap) {
+  message_info_t info, resp;
+  word_t badge;
+  bool done = false;
+
+  info = recv(endpoint_cap, &badge);
+
+  while (!done) {
+    word_t label = get_message_label(info);
+    int err = 0;
+    uint64_t result = 0;
+
+    switch (label) {
+{% for method in methods %}
+      case {{ interface | method_id_name(method.name) }}:
+        result = impl_{{ interface | lower }}_{{ method.name }}({% for i in range(method.params | length) %}get_mr({{ i }}){% if not loop.last %}, {% endif %}{% endfor %});
+        set_mr(0, result);
+        break;
+{% endfor %}
+      default:
+        err = {{ interface | lower }}_error_unknown;
+        break;
+    }
+
+    if (err)
+      resp = new_message_info(err, 0, 0, 0);
+    else
+      resp = new_message_info(label, 0, 0, 1);
+
+    info = reply_recv(endpoint_cap, resp, &badge);
+  }
+
+  reply(endpoint_cap);
+}

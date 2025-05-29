@@ -1,0 +1,34 @@
+interface: calculator2
+methods:
+  - name: quit
+    id: 0
+    params: []
+    return: null
+
+  - name: ret42
+    id: 1
+    params: []
+    return: uint64
+
+  - name: double
+    id: 2
+    params:
+      - name: value
+        type: uint64
+    return: uint64
+
+  - name: inc
+    id: 3
+    params:
+      - name: value
+        type: uint64
+    return: uint64
+
+  - name: add
+    id: 4
+    params:
+      - name: a
+        type: uint64
+      - name: b
+        type: uint64
+    return: uint64

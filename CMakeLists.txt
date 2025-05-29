@@ -3,9 +3,11 @@ cmake_minimum_required(VERSION 3.10)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(ExternalProject)
 include(DefineFileBasenameForSources)
+include(IDL)
+include(UserPrograms)
 
 set(CMAKE_C_STANDARD 23)
-set(CMAKE_C_FLAGS_DEBUG "-g -O1")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O1 -std=gnu23")
 set(limine_dir "${CMAKE_SOURCE_DIR}/limine")
 set(iso_file "${CMAKE_SOURCE_DIR}/untitled_bare_metal.iso")
 set(iso_dir "${CMAKE_BINARY_DIR}/isodir")
@@ -33,38 +35,41 @@ include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/limine)
 
 add_compile_definitions(__UNTITLED_BARE_METAL__=1)
 
-set(targets_to_archive userland calculator_server serial_driver serial_broker)
+set(targets_to_archive calculator_server serial_driver serial_broker)
 set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
 set(archive_name "${CMAKE_BINARY_DIR}/initrd.tar")
 set(archive_binaries)
 
-foreach (program ${targets_to_archive})
-  add_executable(${program}
-    user/${program}.c
-    user/cptr_alloc.c
-    user/exec.c
-    user/lib.c
-    user/pci.c
-    lib/num.c
-    lib/print.c
-    lib/sort.c
-    lib/string.c
-    lib/tar.c
-  )
-  define_file_basename_for_sources(${program})
-  get_target_property(target_output_name ${program} OUTPUT_NAME)
-  if (NOT target_output_name)
-    set(target_output_name ${program})
-  endif ()
-  list(APPEND archive_binaries ${target_output_name})
-endforeach ()
+foreach(program ${targets_to_archive})
+  add_single_file_program(${program})
+endforeach()
+
+add_subdirectory_program(calculator2)
+add_subdirectory_program(main)
 
 find_program(tar_command NAMES gtar tar)
+
+if (NOT tar_command)
+  message(FATAL_ERROR "GNU tar (gtar) not found. Please install it (e.g., via Homebrew: brew install gnu-tar).")
+endif()
+
+# Run a check to see if it's actually GNU tar
+execute_process(
+  COMMAND ${tar_command} --version
+  OUTPUT_VARIABLE tar_version_output
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_QUIET
+)
+
+if (NOT tar_version_output MATCHES "GNU tar")
+  message(FATAL_ERROR "Found 'tar' is not GNU tar. Please install GNU tar (e.g., via Homebrew: brew install gnu-tar) and ensure it's in your PATH.")
+endif()
 
 add_custom_command(
   DEPENDS ${archive_binaries}
   OUTPUT ${archive_name}
-  COMMAND ${tar_command} -cf ${archive_name} ${archive_binaries}
+  COMMAND ${tar_command} -cf ${archive_name} --transform='s|.*/||'
+    ${archive_binaries}
 )
 add_custom_target(initrd_tarball DEPENDS ${archive_name})
 

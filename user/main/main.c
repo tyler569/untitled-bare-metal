@@ -14,6 +14,8 @@
 #include "./serial_driver.h"
 #include <stddef.h>
 
+#include "calculator2.h"
+
 #define PAGE_SIZE 4096
 
 struct boot_info *bi = nullptr;
@@ -114,6 +116,34 @@ spawn_calculator_thread (cptr_t untyped, cptr_t calculator_endpoint)
     .scratch_vspace = init_cap_init_vspace,
     .name = "calculator_server",
     .arguments[0] = calculator_endpoint,
+  };
+
+  int err = spawn_thread (&td);
+  if (err)
+    printf ("Error spawning thread: %d\n", err);
+  else
+    {
+      printf ("Successfully spawned thread\n");
+      tcb_resume (td.tcb);
+    }
+}
+
+void
+spawn_calculator2_thread (cptr_t untyped, cptr_t calculator2_endpoint)
+{
+  void *calculator_elf = find_tar_entry (bi->initrd, "calculator2");
+  if (!calculator_elf)
+    {
+      printf ("Could not find calculator2_elf\n");
+      return;
+    }
+
+  struct thread_data td = {
+    .elf_header = calculator_elf,
+    .untyped = untyped,
+    .scratch_vspace = init_cap_init_vspace,
+    .name = "calculator2",
+    .arguments[0] = calculator2_endpoint,
   };
 
   int err = spawn_thread (&td);
@@ -235,12 +265,29 @@ calculate_fibonacci_numbers (cptr_t calculator_endpoint, word_t up_to)
       message_info_t info;
       set_mr (0, a);
       set_mr (1, b);
-      info = new_message_info (calculator_add, 0, 0, 2);
+      info = new_message_info (m_calculator_add, 0, 0, 2);
       call (calculator_endpoint, info, &badge);
       a = b;
       b = get_mr (0);
 
       printf ("Fibonacci: %lu\n", a);
+
+      if (a > up_to)
+        break;
+    }
+}
+
+void
+calculate_fibonacci_numbers2 (cptr_t calculator_endpoint, word_t up_to)
+{
+  word_t a = 0, b = 1;
+  while (true)
+    {
+      word_t tmp = calculator2_add (calculator_endpoint, a, b);
+      a = b;
+      b = tmp;
+
+      printf ("Fibonacci2: %lu\n", a);
 
       if (a > up_to)
         break;
@@ -419,15 +466,18 @@ main (void *boot_info)
   draw_circle (fb, 150, 400, 50, 0xff0000);
 
   cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
+  cptr_t calculator2_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_write_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_read_endpoint = allocate (untyped, cap_endpoint, 1);
 
   spawn_calculator_thread (untyped, calculator_endpoint);
+  spawn_calculator2_thread (untyped, calculator2_endpoint);
   spawn_serial_driver (untyped, serial_write_endpoint, serial_read_endpoint);
 
   print_to_serial (serial_write_endpoint, "Hello, Serial World!\n");
 
   calculate_fibonacci_numbers (calculator_endpoint, 100'000);
+  calculate_fibonacci_numbers2 (calculator2_endpoint, 100'000);
   serial_capitalization_server(serial_write_endpoint, serial_read_endpoint);
 
   exit (0);

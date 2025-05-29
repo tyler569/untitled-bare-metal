@@ -1,0 +1,15 @@
+#include "{{ interface | lower }}.h"
+#include "lib.h"
+
+{% for method in methods %}
+uint64_t {{ interface | lower }}_{{ method.name }}(cptr_t cap{% if method.params|length > 0 %}, {% for p in method.params %}uint64_t {{ p.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}) {
+  message_info_t info;
+  word_t badge;
+{% for p in method.params %}
+  set_mr({{ loop.index0 }}, {{ p.name }});
+{% endfor %}
+  info = new_message_info({{ interface | method_id_name(method.name) }}, 0, 0, {{ method.params | length }});
+  call(cap, info, &badge);
+  return get_mr(0);
+}
+{% endfor %}

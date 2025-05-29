@@ -1,0 +1,23 @@
+#pragma once
+
+#include <stdint.h>
+#include <sys/types.h>
+
+enum {
+{% for method in methods %}
+  {{ interface | method_id_name(method.name) }} = {{ method.id }},
+{% endfor %}
+  {{ interface | lower }}_error_unknown
+};
+
+// Server function implementations (to be written by user)
+{% for method in methods %}
+uint64_t impl_{{ interface | lower }}_{{ method.name }}({% for p in method.params %}uint64_t {{ p.name }}{% if not loop.last %}, {% endif %}{% endfor %});
+{% endfor %}
+
+void {{ interface | lower }}_server(cptr_t endpoint_cap);
+
+// Client stubs
+{% for method in methods %}
+uint64_t {{ interface | lower }}_{{ method.name }}(cptr_t cap{% if method.params|length > 0 %}, {% for p in method.params %}uint64_t {{ p.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %});
+{% endfor %}

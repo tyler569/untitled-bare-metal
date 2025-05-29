@@ -18,7 +18,7 @@ static struct limine_framebuffer_request fbinfo = {
 void
 create_init_tcb (void *initrd, size_t initrd_size)
 {
-  struct elf_ehdr *init_elf = find_tar_entry (initrd, "userland");
+  struct elf_ehdr *init_elf = find_tar_entry (initrd, "main");
 
   assert (init_elf);
   assert (is_elf (init_elf));

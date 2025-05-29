@@ -21,19 +21,19 @@ main (cptr_t endpoint_cap)
 
       switch (label)
         {
-        case calculator_quit:
+        case m_calculator_quit:
           done = true;
           break;
-        case calculator_ret42:
+        case m_calculator_ret42:
           set_mr (0, 42);
           break;
-        case calculator_double:
+        case m_calculator_double:
           set_mr (0, get_mr (0) * 2);
           break;
-        case calculator_inc:
+        case m_calculator_inc:
           set_mr (0, get_mr (0) + 1);
           break;
-        case calculator_add:
+        case m_calculator_add:
           set_mr (0, get_mr (0) + get_mr (1));
           break;
         default:
