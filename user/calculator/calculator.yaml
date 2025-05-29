@@ -1,4 +1,4 @@
-interface: calculator2
+interface: calculator
 methods:
   - name: quit
     id: 0
