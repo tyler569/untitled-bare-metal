@@ -1,17 +1,3 @@
-# Define the library if it hasn't already been defined
-if (NOT TARGET userlib)
-  add_library(userlib STATIC
-    user/cptr_alloc.c
-    user/exec.c
-    user/lib.c
-    user/pci.c
-    lib/num.c
-    lib/print.c
-    lib/sort.c
-    lib/string.c
-    lib/tar.c
-  )
-endif ()
 
 function(add_single_file_program name)
   add_executable(${name} ${name}.c)

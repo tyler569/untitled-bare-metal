@@ -235,7 +235,7 @@ calculate_fibonacci_numbers (cptr_t calculator_endpoint, word_t up_to)
       a = b;
       b = tmp;
 
-      printf ("Fibonacci2: %lu\n", a);
+      printf ("Fibonacci: %lu\n", a);
 
       if (a > up_to)
         break;

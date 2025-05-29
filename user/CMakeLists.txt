@@ -5,6 +5,18 @@ set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
 set(archive_name "${CMAKE_BINARY_DIR}/initrd.tar")
 set(archive_binaries)
 
+add_library(userlib STATIC
+  lib/cptr_alloc.c
+  lib/exec.c
+  lib/lib.c
+  lib/pci.c
+  ../lib/num.c
+  ../lib/print.c
+  ../lib/sort.c
+  ../lib/string.c
+  ../lib/tar.c
+)
+
 foreach(program ${targets_to_archive})
   add_single_file_program(${program})
 endforeach()
