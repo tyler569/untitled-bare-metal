@@ -1,6 +1,5 @@
 include_directories(.)
 
-set(targets_to_archive serial_driver serial_broker)
 set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
 set(archive_name "${CMAKE_BINARY_DIR}/initrd.tar")
 set(archive_binaries)
@@ -17,9 +16,7 @@ add_library(userlib STATIC
   ../lib/tar.c
 )
 
-foreach(program ${targets_to_archive})
-  add_single_file_program(${program})
-endforeach()
+add_single_file_program(serial_driver)
 
 add_subdirectory_program(calculator)
 add_subdirectory_program(main)

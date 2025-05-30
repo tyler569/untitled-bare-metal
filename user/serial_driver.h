@@ -23,6 +23,12 @@ enum
   serial_driver_read = 2,
 };
 
+enum
+{
+  role_serial_driver,
+  role_serial_broker,
+};
+
 struct serial_driver_ring
 {
   atomic_ushort head;
