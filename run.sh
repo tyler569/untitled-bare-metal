@@ -49,4 +49,5 @@ exec qemu-system-x86_64 -s -vga std \
   $serialopt \
   $netopt \
   -cpu max \
+  -fw_cfg name="opt/verify_fw_cfg",string="fw_cfg working" \
   $gdbserver |& tee last_output

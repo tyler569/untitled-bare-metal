@@ -156,6 +156,6 @@ main (int role)
     serial_driver ();
   else if (role == role_serial_broker)
     serial_broker ();
-  else 
+  else
     printf ("serial_driver error: unknown role\n");
 }

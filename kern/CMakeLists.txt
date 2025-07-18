@@ -33,6 +33,7 @@ if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
   target_sources(untitled_bare_metal PRIVATE
     ../arch/x86_64/debug.c
     ../arch/x86_64/entry.c
+    ../arch/x86_64/fw_cfg.c
     ../arch/x86_64/isrs.S
     ../arch/x86_64/frame.c
     ../arch/x86_64/gdt.c

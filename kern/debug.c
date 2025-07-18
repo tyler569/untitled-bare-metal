@@ -79,6 +79,9 @@ run_smoke_tests ()
 {
   printf ("Smoke tests:\n");
 
+  printf ("  fw_cfg\n");
+  test_fw_cfg ();
+
   printf ("  Interrupt\n");
   printf ("    ");
   asm volatile ("int $255");

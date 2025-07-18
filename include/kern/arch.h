@@ -53,3 +53,7 @@ uint32_t read_pci_l (uint32_t addr);
 uint16_t read_pci_w (uint32_t addr);
 uint8_t read_pci_b (uint32_t addr);
 void write_pci_l (uint32_t addr, uint32_t val);
+
+// fw_cfg interface functions
+size_t fw_cfg_read_file (const char *name, void *buffer, size_t max_size);
+void test_fw_cfg (void);
