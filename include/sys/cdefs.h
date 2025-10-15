@@ -9,7 +9,8 @@
 
 #define STRINGIFY_(x) #x
 #define STRINGIFY(x) STRINGIFY_ (x)
-#define FILE_AND_LINE FILE_BASENAME ":" STRINGIFY (__LINE__)
+// #define FILE_AND_LINE FILE_BASENAME ":" STRINGIFY (__LINE__)
+#define FILE_AND_LINE __FILE__ ":" STRINGIFY (__LINE__)
 
 #define LIKELY(x) __builtin_expect (!!(x), 1)
 #define UNLIKELY(x) __builtin_expect (!!(x), 0)

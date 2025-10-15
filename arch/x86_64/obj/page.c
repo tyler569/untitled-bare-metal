@@ -21,7 +21,7 @@
 static message_info_t
 already_mapped ()
 {
-  return return_ipc (delete_first, 0);
+  return ipc_delete_first ();
 }
 
 static message_info_t
@@ -56,7 +56,7 @@ x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pml4e = pdpt_phy | PTE_PRESENT | PTE_WRITE | PTE_USER;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -79,7 +79,7 @@ x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pdpte = pd_phy | PTE_PRESENT | PTE_WRITE | PTE_USER;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -106,7 +106,7 @@ x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pde = pt_phy | PTE_PRESENT | PTE_WRITE | PTE_USER;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -133,7 +133,7 @@ x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pte = page_phy | PTE_PRESENT | PTE_USER | attr;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -156,5 +156,5 @@ x86_64_huge_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pde = page_phy | PTE_PRESENT | PTE_USER | attr;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }

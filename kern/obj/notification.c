@@ -103,5 +103,5 @@ invoke_notification_recv (cte_t *cap)
 
   n->word = 0;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }

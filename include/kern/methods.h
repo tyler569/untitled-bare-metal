@@ -3,6 +3,7 @@
 #pragma once
 
 #include "kern/cap.h"
+#include "sys/syscall.h"
 
 message_info_t cnode_copy (cte_t *slot, word_t dest_index, uint8_t dest_depth,
                            cte_t *src_root, word_t src_index,

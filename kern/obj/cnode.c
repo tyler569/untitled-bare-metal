@@ -1,4 +1,5 @@
 #include "kern/obj/cnode.h"
+#include "assert.h"
 #include "kern/cap.h"
 #include "kern/syscall.h"
 
@@ -26,11 +27,30 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
   return &cte[index];
 }
 
+// alternate design
+message_info_t
+lookup_cap_slot_v2 (cte_t *cspace_root, word_t index, word_t depth,
+                    cte_t **out)
+{
+  assert_eq (depth, 64);
+
+  if (cap_type (cspace_root->cap) != cap_cnode)
+    return ipc_invalid_root ();
+
+  cte_t *cte = cap_ptr (cspace_root->cap);
+  size_t length = cap_size (cspace_root->cap);
+  if (index >= length)
+    return ipc_range_error (0, length);
+
+  *out = &cte[index];
+  return no_error;
+}
+
 static message_info_t
 communicate_lookup_error (error_t err, bool source, char *operation)
 {
   if (err == no_error)
-    return return_ipc (no_error, 0);
+    return ipc_ok (0);
 
   const char *err_str;
   switch (err)
@@ -98,7 +118,7 @@ cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
 
   copy_cap (dst, src, rights);
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -112,7 +132,7 @@ cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
   // TODO: distribution tree validity
   cte->cap = cap_null_new ();
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -138,5 +158,5 @@ cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   copy_cap (dst, src, rights);
   dst->cap.badge = badge;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
