@@ -10,7 +10,7 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
 
   if (cap_type (cspace_root->cap) != cap_cnode)
     {
-      *err = invalid_root;
+      *err = ipc_invalid_root ();
       return nullptr;
     }
 
@@ -19,7 +19,7 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
   if (index >= length)
     {
       printf ("index: %lu, length: %lu\n", index, length);
-      *err = range_error;
+      *err = ipc_range_error (0, length);
       return nullptr;
     }
 
@@ -27,12 +27,10 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
   return &cte[index];
 }
 
-// alternate design
-message_info_t
-lookup_cap_slot_v2 (cte_t *cspace_root, word_t index, word_t depth,
-                    cte_t **out)
+error_t lookup_cap_slot_2 (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 {
-  assert_eq (depth, 64);
+  *out = nullptr;
+  assert_eq (depth, 64); // for now
 
   if (cap_type (cspace_root->cap) != cap_cnode)
     return ipc_invalid_root ();
@@ -46,11 +44,11 @@ lookup_cap_slot_v2 (cte_t *cspace_root, word_t index, word_t depth,
   return no_error;
 }
 
-static message_info_t
+static error_t 
 communicate_lookup_error (error_t err, bool source, char *operation)
 {
   if (err == no_error)
-    return ipc_ok (0);
+    return no_error;
 
   const char *err_str;
   switch (err)
@@ -67,15 +65,11 @@ communicate_lookup_error (error_t err, bool source, char *operation)
     }
 
   if (source)
-    {
-      printf ("< Source lookup failed: %s; %s >\n", operation, err_str);
-      return return_ipc (err, 0);
-    }
+    printf ("< Source lookup failed: %s; %s >\n", operation, err_str);
   else
-    {
-      printf ("< Destination lookup failed: %s; %s >\n", operation, err_str);
-      return return_ipc (err, 0);
-    }
+    printf ("< Destination lookup failed: %s; %s >\n", operation, err_str);
+
+  return err;
 }
 
 error_t
@@ -103,7 +97,7 @@ cnode_debug_print (cap_t *obj)
   return no_error;
 }
 
-message_info_t
+error_t
 cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
             word_t src_offset, uint8_t src_depth, cap_rights_t rights)
 {
@@ -121,13 +115,13 @@ cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
 {
   error_t err;
   cte_t *cte = lookup_cap_slot (obj, offset, depth, &err);
   if (err != no_error)
-    return return_ipc (err, 0);
+    return err;
 
   // TODO: distribution tree validity
   cte->cap = cap_null_new ();
@@ -135,7 +129,7 @@ cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
             word_t src_offset, uint8_t src_depth, cap_rights_t rights,
             word_t badge)
@@ -150,10 +144,10 @@ cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
     return communicate_lookup_error (err, false, "mint");
 
   if (cap_type (src) != cap_endpoint && cap_type (src) != cap_notification)
-    return return_ipc (invalid_argument, 0);
+    return ipc_invalid_argument (4);
 
   if (src->cap.badge)
-    return return_ipc (invalid_argument, 0);
+    return ipc_invalid_argument (4);
 
   copy_cap (dst, src, rights);
   dst->cap.badge = badge;
