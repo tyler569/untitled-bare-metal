@@ -8,13 +8,10 @@
   do                                                                          \
     {                                                                         \
       if (!(x))                                                               \
-        panic (FILE_AND_LINE ": assertion failed: %s", #x);                   \
+        panic (__FILE__                                                       \
+               ":" STRINGIFY (__LINE__) ": %s: assertion failed: %s",         \
+               __func__, #x);                                                 \
     }                                                                         \
   while (0)
 
-static inline void
-assert_eq (long x, long y)
-{
-  if (x != y)
-    panic (FILE_AND_LINE ": assertion failed: %ld != %ld", x, y);
-}
+#define assert_eq(x, y) assert ((x) == (y))
