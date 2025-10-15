@@ -1,1 +1,8 @@
 .vimrc -linguist-detectable
+
+# gen.rb
+include/sys/syscall.h linguist-generated=true
+include/sys/user_method_stubs.h linguist-generated=true
+include/kern/methods.h linguist-generated=true
+include/kern/kernel_method_stubs.c linguist-generated=true
+include/kern/syscall_dispatch.c linguist-generated=true
