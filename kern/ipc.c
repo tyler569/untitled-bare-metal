@@ -1,14 +1,14 @@
 #include "kern/ipc.h"
+#include "assert.h"
 #include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
 
 word_t
 get_ipc_info ()
 {
-  if (this_tcb && this_tcb->ipc_buffer)
-    return this_tcb->ipc_buffer->tag;
-  else
-    return 0;
+  assert (this_tcb && this_tcb->ipc_buffer);
+
+  return this_tcb->ipc_buffer->tag;
 }
 
 word_t
@@ -32,31 +32,31 @@ get_ipc_length ()
 word_t
 get_mr (word_t i)
 {
-  if (this_tcb && this_tcb->ipc_buffer)
-    return this_tcb->ipc_buffer->msg[i];
-  else
-    return 0;
+  assert (this_tcb && this_tcb->ipc_buffer);
+
+  return this_tcb->ipc_buffer->msg[i];
 }
 
 word_t
 get_cap (word_t i)
 {
-  if (this_tcb && this_tcb->ipc_buffer)
-    return this_tcb->ipc_buffer->caps_or_badges[i];
-  else
-    return 0;
+  assert (this_tcb && this_tcb->ipc_buffer);
+
+  return this_tcb->ipc_buffer->caps_or_badges[i];
 }
 
 void
 set_mr (word_t i, word_t v)
 {
-  if (this_tcb && this_tcb->ipc_buffer)
-    this_tcb->ipc_buffer->msg[i] = v;
+  assert (this_tcb && this_tcb->ipc_buffer);
+
+  this_tcb->ipc_buffer->msg[i] = v;
 }
 
 void
 set_ipc_info (message_info_t tag)
 {
-  if (this_tcb && this_tcb->ipc_buffer)
-    this_tcb->ipc_buffer->tag = tag;
+  assert (this_tcb && this_tcb->ipc_buffer);
+
+  this_tcb->ipc_buffer->tag = tag;
 }

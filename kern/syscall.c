@@ -52,6 +52,8 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       if (cap_type (slot) != cap_endpoint)
         {
           info = dispatch_method (slot, a1);
+          set_ipc_info (info);
+          set_frame_return (f, info);
           break;
         }
       else
@@ -123,7 +125,4 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       err_printf ("Invalid syscall number: %d\n", syscall_number);
       kill_tcb (this_tcb);
     }
-
-  set_ipc_info (info);
-  set_frame_return (f, info);
 }
