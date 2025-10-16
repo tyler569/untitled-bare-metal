@@ -27,7 +27,8 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
   return &cte[index];
 }
 
-error_t lookup_cap_slot_2 (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
+error_t
+lookup_cap_slot_2 (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 {
   *out = nullptr;
   assert_eq (depth, 64); // for now
