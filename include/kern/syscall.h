@@ -9,7 +9,7 @@
 struct frame;
 typedef struct frame frame_t;
 
-void do_syscall (uintptr_t, uintptr_t, int syscall_number, frame_t *);
+void do_syscall (uintptr_t, uintptr_t, int syscall_number);
 
 // Used substantially in kern/syscall.c and generated syscall dispatch
 #define dbg_printf(fmt, ...)                                                  \
@@ -93,4 +93,12 @@ static inline error_t
 ipc_invalid_root ()
 {
   return return_ipc (invalid_root, 0);
+}
+
+MUST_USE
+static inline error_t
+ipc_not_enough_memory(word_t available_memory)
+{
+  set_mr (0, available_memory);
+  return return_ipc(not_enough_memory, 1);
 }

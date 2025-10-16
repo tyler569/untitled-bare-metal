@@ -21,7 +21,7 @@
     }
 
 void
-do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
+do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number)
 {
   if (syscall_number != sys_debug_write && syscall_number != sys_exit)
     dbg_printf ("Task %p a0:%#lx ", this_tcb, a0);
