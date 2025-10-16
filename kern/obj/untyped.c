@@ -54,7 +54,7 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
 
   untyped->badge = untyped_offset + total_size;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 int

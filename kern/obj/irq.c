@@ -23,20 +23,20 @@ irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
     return return_ipc (err, 0);
 
   if (cap_type (result_cte) != cap_null)
-    return return_ipc (delete_first, 0);
+    return ipc_delete_first ();
 
   if (irq >= 16)
-    return return_ipc (invalid_argument, 0);
+    return ipc_invalid_argument (0);
 
   if ((1 << irq) & irq_handlers_issued)
-    return return_ipc (invalid_argument, 0);
+    return ipc_invalid_argument (0);
   irq_handlers_issued |= 1 << irq;
 
   result_cte->cap = cap_irq_handler_new (irq);
   cap_set_ptr (result_cte, &irq_handlers[irq]);
   irq_handlers[irq].irq = irq;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -44,7 +44,7 @@ irq_handler_clear (cte_t *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
   data->n = nullptr;
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -53,7 +53,7 @@ irq_handler_ack (cte_t *obj)
   struct irq_handler_data *data = cap_ptr (obj);
   send_eoi (data->irq);
   data->in_service = false;
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -65,7 +65,7 @@ irq_handler_set_notification (cte_t *obj, cte_t *notification)
   data->n = n;
   data->badge = notification->cap.badge;
 
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 bool

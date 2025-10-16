@@ -428,7 +428,7 @@ main (void *boot_info)
   print_to_serial (serial_write_endpoint, "Hello, Serial World!\n");
 
   calculate_fibonacci_numbers (calculator_endpoint, 100'000);
-  serial_capitalization_server(serial_write_endpoint, serial_read_endpoint);
+  serial_capitalization_server (serial_write_endpoint, serial_read_endpoint);
 
   exit (0);
 }

@@ -30,6 +30,59 @@ return_ipc (word_t err, word_t registers)
 
   message_info_t info = new_message_info (err, 0, 0, registers);
 
-  set_ipc_info (info);
   return info;
+}
+
+MUST_USE
+static inline message_info_t
+ipc_ok (word_t registers)
+{
+  return return_ipc (no_error, registers);
+}
+
+MUST_USE
+static inline message_info_t
+ipc_error (word_t error, word_t registers)
+{
+  return return_ipc (error, registers);
+}
+
+MUST_USE
+static inline message_info_t
+ipc_illegal_operation ()
+{
+  return return_ipc (illegal_operation, 0);
+}
+
+MUST_USE
+static inline message_info_t
+ipc_range_error (word_t min, word_t max)
+{
+  set_mr (0, min);
+  set_mr (1, max);
+  return return_ipc (range_error, 2);
+}
+
+MUST_USE
+static inline message_info_t
+ipc_truncated_message (word_t expected, word_t provided)
+{
+  set_mr (0, expected);
+  set_mr (1, provided);
+  return return_ipc (truncated_message, 2);
+}
+
+MUST_USE
+static inline message_info_t
+ipc_delete_first ()
+{
+  return return_ipc (delete_first, 0);
+}
+
+MUST_USE
+static inline message_info_t
+ipc_invalid_argument (word_t argument_number)
+{
+  set_mr (0, argument_number);
+  return return_ipc (invalid_argument, 1);
 }

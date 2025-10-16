@@ -124,5 +124,6 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       kill_tcb (this_tcb);
     }
 
+  set_ipc_info (info);
   set_frame_return (f, info);
 }

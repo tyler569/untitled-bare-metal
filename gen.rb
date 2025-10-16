@@ -117,12 +117,18 @@ class KMethod
 
   def kernel_unmarshal_check_parameters_length
     mr_parameters_check = <<~EOF
-    if (get_message_length (info) < #{mr_parameters.length})
-      return return_ipc (truncated_message, 0);
+    do {
+      word_t len = get_message_length (info);
+      if (len < #{mr_parameters.length})
+        return ipc_truncated_message(len, #{mr_parameters.length});
+    } while (0);
     EOF
     cap_parameters_check = <<~EOF
-    if (get_message_extra_caps (info) < #{cap_parameters.length})
-      return return_ipc (truncated_message, 0);
+    do {
+      word_t len = get_message_extra_caps (info);
+      if (len < #{cap_parameters.length})
+        return ipc_truncated_message(len, #{cap_parameters.length});
+    } while (0);
     EOF
     checks = []
     checks << mr_parameters_check if mr_parameters.length > 0
@@ -144,7 +150,7 @@ class KMethod
       if (cap_type (slot) != #{type.type_name})
         {
           err_printf ("invalid cap type: %s\\n", cap_type_string (cap_type (slot)));
-          return return_ipc (illegal_operation, 0);
+          return ipc_illegal_operation();
         }
       #{kernel_unmarshal_check_parameters_length}
 
@@ -328,7 +334,7 @@ File.open("include/#{HEADERS[:syscall_dispatch]}", 'w') do |f|
     end
   end
   f.puts "default:"
-  f.puts "  return return_ipc (illegal_operation, 0);"
+  f.puts "  return ipc_illegal_operation();"
   f.puts "}"
   f.puts "}"
 end

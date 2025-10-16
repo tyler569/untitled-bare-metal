@@ -42,7 +42,7 @@ x86_64_io_port_in8 (cte_t *slot, word_t port)
     return err;
 
   set_mr (0, read_port_b (port));
-  return return_ipc (no_error, 1);
+  return ipc_ok (1);
 }
 
 message_info_t
@@ -53,7 +53,7 @@ x86_64_io_port_in16 (cte_t *slot, word_t port)
     return err;
 
   set_mr (0, read_port_w (port));
-  return return_ipc (no_error, 1);
+  return ipc_ok (1);
 }
 
 message_info_t
@@ -64,7 +64,7 @@ x86_64_io_port_in32 (cte_t *slot, word_t port)
     return err;
 
   set_mr (0, read_port_l (port));
-  return return_ipc (no_error, 1);
+  return ipc_ok (1);
 }
 
 message_info_t
@@ -75,7 +75,7 @@ x86_64_io_port_out8 (cte_t *slot, word_t port, word_t value)
     return err;
 
   write_port_b (port, value);
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -86,7 +86,7 @@ x86_64_io_port_out16 (cte_t *slot, word_t port, word_t value)
     return err;
 
   write_port_w (port, value);
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
 
 message_info_t
@@ -97,5 +97,5 @@ x86_64_io_port_out32 (cte_t *slot, word_t port, word_t value)
     return err;
 
   write_port_l (port, value);
-  return return_ipc (no_error, 0);
+  return ipc_ok (0);
 }
