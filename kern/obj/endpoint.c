@@ -11,7 +11,7 @@ first_tcb (struct endpoint *e)
   return CONTAINER_OF (e->list.next, struct tcb, send_receive_node);
 }
 
-static void
+static error_t
 transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge)
 {
   message_info_t info = sender->ipc_buffer->tag;
@@ -30,34 +30,28 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge)
       cte_t *cap = lookup_cap_slot (&sender->cspace_root, send_cptr, 64, &err);
 
       if (err)
-        {
-          printf ("Failed to lookup cap for transfer\n");
-          return;
-        }
+        return err;
 
       cte_t *recv_cnode_root
           = lookup_cap_slot (&receiver->cspace_root,
                              receiver->ipc_buffer->receive_cnode, 64, &err);
       if (err)
-        {
-          printf ("Failed to lookup receive cnode\n");
-          return;
-        }
+        return err;
 
       cte_t *recv_slot = lookup_cap_slot (
           recv_cnode_root, receiver->ipc_buffer->receive_index,
           receiver->ipc_buffer->receive_depth, &err);
+
       if (err)
-        {
-          printf ("Failed to lookup receive slot\n");
-          return;
-        }
+        return err;
 
       copy_cap (recv_slot, cap, cap_rights_all);
     }
 
   if (sender->expects_reply)
     receiver->reply_to = sender;
+
+  return no_error;
 }
 
 static void
