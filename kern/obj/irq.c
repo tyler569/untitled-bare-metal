@@ -14,13 +14,13 @@ struct irq_handler_data
 static uint64_t irq_handlers_issued = 0;
 static struct irq_handler_data irq_handlers[16];
 
-message_info_t
+error_t
 irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
 {
   error_t err;
   cte_t *result_cte = lookup_cap_slot (root, index, depth, &err);
   if (err != no_error)
-    return return_ipc (err, 0);
+    return err;
 
   if (cap_type (result_cte) != cap_null)
     return ipc_delete_first ();
@@ -39,7 +39,7 @@ irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 irq_handler_clear (cte_t *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
@@ -47,7 +47,7 @@ irq_handler_clear (cte_t *obj)
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 irq_handler_ack (cte_t *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
@@ -56,7 +56,7 @@ irq_handler_ack (cte_t *obj)
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 irq_handler_set_notification (cte_t *obj, cte_t *notification)
 {
   struct irq_handler_data *data = cap_ptr (obj);

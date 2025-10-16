@@ -9,8 +9,7 @@ signal_waiting_receiver (struct tcb *receiver, word_t badge)
   message_info_t tag = new_message_info (no_error, 0, 0, 0);
 
   receiver->ipc_buffer->tag = tag;
-  receiver->saved_state.rax = tag;
-  receiver->saved_state.rdi = badge;
+  receiver->ipc_buffer->sender_badge = badge;
 
   receiver->state = TASK_STATE_RUNNABLE;
   switch_tcb (receiver);
@@ -80,7 +79,7 @@ invoke_notification_send (cte_t *cap)
   notification_signal (n, cap->cap.badge);
 }
 
-message_info_t
+error_t
 invoke_notification_recv (cte_t *cap)
 {
   assert (cap_type (cap) == cap_notification);

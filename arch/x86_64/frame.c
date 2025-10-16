@@ -105,6 +105,12 @@ set_frame_return (frame_t *f, uintptr_t val)
 }
 
 void
+set_frame_badge (frame_t *f, uintptr_t val)
+{
+  f->rdi = val;
+}
+
+void
 ensure_frame_valid_for_usermode (frame_t *f)
 {
   f->cs = USER_CS;

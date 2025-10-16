@@ -410,13 +410,13 @@ main (void *boot_info)
                                 init_cap_root_cnode, e9_io_port, 64);
   print_to_e9 (e9_io_port, "Hello, E9 World!\n");
 
-  void *fb = map_framebuffer (untyped);
-  clear_fb (fb, 0xffffffff);
-  draw_square (fb, 100, 100, 100, 100, 0xff);
-  draw_square (fb, 200, 200, 100, 100, 0xff00);
-  draw_square (fb, 300, 300, 100, 100, 0xff0000);
-  draw_square (fb, 400, 400, 100, 100, 0xff000000);
-  draw_circle (fb, 150, 400, 50, 0xff0000);
+  // void *fb = map_framebuffer (untyped);
+  // clear_fb (fb, 0xffffffff);
+  // draw_square (fb, 100, 100, 100, 100, 0xff);
+  // draw_square (fb, 200, 200, 100, 100, 0xff00);
+  // draw_square (fb, 300, 300, 100, 100, 0xff0000);
+  // draw_square (fb, 400, 400, 100, 100, 0xff000000);
+  // draw_circle (fb, 150, 400, 50, 0xff0000);
 
   cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_write_endpoint = allocate (untyped, cap_endpoint, 1);

@@ -44,32 +44,32 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       break;
     case sys_call:
       GET_CAP (a0, slot, err);
-      dbg_printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
+      dbg_printf ("sys_call (dest: %#lx)\n", a0);
 
       if (cap_type (slot) != cap_endpoint)
-        dispatch_method (slot, a1);
+        dispatch_method (slot, this_tcb->ipc_buffer->tag);
       else
-        invoke_endpoint_call (slot, a1);
+        invoke_endpoint_call (slot);
       break;
     case sys_send:
       GET_CAP (a0, slot, err);
-      dbg_printf ("sys_send (dest: %#lx, info: %#lx)\n", a0, a1);
+      dbg_printf ("sys_send (dest: %#lx)\n", a0);
 
       ASSERT_ENDPOINT (slot);
 
       if (cap_type (slot) == cap_notification)
         invoke_notification_send (slot);
       else if (cap_type (slot) == cap_endpoint)
-        invoke_endpoint_send (slot, a1);
+        invoke_endpoint_send (slot);
       break;
     case sys_nbsend:
       GET_CAP (a0, slot, err);
-      dbg_printf ("sys_nbsend (dest: %#lx, info: %#lx)\n", a0, a1);
+      dbg_printf ("sys_nbsend (dest: %#lx)\n", a0);
 
       ASSERT_ENDPOINT (slot);
 
       if (cap_type (slot) == cap_endpoint)
-        invoke_endpoint_nbsend (slot, a1);
+        invoke_endpoint_nbsend (slot);
       break;
     case sys_recv:
       GET_CAP (a0, slot, err);
@@ -93,15 +93,15 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       break;
     case sys_reply:
       dbg_printf ("sys_reply (info: %#lx)\n", a0);
-      invoke_reply (a0);
+      invoke_reply ();
       break;
     case sys_replyrecv:
       GET_CAP (a0, slot, err);
-      dbg_printf ("sys_replyrecv (dest: %#lx, info: %#lx)\n", a0, a1);
+      dbg_printf ("sys_replyrecv (dest: %#lx)\n", a0);
 
       ASSERT_ENDPOINT (slot);
 
-      invoke_reply_recv (slot, a1);
+      invoke_reply_recv (slot);
       break;
     case sys_yield:
       dbg_printf ("sys_yield ()\n");

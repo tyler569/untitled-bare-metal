@@ -45,7 +45,7 @@ struct ipc_buffer
   message_info_t tag;
 
   word_t msg[MESSAGE_MAX_LENGTH];
-  word_t user_data;
+  word_t sender_badge;
   word_t caps_or_badges[MESSAGE_MAX_EXTRA_CAPS];
 
   cptr_t receive_cnode;

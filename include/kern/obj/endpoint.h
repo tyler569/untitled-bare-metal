@@ -12,11 +12,11 @@ struct endpoint
 
 static_assert (sizeof (struct endpoint) <= BIT (endpoint_size_bits));
 
-void invoke_endpoint_send (cte_t *cap, word_t message_info);
+void invoke_endpoint_send (cte_t *cap);
 void invoke_endpoint_recv (cte_t *cap);
-void invoke_endpoint_nbsend (cte_t *cap, word_t message_info);
+void invoke_endpoint_nbsend (cte_t *cap);
 void invoke_endpoint_nbrecv (cte_t *cap);
 
-void invoke_endpoint_call (cte_t *cap, word_t message_info);
-void invoke_reply (word_t message_info);
-void invoke_reply_recv (cte_t *cap, word_t message_info);
+void invoke_endpoint_call (cte_t *cap);
+void invoke_reply ();
+void invoke_reply_recv (cte_t *cap);

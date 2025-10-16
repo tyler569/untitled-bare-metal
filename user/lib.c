@@ -21,18 +21,17 @@ _syscall0 (int syscall_num)
 }
 
 static inline void
-_syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
+_syscall1 (int syscall_num, uintptr_t a1)
 {
   asm volatile ("syscall" :
-                : "a"(syscall_num), "D"(a1), "S"(a2)
-                : "rcx", "r11");
+				: "a"(syscall_num), "D"(a1)
+				: "rcx", "r11");
 }
 
 static inline void
-_syscall22 (int syscall_num, uintptr_t a1, uintptr_t a2, uintptr_t *out)
+_syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
 {
-  asm volatile ("syscall"
-                : "=D"(*out)
+  asm volatile ("syscall" :
                 : "a"(syscall_num), "D"(a1), "S"(a2)
                 : "rcx", "r11");
 }
@@ -61,7 +60,9 @@ message_info_t
 call (cptr_t cap, message_info_t info, word_t *sender)
 {
   __ipc_buffer->tag = info;
-  _syscall22 (sys_call, cap, info, sender);
+  _syscall1 (sys_call, cap);
+  if (sender)
+	*sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
 }
 
@@ -69,28 +70,34 @@ message_info_t
 __call_kernel (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall2 (sys_call, cap, info);
+  _syscall1 (sys_call, cap);
   return __ipc_buffer->tag;
 }
 
 message_info_t
 recv (cptr_t cap, word_t *sender)
 {
-  _syscall22 (sys_recv, cap, 0, sender);
+  _syscall1 (sys_recv, cap);
+  if (sender)
+	*sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
 }
 
 message_info_t
 nbrecv (cptr_t cap, word_t *sender)
 {
-  _syscall22 (sys_nbrecv, cap, 0, sender);
+  _syscall1 (sys_nbrecv, cap);
+  if (sender)
+	*sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
 }
 
 void
 wait (cptr_t cap, word_t *nfn_word)
 {
-  _syscall22 (sys_recv, cap, 0, nfn_word);
+  _syscall1 (sys_recv, cap);
+  if (nfn_word)
+	*nfn_word = __ipc_buffer->sender_badge;
 }
 
 message_info_t
@@ -105,7 +112,9 @@ message_info_t
 reply_recv (cptr_t cap, message_info_t info, word_t *sender)
 {
   __ipc_buffer->tag = info;
-  _syscall22 (sys_replyrecv, cap, info, sender);
+  _syscall1 (sys_replyrecv, cap);
+  if (sender)
+	*sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
 }
 
