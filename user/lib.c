@@ -14,34 +14,27 @@ _start ()
   asm ("jmp main");
 }
 
-static inline uintptr_t
+static inline void 
 _syscall0 (int syscall_num)
 {
-  uintptr_t ret;
-  asm volatile ("syscall" : "=a"(ret) : "0"(syscall_num) : "rcx", "r11");
-  return ret;
+  asm volatile ("syscall" :: "a"(syscall_num) : "rcx", "r11");
 }
 
-static inline uintptr_t
+static inline void
 _syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
 {
-  uintptr_t ret;
-  asm volatile ("syscall"
-                : "=a"(ret)
-                : "0"(syscall_num), "D"(a1), "S"(a2)
+  asm volatile ("syscall" :
+                : "a"(syscall_num), "D"(a1), "S"(a2)
                 : "rcx", "r11");
-  return ret;
 }
 
-static inline uintptr_t
+static inline void
 _syscall22 (int syscall_num, uintptr_t a1, uintptr_t a2, uintptr_t *out)
 {
-  uintptr_t ret;
   asm volatile ("syscall"
-                : "=a"(ret), "=D"(*out)
-                : "0"(syscall_num), "1"(a1), "S"(a2)
+                : "=D"(*out)
+                : "a"(syscall_num), "D"(a1), "S"(a2)
                 : "rcx", "r11");
-  return ret;
 }
 
 void
@@ -68,26 +61,30 @@ message_info_t
 call (cptr_t cap, message_info_t info, word_t *sender)
 {
   __ipc_buffer->tag = info;
-  return _syscall22 (sys_call, cap, info, sender);
+  _syscall22 (sys_call, cap, info, sender);
+  return __ipc_buffer->tag;
 }
 
 message_info_t
 __call_kernel (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  return _syscall2 (sys_call, cap, info);
+  _syscall2 (sys_call, cap, info);
+  return __ipc_buffer->tag;
 }
 
 message_info_t
 recv (cptr_t cap, word_t *sender)
 {
-  return _syscall22 (sys_recv, cap, 0, sender);
+  _syscall22 (sys_recv, cap, 0, sender);
+  return __ipc_buffer->tag;
 }
 
 message_info_t
 nbrecv (cptr_t cap, word_t *sender)
 {
-  return _syscall22 (sys_nbrecv, cap, 0, sender);
+  _syscall22 (sys_nbrecv, cap, 0, sender);
+  return __ipc_buffer->tag;
 }
 
 void
@@ -100,14 +97,16 @@ message_info_t
 reply (message_info_t info)
 {
   __ipc_buffer->tag = info;
-  return _syscall2 (sys_reply, info, 0);
+  _syscall2 (sys_reply, info, 0);
+  return __ipc_buffer->tag;
 }
 
 message_info_t
 reply_recv (cptr_t cap, message_info_t info, word_t *sender)
 {
   __ipc_buffer->tag = info;
-  return _syscall22 (sys_replyrecv, cap, info, sender);
+  _syscall22 (sys_replyrecv, cap, info, sender);
+  return __ipc_buffer->tag;
 }
 
 void

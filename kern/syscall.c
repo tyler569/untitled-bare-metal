@@ -10,11 +10,8 @@
 
 #define GET_CAP(cptr, slot, err)                                              \
   slot = lookup_cap_slot_this_tcb (cptr, &err);                               \
-  if (err != no_error)                                                        \
-    {                                                                         \
-      info = return_ipc (err, 0);                                             \
-      break;                                                                  \
-    }
+  if (err)                                                                    \
+      break;
 
 #define ASSERT_ENDPOINT(slot)                                                 \
   if (cap_type (slot) != cap_endpoint && cap_type (slot) != cap_notification) \
@@ -32,7 +29,6 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
   if (syscall_number == sys_exit)
     dbg_printf ("Task %p ", this_tcb);
 
-  message_info_t info = 0;
   error_t err;
   cte_t *slot;
 
@@ -48,19 +44,12 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       break;
     case sys_call:
       GET_CAP (a0, slot, err);
+      dbg_printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
 
       if (cap_type (slot) != cap_endpoint)
-        {
-          info = dispatch_method (slot, a1);
-          set_ipc_info (info);
-          set_frame_return (f, info);
-          break;
-        }
+        dispatch_method (slot, a1);
       else
-        {
-          dbg_printf ("sys_call (dest: %#lx, info: %#lx)\n", a0, a1);
-          invoke_endpoint_call (slot, a1);
-        }
+        invoke_endpoint_call (slot, a1);
       break;
     case sys_send:
       GET_CAP (a0, slot, err);
@@ -84,25 +73,23 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       break;
     case sys_recv:
       GET_CAP (a0, slot, err);
-
       dbg_printf ("sys_recv (dest: %#lx)\n", a0);
 
       ASSERT_ENDPOINT (slot);
 
       if (cap_type (slot) == cap_notification)
-        info = invoke_notification_recv (slot);
+        invoke_notification_recv (slot);
       else if (cap_type (slot) == cap_endpoint)
-        info = invoke_endpoint_recv (slot);
+        invoke_endpoint_recv (slot);
       break;
     case sys_nbrecv:
       GET_CAP (a0, slot, err);
-
       dbg_printf ("sys_nbrecv (dest: %#lx)\n", a0);
 
       ASSERT_ENDPOINT (slot);
 
       if (cap_type (slot) == cap_endpoint)
-        info = invoke_endpoint_nbrecv (slot);
+        invoke_endpoint_nbrecv (slot);
       break;
     case sys_reply:
       dbg_printf ("sys_reply (info: %#lx)\n", a0);
@@ -110,12 +97,11 @@ do_syscall (uintptr_t a0, uintptr_t a1, int syscall_number, frame_t *f)
       break;
     case sys_replyrecv:
       GET_CAP (a0, slot, err);
-
       dbg_printf ("sys_replyrecv (dest: %#lx, info: %#lx)\n", a0, a1);
 
       ASSERT_ENDPOINT (slot);
 
-      info = invoke_reply_recv (slot, a1);
+      invoke_reply_recv (slot, a1);
       break;
     case sys_yield:
       dbg_printf ("sys_yield ()\n");

@@ -20,8 +20,8 @@ void do_syscall (uintptr_t, uintptr_t, int syscall_number, frame_t *);
 #define err_printf(...) printf (__VA_ARGS__)
 
 MUST_USE
-static inline message_info_t
-return_ipc (word_t err, word_t registers)
+static inline error_t
+return_ipc (error_t err, word_t registers)
 {
   if (err != no_error && err < max_error_code)
     dbg_printf ("return_ipc: err='%s'\n", error_string (err));
@@ -29,33 +29,34 @@ return_ipc (word_t err, word_t registers)
     dbg_printf ("return_ipc: err='%lu'\n", err);
 
   message_info_t info = new_message_info (err, 0, 0, registers);
+  set_ipc_info (info);
 
-  return info;
+  return err;
 }
 
 MUST_USE
-static inline message_info_t
+static inline error_t
 ipc_ok (word_t registers)
 {
   return return_ipc (no_error, registers);
 }
 
 MUST_USE
-static inline message_info_t
+static inline error_t
 ipc_error (word_t error, word_t registers)
 {
   return return_ipc (error, registers);
 }
 
 MUST_USE
-static inline message_info_t
+static inline error_t
 ipc_illegal_operation ()
 {
   return return_ipc (illegal_operation, 0);
 }
 
 MUST_USE
-static inline message_info_t
+static inline error_t
 ipc_range_error (word_t min, word_t max)
 {
   set_mr (0, min);
@@ -64,7 +65,7 @@ ipc_range_error (word_t min, word_t max)
 }
 
 MUST_USE
-static inline message_info_t
+static inline error_t
 ipc_truncated_message (word_t expected, word_t provided)
 {
   set_mr (0, expected);
@@ -73,14 +74,14 @@ ipc_truncated_message (word_t expected, word_t provided)
 }
 
 MUST_USE
-static inline message_info_t
+static inline error_t
 ipc_delete_first ()
 {
   return return_ipc (delete_first, 0);
 }
 
 MUST_USE
-static inline message_info_t
+static inline error_t
 ipc_invalid_argument (word_t argument_number)
 {
   set_mr (0, argument_number);
@@ -88,7 +89,7 @@ ipc_invalid_argument (word_t argument_number)
 }
 
 MUST_USE
-static inline message_info_t
+static inline error_t
 ipc_invalid_root ()
 {
   return return_ipc (invalid_root, 0);
