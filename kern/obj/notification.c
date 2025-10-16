@@ -53,7 +53,8 @@ notification_signal (struct notification *nfn, word_t badge)
       && nfn->bound_tcb->state == TASK_STATE_RECEIVING)
     {
       nfn->word = 0;
-      signal_bound_receiver_waiting_on_something_else (nfn->bound_tcb, nfn_word);
+      signal_bound_receiver_waiting_on_something_else (nfn->bound_tcb,
+                                                       nfn_word);
       return;
     }
 
@@ -89,7 +90,8 @@ invoke_notification_recv (cte_t *cap)
 
   if (nfn->bound_tcb && nfn->bound_tcb != this_tcb)
     {
-	  err_printf ("killing thread attempted to wait on bound notification\nfn");
+      err_printf (
+          "killing thread attempted to wait on bound notification\nfn");
       kill_tcb (this_tcb);
       schedule ();
     }

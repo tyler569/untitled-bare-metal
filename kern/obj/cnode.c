@@ -45,7 +45,7 @@ lookup_cap_slot_2 (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
   return no_error;
 }
 
-static error_t 
+static error_t
 communicate_lookup_error (error_t err, bool source, char *operation)
 {
   if (err == no_error)

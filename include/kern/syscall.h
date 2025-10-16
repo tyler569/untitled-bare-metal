@@ -97,8 +97,8 @@ ipc_invalid_root ()
 
 MUST_USE
 static inline error_t
-ipc_not_enough_memory(word_t available_memory)
+ipc_not_enough_memory (word_t available_memory)
 {
   set_mr (0, available_memory);
-  return return_ipc(not_enough_memory, 1);
+  return return_ipc (not_enough_memory, 1);
 }

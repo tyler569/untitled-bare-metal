@@ -11,7 +11,7 @@
 #define GET_CAP(cptr, slot, err)                                              \
   slot = lookup_cap_slot_this_tcb (cptr, &err);                               \
   if (err)                                                                    \
-      break;
+    break;
 
 #define ASSERT_ENDPOINT(slot)                                                 \
   if (cap_type (slot) != cap_endpoint && cap_type (slot) != cap_notification) \

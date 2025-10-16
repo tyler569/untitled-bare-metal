@@ -14,24 +14,23 @@ _start ()
   asm ("jmp main");
 }
 
-static inline void 
+static inline void
 _syscall0 (int syscall_num)
 {
-  asm volatile ("syscall" :: "a"(syscall_num) : "rcx", "r11");
+  asm volatile ("syscall" ::"a"(syscall_num) : "rcx", "r11");
 }
 
 static inline void
 _syscall1 (int syscall_num, uintptr_t a1)
 {
-  asm volatile ("syscall" :
-				: "a"(syscall_num), "D"(a1)
-				: "rcx", "r11");
+  asm volatile ("syscall" : : "a"(syscall_num), "D"(a1) : "rcx", "r11");
 }
 
 static inline void
 _syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
 {
-  asm volatile ("syscall" :
+  asm volatile ("syscall"
+                :
                 : "a"(syscall_num), "D"(a1), "S"(a2)
                 : "rcx", "r11");
 }
@@ -62,7 +61,7 @@ call (cptr_t cap, message_info_t info, word_t *sender)
   __ipc_buffer->tag = info;
   _syscall1 (sys_call, cap);
   if (sender)
-	*sender = __ipc_buffer->sender_badge;
+    *sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
 }
 
@@ -79,7 +78,7 @@ recv (cptr_t cap, word_t *sender)
 {
   _syscall1 (sys_recv, cap);
   if (sender)
-	*sender = __ipc_buffer->sender_badge;
+    *sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
 }
 
@@ -88,7 +87,7 @@ nbrecv (cptr_t cap, word_t *sender)
 {
   _syscall1 (sys_nbrecv, cap);
   if (sender)
-	*sender = __ipc_buffer->sender_badge;
+    *sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
 }
 
@@ -97,7 +96,7 @@ wait (cptr_t cap, word_t *nfn_word)
 {
   _syscall1 (sys_recv, cap);
   if (nfn_word)
-	*nfn_word = __ipc_buffer->sender_badge;
+    *nfn_word = __ipc_buffer->sender_badge;
 }
 
 message_info_t
@@ -114,7 +113,7 @@ reply_recv (cptr_t cap, message_info_t info, word_t *sender)
   __ipc_buffer->tag = info;
   _syscall1 (sys_replyrecv, cap);
   if (sender)
-	*sender = __ipc_buffer->sender_badge;
+    *sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
 }
 

@@ -79,8 +79,8 @@ send_message_directly (struct tcb *receiver, word_t badge, bool resume_now)
 }
 
 static void
-send_message_to_blocked_receiver (struct endpoint *e,
-                                  word_t badge, bool resume_now)
+send_message_to_blocked_receiver (struct endpoint *e, word_t badge,
+                                  bool resume_now)
 {
   struct list_head *next = pop_from_list (&e->list);
   struct tcb *receiver = CONTAINER_OF (next, struct tcb, send_receive_node);
@@ -89,8 +89,7 @@ send_message_to_blocked_receiver (struct endpoint *e,
 }
 
 static void
-queue_message_on_endpoint (struct endpoint *e,
-                           word_t badge, bool is_call)
+queue_message_on_endpoint (struct endpoint *e, word_t badge, bool is_call)
 {
   append_to_list (&this_tcb->send_receive_node, &e->list);
 
@@ -158,7 +157,7 @@ endpoint_nbsend (struct endpoint *e, word_t badge)
   send_message_to_blocked_receiver (e, badge, false);
 }
 
-static void 
+static void
 endpoint_recv (struct endpoint *e)
 {
   if (is_receive_blocked (e))
@@ -214,12 +213,12 @@ handle_recv_with_pending_notification ()
 {
   if (this_tcb->bound_notification && this_tcb->bound_notification->word)
     {
-	  this_tcb->ipc_buffer->sender_badge = this_tcb->bound_notification->word;
+      this_tcb->ipc_buffer->sender_badge = this_tcb->bound_notification->word;
       this_tcb->bound_notification->word = 0;
-	  return true;
+      return true;
     }
   else
-	return false;
+    return false;
 }
 
 void
@@ -228,7 +227,7 @@ invoke_endpoint_recv (cte_t *cap)
   assert (cap_type (cap) == cap_endpoint);
 
   if (handle_recv_with_pending_notification ())
-	return;
+    return;
 
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
@@ -241,7 +240,7 @@ invoke_endpoint_nbrecv (cte_t *cap)
   assert (cap_type (cap) == cap_endpoint);
 
   if (handle_recv_with_pending_notification ())
-	return;
+    return;
 
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
