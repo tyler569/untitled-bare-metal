@@ -12,10 +12,10 @@ typedef struct frame frame_t;
 void do_syscall (uintptr_t, uintptr_t, int syscall_number, frame_t *);
 
 // Used substantially in kern/syscall.c and generated syscall dispatch
-#define dbg_printf(...)                                                       \
+#define dbg_printf(fmt, ...)                                                  \
   do                                                                          \
     if (this_tcb->debug)                                                      \
-      printf (__VA_ARGS__);                                                   \
+      printf (fmt __VA_OPT__ (, ) __VA_ARGS__);                               \
   while (0)
 #define err_printf(...) printf (__VA_ARGS__)
 
@@ -85,4 +85,11 @@ ipc_invalid_argument (word_t argument_number)
 {
   set_mr (0, argument_number);
   return return_ipc (invalid_argument, 1);
+}
+
+MUST_USE
+static inline message_info_t
+ipc_invalid_root ()
+{
+  return return_ipc (invalid_root, 0);
 }

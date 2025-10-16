@@ -47,7 +47,7 @@ main (cptr_t endpoint_cap)
         resp = new_message_info (label, 0, 0, 1);
 
       if (done)
-        reply (endpoint_cap);
+        reply (resp);
       else
         info = reply_recv (endpoint_cap, resp, &badge);
     }
