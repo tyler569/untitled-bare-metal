@@ -6,9 +6,9 @@
 - X support huge pages
   - X update the mapping/unmapping code to support huge pages
 - X support the ability to send capabilities over IPC
-- define headers for the usermode processes
-  - calculator_server
-  - uart_driver
+- X define headers for the usermode processes
+  - X calculator_server
+  - X uart_driver
 - pass page mapping bits through to usermode
   - put the bits somewhere in an accessible header
   - consume that header from both kernel mode and usermode

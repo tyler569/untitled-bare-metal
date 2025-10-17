@@ -37,8 +37,8 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
       return ipc_not_enough_memory (available_memory);
     }
 
-  error_t err;
-  cte_t *dest_cnode = lookup_cap_slot (root, node_index, node_depth, &err);
+  cte_t *dest_cnode;
+  error_t err = lookup_cap_slot (root, node_index, node_depth, &dest_cnode);
   if (err != no_error)
     return err;
 

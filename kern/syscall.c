@@ -9,7 +9,7 @@
 #include "kern/syscall_dispatch.c"
 
 #define GET_CAP(cptr, slot, err)                                              \
-  slot = lookup_cap_slot_this_tcb (cptr, &err);                               \
+  err = lookup_cap_slot_this_tcb (cptr, &slot);                               \
   if (err)                                                                    \
     break;
 

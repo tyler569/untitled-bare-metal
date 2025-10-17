@@ -25,22 +25,24 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge)
   word_t transfer_cap = get_message_extra_caps (sender->ipc_buffer->tag);
   if (transfer_cap)
     {
-      error_t err;
       cptr_t send_cptr = sender->ipc_buffer->caps_or_badges[0];
-      cte_t *cap = lookup_cap_slot (&sender->cspace_root, send_cptr, 64, &err);
+      cte_t *cap;
+      error_t err = lookup_cap_slot (&sender->cspace_root, send_cptr, 64, &cap);
 
       if (err)
         return err;
 
-      cte_t *recv_cnode_root
-          = lookup_cap_slot (&receiver->cspace_root,
-                             receiver->ipc_buffer->receive_cnode, 64, &err);
+      cte_t *recv_cnode_root;
+      err = lookup_cap_slot (&receiver->cspace_root,
+                               receiver->ipc_buffer->receive_cnode, 64,
+                               &recv_cnode_root);
       if (err)
         return err;
 
-      cte_t *recv_slot = lookup_cap_slot (
-          recv_cnode_root, receiver->ipc_buffer->receive_index,
-          receiver->ipc_buffer->receive_depth, &err);
+      cte_t *recv_slot;
+      err = lookup_cap_slot (recv_cnode_root,
+                               receiver->ipc_buffer->receive_index,
+                               receiver->ipc_buffer->receive_depth, &recv_slot);
 
       if (err)
         return err;

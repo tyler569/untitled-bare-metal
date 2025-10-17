@@ -3,32 +3,9 @@
 #include "kern/cap.h"
 #include "kern/syscall.h"
 
-cte_t *
-lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, error_t *err)
-{
-  assert_eq (depth, 64); // for now
-
-  if (cap_type (cspace_root->cap) != cap_cnode)
-    {
-      *err = ipc_invalid_root ();
-      return nullptr;
-    }
-
-  cte_t *cte = cap_ptr (cspace_root->cap);
-  size_t length = cap_size (cspace_root->cap);
-  if (index >= length)
-    {
-      printf ("index: %lu, length: %lu\n", index, length);
-      *err = ipc_range_error (0, length);
-      return nullptr;
-    }
-
-  *err = no_error;
-  return &cte[index];
-}
 
 error_t
-lookup_cap_slot_2 (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
+lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 {
   *out = nullptr;
   assert_eq (depth, 64); // for now
@@ -102,12 +79,13 @@ error_t
 cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
             word_t src_offset, uint8_t src_depth, cap_rights_t rights)
 {
-  error_t err;
-  cte_t *dst = lookup_cap_slot (obj, dst_offset, dst_depth, &err);
+  cte_t *dst;
+  error_t err = lookup_cap_slot (obj, dst_offset, dst_depth, &dst);
   if (err != no_error)
     return communicate_lookup_error (err, false, "copy");
 
-  cte_t *src = lookup_cap_slot (root, src_offset, src_depth, &err);
+  cte_t *src;
+  err = lookup_cap_slot (root, src_offset, src_depth, &src);
   if (err != no_error)
     return communicate_lookup_error (err, true, "copy");
 
@@ -119,8 +97,8 @@ cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
 error_t
 cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
 {
-  error_t err;
-  cte_t *cte = lookup_cap_slot (obj, offset, depth, &err);
+  cte_t *cte;
+  error_t err = lookup_cap_slot (obj, offset, depth, &cte);
   if (err != no_error)
     return err;
 
@@ -135,12 +113,13 @@ cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
             word_t src_offset, uint8_t src_depth, cap_rights_t rights,
             word_t badge)
 {
-  error_t err;
-  cte_t *dst = lookup_cap_slot (obj, dst_offset, dst_depth, &err);
+  cte_t *dst;
+  error_t err = lookup_cap_slot (obj, dst_offset, dst_depth, &dst);
   if (err != no_error)
     return communicate_lookup_error (err, true, "mint");
 
-  cte_t *src = lookup_cap_slot (root, src_offset, src_depth, &err);
+  cte_t *src;
+  err = lookup_cap_slot (root, src_offset, src_depth, &src);
   if (err != no_error)
     return communicate_lookup_error (err, false, "mint");
 

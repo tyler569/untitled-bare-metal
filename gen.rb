@@ -156,7 +156,7 @@ class KMethod
 
       #{cap_parameters.map.with_index do |param, i|
         <<~EOS
-        #{param['name']} = lookup_cap_slot_this_tcb (get_cap (#{i}), &error);
+        error = lookup_cap_slot_this_tcb (get_cap (#{i}), &#{param['name']});
         if (error != no_error)
           {
             err_printf ("lookup_cap failed for cap #{i}\\n");

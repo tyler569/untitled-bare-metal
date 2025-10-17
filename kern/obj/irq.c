@@ -17,8 +17,8 @@ static struct irq_handler_data irq_handlers[16];
 error_t
 irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
 {
-  error_t err;
-  cte_t *result_cte = lookup_cap_slot (root, index, depth, &err);
+  cte_t *result_cte;
+  error_t err = lookup_cap_slot (root, index, depth, &result_cte);
   if (err != no_error)
     return err;
 

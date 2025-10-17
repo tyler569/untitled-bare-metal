@@ -6,8 +6,8 @@ message_info_t
 x86_64_io_port_control_issue (cte_t *, uint16_t first_port, uint16_t last_port,
                               cte_t *root, word_t index, word_t depth)
 {
-  message_info_t err;
-  cte_t *dest_slot = lookup_cap_slot (root, index, depth, &err);
+  cte_t *dest_slot;
+  error_t err = lookup_cap_slot (root, index, depth, &dest_slot);
   if (err)
     {
       return return_ipc (err, 0);

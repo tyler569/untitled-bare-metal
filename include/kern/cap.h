@@ -269,11 +269,11 @@ cap_irq_handler_new (word_t irq)
   return cap;
 }
 
-cte_t *lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
-                        error_t *err);
+error_t lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
+                           cte_t **out);
 
-#define lookup_cap_slot_this_tcb(index, err)                                  \
-  lookup_cap_slot (&this_tcb->cspace_root, index, 64, err)
+#define lookup_cap_slot_this_tcb(index, out)                                  \
+  lookup_cap_slot (&this_tcb->cspace_root, index, 64, out)
 
 static inline word_t
 cte_ptr_type (cte_t *cte)
