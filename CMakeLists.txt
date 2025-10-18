@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(ExternalProject)
-include(DefineFileBasenameForSources)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_FLAGS_DEBUG "-g -O1")
@@ -51,7 +50,6 @@ foreach (program ${targets_to_archive})
     lib/string.c
     lib/tar.c
   )
-  define_file_basename_for_sources(${program})
   get_target_property(target_output_name ${program} OUTPUT_NAME)
   if (NOT target_output_name)
     set(target_output_name ${program})

@@ -64,5 +64,3 @@ if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
 else ()
   message(FATAL_ERROR "Unsupported target: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}")
 endif ()
-
-define_file_basename_for_sources(untitled_bare_metal)
