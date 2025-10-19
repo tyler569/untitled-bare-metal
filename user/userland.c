@@ -131,9 +131,8 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
                      cptr_t serial_read_endpoint)
 {
   void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
-  void *serial_broker_elf = find_tar_entry (bi->initrd, "serial_broker");
 
-  if (!serial_driver_elf || !serial_broker_elf)
+  if (!serial_driver_elf)
     {
       printf ("Could not find serial driver elf\n");
       return;
@@ -183,11 +182,12 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
   cptr_t ring_page = allocate (untyped, cap_x86_64_page, 1);
 
   struct thread_data tdb = {
-    .elf_header = serial_broker_elf,
+    .elf_header = serial_driver_elf,
     .untyped = untyped,
     .scratch_vspace = init_cap_init_vspace,
     .cspace_root = cnode,
     .name = "serial_broker",
+	.arguments[0] = true,
   };
 
   struct thread_data tdd = {
@@ -196,6 +196,7 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
     .scratch_vspace = init_cap_init_vspace,
     .cspace_root = cnode,
     .name = "serial_driver",
+	.arguments[0] = false,
   };
 
   err = spawn_thread (&tdb);

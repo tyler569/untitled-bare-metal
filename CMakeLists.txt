@@ -32,7 +32,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/limine)
 
 add_compile_definitions(__UNTITLED_BARE_METAL__=1)
 
-set(targets_to_archive userland calculator_server serial_driver serial_broker)
+set(targets_to_archive userland calculator_server serial_driver)
 set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
 set(archive_name "${CMAKE_BINARY_DIR}/initrd.tar")
 set(archive_binaries)
