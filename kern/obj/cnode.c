@@ -3,7 +3,6 @@
 #include "kern/cap.h"
 #include "kern/syscall.h"
 
-
 error_t
 lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 {

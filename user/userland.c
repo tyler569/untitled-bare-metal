@@ -224,21 +224,26 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
   tcb_resume (tdd.tcb);
 }
 
+long
+calc_add (cptr_t calculator_endpoint, long a, long b)
+{
+  set_mr (0, (word_t)a);
+  set_mr (1, (word_t)b);
+  message_info_t info = new_message_info (calculator_add, 0, 0, 2);
+  call (calculator_endpoint, info, nullptr);
+  return get_mr (0);
+}
+
 void
 calculate_fibonacci_numbers (cptr_t calculator_endpoint, word_t up_to)
 {
-  word_t badge;
-  word_t a = 0, b = 1;
+  word_t a = 0, b = 1, tmp;
 
   while (true)
     {
-      message_info_t info;
-      set_mr (0, a);
-      set_mr (1, b);
-      info = new_message_info (calculator_add, 0, 0, 2);
-      call (calculator_endpoint, info, &badge);
+      tmp = calc_add (calculator_endpoint, a, b);
       a = b;
-      b = get_mr (0);
+      b = tmp;
 
       printf ("Fibonacci: %lu\n", a);
 

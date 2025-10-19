@@ -270,7 +270,7 @@ cap_irq_handler_new (word_t irq)
 }
 
 error_t lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
-                           cte_t **out);
+                         cte_t **out);
 
 #define lookup_cap_slot_this_tcb(index, out)                                  \
   lookup_cap_slot (&this_tcb->cspace_root, index, 64, out)

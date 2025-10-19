@@ -101,9 +101,9 @@ void
 enumerate_pci_bus (cptr_t port)
 {
   for (uint32_t bus = 0; bus < 256; bus++)
-	{
-	  if (pci_read_l (port, pci_addr (bus, 0, 0, 0)) == 0xffffffff)
-		continue;
+    {
+      if (pci_read_l (port, pci_addr (bus, 0, 0, 0)) == 0xffffffff)
+        continue;
 
       for (uint32_t dev = 0; dev < 32; dev++)
         for (uint32_t func = 0; func < 8; func++)
@@ -112,5 +112,5 @@ enumerate_pci_bus (cptr_t port)
             if (pci_read_l (port, addr) != 0xffffffff)
               print_device_info (port, addr);
           }
-	}
+    }
 }
