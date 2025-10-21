@@ -4,8 +4,6 @@
 #include "sys/syscall.h"
 #include "sys/types.h"
 
-// clang-format off
-
 #define BITS_POINTER_MASK 0x0000'ffff'ffff'fffc
 
 static inline void *
@@ -24,8 +22,6 @@ set_bits_pointer (word_t *bits, void *ptr)
   *bits &= ~BITS_POINTER_MASK;
   *bits |= (word_t)ptr & BITS_POINTER_MASK;
 }
-
-// clang-format on
 
 union capability
 {
