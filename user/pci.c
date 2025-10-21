@@ -33,6 +33,20 @@ pci_write_l (cptr_t port, uint32_t addr, uint32_t value)
 }
 
 void
+pci_write_w (cptr_t port, uint32_t addr, uint16_t value)
+{
+  x86_64_io_port_out32 (port, PCI_CONFIG_ADDRESS, addr);
+  x86_64_io_port_out16 (port, PCI_CONFIG_DATA, value);
+}
+
+void
+pci_write_b (cptr_t port, uint32_t addr, uint8_t value)
+{
+  x86_64_io_port_out32 (port, PCI_CONFIG_ADDRESS, addr);
+  x86_64_io_port_out8 (port, PCI_CONFIG_DATA, value);
+}
+
+void
 print_device_info (cptr_t port, uint32_t pci_address)
 {
   uint16_t vendor_id = pci_read_w (port, pci_address + PCI_VENDOR_ID);

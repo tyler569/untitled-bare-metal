@@ -105,9 +105,15 @@ set_frame_return (frame_t *f, uintptr_t val)
 }
 
 void
-set_frame_badge (frame_t *f, uintptr_t val)
+set_frame_r15 (frame_t *f, uintptr_t val)
 {
-  f->rdi = val;
+  f->r15 = val;
+}
+
+void
+set_frame_sp (frame_t *f, uintptr_t val)
+{
+  f->rsp = val;
 }
 
 void

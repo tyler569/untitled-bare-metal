@@ -187,7 +187,7 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
     .scratch_vspace = init_cap_init_vspace,
     .cspace_root = cnode,
     .name = "serial_broker",
-	.arguments[0] = true,
+    .arguments[0] = true,
   };
 
   struct thread_data tdd = {
@@ -196,7 +196,7 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
     .scratch_vspace = init_cap_init_vspace,
     .cspace_root = cnode,
     .name = "serial_driver",
-	.arguments[0] = false,
+    .arguments[0] = false,
   };
 
   err = spawn_thread (&tdb);

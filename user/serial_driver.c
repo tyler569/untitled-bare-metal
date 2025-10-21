@@ -153,9 +153,9 @@ int
 main (bool is_broker)
 {
   if (is_broker)
-	broker_thread_main ();
+    broker_thread_main ();
   else
-	driver_thread_main ();
+    driver_thread_main ();
 
   exit (1);
 }
