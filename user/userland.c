@@ -240,17 +240,19 @@ calculate_fibonacci_numbers (cptr_t calculator_endpoint, word_t up_to)
 {
   word_t a = 0, b = 1, tmp;
 
+  printf("Fibonacci: ");
   while (true)
     {
       tmp = calc_add (calculator_endpoint, a, b);
       a = b;
       b = tmp;
 
-      printf ("Fibonacci: %lu\n", a);
+      printf ("%lu ", a);
 
       if (a > up_to)
         break;
     }
+  printf("\n");
 }
 
 void
@@ -433,7 +435,7 @@ main (void *boot_info)
 
   print_to_serial (serial_write_endpoint, "Hello, Serial World!\n");
 
-  calculate_fibonacci_numbers (calculator_endpoint, 100'000);
+  calculate_fibonacci_numbers (calculator_endpoint, 10'000);
   serial_capitalization_server (serial_write_endpoint, serial_read_endpoint);
 
   exit (0);
