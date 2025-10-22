@@ -17,7 +17,7 @@ typedef uint16_t elf_versym;
 typedef uint64_t elf_relr;
 
 #define EI_NIDENT 16
-#define ELFMAGIC "\x{7f}ELF"
+#define ELFMAGIC "\177ELF"
 #define ELFCLASS64 2
 #define ELFDATA2LSB 1
 #define ELFVERSION_CURRENT 1

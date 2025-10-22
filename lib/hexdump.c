@@ -12,9 +12,7 @@ static void
 print_byte_char_line (const char *c, size_t remaining_len)
 {
   for (size_t i = 0; i < remaining_len; i++)
-    {
-      printf ("%c", dump_byte_char (c[i]));
-    }
+    printf ("%c", dump_byte_char (c[i]));
 }
 
 static void
@@ -43,9 +41,7 @@ void
 hexdump_addr (const void *data, size_t len, uintptr_t base_address)
 {
   for (size_t i = 0; i < len; i += 16)
-    {
-      hexdump_line (data + i, MIN (len - i, 16), base_address + i);
-    }
+    hexdump_line (data + i, MIN (len - i, 16u), base_address + i);
 }
 
 void

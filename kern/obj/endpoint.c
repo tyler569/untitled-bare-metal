@@ -160,7 +160,7 @@ endpoint_recv (struct endpoint *e)
   if (is_receive_blocked (e))
     queue_receiver_on_endpoint (e);
   else
-    return receive_message_from_blocked_sender (e);
+    receive_message_from_blocked_sender (e);
 }
 
 static void

@@ -10,9 +10,12 @@
 #define WRITE(data, size)                                                     \
   do                                                                          \
     {                                                                         \
-      int can_write = MIN (size, n - written);                                \
-      F_WRITE (f, data, can_write);                                           \
-      written += can_write;                                                   \
+      if (written < n)                                                        \
+        {                                                                     \
+          size_t can_write = MIN (size, n - written);               \
+          F_WRITE (f, data, can_write);                                       \
+          written += can_write;                                               \
+        }                                                                     \
     }                                                                         \
   while (0)
 
@@ -48,12 +51,12 @@ struct number
 };
 
 MUST_USE
-static int
-format_pad (FILE *f, struct format_spec *spec, int pad_len, int n)
+static size_t
+format_pad (FILE *f, struct format_spec *spec, int pad_len, size_t n)
 {
-  int written = 0;
+  size_t written = 0;
   for (int i = 0; i < pad_len; i++)
-    WRITE (&spec->padding_char, 1);
+    WRITE (&spec->padding_char, 1u);
   return written;
 }
 
@@ -168,49 +171,49 @@ format_layout_int (struct format_spec *spec, struct number number,
 }
 
 MUST_USE
-static int
+static size_t
 format_number_sign (FILE *f, struct format_spec *spec, struct number number,
-                    int n)
+                    size_t n)
 {
-  int written = 0;
+  size_t written = 0;
   if (number.negative)
     {
-      WRITE ("-", 1);
+      WRITE ("-", 1u);
     }
   else if (spec->print_plus)
     {
-      WRITE ("+", 1);
+      WRITE ("+", 1u);
     }
   else if (spec->leave_space)
     {
-      WRITE (" ", 1);
+      WRITE (" ", 1u);
     }
   return written;
 }
 
 MUST_USE
-static int
-format_number_alternate_form (FILE *f, struct format_spec *spec, int n)
+static size_t
+format_number_alternate_form (FILE *f, struct format_spec *spec, size_t n)
 {
-  int written = 0;
+  size_t written = 0;
   if (spec->alternate_form)
     {
       switch (spec->base)
         {
         case BASE_2:
-          WRITE ("0b", 2);
+          WRITE ("0b", 2u);
           break;
         case BASE_8:
-          WRITE ("0", 1);
+          WRITE ("0", 1u);
           break;
         case BASE_10:
           break;
         case BASE_16_CAPS:
-          WRITE ("0X", 2);
+          WRITE ("0X", 2u);
           break;
         case BASE_16:
         case BASE_PTR:
-          WRITE ("0x", 2);
+          WRITE ("0x", 2u);
           break;
         }
     }
@@ -218,14 +221,15 @@ format_number_alternate_form (FILE *f, struct format_spec *spec, int n)
 }
 
 MUST_USE
-static int
-format_number (FILE *f, struct format_spec *spec, struct number number, int n)
+static size_t
+format_number (FILE *f, struct format_spec *spec, struct number number,
+               size_t n)
 {
-  int written = 0;
+  size_t written = 0;
   char buf[NUM_BUF_SIZE] = {};
   const char *digits = format_layout_int (spec, number, buf);
-  int digits_len = (int)strlen (digits);
-  int pad_len = spec->padding_width - digits_len;
+  size_t digits_len = strlen (digits);
+  int pad_len = spec->padding_width - (int)digits_len;
   bool null_pointer = number.value == 0 && spec->base == BASE_PTR;
 
   if (number.negative || spec->print_plus || spec->leave_space)
@@ -291,25 +295,25 @@ format_number (FILE *f, struct format_spec *spec, struct number number, int n)
 }
 
 MUST_USE
-static int
-format_string (FILE *f, struct format_spec *spec, const char *s, int n)
+static size_t
+format_string (FILE *f, struct format_spec *spec, const char *s, size_t n)
 {
-  int written = 0;
+  size_t written = 0;
 
   if (s == NULL)
     {
       s = "(null)";
     }
 
-  int len = strlen (s);
+  size_t len = strlen (s);
   int pad_len = 0;
   if (spec->precision >= 0)
     {
-      len = MIN (len, spec->precision);
+      len = MIN (len, (size_t)spec->precision);
     }
-  if (spec->padding_width > len)
+  if (spec->padding_width > (int)len)
     {
-      pad_len = spec->padding_width - len;
+      pad_len = spec->padding_width - (int)len;
     }
 
   if (spec->padding_width && !spec->left_justify)
@@ -333,7 +337,7 @@ int
 vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
 {
   const char *fmt = format;
-  int written = 0;
+  size_t written = 0;
   n -= 1;
 
   va_list args;
@@ -356,9 +360,9 @@ vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
         }
       else
         {
-          long len = p - fmt;
+          size_t len = p - fmt;
           // assert (len >= 0);
-          WRITE (fmt, (unsigned long)len);
+          WRITE (fmt, len);
           fmt = p;
         }
 
@@ -367,7 +371,7 @@ vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
         {
         case '\0':
         case '%':
-          WRITE ("%", 1);
+          WRITE ("%", 1u);
           break;
         case '-':
           spec.left_justify = true;
@@ -443,7 +447,7 @@ vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
         case 'c':
           {
             char c = va_arg (args, int);
-            WRITE (&c, 1);
+            WRITE (&c, 1u);
             break;
           }
         case 's':
@@ -510,8 +514,8 @@ vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
     }
 
   va_end (args);
-  F_WRITE (f, "", 1);
-  return written;
+  F_WRITE (f, "", 1u);
+  return (int)written;
 }
 
 #if 0 // sprintf is not yet supported
@@ -611,7 +615,7 @@ puts (const char *str)
 int
 putchar (int c)
 {
-  return F_WRITE (w_stdout, &c, 1);
+  return F_WRITE (w_stdout, &c, 1u);
 }
 
 #ifdef __KERNEL__
