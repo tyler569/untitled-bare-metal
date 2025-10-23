@@ -115,6 +115,8 @@ add_vm_mapping (uintptr_t root, uintptr_t virt, uintptr_t phys, int flags)
 
   pte = &pt[(virt >> PT_SHIFT) & PT_MASK];
   *pte = phys | flags;
+
+  asm volatile ("invlpg (%0)" ::"r"(virt) : "memory");
 }
 
 uintptr_t

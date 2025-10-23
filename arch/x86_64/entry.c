@@ -7,7 +7,7 @@
 #include "sys/cdefs.h"
 #include "x86_64.h"
 
-LIMINE_BASE_REVISION (1)
+LIMINE_BASE_REVISION (3)
 
 // The kernel entrypoint, called by the bootloader.
 USED void
