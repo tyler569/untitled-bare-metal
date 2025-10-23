@@ -240,7 +240,7 @@ calculate_fibonacci_numbers (cptr_t calculator_endpoint, word_t up_to)
 {
   word_t a = 0, b = 1, tmp;
 
-  printf("Fibonacci: ");
+  printf ("Fibonacci: ");
   while (true)
     {
       tmp = calc_add (calculator_endpoint, a, b);
@@ -252,7 +252,7 @@ calculate_fibonacci_numbers (cptr_t calculator_endpoint, word_t up_to)
       if (a > up_to)
         break;
     }
-  printf("\n");
+  printf ("\n");
 }
 
 void

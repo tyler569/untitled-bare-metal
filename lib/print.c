@@ -12,7 +12,7 @@
     {                                                                         \
       if (written < n)                                                        \
         {                                                                     \
-          size_t can_write = MIN (size, n - written);               \
+          size_t can_write = MIN (size, n - written);                         \
           F_WRITE (f, data, can_write);                                       \
           written += can_write;                                               \
         }                                                                     \
