@@ -7,3 +7,5 @@
 /last_output
 /limine
 /release/
+
+!build.zig
