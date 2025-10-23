@@ -5,7 +5,7 @@ const iso_name = "untitled_bare_metal.iso";
 const iso_dir_name = "isodir";
 const limine_dir = "limine";
 const limine_repo = "https://github.com/limine-bootloader/limine.git";
-const limine_branch = "v7.x-binary";
+const limine_branch = "v10.x-binary";
 
 const userland_cflags = [_][]const u8{
     "-std=c23",
@@ -25,7 +25,7 @@ pub fn build(b: *std.Build) void {
         .cpu_model = .{ .explicit = .generic(.x86_64) },
         .os_tag = .freestanding,
         .abi = .none,
-        .cpu_features_add = std.Target.x86.featureSet(&.{ .soft_float }),
+        .cpu_features_add = std.Target.x86.featureSet(&.{.soft_float}),
         .cpu_features_sub = std.Target.x86.featureSet(&.{
             .x87,
             .@"3dnow",
@@ -63,15 +63,24 @@ pub fn build(b: *std.Build) void {
     var userland_exes: [userland_programs.len]*std.Build.Step.Compile = undefined;
     for (userland_programs, 0..) |program, i| {
         userland_exes[i] = buildUserland(b, target, optimize, program, &userland_sources);
+        // Install userland programs to zig-out/bin
+        b.installArtifact(userland_exes[i]);
     }
 
     const initrd_tar = createInitrdTarball(b, &userland_exes);
 
     const kernel = buildKernel(b, target, optimize);
 
+    // Install kernel to zig-out/bin
+    b.installArtifact(kernel);
+
     const iso_step = createIso(b, limine_step, kernel, initrd_tar);
 
     b.getInstallStep().dependOn(iso_step);
+
+    // QEMU debug options
+    const qemu_debug = b.option([]const u8, "qemu-debug", "QEMU debug flags (e.g., 'int,cpu_reset')");
+    const qemu_debug_int = b.option(bool, "qemu-debug-int", "Enable QEMU interrupt and CPU reset debugging") orelse false;
 
     const run_step = b.step("run", "Run the OS in QEMU");
     const qemu_cmd = b.addSystemCommand(&.{
@@ -85,13 +94,21 @@ pub fn build(b: *std.Build) void {
         "-vga",               "virtio",
         "-chardev",           "stdio,id=dbgio,logfile=last_output",
         "-device",            "isa-debugcon,chardev=dbgio,iobase=0xe9",
+        // "-monitor", "stdio",
         "-serial",            "unix:/tmp/vm_uart.sock,server,nowait",
         "-net",               "nic,model=e1000e",
         "-net",               "user",
         "-cpu",               "max",
         "-no-reboot",
-        // "-d", "int,cpu_reset",
     });
+
+    // Add optional debug flags
+    if (qemu_debug_int) {
+        qemu_cmd.addArgs(&.{ "-d", "int,cpu_reset" });
+    } else if (qemu_debug) |debug_flags| {
+        qemu_cmd.addArgs(&.{ "-d", debug_flags });
+    }
+
     qemu_cmd.step.dependOn(iso_step);
     run_step.dependOn(&qemu_cmd.step);
 }
@@ -285,6 +302,7 @@ fn createIso(
     const copy_cfg = b.addSystemCommand(&.{
         "cp",
         "limine.cfg",
+        "limine.conf",
         iso_boot_limine_dir,
     });
     copy_cfg.step.dependOn(&mkdir_cmd.step);
