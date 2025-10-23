@@ -1,3 +1,4 @@
+#include "assert.h"
 #include "kern/kernel.h"
 #include "kern/mem.h"
 #include "limine.h"
@@ -36,6 +37,7 @@ direct_map_of (uintptr_t addr)
   static uintptr_t hhdm_cache = 0;
   if (!hhdm_cache)
     hhdm_cache = volatile_read (hhdminfo.response)->offset;
+  assert (hhdm_cache != 0);
   return addr | hhdm_cache;
 }
 
