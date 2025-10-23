@@ -1,5 +1,22 @@
 const std = @import("std");
 
+// Constants
+const iso_name = "untitled_bare_metal.iso";
+const iso_dir_name = "isodir";
+const limine_dir = "limine";
+const limine_repo = "https://github.com/limine-bootloader/limine.git";
+const limine_branch = "v7.x-binary";
+
+const userland_cflags = [_][]const u8{
+    "-std=c23",
+    "-fasm",
+};
+
+const kernel_cflags = [_][]const u8{
+    "-std=c23",
+    "-fasm",
+};
+
 pub fn build(b: *std.Build) void {
     // Use freestanding x86_64 target for kernel and userland
     // Explicitly disable SSE/MMX to prevent use in kernel
@@ -8,6 +25,7 @@ pub fn build(b: *std.Build) void {
         .cpu_model = .{ .explicit = .generic(.x86_64) },
         .os_tag = .freestanding,
         .abi = .none,
+        .cpu_features_add = std.Target.x86.featureSet(&.{ .soft_float }),
         .cpu_features_sub = std.Target.x86.featureSet(&.{
             .@"3dnow",
             .mmx,
@@ -19,12 +37,10 @@ pub fn build(b: *std.Build) void {
 
     const optimize = b.standardOptimizeOption(.{});
 
-    const iso_file = b.pathJoin(&.{ b.install_prefix, "untitled_bare_metal.iso" });
+    const iso_file = b.pathJoin(&.{ b.install_prefix, iso_name });
 
-    // Step 1: Download and build Limine bootloader
     const limine_step = setupLimine(b);
 
-    // Step 2: Build userland programs
     const userland_programs = [_][]const u8{
         "userland",
         "calculator_server",
@@ -43,39 +59,36 @@ pub fn build(b: *std.Build) void {
         "lib/tar.c",
     };
 
-    var userland_exes = std.ArrayList(*std.Build.Step.Compile).initCapacity(b.allocator, userland_programs.len) catch @panic("OOM");
-    defer userland_exes.deinit(b.allocator);
-
-    for (userland_programs) |program| {
-        const exe = buildUserland(b, target, optimize, program, &userland_sources);
-        userland_exes.append(b.allocator, exe) catch @panic("OOM");
+    var userland_exes: [userland_programs.len]*std.Build.Step.Compile = undefined;
+    for (userland_programs, 0..) |program, i| {
+        userland_exes[i] = buildUserland(b, target, optimize, program, &userland_sources);
     }
 
-    // Step 3: Create initrd tarball from userland programs
-    const initrd_tar = createInitrdTarball(b, userland_exes.items);
+    const initrd_tar = createInitrdTarball(b, &userland_exes);
 
-    // Step 4: Build kernel
     const kernel = buildKernel(b, target, optimize);
 
-    // Step 5: Create ISO image
-    const iso_step = createIso(b, limine_step, kernel, initrd_tar, iso_file);
+    const iso_step = createIso(b, limine_step, kernel, initrd_tar);
 
-    // Default step builds the ISO
     b.getInstallStep().dependOn(iso_step);
 
-    // Add a "run" step to run the ISO in QEMU (matches run.sh defaults)
     const run_step = b.step("run", "Run the OS in QEMU");
     const qemu_cmd = b.addSystemCommand(&.{
-        "qemu-system-x86_64", "-s", "-vga", "std", "-no-reboot",
-        "-m", "128M", "-smp", "2",
-        "-cdrom", iso_file,
-        "-M", "smm=off",
-        "-display", "none",
-        "-vga", "virtio",
-        "-debugcon", "stdio",
-        "-serial", "unix:/tmp/vm_uart.sock,server,nowait",
-        "-net", "nic,model=e1000e", "-net", "user",
-        "-cpu", "max",
+        "qemu-system-x86_64", "-s",
+        "-vga",               "std",
+        "-m",                 "128M",
+        "-smp",               "2",
+        "-cdrom",             iso_file,
+        "-M",                 "smm=off",
+        "-display",           "none",
+        "-vga",               "virtio",
+        "-chardev",           "stdio,id=dbgio,logfile=last_output",
+        "-device",            "isa-debugcon,chardev=dbgio,iobase=0xe9",
+        "-serial",            "unix:/tmp/vm_uart.sock,server,nowait",
+        "-net",               "nic,model=e1000e",
+        "-net",               "user",
+        "-cpu",               "max",
+        "-no-reboot",
         // "-d", "int,cpu_reset",
     });
     qemu_cmd.step.dependOn(iso_step);
@@ -83,15 +96,12 @@ pub fn build(b: *std.Build) void {
 }
 
 fn setupLimine(b: *std.Build) *std.Build.Step.Compile {
-    const limine_dir = "limine";
-    const limine_repo = "https://github.com/limine-bootloader/limine.git";
-    const limine_branch = "v7.x-binary";
-
     // Check if limine directory exists, if not clone it
     const check_limine = b.addSystemCommand(&.{
-        "sh",
-        "-c",
-        "test -d " ++ limine_dir ++ " || git clone --depth 1 --branch " ++ limine_branch ++ " " ++ limine_repo ++ " " ++ limine_dir,
+        "sh", "-c",
+        "test -d " ++ limine_dir ++
+            " || git clone --depth 1 --branch " ++
+            limine_branch ++ " " ++ limine_repo ++ " " ++ limine_dir,
     });
 
     // Build the limine binary using Zig's build system (for the host machine)
@@ -135,7 +145,6 @@ fn buildUserland(
         .name = name,
         .root_module = root_module,
     });
-    exe.bundle_compiler_rt = false;
 
     // Add program-specific source
     const program_source = b.fmt("user/{s}.c", .{name});
@@ -159,11 +168,6 @@ fn buildUserland(
     return exe;
 }
 
-const userland_cflags = [_][]const u8{
-    "-std=c23",
-    "-fasm",
-};
-
 fn createInitrdTarball(
     b: *std.Build,
     userland_exes: []*std.Build.Step.Compile,
@@ -171,7 +175,7 @@ fn createInitrdTarball(
     // Create tarball directly from the emitted binaries (no intermediate install)
     const tar_cmd = b.addSystemCommand(&.{ "gtar", "-cf" });
     const tar_output = tar_cmd.addOutputFileArg("initrd.tar");
-    tar_cmd.addArg("--transform=s|.*/||");  // Strip directory paths in archive
+    tar_cmd.addArg("--transform=s|.*/||"); // Strip directory paths in archive
 
     // Add each executable binary as an input - this tracks dependencies properly
     for (userland_exes) |exe| {
@@ -191,16 +195,12 @@ fn buildKernel(
         .optimize = optimize,
         .code_model = .kernel,
         .red_zone = false,
-        .sanitize_c = .off,
-        .error_tracing = false,
-        .no_builtin = true,
     });
 
     const kernel = b.addExecutable(.{
         .name = "untitled_bare_metal",
         .root_module = root_module,
     });
-    kernel.bundle_compiler_rt = false;
 
     // Kernel sources
     const kernel_sources = [_][]const u8{
@@ -252,11 +252,6 @@ fn buildKernel(
         "arch/x86_64/obj/page.c",
     };
 
-    const kernel_cflags = [_][]const u8{
-        "-std=c23",
-        "-fasm",
-    };
-
     for (kernel_sources) |src| {
         kernel.addCSourceFile(.{
             .file = b.path(src),
@@ -296,11 +291,10 @@ fn createIso(
     limine_exe: *std.Build.Step.Compile,
     kernel: *std.Build.Step.Compile,
     initrd_tar: std.Build.LazyPath,
-    _: []const u8,
 ) *std.Build.Step {
-    const iso_dir = b.pathJoin(&.{ b.install_prefix, "isodir" });
-    const iso_boot_dir = b.pathJoin(&.{ b.install_prefix, "isodir", "boot" });
-    const iso_boot_limine_dir = b.pathJoin(&.{ b.install_prefix, "isodir", "boot", "limine" });
+    const iso_dir = b.pathJoin(&.{ b.install_prefix, iso_dir_name });
+    const iso_boot_dir = b.pathJoin(&.{ b.install_prefix, iso_dir_name, "boot" });
+    const iso_boot_limine_dir = b.pathJoin(&.{ b.install_prefix, iso_dir_name, "boot", "limine" });
 
     // Create ISO directory structure
     const mkdir_cmd = b.addSystemCommand(&.{
@@ -362,7 +356,7 @@ fn createIso(
         iso_dir,
         "-o",
     });
-    const iso_output = xorriso_cmd.addOutputFileArg("untitled_bare_metal.iso");
+    const iso_output = xorriso_cmd.addOutputFileArg(iso_name);
 
     // Add input file dependencies so Zig knows to rebuild when they change
     xorriso_cmd.addFileArg(kernel_bin);
@@ -380,7 +374,7 @@ fn createIso(
     limine_install.step.dependOn(&xorriso_cmd.step);
 
     // Install the ISO to the output directory
-    const install_iso = b.addInstallFile(iso_output, "untitled_bare_metal.iso");
+    const install_iso = b.addInstallFile(iso_output, iso_name);
     install_iso.step.dependOn(&limine_install.step);
 
     return &install_iso.step;
