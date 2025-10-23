@@ -27,6 +27,7 @@ pub fn build(b: *std.Build) void {
         .abi = .none,
         .cpu_features_add = std.Target.x86.featureSet(&.{ .soft_float }),
         .cpu_features_sub = std.Target.x86.featureSet(&.{
+            .x87,
             .@"3dnow",
             .mmx,
             .sse,
@@ -135,10 +136,6 @@ fn buildUserland(
     const root_module = b.createModule(.{
         .target = target,
         .optimize = optimize,
-        .red_zone = false,
-        .sanitize_c = .off,
-        .error_tracing = false,
-        .no_builtin = true,
     });
 
     const exe = b.addExecutable(.{
@@ -153,13 +150,10 @@ fn buildUserland(
         .flags = &userland_cflags,
     });
 
-    // Add common sources
-    for (common_sources) |src| {
-        exe.addCSourceFile(.{
-            .file = b.path(src),
-            .flags = &userland_cflags,
-        });
-    }
+    exe.addCSourceFiles(.{
+        .files = common_sources,
+        .flags = &userland_cflags,
+    });
 
     exe.addIncludePath(b.path("include"));
     exe.addIncludePath(b.path("limine"));
@@ -252,26 +246,10 @@ fn buildKernel(
         "arch/x86_64/obj/page.c",
     };
 
-    for (kernel_sources) |src| {
-        kernel.addCSourceFile(.{
-            .file = b.path(src),
-            .flags = &kernel_cflags,
-        });
-    }
-
-    for (lib_sources) |src| {
-        kernel.addCSourceFile(.{
-            .file = b.path(src),
-            .flags = &kernel_cflags,
-        });
-    }
-
-    for (arch_sources) |src| {
-        kernel.addCSourceFile(.{
-            .file = b.path(src),
-            .flags = &kernel_cflags,
-        });
-    }
+    kernel.addCSourceFiles(.{
+        .files = &(kernel_sources ++ lib_sources ++ arch_sources),
+        .flags = &kernel_cflags,
+    });
 
     // Assembly sources
     kernel.addAssemblyFile(b.path("arch/x86_64/isrs.S"));

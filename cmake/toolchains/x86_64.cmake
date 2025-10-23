@@ -17,4 +17,4 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-set(CMAKE_C_FLAGS "-ffreestanding -nostdlib -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2")
+set(CMAKE_C_FLAGS "-ffreestanding -nostdlib -mno-red-zone -mno-x87 -mno-mmx -mno-3dnow -mno-sse -mno-sse2")
