@@ -48,15 +48,16 @@ init_lapic ()
   uint64_t lapic_base_mdr = read_msr (IA32_APIC_BASE);
   write_msr (IA32_APIC_BASE, lapic_base_mdr | 0x800);
 
+  add_vm_mapping (get_vm_root (), direct_map_of (BASE), BASE,
+                  PTE_PRESENT | PTE_WRITE);
+
   write_register (ESR, 0);
   write_register (SVR, 0x100 | 0xFF);
 
   write_register (LINT0, 0x8700);
   write_register (LINT1, 0x8400);
 
-  // clang-format off
   init_lapic_timer (0x3, 100'000'000);
-  // clang-format on
 }
 
 void

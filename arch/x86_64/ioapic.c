@@ -62,6 +62,9 @@ write_relocation_entry (uint32_t irq, union ioapic_relocation_entry entry)
 void
 init_ioapic ()
 {
+  add_vm_mapping (get_vm_root (), direct_map_of (IOAPIC_BASE), IOAPIC_BASE,
+                  PTE_PRESENT | PTE_WRITE);
+
   for (int i = 1; i < 24; i++)
     {
       union ioapic_relocation_entry entry = {
