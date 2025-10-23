@@ -30,7 +30,7 @@ constexpr uint16_t PCI_INTERRUPT_PIN = 0x3D;
 static inline uint32_t
 pci_addr (uint8_t bus, uint8_t device, uint8_t function, uint16_t offset)
 {
-  return (1 << 31) | (bus << 16) | (device << 11) | (function << 8)
+  return (1u << 31) | (bus << 16) | (device << 11) | (function << 8)
          | (offset & 0xFC);
 }
 
