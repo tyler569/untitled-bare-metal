@@ -50,16 +50,6 @@ cnode_mint (cptr_t obj, word_t dest_index, uint8_t dest_depth, cptr_t src_root,
   return get_message_label (__ipc_buffer->tag);
 }
 static inline int
-cnode_revoke (cptr_t obj, word_t index, uint8_t depth)
-{
-  set_mr (0, (word_t)index);
-  set_mr (1, (word_t)depth);
-
-  message_info_t _info = new_message_info (METHOD_cnode_revoke, 0, 0, 2);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
 cnode_debug_print (cptr_t obj)
 {
 
@@ -80,21 +70,6 @@ tcb_configure (cptr_t obj, word_t fault_ep, cptr_t cspace_root,
   set_cap (1, vspace_root);
   set_cap (2, buffer_frame);
   message_info_t _info = new_message_info (METHOD_tcb_configure, 0, 3, 4);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
-tcb_copy_registers (cptr_t obj, cptr_t source, bool suspend_source,
-                    bool resume_target, bool transfer_frame,
-                    bool transfer_integer, word_t arch_flags)
-{
-  set_mr (0, (word_t)suspend_source);
-  set_mr (1, (word_t)resume_target);
-  set_mr (2, (word_t)transfer_frame);
-  set_mr (3, (word_t)transfer_integer);
-  set_mr (4, (word_t)arch_flags);
-  set_cap (0, source);
-  message_info_t _info = new_message_info (METHOD_tcb_copy_registers, 0, 1, 5);
   __call_kernel (obj, _info);
   return get_message_label (__ipc_buffer->tag);
 }
@@ -126,38 +101,6 @@ tcb_bind_notification (cptr_t obj, cptr_t notification)
   set_cap (0, notification);
   message_info_t _info
       = new_message_info (METHOD_tcb_bind_notification, 0, 1, 0);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
-tcb_set_affinity (cptr_t obj, word_t affinity)
-{
-  set_mr (0, (word_t)affinity);
-
-  message_info_t _info = new_message_info (METHOD_tcb_set_affinity, 0, 0, 1);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
-tcb_set_ipc_buffer (cptr_t obj, word_t buffer, cptr_t buffer_frame)
-{
-  set_mr (0, (word_t)buffer);
-  set_cap (0, buffer_frame);
-  message_info_t _info = new_message_info (METHOD_tcb_set_ipc_buffer, 0, 1, 1);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
-tcb_set_space (cptr_t obj, word_t fault_ep, cptr_t cspace_root,
-               word_t cspace_root_data, cptr_t vspace_root,
-               word_t vspace_root_data)
-{
-  set_mr (0, (word_t)fault_ep);
-  set_mr (1, (word_t)cspace_root_data);
-  set_mr (2, (word_t)vspace_root_data);
-  set_cap (0, cspace_root);
-  set_cap (1, vspace_root);
-  message_info_t _info = new_message_info (METHOD_tcb_set_space, 0, 2, 3);
   __call_kernel (obj, _info);
   return get_message_label (__ipc_buffer->tag);
 }
@@ -315,14 +258,6 @@ x86_64_pdpt_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   return get_message_label (__ipc_buffer->tag);
 }
 static inline int
-x86_64_pdpt_unmap (cptr_t obj)
-{
-
-  message_info_t _info = new_message_info (METHOD_x86_64_pdpt_unmap, 0, 0, 0);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
 x86_64_pd_map (cptr_t obj, cptr_t vspace, word_t vaddr,
                x86_vm_attributes_t attr)
 {
@@ -330,14 +265,6 @@ x86_64_pd_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   set_mr (1, (word_t)attr);
   set_cap (0, vspace);
   message_info_t _info = new_message_info (METHOD_x86_64_pd_map, 0, 1, 2);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
-x86_64_pd_unmap (cptr_t obj)
-{
-
-  message_info_t _info = new_message_info (METHOD_x86_64_pd_unmap, 0, 0, 0);
   __call_kernel (obj, _info);
   return get_message_label (__ipc_buffer->tag);
 }
@@ -353,14 +280,6 @@ x86_64_pt_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   return get_message_label (__ipc_buffer->tag);
 }
 static inline int
-x86_64_pt_unmap (cptr_t obj)
-{
-
-  message_info_t _info = new_message_info (METHOD_x86_64_pt_unmap, 0, 0, 0);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
 x86_64_page_map (cptr_t obj, cptr_t vspace, word_t vaddr,
                  x86_vm_attributes_t attr)
 {
@@ -368,14 +287,6 @@ x86_64_page_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   set_mr (1, (word_t)attr);
   set_cap (0, vspace);
   message_info_t _info = new_message_info (METHOD_x86_64_page_map, 0, 1, 2);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
-x86_64_page_unmap (cptr_t obj)
-{
-
-  message_info_t _info = new_message_info (METHOD_x86_64_page_unmap, 0, 0, 0);
   __call_kernel (obj, _info);
   return get_message_label (__ipc_buffer->tag);
 }
@@ -388,15 +299,6 @@ x86_64_huge_page_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   set_cap (0, vspace);
   message_info_t _info
       = new_message_info (METHOD_x86_64_huge_page_map, 0, 1, 2);
-  __call_kernel (obj, _info);
-  return get_message_label (__ipc_buffer->tag);
-}
-static inline int
-x86_64_huge_page_unmap (cptr_t obj)
-{
-
-  message_info_t _info
-      = new_message_info (METHOD_x86_64_huge_page_unmap, 0, 0, 0);
   __call_kernel (obj, _info);
   return get_message_label (__ipc_buffer->tag);
 }

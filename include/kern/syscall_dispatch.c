@@ -136,33 +136,6 @@ dispatch_method (cte_t *slot, message_info_t info)
                            src_depth, rights, badge);
         break;
       }
-    case METHOD_cnode_revoke:
-      {
-        word_t index = (word_t)get_mr (0);
-        uint8_t depth = (uint8_t)get_mr (1);
-
-        dbg_printf ("cnode_revoke ");
-
-        if (cap_type (slot) != cap_cnode)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-        do
-          {
-            word_t len = get_message_length (info);
-            if (len < 2)
-              return ipc_truncated_message (len, 2);
-          }
-        while (0);
-
-        dbg_printf ("(cap:%s, index=%#lx, depth=%hhu)\n",
-                    cap_type_string (slot), index, depth);
-
-        return cnode_revoke (slot, index, depth);
-        break;
-      }
     case METHOD_cnode_debug_print:
       {
 
@@ -249,58 +222,6 @@ dispatch_method (cte_t *slot, message_info_t info)
                               buffer_frame);
         break;
       }
-    case METHOD_tcb_copy_registers:
-      {
-        bool suspend_source = (bool)get_mr (0);
-        bool resume_target = (bool)get_mr (1);
-        bool transfer_frame = (bool)get_mr (2);
-        bool transfer_integer = (bool)get_mr (3);
-        word_t arch_flags = (word_t)get_mr (4);
-        cte_t *source;
-
-        dbg_printf ("tcb_copy_registers ");
-
-        if (cap_type (slot) != cap_tcb)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-        do
-          {
-            word_t len = get_message_length (info);
-            if (len < 5)
-              return ipc_truncated_message (len, 5);
-          }
-        while (0);
-
-        do
-          {
-            word_t len = get_message_extra_caps (info);
-            if (len < 1)
-              return ipc_truncated_message (len, 1);
-          }
-        while (0);
-
-        error = lookup_cap_slot_this_tcb (get_cap (0), &source);
-        if (error != no_error)
-          {
-            err_printf ("lookup_cap failed for cap 0\n");
-            set_mr (0, 0);
-            return return_ipc (error, 1);
-          }
-
-        dbg_printf (
-            "(cap:%s, source=cap:%s, suspend_source=%d, resume_target=%d, "
-            "transfer_frame=%d, transfer_integer=%d, arch_flags=%#lx)\n",
-            cap_type_string (slot), cap_type_string (source), suspend_source,
-            resume_target, transfer_frame, transfer_integer, arch_flags);
-
-        return tcb_copy_registers (slot, source, suspend_source, resume_target,
-                                   transfer_frame, transfer_integer,
-                                   arch_flags);
-        break;
-      }
     case METHOD_tcb_read_registers:
       {
         bool suspend_source = (bool)get_mr (0);
@@ -383,134 +304,6 @@ dispatch_method (cte_t *slot, message_info_t info)
                     cap_type_string (notification));
 
         return tcb_bind_notification (slot, notification);
-        break;
-      }
-    case METHOD_tcb_set_affinity:
-      {
-        word_t affinity = (word_t)get_mr (0);
-
-        dbg_printf ("tcb_set_affinity ");
-
-        if (cap_type (slot) != cap_tcb)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-        do
-          {
-            word_t len = get_message_length (info);
-            if (len < 1)
-              return ipc_truncated_message (len, 1);
-          }
-        while (0);
-
-        dbg_printf ("(cap:%s, affinity=%#lx)\n", cap_type_string (slot),
-                    affinity);
-
-        return tcb_set_affinity (slot, affinity);
-        break;
-      }
-    case METHOD_tcb_set_ipc_buffer:
-      {
-        word_t buffer = (word_t)get_mr (0);
-        cte_t *buffer_frame;
-
-        dbg_printf ("tcb_set_ipc_buffer ");
-
-        if (cap_type (slot) != cap_tcb)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-        do
-          {
-            word_t len = get_message_length (info);
-            if (len < 1)
-              return ipc_truncated_message (len, 1);
-          }
-        while (0);
-
-        do
-          {
-            word_t len = get_message_extra_caps (info);
-            if (len < 1)
-              return ipc_truncated_message (len, 1);
-          }
-        while (0);
-
-        error = lookup_cap_slot_this_tcb (get_cap (0), &buffer_frame);
-        if (error != no_error)
-          {
-            err_printf ("lookup_cap failed for cap 0\n");
-            set_mr (0, 0);
-            return return_ipc (error, 1);
-          }
-
-        dbg_printf ("(cap:%s, buffer=%#lx, buffer_frame=cap:%s)\n",
-                    cap_type_string (slot), buffer,
-                    cap_type_string (buffer_frame));
-
-        return tcb_set_ipc_buffer (slot, buffer, buffer_frame);
-        break;
-      }
-    case METHOD_tcb_set_space:
-      {
-        word_t fault_ep = (word_t)get_mr (0);
-        word_t cspace_root_data = (word_t)get_mr (1);
-        word_t vspace_root_data = (word_t)get_mr (2);
-        cte_t *cspace_root;
-        cte_t *vspace_root;
-
-        dbg_printf ("tcb_set_space ");
-
-        if (cap_type (slot) != cap_tcb)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-        do
-          {
-            word_t len = get_message_length (info);
-            if (len < 3)
-              return ipc_truncated_message (len, 3);
-          }
-        while (0);
-
-        do
-          {
-            word_t len = get_message_extra_caps (info);
-            if (len < 2)
-              return ipc_truncated_message (len, 2);
-          }
-        while (0);
-
-        error = lookup_cap_slot_this_tcb (get_cap (0), &cspace_root);
-        if (error != no_error)
-          {
-            err_printf ("lookup_cap failed for cap 0\n");
-            set_mr (0, 0);
-            return return_ipc (error, 1);
-          }
-        error = lookup_cap_slot_this_tcb (get_cap (1), &vspace_root);
-        if (error != no_error)
-          {
-            err_printf ("lookup_cap failed for cap 1\n");
-            set_mr (0, 1);
-            return return_ipc (error, 1);
-          }
-
-        dbg_printf ("(cap:%s, fault_ep=%#lx, cspace_root=cap:%s, "
-                    "cspace_root_data=%#lx, vspace_root=cap:%s, "
-                    "vspace_root_data=%#lx)\n",
-                    cap_type_string (slot), fault_ep,
-                    cap_type_string (cspace_root), cspace_root_data,
-                    cap_type_string (vspace_root), vspace_root_data);
-
-        return tcb_set_space (slot, fault_ep, cspace_root, cspace_root_data,
-                              vspace_root, vspace_root_data);
         break;
       }
     case METHOD_tcb_set_tls_base:
@@ -943,23 +736,6 @@ dispatch_method (cte_t *slot, message_info_t info)
         return x86_64_pdpt_map (slot, vspace, vaddr, attr);
         break;
       }
-    case METHOD_x86_64_pdpt_unmap:
-      {
-
-        dbg_printf ("x86_64_pdpt_unmap ");
-
-        if (cap_type (slot) != cap_x86_64_pdpt)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
-
-        return x86_64_pdpt_unmap (slot);
-        break;
-      }
     case METHOD_x86_64_pd_map:
       {
         word_t vaddr = (word_t)get_mr (0);
@@ -1003,23 +779,6 @@ dispatch_method (cte_t *slot, message_info_t info)
                     attr);
 
         return x86_64_pd_map (slot, vspace, vaddr, attr);
-        break;
-      }
-    case METHOD_x86_64_pd_unmap:
-      {
-
-        dbg_printf ("x86_64_pd_unmap ");
-
-        if (cap_type (slot) != cap_x86_64_pd)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
-
-        return x86_64_pd_unmap (slot);
         break;
       }
     case METHOD_x86_64_pt_map:
@@ -1067,23 +826,6 @@ dispatch_method (cte_t *slot, message_info_t info)
         return x86_64_pt_map (slot, vspace, vaddr, attr);
         break;
       }
-    case METHOD_x86_64_pt_unmap:
-      {
-
-        dbg_printf ("x86_64_pt_unmap ");
-
-        if (cap_type (slot) != cap_x86_64_pt)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
-
-        return x86_64_pt_unmap (slot);
-        break;
-      }
     case METHOD_x86_64_page_map:
       {
         word_t vaddr = (word_t)get_mr (0);
@@ -1129,23 +871,6 @@ dispatch_method (cte_t *slot, message_info_t info)
         return x86_64_page_map (slot, vspace, vaddr, attr);
         break;
       }
-    case METHOD_x86_64_page_unmap:
-      {
-
-        dbg_printf ("x86_64_page_unmap ");
-
-        if (cap_type (slot) != cap_x86_64_page)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
-
-        return x86_64_page_unmap (slot);
-        break;
-      }
     case METHOD_x86_64_huge_page_map:
       {
         word_t vaddr = (word_t)get_mr (0);
@@ -1189,23 +914,6 @@ dispatch_method (cte_t *slot, message_info_t info)
                     attr);
 
         return x86_64_huge_page_map (slot, vspace, vaddr, attr);
-        break;
-      }
-    case METHOD_x86_64_huge_page_unmap:
-      {
-
-        dbg_printf ("x86_64_huge_page_unmap ");
-
-        if (cap_type (slot) != cap_x86_64_huge_page)
-          {
-            err_printf ("invalid cap type: %s\n",
-                        cap_type_string (cap_type (slot)));
-            return ipc_illegal_operation ();
-          }
-
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
-
-        return x86_64_huge_page_unmap (slot);
         break;
       }
     case METHOD_irq_control_get:

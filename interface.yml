@@ -29,10 +29,10 @@ types:
           - { name: src_depth, type: uint8_t }
           - { name: rights, type: cap_rights_t }
           - { name: badge, type: word_t }
-      - name: revoke
-        parameters:
-          - { name: index, type: word_t }
-          - { name: depth, type: uint8_t }
+      # - name: revoke
+      #   parameters:
+      #     - { name: index, type: word_t }
+      #     - { name: depth, type: uint8_t }
       - name: debug_print
         parameters: []
   - name: tcb
@@ -46,14 +46,14 @@ types:
           - { name: vspace_root_data, type: word_t }
           - { name: buffer, type: word_t }
           - { name: buffer_frame, type: cptr_t }
-      - name: copy_registers
-        parameters:
-          - { name: source, type: cptr_t }
-          - { name: suspend_source, type: bool }
-          - { name: resume_target, type: bool }
-          - { name: transfer_frame, type: bool }
-          - { name: transfer_integer, type: bool }
-          - { name: arch_flags, type: word_t }
+      # - name: copy_registers
+      #   parameters:
+      #     - { name: source, type: cptr_t }
+      #     - { name: suspend_source, type: bool }
+      #     - { name: resume_target, type: bool }
+      #     - { name: transfer_frame, type: bool }
+      #     - { name: transfer_integer, type: bool }
+      #     - { name: arch_flags, type: word_t }
       - name: read_registers
         parameters:
           - { name: suspend_source, type: bool }
@@ -65,20 +65,20 @@ types:
       - name: bind_notification
         parameters:
           - { name: notification, type: cptr_t }
-      - name: set_affinity
-        parameters:
-          - { name: affinity, type: word_t }
-      - name: set_ipc_buffer
-        parameters:
-          - { name: buffer, type: word_t }
-          - { name: buffer_frame, type: cptr_t }
-      - name: set_space
-        parameters:
-          - { name: fault_ep, type: word_t }
-          - { name: cspace_root, type: cptr_t }
-          - { name: cspace_root_data, type: word_t }
-          - { name: vspace_root, type: cptr_t }
-          - { name: vspace_root_data, type: word_t }
+      # - name: set_affinity
+      #   parameters:
+      #     - { name: affinity, type: word_t }
+      # - name: set_ipc_buffer
+      #   parameters:
+      #     - { name: buffer, type: word_t }
+      #     - { name: buffer_frame, type: cptr_t }
+      # - name: set_space
+      #   parameters:
+      #     - { name: fault_ep, type: word_t }
+      #     - { name: cspace_root, type: cptr_t }
+      #     - { name: cspace_root_data, type: word_t }
+      #     - { name: vspace_root, type: cptr_t }
+      #     - { name: vspace_root_data, type: word_t }
       - name: set_tls_base
         parameters:
           - { name: tls_base, type: word_t }
@@ -149,8 +149,8 @@ types:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
           - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
-        parameters: []
+      # - name: unmap
+      #   parameters: []
   - name: x86_64_pd
     methods:
       - name: map
@@ -158,8 +158,8 @@ types:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
           - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
-        parameters: []
+      # - name: unmap
+      #   parameters: []
   - name: x86_64_pt
     methods:
       - name: map
@@ -167,8 +167,8 @@ types:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
           - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
-        parameters: []
+      # - name: unmap
+      #   parameters: []
   - name: x86_64_page
     methods:
       - name: map
@@ -176,8 +176,8 @@ types:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
           - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
-        parameters: []
+      # - name: unmap
+      #   parameters: []
   - name: x86_64_huge_page
     methods:
       - name: map
@@ -185,8 +185,8 @@ types:
           - { name: vspace, type: cptr_t }
           - { name: vaddr, type: word_t }
           - { name: attr, type: x86_vm_attributes_t }
-      - name: unmap
-        parameters: []
+      # - name: unmap
+      #   parameters: []
   - name: irq_control
     methods:
       - name: get
