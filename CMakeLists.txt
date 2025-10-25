@@ -16,7 +16,7 @@ file(MAKE_DIRECTORY ${iso_dir}/boot/limine)
 if (NOT EXISTS ${limine_dir})
   ExternalProject_Add(limine
     SOURCE_DIR "${limine_dir}"
-    DOWNLOAD_COMMAND git clone --depth 1 --branch v7.x-binary https://github.com/limine-bootloader/limine.git ${limine_dir}
+    DOWNLOAD_COMMAND git clone --depth 1 --branch v10.x-binary https://github.com/limine-bootloader/limine.git ${limine_dir}
     CONFIGURE_COMMAND ""
     BUILD_IN_SOURCE 1
     BUILD_COMMAND make
@@ -30,7 +30,7 @@ project(untitled_bare_metal C ASM)
 add_compile_options(-Wall -Wextra -fbuiltin)
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/limine)
 
-add_compile_definitions(__UNTITLED_BARE_METAL__=1)
+add_compile_definitions(__shrike__=1)
 
 set(targets_to_archive userland calculator_server serial_driver)
 set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
@@ -69,9 +69,9 @@ add_custom_target(initrd_tarball DEPENDS ${archive_name})
 add_subdirectory(kern)
 
 add_custom_command(
-  DEPENDS limine untitled_bare_metal ${archive_name} "${CMAKE_SOURCE_DIR}/limine.cfg"
+  DEPENDS limine untitled_bare_metal ${archive_name} "${CMAKE_SOURCE_DIR}/limine.conf"
   OUTPUT ${iso_file}
-  COMMAND cp ${CMAKE_SOURCE_DIR}/limine.cfg ${iso_dir}/boot/limine
+  COMMAND cp ${CMAKE_SOURCE_DIR}/limine.conf ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-bios.sys ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-bios-cd.bin ${iso_dir}/boot/limine
   COMMAND cp ${limine_dir}/limine-uefi-cd.bin ${iso_dir}/boot/limine

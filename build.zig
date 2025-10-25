@@ -70,6 +70,8 @@ pub fn build(b: *std.Build) void {
     const initrd_tar = createInitrdTarball(b, &userland_exes);
 
     const kernel = buildKernel(b, target, optimize);
+    // Ensure limine is cloned before building kernel (needed for limine.h header)
+    kernel.step.dependOn(&limine_step.step);
 
     // Install kernel to zig-out/bin
     b.installArtifact(kernel);
@@ -81,8 +83,11 @@ pub fn build(b: *std.Build) void {
     // QEMU debug options
     const qemu_debug = b.option([]const u8, "qemu-debug", "QEMU debug flags (e.g., 'int,cpu_reset')");
     const qemu_debug_int = b.option(bool, "qemu-debug-int", "Enable QEMU interrupt and CPU reset debugging") orelse false;
+    const qemu_monitor_stdio = b.option(bool, "qemu-monitor-stdio", "Use monitor stdio instead of debugcon") orelse false;
 
     const run_step = b.step("run", "Run the OS in QEMU");
+    run_step.dependOn(b.getInstallStep());
+
     const qemu_cmd = b.addSystemCommand(&.{
         "qemu-system-x86_64", "-s",
         "-vga",               "std",
@@ -92,15 +97,22 @@ pub fn build(b: *std.Build) void {
         "-M",                 "smm=off",
         "-display",           "none",
         "-vga",               "virtio",
-        "-chardev",           "stdio,id=dbgio,logfile=last_output",
-        "-device",            "isa-debugcon,chardev=dbgio,iobase=0xe9",
-        // "-monitor", "stdio",
         "-serial",            "unix:/tmp/vm_uart.sock,server,nowait",
         "-net",               "nic,model=e1000e",
         "-net",               "user",
         "-cpu",               "max",
         "-no-reboot",
     });
+
+    // Choose between debugcon chardev or monitor stdio
+    if (qemu_monitor_stdio) {
+        qemu_cmd.addArgs(&.{ "-monitor", "stdio" });
+    } else {
+        qemu_cmd.addArgs(&.{
+            "-chardev", "stdio,id=dbgio,logfile=last_output",
+            "-device",  "isa-debugcon,chardev=dbgio,iobase=0xe9",
+        });
+    }
 
     // Add optional debug flags
     if (qemu_debug_int) {
@@ -153,6 +165,7 @@ fn buildUserland(
     const root_module = b.createModule(.{
         .target = target,
         .optimize = optimize,
+        .sanitize_c = .off,
     });
 
     const exe = b.addExecutable(.{

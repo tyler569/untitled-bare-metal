@@ -25,6 +25,11 @@ target_include_directories(untitled_bare_metal PRIVATE
   ${CMAKE_SOURCE_DIR}/limine
 )
 
+# Ensure limine is cloned before building kernel (needed for limine.h header)
+if (TARGET limine)
+  add_dependencies(untitled_bare_metal limine)
+endif ()
+
 add_compile_definitions(
   __KERNEL__=1
 )
