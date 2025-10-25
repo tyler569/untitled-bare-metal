@@ -46,9 +46,7 @@ map_virt_from_virt_phys (uintptr_t pml4, uintptr_t dst_va, uintptr_t src_va,
                          size_t size, uint64_t flags)
 {
   for (size_t off = 0; off < size; off += PAGE_SIZE)
-    {
-      add_vm_mapping (pml4, dst_va + off, physical_of (src_va + off), flags);
-    }
+    add_vm_mapping (pml4, dst_va + off, physical_of (src_va + off), flags);
 }
 
 void

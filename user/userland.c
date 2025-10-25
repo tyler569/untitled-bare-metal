@@ -53,10 +53,9 @@ print_bootinfo_information ()
           total_untyped_size / 1024 / 1024);
   printf ("\n");
 
-  printf ("  limine bootloader: %p\n", bi->framebuffer_info.address);
-  printf ("    size: %zx\n", bi->framebuffer_info.height
-                                 * bi->framebuffer_info.width
-                                 * bi->framebuffer_info.bpp / 8);
+  printf ("  limine fb: %p, size: %zx\n", bi->framebuffer_info.address,
+          bi->framebuffer_info.height * bi->framebuffer_info.width
+              * bi->framebuffer_info.bpp / 8);
 }
 
 [[noreturn]] void
