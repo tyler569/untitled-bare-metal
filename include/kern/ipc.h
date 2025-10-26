@@ -2,7 +2,7 @@
 
 #include "sys/ipc.h"
 
-word_t get_ipc_info ();
+message_info_t get_ipc_info ();
 word_t get_ipc_label ();
 word_t get_ipc_extra_caps ();
 word_t get_ipc_length ();

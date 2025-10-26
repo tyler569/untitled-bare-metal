@@ -133,7 +133,7 @@ broker_thread_main ()
 
           if (get_message_label (info) != serial_driver_read)
             {
-              reply (0);
+              reply (new_message_info (illegal_operation, 0, 0, 0));
               continue;
             }
 

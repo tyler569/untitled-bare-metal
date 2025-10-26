@@ -18,20 +18,19 @@
  * and that is the ASID.
  */
 
-static message_info_t
+static error_t
 already_mapped ()
 {
   return ipc_delete_first ();
 }
 
-static message_info_t
+static error_t
 table_missing (int level)
 {
-  set_mr (0, level);
-  return return_ipc (failed_lookup, 1);
+  return ipc_failed_lookup (level);
 }
 
-message_info_t
+error_t
 x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -59,7 +58,7 @@ x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -82,7 +81,7 @@ x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -109,7 +108,7 @@ x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
@@ -136,7 +135,7 @@ x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
   return ipc_ok (0);
 }
 
-message_info_t
+error_t
 x86_64_huge_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);

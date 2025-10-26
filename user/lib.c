@@ -39,20 +39,20 @@ void
 send (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall2 (sys_send, cap, info);
+  _syscall1 (sys_send, cap);
 }
 
 void
 nbsend (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall2 (sys_nbsend, cap, info);
+  _syscall1 (sys_nbsend, cap);
 }
 
 void
 signal (cptr_t cap)
 {
-  _syscall2 (sys_send, cap, 0);
+  _syscall1 (sys_send, cap);
 }
 
 message_info_t
@@ -103,7 +103,7 @@ message_info_t
 reply (message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall2 (sys_reply, info, 0);
+  _syscall0 (sys_reply);
   return __ipc_buffer->tag;
 }
 

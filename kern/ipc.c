@@ -3,7 +3,7 @@
 #include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
 
-word_t
+message_info_t
 get_ipc_info ()
 {
   assert (this_tcb && this_tcb->ipc_buffer);
