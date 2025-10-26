@@ -311,10 +311,9 @@ fn createIso(
         iso_boot_limine_dir,
     });
 
-    // Copy limine.cfg
+    // Copy limine.conf
     const copy_cfg = b.addSystemCommand(&.{
         "cp",
-        "limine.cfg",
         "limine.conf",
         iso_boot_limine_dir,
     });
