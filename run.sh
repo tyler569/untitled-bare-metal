@@ -3,21 +3,19 @@
 iso="untitled_bare_metal.iso"
 mem="128M"
 smp=2
-debugopt="-debugcon stdio"
+debugopt="-chardev stdio,id=dbgio,logfile=last_output -device isa-debugcon,chardev=dbgio,iobase=0xe9"
 serialopt="-serial unix:/tmp/vm_uart.sock,server,nowait"
 netopt="-net nic,model=e1000e -net user"
 gdbserver=""
 video="-display none -vga virtio"
-tee="|& tee last_output"
 
 while getopts "dmustv" opt; do
   case $opt in
     d)
-      debugopt="-d int,cpu_reset"
+      debugopt="$debugopt -d int,cpu_reset"
       ;;
     m)
       debugopt="-monitor stdio"
-      tee=""
       ;;
     u)
       debugopt="-serial stdio"
@@ -27,7 +25,7 @@ while getopts "dmustv" opt; do
       gdbserver="-S"
       ;;
     t)
-      tee=""
+      debugopt="-debugcon stdio"
       ;;
     v)
       video="-vga virtio"
@@ -38,7 +36,7 @@ while getopts "dmustv" opt; do
   esac
 done
 
-exec qemu-system-x86_64 -s -vga std \
+exec qemu-system-x86_64 -s \
   -no-reboot \
   -m $mem \
   -smp $smp \
@@ -49,4 +47,4 @@ exec qemu-system-x86_64 -s -vga std \
   $serialopt \
   $netopt \
   -cpu max \
-  $gdbserver |& tee last_output
+  $gdbserver
