@@ -157,8 +157,8 @@ enum syscall_number
 {
   sys_exit,
   sys_debug_write,
-  sys_call,
   sys_yield,
+  sys_call,
   sys_send,
   sys_nbsend,
   sys_recv,

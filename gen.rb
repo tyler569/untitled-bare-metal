@@ -2,25 +2,271 @@
 
 require 'yaml'
 
-def format_param_list(params)
-  params.map do |param|
-    "#{param['type']} #{param['name']}"
-  end.join(", ")
-end
-
-def format_call_list(params)
-  params.map do |param|
-    param['name']
-  end.join(", ")
-end
-
-def format_type_only_list(params)
-  params.map do |param|
-    param['type']
-  end.join(", ")
-end
-
 K_CAP_TYPE = 'cte_t *'
+
+# ----------------- Data Model -----------------
+
+class Parameter
+  attr_reader :name, :type
+
+  def initialize(hash)
+    @name = hash['name']
+    @type = hash['type']
+  end
+
+  def capability?
+    @type == 'cptr_t'
+  end
+
+  def message_register?
+    !capability?
+  end
+
+  def to_declaration
+    "#{@type} #{@name}"
+  end
+end
+
+# ----------------- Marshalling -----------------
+
+module Marshalling
+  class ParameterTransformer
+    def initialize(params)
+      @params = params.map { |p| p.is_a?(Parameter) ? p : Parameter.new(p) }
+    end
+
+    def mr_parameters
+      @params.select(&:message_register?)
+    end
+
+    def cap_parameters
+      @params.select(&:capability?)
+    end
+
+    def format_param_list
+      @params.map(&:to_declaration).join(", ")
+    end
+
+    def format_call_list
+      @params.map(&:name).join(", ")
+    end
+
+    # Transform cptr_t -> cte_t* for kernel
+    def kernel_transformed_params
+      @params.map do |param|
+        if param.capability?
+          Parameter.new({'name' => param.name, 'type' => K_CAP_TYPE})
+        else
+          param
+        end
+      end
+    end
+  end
+
+  class MessageInfo
+    def initialize(method_identifier, params)
+      @method_identifier = method_identifier
+      @transformer = ParameterTransformer.new(params)
+    end
+
+    def to_c_expression
+      "new_message_info (#{@method_identifier}, 0, #{@transformer.cap_parameters.length}, #{@transformer.mr_parameters.length})"
+    end
+  end
+end
+
+# ----------------- Code Generators -----------------
+
+class UserStubGenerator
+  def initialize(method)
+    @method = method
+    @transformer = Marshalling::ParameterTransformer.new(@method.user_param_list)
+    @msg_info = Marshalling::MessageInfo.new(@method.identifier_name, @method.parameters)
+  end
+
+  def generate
+    mr_params = @method.mr_parameters
+    cap_params = @method.cap_parameters
+
+    <<~EOF
+    static inline int
+    #{@method.user_function_name} (#{@transformer.format_param_list}) {
+      #{mr_params.map.with_index { |param, i| "set_mr (#{i}, (word_t)#{param['name']});" }.join("\n")}
+      #{cap_params.map.with_index { |param, i| "set_cap (#{i}, #{param['name']});" }.join("\n")}
+      message_info_t _info = #{@msg_info.to_c_expression};
+      __call_kernel (obj, _info);
+      return get_message_label (__ipc_buffer->tag);
+    }
+    EOF
+  end
+end
+
+class KernelDispatchGenerator
+  def initialize(method)
+    @method = method
+  end
+
+  def generate_parameter_length_check
+    mr_params = @method.mr_parameters
+    cap_params = @method.cap_parameters
+
+    mr_check = if mr_params.length > 0
+      <<~EOF
+      do {
+        word_t len = get_message_length (info);
+        if (len < #{mr_params.length})
+          return ipc_truncated_message(len, #{mr_params.length});
+      } while (0);
+      EOF
+    else
+      ""
+    end
+
+    cap_check = if cap_params.length > 0
+      <<~EOF
+      do {
+        word_t len = get_message_extra_caps (info);
+        if (len < #{cap_params.length})
+          return ipc_truncated_message(len, #{cap_params.length});
+      } while (0);
+      EOF
+    else
+      ""
+    end
+
+    [mr_check, cap_check].reject(&:empty?).join("\n")
+  end
+
+  def generate_dispatch_case
+    mr_params = @method.mr_parameters
+    cap_params = @method.cap_parameters
+
+    <<~EOF
+    case #{@method.identifier_name}: {
+      #{mr_params.map.with_index do |param, i|
+          "#{param['type']} #{param['name']} = (#{param['type']})get_mr (#{i});"
+        end.join
+      }
+      #{cap_params.map { |param| "#{K_CAP_TYPE}#{param['name']};" }.join}
+
+      dbg_printf ("#{@method.user_function_name} ");
+
+      if (cap_type (slot) != #{@method.type.type_name})
+        {
+          err_printf ("invalid cap type: %s\\n", cap_type_string (cap_type (slot)));
+          return ipc_illegal_operation();
+        }
+      #{generate_parameter_length_check}
+
+      #{cap_params.map.with_index do |param, i|
+        <<~EOS
+        error = lookup_cap_slot_this_tcb (get_cap (#{i}), &#{param['name']});
+        if (error != no_error)
+          {
+            err_printf ("lookup_cap failed for cap #{i}\\n");
+            set_mr (0, #{i});
+            return return_ipc (error, 1);
+          }
+        EOS
+      end.join}
+
+      dbg_printf ("(#{@method.kernel_print_format})\\n", #{@method.kernel_print_param_list});
+
+      return #{@method.kernel_function_name} (#{@method.kernel_call_list});
+      break;
+    }
+    EOF
+  end
+end
+
+class EnumGenerator
+  def initialize(types, errors, syscalls)
+    @types = types
+    @errors = errors
+    @syscalls = syscalls
+  end
+
+  def generate_object_type_enum
+    lines = ["enum object_type {"]
+    @types.each do |type|
+      lines << "  #{type.type_name},"
+    end
+    lines << "  max_cap_type,"
+    lines << "};"
+    lines.join("\n")
+  end
+
+  def generate_cap_type_string_function
+    lines = ["static inline const char *cap_type_string (word_t type) {"]
+    lines << "  switch (type) {"
+    @types.each do |type|
+      lines << "    case #{type.type_name}: return \"#{type.name}\";"
+    end
+    lines << "    default: return \"unknown\";"
+    lines << "  }"
+    lines << "}"
+    lines.join("\n")
+  end
+
+  def generate_method_id_enum
+    lines = ["enum method_id {"]
+    lines << "  METHOD_invalid,"
+    @types.each do |type|
+      type.kmethods.each do |method|
+        lines << "  #{method.identifier_name},"
+      end
+    end
+    lines << "};"
+    lines.join("\n")
+  end
+
+  def generate_error_enum
+    lines = ["enum error_code {"]
+    @errors.each do |error|
+      lines << "  #{error},"
+    end
+    lines << "  max_error_code,"
+    lines << "};"
+    lines.join("\n")
+  end
+
+  def generate_error_string_function
+    lines = ["static inline const char *error_string (error_t error) {"]
+    lines << "  switch (error) {"
+    @errors.each do |error|
+      lines << "    case #{error}: return \"#{error.gsub('_', ' ')}\";"
+    end
+    lines << "    default: return \"unknown\";"
+    lines << "  }"
+    lines << "}"
+    lines.join("\n")
+  end
+
+  def generate_syscall_enum
+    lines = ["enum syscall_number {"]
+    @syscalls.each do |syscall|
+      lines << "  #{syscall},"
+    end
+    lines << "};"
+    lines.join("\n")
+  end
+
+  def generate_all
+    [
+      generate_object_type_enum,
+      "",
+      generate_cap_type_string_function,
+      "",
+      generate_method_id_enum,
+      "",
+      generate_error_enum,
+      "",
+      generate_error_string_function,
+      "",
+      generate_syscall_enum
+    ].join("\n")
+  end
+end
 
 class KMethod
   attr_reader :name, :parameters, :type
@@ -57,6 +303,14 @@ class KMethod
     end
   end
 
+  def kernel_param_list_declaration
+    kernel_param_list.map { |p| "#{p['type']} #{p['name']}" }.join(", ")
+  end
+
+  def kernel_call_list
+    kernel_param_list.map { |p| p['name'] }.join(", ")
+  end
+
   def kernel_print_param_list
     l = ['cap_type_string (slot)'] + @parameters.map do |param|
       if param['type'] == 'cptr_t'
@@ -86,92 +340,32 @@ class KMethod
     l.join(', ')
   end
 
+  def transformer
+    @transformer ||= Marshalling::ParameterTransformer.new(@parameters)
+  end
+
   def mr_parameters
-    @parameters.filter do |param|
-      param['type'] != 'cptr_t'
-    end
+    transformer.mr_parameters.map { |p| {'name' => p.name, 'type' => p.type} }
   end
 
   def cap_parameters
-    @parameters.filter do |param|
-      param['type'] == 'cptr_t'
-    end
+    transformer.cap_parameters.map { |p| {'name' => p.name, 'type' => p.type} }
   end
 
   def message_info
-    "new_message_info (#{identifier_name}, 0, #{cap_parameters.length}, #{mr_parameters.length})"
+    Marshalling::MessageInfo.new(identifier_name, @parameters).to_c_expression
   end
 
   def usermode_wrapper
-    <<~EOF
-    static inline int
-    #{user_function_name} (#{format_param_list(user_param_list)}) {
-      #{mr_parameters.map.with_index { |param, i| "set_mr (#{i}, (word_t)#{param['name']});" }.join("\n")}
-      #{cap_parameters.map.with_index { |param, i| "set_cap (#{i}, #{param['name']});" }.join("\n")}
-      message_info_t _info = #{message_info};
-      __call_kernel (obj, _info);
-      return get_message_label (__ipc_buffer->tag);
-    }
-    EOF
+    UserStubGenerator.new(self).generate
   end
 
   def kernel_unmarshal_check_parameters_length
-    mr_parameters_check = <<~EOF
-    do {
-      word_t len = get_message_length (info);
-      if (len < #{mr_parameters.length})
-        return ipc_truncated_message(len, #{mr_parameters.length});
-    } while (0);
-    EOF
-    cap_parameters_check = <<~EOF
-    do {
-      word_t len = get_message_extra_caps (info);
-      if (len < #{cap_parameters.length})
-        return ipc_truncated_message(len, #{cap_parameters.length});
-    } while (0);
-    EOF
-    checks = []
-    checks << mr_parameters_check if mr_parameters.length > 0
-    checks << cap_parameters_check if cap_parameters.length > 0
-    checks.join("\n")
+    KernelDispatchGenerator.new(self).generate_parameter_length_check
   end
 
   def kernel_unmarshal_and_call
-    <<~EOF
-    case #{identifier_name}: {
-      #{mr_parameters.map.with_index do |param, i|
-          "#{param['type']} #{param['name']} = (#{param['type']})get_mr (#{i});"
-        end.join
-      }
-      #{cap_parameters.map { |param| "#{K_CAP_TYPE}#{param['name']};" }.join}
-
-      dbg_printf ("#{user_function_name} ");
-
-      if (cap_type (slot) != #{type.type_name})
-        {
-          err_printf ("invalid cap type: %s\\n", cap_type_string (cap_type (slot)));
-          return ipc_illegal_operation();
-        }
-      #{kernel_unmarshal_check_parameters_length}
-
-      #{cap_parameters.map.with_index do |param, i|
-        <<~EOS
-        error = lookup_cap_slot_this_tcb (get_cap (#{i}), &#{param['name']});
-        if (error != no_error)
-          {
-            err_printf ("lookup_cap failed for cap #{i}\\n");
-            set_mr (0, #{i});
-            return return_ipc (error, 1);
-          }
-        EOS
-      end.join}
-
-      dbg_printf ("(#{kernel_print_format})\\n", #{kernel_print_param_list});
-
-      return #{kernel_function_name} (#{format_call_list(kernel_param_list)});
-      break;
-    }
-    EOF
+    KernelDispatchGenerator.new(self).generate_dispatch_case
   end
 end
 
@@ -199,6 +393,8 @@ AUTOGENERATED_BANNER = <<~EOF
 EOF
 
 intf = YAML.load_file('interface.yml')
+errors = YAML.load_file('errors.yml')
+syscalls = YAML.load_file('syscalls.yml')
 
 type_objs = intf['types'].map do |type|
   KType.new(type['name'], type)
@@ -211,62 +407,15 @@ HEADERS = {
   syscall_dispatch: 'kern/syscall_dispatch.c'
 }
 
+enum_generator = EnumGenerator.new(type_objs, errors, syscalls)
+
 File.open("include/#{HEADERS[:global_constants]}", 'w') do |f|
   f.puts AUTOGENERATED_BANNER
   f.puts '#pragma once'
   f.puts
   f.puts '#include "sys/types.h"'
   f.puts
-  # type enum
-  f.puts "enum object_type {"
-  type_objs.each do |type|
-    f.puts "  #{type.type_name},"
-  end
-  f.puts "  max_cap_type,"
-  f.puts "};"
-  f.puts
-  f.puts "static inline const char *cap_type_string (word_t type) {"
-  f.puts "  switch (type) {"
-  type_objs.each do |type|
-    f.puts "    case #{type.type_name}: return \"#{type.name}\";"
-  end
-  f.puts "    default: return \"unknown\";"
-  f.puts "  }"
-  f.puts "}"
-  f.puts
-  # method enum
-  f.puts "enum method_id {"
-  f.puts "  METHOD_invalid,"
-  type_objs.each do |type|
-    type.kmethods.each do |method|
-      f.puts "  #{method.identifier_name},"
-    end
-  end
-  f.puts "};"
-  f.puts
-  # error enum
-  f.puts "enum error_code {"
-  intf['errors'].each do |error|
-    f.puts "  #{error},"
-  end
-  f.puts "  max_error_code,"
-  f.puts "};"
-  f.puts
-  f.puts "static inline const char *error_string (error_t error) {"
-  f.puts "  switch (error) {"
-  intf['errors'].each do |error|
-    f.puts "    case #{error}: return \"#{error.gsub('_', ' ')}\";"
-  end
-  f.puts "    default: return \"unknown\";"
-  f.puts "  }"
-  f.puts "}"
-  f.puts
-  # syscall number
-  f.puts "enum syscall_number {"
-  intf['system_calls'].each do |syscall|
-    f.puts "  #{syscall},"
-  end
-  f.puts "};"
+  f.puts enum_generator.generate_all
 end
 
 File.open("include/#{HEADERS[:user_methods]}", 'w') do |f|
@@ -298,7 +447,7 @@ File.open("include/#{HEADERS[:kernel_methods]}", 'w') do |f|
   type_objs.each do |type|
     type.kmethods.each do |method|
       # puts kernel header
-      f.puts "error_t #{method.kernel_function_name} (#{format_param_list(method.kernel_param_list)});"
+      f.puts "error_t #{method.kernel_function_name} (#{method.kernel_param_list_declaration});"
     end
   end
 end

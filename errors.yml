@@ -1,0 +1,13 @@
+---
+- no_error
+- alignment_error
+- delete_first
+- failed_lookup
+- illegal_operation
+- invalid_argument
+- invalid_capability
+- invalid_root
+- not_enough_memory
+- range_error
+- revoke_first
+- truncated_message
