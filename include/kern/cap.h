@@ -1,16 +1,30 @@
 #pragma once
 
+#include "assert.h"
 #include "sys/cdefs.h"
 #include "sys/ipc.h"
 #include "sys/syscall.h"
 #include "sys/types.h"
 
-#define BITS_POINTER_MASK 0x0000'ffff'ffff'fffc
+constexpr uintptr_t bits_ptr_mask = 0xffff'ffff'fff0;
+
+static inline bool
+is_safe_cap_ptr (void *ptr)
+{
+  uintptr_t p = (uintptr_t)ptr;
+  uintptr_t low_bits = p & 0xf;
+  if (low_bits != 0)
+    return false;
+  uintptr_t high_bits = p >> 47;
+  if (high_bits != 0x1ffff && high_bits != 0)
+    return false;
+  return true;
+}
 
 static inline void *
 bits_pointer (word_t bits)
 {
-  word_t ptr_bits = bits & BITS_POINTER_MASK;
+  word_t ptr_bits = bits & bits_ptr_mask;
   if (ptr_bits & 0x8000'0000'0000)
     return (void *)(ptr_bits | 0xffff'0000'0000'0000);
   else
@@ -20,8 +34,9 @@ bits_pointer (word_t bits)
 static inline void
 set_bits_pointer (word_t *bits, void *ptr)
 {
-  *bits &= ~BITS_POINTER_MASK;
-  *bits |= (word_t)ptr & BITS_POINTER_MASK;
+  assert (is_safe_cap_ptr (ptr));
+  *bits &= ~bits_ptr_mask;
+  *bits |= (word_t)ptr & bits_ptr_mask;
 }
 
 union capability
@@ -29,9 +44,10 @@ union capability
   word_t words[2];
   struct
   {
-    word_t reserved : 1;
+    word_t is_original : 1;
     word_t is_device : 1;
-    word_t ptr : 46;
+    word_t reserved : 2;
+    word_t ptr : 44;
     word_t size_bits : 6;
     word_t rights : 5;
     word_t type : 5;
