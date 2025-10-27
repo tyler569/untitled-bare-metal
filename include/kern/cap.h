@@ -329,8 +329,8 @@ cap_value_type_string (cap_t cap)
 
 void insert (struct cte *new, struct cte *src, struct cte *next);
 void remove (struct cte *del);
-error_t copy (struct cte *dest, struct cte *src, cap_rights_t);
-error_t mint (struct cte *dest, struct cte *src, word_t badge, cap_rights_t);
+message_info_t copy (struct cte *dest, struct cte *src, cap_rights_t);
+message_info_t mint (struct cte *dest, struct cte *src, word_t badge, cap_rights_t);
 bool is_child (struct cte *c, struct cte *parent);
-error_t delete (struct cte *c);
-error_t revoke (struct cte *c);
+message_info_t delete (struct cte *c);
+message_info_t revoke (struct cte *c);

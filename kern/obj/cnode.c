@@ -52,7 +52,8 @@ cnode_debug_print (cte_t *obj)
 
   for (size_t i = 0; i < size; i++)
     {
-      word_t type = cap_type (cte[i].cap);
+      cte_t *e = cte + i;
+      word_t type = cap_type (e);
       if (type == cap_null)
         continue;
       if (type >= max_cap_type)
@@ -60,7 +61,7 @@ cnode_debug_print (cte_t *obj)
           printf ("  %zu: Invalid cap type %lu\n", i, type);
           continue;
         }
-      printf ("  %zu: %s\n", i, cap_type_string (type));
+      printf ("  %zu: %s (%p)\n", i, cap_type_string (e), cap_ptr (e));
     }
 
   return msg_ok (0);
@@ -76,20 +77,9 @@ cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   cte_t *src;
   TRY (lookup_cap_slot (root, src_offset, src_depth, &src));
 
-  copy_cap (dst, src, rights);
+  TRY (copy (dst, src, rights));
 
   return msg_ok (0);
-}
-
-message_info_t
-cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
-{
-  cte_t *cte;
-  TRY (lookup_cap_slot (obj, offset, depth, &cte));
-
-  error_t err = delete (cte);
-
-  return msg_err (err, 0);
 }
 
 message_info_t
@@ -103,13 +93,29 @@ cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   cte_t *src;
   TRY (lookup_cap_slot (root, src_offset, src_depth, &src));
 
-  if (cap_type (src) != cap_endpoint && cap_type (src) != cap_notification)
-    return msg_invalid_argument (4);
+  TRY (mint (dst, src, badge, rights));
 
-  if (src->cap.badge)
-    return msg_invalid_argument (4);
+  return msg_ok (0);
+}
 
-  error_t err = mint (dst, src, badge, rights);
+message_info_t
+cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
+{
+  cte_t *cte;
+  TRY (lookup_cap_slot (obj, offset, depth, &cte));
 
-  return msg_err (err, 0);
+  TRY (delete (cte));
+
+  return msg_ok (0);
+}
+
+message_info_t
+cnode_revoke (cte_t *obj, word_t offset, uint8_t depth)
+{
+  cte_t *cte;
+  TRY (lookup_cap_slot (obj, offset, depth, &cte));
+
+  TRY (revoke (cte));
+
+  return msg_ok (0);
 }

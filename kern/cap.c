@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "kern/cap.h"
 #include "kern/mem.h"
+#include "kern/syscall.h"
 #include "sys/syscall.h"
 
 void
@@ -25,14 +26,14 @@ remove (struct cte *del)
   del->prev = nullptr;
 }
 
-error_t
+message_info_t
 copy (struct cte *dest, struct cte *src, cap_rights_t rights_mask)
 {
   if (cap_type (dest) != cap_null)
-    return delete_first;
+    return msg_delete_first ();
 
   if (cap_type (src) == cap_untyped && src->cap.badge)
-    return revoke_first;
+    return msg_revoke_first ();
 
   dest->cap = src->cap;
 
@@ -43,21 +44,21 @@ copy (struct cte *dest, struct cte *src, cap_rights_t rights_mask)
 
   insert (dest, src, src->next);
 
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 mint (struct cte *dest, struct cte *src, unsigned long badge,
       cap_rights_t rights_mask)
 {
   if (cap_type (dest) != cap_null)
-    return delete_first;
+    return msg_delete_first ();
 
   if (cap_type (src) != cap_endpoint && cap_type (src) != cap_notification)
-    return illegal_operation;
+    return msg_illegal_operation ();
 
   if (src->cap.badge != 0)
-    return illegal_operation;
+    return msg_illegal_operation ();
 
   dest->cap = src->cap;
   dest->cap.badge = badge;
@@ -69,7 +70,7 @@ mint (struct cte *dest, struct cte *src, unsigned long badge,
 
   insert (dest, src, src->next);
 
-  return no_error;
+  return msg_ok (0);
 }
 
 bool
@@ -99,7 +100,7 @@ is_child (struct cte *c, struct cte *parent)
   return true;
 }
 
-error_t
+message_info_t
 delete (struct cte *c)
 {
   revoke (c);
@@ -113,10 +114,10 @@ delete (struct cte *c)
 
   c->cap = cap_null_new ();
 
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 revoke (struct cte *c)
 {
   while (is_child (c->next, c))
@@ -127,5 +128,5 @@ revoke (struct cte *c)
 
   // leaves c with no children
 
-  return no_error;
+  return msg_ok (0);
 }

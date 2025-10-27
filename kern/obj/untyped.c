@@ -40,10 +40,14 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
   cte_t *dest_cnode;
   TRY (lookup_cap_slot (root, node_index, node_depth, &dest_cnode));
 
+  // TODO: return an error in this case/ invalid argument or smth
+  assert (cap_type (dest_cnode) == cap_cnode);
+
   if (cap_size (dest_cnode) < node_offset + num_objects)
     return msg_range_error (0, cap_size (dest_cnode));
 
   cte_t *dest_slot_0 = cte_for (dest_cnode, node_offset, node_depth);
+  assert (dest_slot_0);
 
   uintptr_t untyped_paddr = (uintptr_t)cap_ptr (*untyped);
   uintptr_t usable_memory = untyped_paddr + untyped_offset;

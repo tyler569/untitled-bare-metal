@@ -224,6 +224,48 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
   tcb_resume (tdd.tcb);
 }
 
+void
+spawn_cdt_test (cptr_t main_untyped, cptr_t test_untyped)
+{
+  void *cdt_test_elf = find_tar_entry (bi->initrd, "cdt_test");
+  if (!cdt_test_elf)
+    {
+      printf ("Could not find cdt_test elf\n");
+      return;
+    }
+
+  // Create a cnode for the CDT test using the main untyped
+  cptr_t test_cnode = allocate_with_size (main_untyped, cap_cnode, 1, 7);
+
+  // Copy the cnode cap into the test cnode itself (slot 0)
+  cnode_copy (test_cnode, 0, 64, init_cap_root_cnode, test_cnode, 64,
+              cap_rights_all);
+
+  // Delegate the TEST untyped into slot 1 (so test can revoke it safely)
+  cnode_copy (test_cnode, 1, 64, init_cap_root_cnode, test_untyped, 64,
+              cap_rights_all);
+
+  printf ("CDT Test cnode contents:\n");
+  cnode_debug_print (test_cnode);
+
+  struct thread_data td = {
+    .elf_header = cdt_test_elf,
+    .untyped = main_untyped,  // Use main untyped for thread infrastructure
+    .scratch_vspace = init_cap_init_vspace,
+    .cspace_root = test_cnode,
+    .name = "cdt_test",
+  };
+
+  int err = spawn_thread (&td);
+  if (err)
+    printf ("Error spawning CDT test: %d\n", err);
+  else
+    {
+      printf ("Successfully spawned CDT test\n");
+      tcb_resume (td.tcb);
+    }
+}
+
 long
 calc_add (cptr_t calculator_endpoint, long a, long b)
 {
@@ -404,8 +446,11 @@ main (void *boot_info)
   setup_memory_information (bi);
 
   word_t untyped = init_cap_first_untyped + untypeds[0].index;
+  word_t test_untyped = init_cap_first_untyped + untypeds[1].index;
 
   printf ("Largest untyped: %lx\n", untyped);
+  printf ("CDT test untyped: %lx (size: %d bits)\n", test_untyped,
+          untypeds[1].size_bits);
 
   cptr_t pci_io_port = cptr_alloc ();
   x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
@@ -428,6 +473,9 @@ main (void *boot_info)
   cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_write_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_read_endpoint = allocate (untyped, cap_endpoint, 1);
+
+  // Run CDT tests first (uses main untyped for infra, test_untyped for testing)
+  spawn_cdt_test (untyped, test_untyped);
 
   spawn_calculator_thread (untyped, calculator_endpoint);
   spawn_serial_driver (untyped, serial_write_endpoint, serial_read_endpoint);
