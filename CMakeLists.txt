@@ -43,7 +43,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/limine)
 
 add_compile_definitions(__shrike__=1)
 
-set(targets_to_archive userland calculator_server serial_driver)
+set(targets_to_archive userland calculator_server serial_driver pci_manager)
 set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
 set(archive_name "${CMAKE_BINARY_DIR}/initrd.tar")
 set(archive_file_paths)
