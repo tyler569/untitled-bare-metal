@@ -18,19 +18,19 @@
  * and that is the ASID.
  */
 
-static error_t
+static message_info_t
 already_mapped ()
 {
-  return ipc_delete_first ();
+  return msg_delete_first ();
 }
 
-static error_t
+static message_info_t
 table_missing (int level)
 {
-  return ipc_failed_lookup (level);
+  return msg_failed_lookup (level);
 }
 
-error_t
+message_info_t
 x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -55,10 +55,10 @@ x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pml4e = pdpt_phy | PTE_PRESENT | PTE_WRITE | PTE_USER;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -78,10 +78,10 @@ x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pdpte = pd_phy | PTE_PRESENT | PTE_WRITE | PTE_USER;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -105,10 +105,10 @@ x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pde = pt_phy | PTE_PRESENT | PTE_WRITE | PTE_USER;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
@@ -132,10 +132,10 @@ x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pte = page_phy | PTE_PRESENT | PTE_USER | attr;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 x86_64_huge_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
@@ -155,5 +155,5 @@ x86_64_huge_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 
   *pde = page_phy | PTE_PRESENT | PTE_USER | attr;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }

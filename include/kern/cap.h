@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sys/cdefs.h"
+#include "sys/ipc.h"
 #include "sys/syscall.h"
 #include "sys/types.h"
 
@@ -265,8 +266,13 @@ cap_irq_handler_new (word_t irq)
   return cap;
 }
 
-error_t lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
-                         cte_t **out);
+// Low-level lookup that returns error_t without touching IPC buffer
+error_t lookup_cap_slot_raw (cte_t *cspace_root, word_t index, word_t depth,
+                             cte_t **out);
+
+// High-level lookup that formats errors into IPC buffer
+message_info_t lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
+                                cte_t **out);
 
 #define lookup_cap_slot_this_tcb(index, out)                                  \
   lookup_cap_slot (&this_tcb->cspace_root, index, 64, out)

@@ -3,7 +3,7 @@
 #include "kern/obj/tcb.h"
 #include "kern/syscall.h"
 
-static void
+static message_info_t
 signal_waiting_receiver (struct tcb *receiver, word_t badge)
 {
   message_info_t tag = new_message_info (no_error, 0, 0, 0);
@@ -13,6 +13,8 @@ signal_waiting_receiver (struct tcb *receiver, word_t badge)
 
   receiver->state = TASK_STATE_RUNNABLE;
   switch_tcb (receiver);
+
+  return msg_ok (0);
 }
 
 static void
@@ -23,13 +25,14 @@ signal_bound_receiver_waiting_on_something_else (struct tcb *receiver,
   signal_waiting_receiver (receiver, badge);
 }
 
-static void
+static message_info_t
 queue_receiver_on_notification (struct notification *nfn)
 {
   append_to_list (&this_tcb->send_receive_node, &nfn->list);
   this_tcb->state = TASK_STATE_RECEIVING;
 
   schedule ();
+  return msg_noreturn ();
 }
 
 static void
@@ -70,7 +73,7 @@ notification_signal (struct notification *nfn, word_t badge)
   signal_waiting_receiver (tcb, nfn_word);
 }
 
-void
+message_info_t
 invoke_notification_send (cte_t *cap)
 {
   assert (cap_type (cap) == cap_notification);
@@ -78,9 +81,10 @@ invoke_notification_send (cte_t *cap)
   struct notification *nfn = cap_ptr (cap);
   maybe_init_notification (nfn);
   notification_signal (nfn, cap->cap.badge);
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 invoke_notification_recv (cte_t *cap)
 {
   assert (cap_type (cap) == cap_notification);
@@ -97,12 +101,9 @@ invoke_notification_recv (cte_t *cap)
     }
 
   if (nfn->word == 0)
-    {
-      queue_receiver_on_notification (nfn);
-      return 0;
-    }
+    return queue_receiver_on_notification (nfn);
 
   nfn->word = 0;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }

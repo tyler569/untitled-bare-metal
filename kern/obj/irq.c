@@ -14,49 +14,47 @@ struct irq_handler_data
 static uint64_t irq_handlers_issued = 0;
 static struct irq_handler_data irq_handlers[16];
 
-error_t
+message_info_t
 irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
 {
   cte_t *result_cte;
-  error_t err = lookup_cap_slot (root, index, depth, &result_cte);
-  if (err != no_error)
-    return err;
+  TRY (lookup_cap_slot (root, index, depth, &result_cte));
 
   if (cap_type (result_cte) != cap_null)
-    return ipc_delete_first ();
+    return msg_delete_first ();
 
   if (irq >= 16)
-    return ipc_invalid_argument (0);
+    return msg_invalid_argument (0);
 
   if ((1 << irq) & irq_handlers_issued)
-    return ipc_invalid_argument (0);
+    return msg_invalid_argument (0);
   irq_handlers_issued |= 1 << irq;
 
   result_cte->cap = cap_irq_handler_new (irq);
   cap_set_ptr (result_cte, &irq_handlers[irq]);
   irq_handlers[irq].irq = irq;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 irq_handler_clear (cte_t *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
   data->n = nullptr;
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 irq_handler_ack (cte_t *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
   send_eoi (data->irq);
   data->in_service = false;
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 irq_handler_set_notification (cte_t *obj, cte_t *notification)
 {
   struct irq_handler_data *data = cap_ptr (obj);
@@ -65,7 +63,7 @@ irq_handler_set_notification (cte_t *obj, cte_t *notification)
   data->n = n;
   data->badge = notification->cap.badge;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
 bool

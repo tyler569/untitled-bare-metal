@@ -17,7 +17,7 @@ size_t root_untyped_cap_count = 0;
 int create_objects (word_t type, word_t size_bits, cte_t *dest_slot_0,
                     word_t num_objects, uintptr_t usable_memory);
 
-error_t
+message_info_t
 untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
                 word_t node_index, uint8_t node_depth, word_t node_offset,
                 word_t num_objects)
@@ -34,16 +34,14 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
       printf ("not enough memory to make %lu objects of type %lu (size %lu "
               "bytes). We have %lu bytes available.\n",
               num_objects, type, obj_size, available_memory);
-      return ipc_not_enough_memory (available_memory);
+      return msg_not_enough_memory (available_memory);
     }
 
   cte_t *dest_cnode;
-  error_t err = lookup_cap_slot (root, node_index, node_depth, &dest_cnode);
-  if (err != no_error)
-    return err;
+  TRY (lookup_cap_slot (root, node_index, node_depth, &dest_cnode));
 
   if (cap_size (dest_cnode) < node_offset + num_objects)
-    return ipc_range_error (0, cap_size (dest_cnode));
+    return msg_range_error (0, cap_size (dest_cnode));
 
   cte_t *dest_slot_0 = cte_for (dest_cnode, node_offset, node_depth);
 
@@ -54,7 +52,7 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
 
   untyped->badge = untyped_offset + total_size;
 
-  return ipc_ok (0);
+  return msg_ok (0);
 }
 
 int

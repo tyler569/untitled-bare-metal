@@ -9,7 +9,7 @@
 struct frame;
 typedef struct frame frame_t;
 
-void do_syscall (uintptr_t, uintptr_t, int syscall_number);
+void do_syscall (uintptr_t, uintptr_t, enum syscall_number);
 
 // Used substantially in kern/syscall.c and generated syscall dispatch
 #define dbg_printf(fmt, ...)                                                  \
@@ -19,6 +19,36 @@ void do_syscall (uintptr_t, uintptr_t, int syscall_number);
   while (0)
 #define err_printf(...) printf (__VA_ARGS__)
 
+// TRY macro for error propagation
+#define TRY(expr)                                                             \
+  do                                                                          \
+    {                                                                         \
+      message_info_t __tag = (expr);                                          \
+      if (__tag.label != no_error)                                            \
+        return __tag;                                                         \
+    }                                                                         \
+  while (0)
+
+// Helper to create success message_info_t
+static inline message_info_t
+msg_ok (word_t registers)
+{
+  return new_message_info (no_error, 0, 0, registers);
+}
+
+// Helper to create error message_info_t
+static inline message_info_t
+msg_err (word_t label, word_t registers)
+{
+  if (label != no_error && label < max_error_code)
+    dbg_printf ("msg_err: err='%s'\n", error_string (label));
+  else if (label != no_error)
+    dbg_printf ("msg_err: err='%lu'\n", label);
+
+  return new_message_info (label, 0, 0, registers);
+}
+
+// Legacy compatibility - deprecated
 MUST_USE
 static inline error_t
 return_ipc (error_t err, word_t registers)
@@ -55,58 +85,78 @@ ipc_illegal_operation ()
   return return_ipc (illegal_operation, 0);
 }
 
+// New message_info_t-based error functions
 MUST_USE
-static inline error_t
-ipc_range_error (word_t min, word_t max)
+static inline message_info_t
+msg_range_error (word_t min, word_t max)
 {
   set_mr (0, min);
   set_mr (1, max);
-  return return_ipc (range_error, 2);
+  return msg_err (range_error, 2);
 }
 
 MUST_USE
-static inline error_t
-ipc_truncated_message (word_t expected, word_t provided)
+static inline message_info_t
+msg_truncated_message (word_t expected, word_t provided)
 {
   set_mr (0, expected);
   set_mr (1, provided);
-  return return_ipc (truncated_message, 2);
+  return msg_err (truncated_message, 2);
 }
 
 MUST_USE
-static inline error_t
-ipc_delete_first ()
+static inline message_info_t
+msg_delete_first ()
 {
-  return return_ipc (delete_first, 0);
+  return msg_err (delete_first, 0);
 }
 
 MUST_USE
-static inline error_t
-ipc_invalid_argument (word_t argument_number)
+static inline message_info_t
+msg_invalid_argument (word_t argument_number)
 {
   set_mr (0, argument_number);
-  return return_ipc (invalid_argument, 1);
+  return msg_err (invalid_argument, 1);
 }
 
 MUST_USE
-static inline error_t
-ipc_invalid_root ()
+static inline message_info_t
+msg_invalid_root ()
 {
-  return return_ipc (invalid_root, 0);
+  return msg_err (invalid_root, 0);
 }
 
 MUST_USE
-static inline error_t
-ipc_not_enough_memory (word_t available_memory)
+static inline message_info_t
+msg_not_enough_memory (word_t available_memory)
 {
   set_mr (0, available_memory);
-  return return_ipc (not_enough_memory, 1);
+  return msg_err (not_enough_memory, 1);
 }
 
 MUST_USE
-static inline error_t
-ipc_failed_lookup (word_t level)
+static inline message_info_t
+msg_failed_lookup (word_t level)
 {
   set_mr (0, level);
-  return return_ipc (failed_lookup, 1);
+  return msg_err (failed_lookup, 1);
+}
+
+MUST_USE
+static inline message_info_t
+msg_illegal_operation ()
+{
+  return msg_err (illegal_operation, 0);
+}
+
+// This is used internally to represent the condition that "this ipc return
+// will never be actually delivered to the user (for example out of a kernel
+// function that calls schedule () ). This is never a valid label for any
+// response out of the kernel (our contract is that label is always 0
+// (no_error) for all successful operations and data is in MRs)
+MUST_USE
+static inline message_info_t
+msg_noreturn ()
+{
+  return new_message_info (~0, 0, 0, 0);
 }

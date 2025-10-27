@@ -77,23 +77,23 @@ suspend_tcb (struct tcb *t)
   spin_unlock (&runnable_tcbs_lock);
 }
 
-error_t
+message_info_t
 tcb_resume (cte_t *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
   make_tcb_runnable (tcb);
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 tcb_suspend (cte_t *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
   suspend_tcb (tcb);
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 tcb_read_registers (cte_t *cap, bool suspend_source, word_t arch_flags,
                     word_t count, frame_t *regs)
 {
@@ -103,10 +103,10 @@ tcb_read_registers (cte_t *cap, bool suspend_source, word_t arch_flags,
 
   struct tcb *tcb = cap_ptr (cap);
   copy_frame (regs, &tcb->saved_state);
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 tcb_write_registers (cte_t *cap, bool resume_target, word_t arch_flags,
                      word_t count, frame_t *regs)
 {
@@ -116,7 +116,7 @@ tcb_write_registers (cte_t *cap, bool resume_target, word_t arch_flags,
 
   struct tcb *tcb = cap_ptr (cap);
   copy_frame (&tcb->saved_state, regs);
-  return no_error;
+  return msg_ok (0);
 }
 
 uintptr_t
@@ -126,7 +126,7 @@ tcb_vm_root (struct tcb *t)
   return physical_of ((uintptr_t)vm_root_page);
 }
 
-error_t
+message_info_t
 tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
                word_t cspace_root_data, cte_t *vspace_root,
                word_t vspace_root_data, word_t buffer, cte_t *buffer_frame)
@@ -144,50 +144,50 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
 
   tcb->ipc_buffer = cap_ptr (buffer_frame);
 
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 tcb_bind_notification (cte_t *cap, cte_t *notification)
 {
   struct tcb *tcb = cap_ptr (cap);
   if (cap_type (notification) != cap_notification)
-    return illegal_operation;
+    return msg_illegal_operation ();
 
   struct notification *n = cap_ptr (notification);
   if (n->bound_tcb)
-    return illegal_operation;
+    return msg_illegal_operation ();
 
   tcb->bound_notification = n;
   n->bound_tcb = tcb;
 
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 tcb_set_tls_base (cte_t *cap, word_t tls_base)
 {
   struct tcb *tcb = cap_ptr (cap);
   tcb->tls_base = tls_base;
   if (tcb == this_tcb)
     set_tls_base (tls_base);
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 tcb_set_debug (cte_t *cap, word_t flags)
 {
   struct tcb *tcb = cap_ptr (cap);
   tcb->debug = flags != 0;
-  return no_error;
+  return msg_ok (0);
 }
 
-error_t
+message_info_t
 tcb_set_name (cte_t *cap, char *name, word_t len)
 {
   struct tcb *tcb = cap_ptr (cap);
   strncpy (tcb->name, name, len);
-  return no_error;
+  return msg_ok (0);
 }
 
 void

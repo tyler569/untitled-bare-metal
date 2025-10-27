@@ -12,12 +12,12 @@ enum
 union message_info_t
 {
   struct
-    { 
-      word_t length : 8;
-      word_t caps_unwrapped : 3;
-      word_t extra_caps : 2;
-      word_t label : 51;
-    };
+  {
+    word_t length : 8;
+    word_t caps_unwrapped : 3;
+    word_t extra_caps : 2;
+    word_t label : 51;
+  };
   uint64_t value;
 };
 typedef union message_info_t message_info_t;
@@ -27,10 +27,10 @@ new_message_info (word_t label, word_t caps_unwrapped, word_t extra_caps,
                   word_t length)
 {
   return (message_info_t){
-      .label = label,
-      .caps_unwrapped = caps_unwrapped,
-      .extra_caps = extra_caps,
-      .length = length,
+    .label = label,
+    .caps_unwrapped = caps_unwrapped,
+    .extra_caps = extra_caps,
+    .length = length,
   };
 }
 
