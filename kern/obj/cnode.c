@@ -87,10 +87,9 @@ cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
   cte_t *cte;
   TRY (lookup_cap_slot (obj, offset, depth, &cte));
 
-  // TODO: distribution tree validity
-  cte->cap = cap_null_new ();
+  error_t err = delete (cte);
 
-  return msg_ok (0);
+  return msg_err (err, 0);
 }
 
 message_info_t
@@ -110,8 +109,7 @@ cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   if (src->cap.badge)
     return msg_invalid_argument (4);
 
-  copy_cap (dst, src, rights);
-  dst->cap.badge = badge;
+  error_t err = mint (dst, src, badge, rights);
 
-  return msg_ok (0);
+  return msg_err (err, 0);
 }

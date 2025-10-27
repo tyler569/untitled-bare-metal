@@ -59,6 +59,16 @@ typedef union capability cap_t;
 
 static_assert (sizeof (cap_t) == 16, "cap_t size is not 16 bytes");
 
+struct cte
+{
+  cap_t cap;
+  struct cte *next, *prev;
+};
+
+typedef struct cte cte_t;
+
+static_assert (sizeof (cte_t) == 32, "cte_t size is not 32 bytes");
+
 static inline void *
 cap_ptr (cap_t cap)
 {
@@ -100,56 +110,6 @@ cap_set_rights (cap_t *cap, word_t rights)
 {
   cap->rights = rights;
 }
-
-struct cdt_node
-{
-  word_t words[2];
-};
-
-typedef struct cdt_node cdt_node_t;
-
-static inline cdt_node_t
-cdt_new (cdt_node_t *prev, cdt_node_t *next)
-{
-  cdt_node_t cdt;
-  cdt.words[0] = (word_t)prev;
-  cdt.words[1] = (word_t)next;
-  return cdt;
-}
-
-static inline cdt_node_t *
-cdt_prev (cdt_node_t *cdt)
-{
-  return (cdt_node_t *)cdt->words[0];
-}
-
-static inline cdt_node_t *
-cdt_next (cdt_node_t *cdt)
-{
-  return (cdt_node_t *)cdt->words[1];
-}
-
-static inline void
-cdt_set_prev (cdt_node_t *cdt, cdt_node_t *prev)
-{
-  set_bits_pointer (&cdt->words[0], prev);
-}
-
-static inline void
-cdt_set_next (cdt_node_t *cdt, cdt_node_t *next)
-{
-  set_bits_pointer (&cdt->words[1], next);
-}
-
-struct cte
-{
-  cap_t cap;
-  cdt_node_t cdt;
-};
-
-typedef struct cte cte_t;
-
-static_assert (sizeof (cte_t) == 32, "cte_t size is not 32 bytes");
 
 static inline cap_t
 cap_null_new ()
@@ -365,11 +325,12 @@ cap_value_type_string (cap_t cap)
       cap_t: cap_value_type_string,                                           \
       cte_t *: cte_type_string) (t)
 
-static inline void
-copy_cap (cte_t *dest, cte_t *src, cap_rights_t rights)
-{
-  // TODO: insert into CDT
+#define copy_cap copy
 
-  dest->cap = src->cap;
-  dest->cap.rights &= rights;
-}
+void insert (struct cte *new, struct cte *src, struct cte *next);
+void remove (struct cte *del);
+error_t copy (struct cte *dest, struct cte *src, cap_rights_t);
+error_t mint (struct cte *dest, struct cte *src, word_t badge, cap_rights_t);
+bool is_child (struct cte *c, struct cte *parent);
+error_t delete (struct cte *c);
+error_t revoke (struct cte *c);
