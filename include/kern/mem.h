@@ -29,7 +29,7 @@ uintptr_t alloc_page ();
 
 struct untyped_desc;
 
-void create_init_untyped_caps (cte_t *base, size_t *count,
+void create_init_untyped_caps (struct cap *base, size_t *count,
                                struct untyped_desc *desc);
-void create_init_untyped_device_caps (cte_t *base, size_t *count,
+void create_init_untyped_device_caps (struct cap *base, size_t *count,
                                       struct untyped_desc *desc);

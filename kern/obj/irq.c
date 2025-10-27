@@ -15,9 +15,10 @@ static uint64_t irq_handlers_issued = 0;
 static struct irq_handler_data irq_handlers[16];
 
 message_info_t
-irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
+irq_control_get (struct cap *, word_t irq, struct cap *root, word_t index,
+                 uint8_t depth)
 {
-  cte_t *result_cte;
+  struct cap *result_cte;
   TRY (lookup_cap_slot (root, index, depth, &result_cte));
 
   if (cap_type (result_cte) != cap_null)
@@ -30,7 +31,7 @@ irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
     return msg_invalid_argument (0);
   irq_handlers_issued |= 1 << irq;
 
-  result_cte->cap = cap_irq_handler_new (irq);
+  cap_irq_handler_init (result_cte, irq);
   cap_set_ptr (result_cte, &irq_handlers[irq]);
   irq_handlers[irq].irq = irq;
 
@@ -38,7 +39,7 @@ irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
 }
 
 message_info_t
-irq_handler_clear (cte_t *obj)
+irq_handler_clear (struct cap *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
   data->n = nullptr;
@@ -46,7 +47,7 @@ irq_handler_clear (cte_t *obj)
 }
 
 message_info_t
-irq_handler_ack (cte_t *obj)
+irq_handler_ack (struct cap *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
   send_eoi (data->irq);
@@ -55,13 +56,13 @@ irq_handler_ack (cte_t *obj)
 }
 
 message_info_t
-irq_handler_set_notification (cte_t *obj, cte_t *notification)
+irq_handler_set_notification (struct cap *obj, struct cap *notification)
 {
   struct irq_handler_data *data = cap_ptr (obj);
   struct notification *n = cap_ptr (notification);
 
   data->n = n;
-  data->badge = notification->cap.badge;
+  data->badge = notification->badge;
 
   return msg_ok (0);
 }

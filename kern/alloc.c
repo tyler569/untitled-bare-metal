@@ -72,7 +72,7 @@ allocate_aligned_regions (struct physical_extent *extent)
 }
 
 void
-create_init_untyped_caps (cte_t *base, size_t *count,
+create_init_untyped_caps (struct cap *base, size_t *count,
                           struct untyped_desc *desc)
 {
   size_t n = *count;
@@ -84,8 +84,8 @@ create_init_untyped_caps (cte_t *base, size_t *count,
 
       regions[i].in_user_use = true;
 
-      base[cap_i].cap
-          = cap_untyped_new (regions[i].addr, regions[i].size_bits + 12);
+      cap_untyped_init (&base[cap_i], regions[i].addr,
+                        regions[i].size_bits + 12);
 
       desc[cap_i].base = regions[i].addr;
       desc[cap_i].size_bits = regions[i].size_bits + 12;
@@ -100,7 +100,7 @@ create_init_untyped_caps (cte_t *base, size_t *count,
 }
 
 void
-create_init_untyped_device_caps (cte_t *base, size_t *count,
+create_init_untyped_device_caps (struct cap *base, size_t *count,
                                  struct untyped_desc *desc)
 {
   size_t n = *count;
@@ -130,8 +130,7 @@ create_init_untyped_device_caps (cte_t *base, size_t *count,
               size_t size = ~mask + 1;
               size_t size_bits = 63 - __builtin_clzll (size);
 
-              cap_t cap = cap_untyped_device_new (bar, size_bits);
-              base[cap_i].cap = cap;
+              cap_untyped_device_init (&base[cap_i], bar, size_bits);
 
               desc[cap_i].base = bar;
               desc[cap_i].size_bits = size_bits;

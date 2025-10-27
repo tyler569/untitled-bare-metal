@@ -31,7 +31,8 @@ table_missing (int level)
 }
 
 message_info_t
-x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
+x86_64_pdpt_map (struct cap *cte, struct cap *vspace, word_t vaddr,
+                 word_t attr)
 {
   (void)attr;
 
@@ -59,7 +60,7 @@ x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 }
 
 message_info_t
-x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
+x86_64_pd_map (struct cap *cte, struct cap *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
 
@@ -82,7 +83,7 @@ x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 }
 
 message_info_t
-x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
+x86_64_pt_map (struct cap *cte, struct cap *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
 
@@ -109,7 +110,8 @@ x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 }
 
 message_info_t
-x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
+x86_64_page_map (struct cap *cte, struct cap *vspace, word_t vaddr,
+                 word_t attr)
 {
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
   uintptr_t page_phy = physical_of ((uintptr_t)cap_ptr (cte));
@@ -136,7 +138,8 @@ x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 }
 
 message_info_t
-x86_64_huge_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
+x86_64_huge_page_map (struct cap *cte, struct cap *vspace, word_t vaddr,
+                      word_t attr)
 {
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
   uintptr_t page_phy = physical_of ((uintptr_t)cap_ptr (cte));

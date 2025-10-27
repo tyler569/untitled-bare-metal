@@ -113,6 +113,13 @@ msg_delete_first ()
 
 MUST_USE
 static inline message_info_t
+msg_revoke_first ()
+{
+  return msg_err (revoke_first, 0);
+}
+
+MUST_USE
+static inline message_info_t
 msg_invalid_argument (word_t argument_number)
 {
   set_mr (0, argument_number);

@@ -50,6 +50,16 @@ cnode_mint (cptr_t obj, word_t dest_index, uint8_t dest_depth, cptr_t src_root,
   return get_message_label (__ipc_buffer->tag);
 }
 static inline int
+cnode_revoke (cptr_t obj, word_t index, uint8_t depth)
+{
+  set_mr (0, (word_t)index);
+  set_mr (1, (word_t)depth);
+
+  message_info_t _info = new_message_info (METHOD_cnode_revoke, 0, 0, 2);
+  __call_kernel (obj, _info);
+  return get_message_label (__ipc_buffer->tag);
+}
+static inline int
 cnode_debug_print (cptr_t obj)
 {
 

@@ -11,7 +11,7 @@
 constexpr size_t cnode_slots = BIT (INIT_CNODE_SIZE_BITS);
 
 struct tcb init_tcb;
-cte_t init_cnode[cnode_slots];
+struct cap init_cnode[cnode_slots];
 
 static struct limine_framebuffer_request fbinfo = {
   .id = LIMINE_FRAMEBUFFER_REQUEST,
@@ -84,17 +84,26 @@ create_init_tcb (void *initrd, size_t initrd_size)
   init_tcb.ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buf);
 
   // caps
-  cap_t init_tcb_cap = cap_tcb_new (&init_tcb);
-  cap_t init_cnode_cap = cap_cnode_new (init_cnode, INIT_CNODE_SIZE_BITS);
-  cap_t init_vspace_cap = cap_x86_64_pml4_new (direct_map_of (get_vm_root ()));
-  cap_t init_io_port_cap = cap_x86_64_io_port_control_new ();
-  cap_t init_irq_control_cap = cap_irq_control_new ();
+  struct cap init_tcb_cap;
+  cap_tcb_init (&init_tcb_cap, &init_tcb);
+
+  struct cap init_cnode_cap;
+  cap_cnode_init (&init_cnode_cap, init_cnode, INIT_CNODE_SIZE_BITS);
+
+  struct cap init_vspace_cap;
+  cap_x86_64_pml4_init (&init_vspace_cap, direct_map_of (get_vm_root ()));
+
+  struct cap init_io_port_cap;
+  cap_x86_64_io_port_control_init (&init_io_port_cap);
+
+  struct cap init_irq_control_cap;
+  cap_irq_control_init (&init_irq_control_cap);
 
   // fill well-known slots
   struct
   {
     size_t slot;
-    cap_t cap;
+    struct cap cap;
   } seed_caps[] = {
     { init_cap_init_tcb, init_tcb_cap },
     { init_cap_root_cnode, init_cnode_cap },
@@ -104,10 +113,10 @@ create_init_tcb (void *initrd, size_t initrd_size)
   };
 
   for (size_t i = 0; i < sizeof (seed_caps) / sizeof (seed_caps[0]); i++)
-    init_cnode[seed_caps[i].slot].cap = seed_caps[i].cap;
+    init_cnode[seed_caps[i].slot] = seed_caps[i].cap;
 
-  init_tcb.cspace_root.cap = init_cnode_cap;
-  init_tcb.vspace_root.cap = init_vspace_cap;
+  init_tcb.cspace_root = init_cnode_cap;
+  init_tcb.vspace_root = init_vspace_cap;
 
   // untyped ranges
   size_t n_untyped = cnode_slots - init_cap_first_untyped;

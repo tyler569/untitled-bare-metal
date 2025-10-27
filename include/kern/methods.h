@@ -5,56 +5,65 @@
 #include "kern/cap.h"
 #include "sys/syscall.h"
 
-message_info_t cnode_copy (cte_t *slot, word_t dest_index, uint8_t dest_depth,
-                           cte_t *src_root, word_t src_index,
-                           uint8_t src_depth, cap_rights_t rights);
-message_info_t cnode_delete (cte_t *slot, word_t index, uint8_t depth);
-message_info_t cnode_mint (cte_t *slot, word_t dest_index, uint8_t dest_depth,
-                           cte_t *src_root, word_t src_index,
-                           uint8_t src_depth, cap_rights_t rights,
-                           word_t badge);
-message_info_t cnode_debug_print (cte_t *slot);
-message_info_t tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
-                              word_t cspace_root_data, cte_t *vspace_root,
-                              word_t vspace_root_data, word_t buffer,
-                              cte_t *buffer_frame);
-message_info_t tcb_read_registers (cte_t *slot, bool suspend_source,
+message_info_t cnode_copy (struct cap *slot, word_t dest_index,
+                           uint8_t dest_depth, struct cap *src_root,
+                           word_t src_index, uint8_t src_depth,
+                           cap_rights_t rights);
+message_info_t cnode_delete (struct cap *slot, word_t index, uint8_t depth);
+message_info_t cnode_mint (struct cap *slot, word_t dest_index,
+                           uint8_t dest_depth, struct cap *src_root,
+                           word_t src_index, uint8_t src_depth,
+                           cap_rights_t rights, word_t badge);
+message_info_t cnode_revoke (struct cap *slot, word_t index, uint8_t depth);
+message_info_t cnode_debug_print (struct cap *slot);
+message_info_t tcb_configure (struct cap *slot, word_t fault_ep,
+                              struct cap *cspace_root, word_t cspace_root_data,
+                              struct cap *vspace_root, word_t vspace_root_data,
+                              word_t buffer, struct cap *buffer_frame);
+message_info_t tcb_read_registers (struct cap *slot, bool suspend_source,
                                    word_t arch_flags, word_t count,
                                    user_context_t *regs);
-message_info_t tcb_resume (cte_t *slot);
-message_info_t tcb_bind_notification (cte_t *slot, cte_t *notification);
-message_info_t tcb_set_tls_base (cte_t *slot, word_t tls_base);
-message_info_t tcb_suspend (cte_t *slot);
-message_info_t tcb_write_registers (cte_t *slot, bool resume_target,
+message_info_t tcb_resume (struct cap *slot);
+message_info_t tcb_bind_notification (struct cap *slot,
+                                      struct cap *notification);
+message_info_t tcb_set_tls_base (struct cap *slot, word_t tls_base);
+message_info_t tcb_suspend (struct cap *slot);
+message_info_t tcb_write_registers (struct cap *slot, bool resume_target,
                                     word_t arch_flags, word_t count,
                                     user_context_t *regs);
-message_info_t tcb_set_debug (cte_t *slot, word_t flags);
-message_info_t tcb_set_name (cte_t *slot, char *name, word_t len);
-message_info_t untyped_retype (cte_t *slot, word_t type, word_t size_bits,
-                               cte_t *root, word_t node_index,
+message_info_t tcb_set_debug (struct cap *slot, word_t flags);
+message_info_t tcb_set_name (struct cap *slot, char *name, word_t len);
+message_info_t untyped_retype (struct cap *slot, word_t type, word_t size_bits,
+                               struct cap *root, word_t node_index,
                                uint8_t node_depth, word_t node_offset,
                                word_t num_objects);
-message_info_t x86_64_io_port_in8 (cte_t *slot, word_t port);
-message_info_t x86_64_io_port_in16 (cte_t *slot, word_t port);
-message_info_t x86_64_io_port_in32 (cte_t *slot, word_t port);
-message_info_t x86_64_io_port_out8 (cte_t *slot, word_t port, word_t value);
-message_info_t x86_64_io_port_out16 (cte_t *slot, word_t port, word_t value);
-message_info_t x86_64_io_port_out32 (cte_t *slot, word_t port, word_t value);
-message_info_t x86_64_io_port_control_issue (cte_t *slot, word_t first_port,
-                                             word_t last_port, cte_t *root,
-                                             word_t index, uint8_t depth);
-message_info_t x86_64_pdpt_map (cte_t *slot, cte_t *vspace, word_t vaddr,
-                                x86_vm_attributes_t attr);
-message_info_t x86_64_pd_map (cte_t *slot, cte_t *vspace, word_t vaddr,
-                              x86_vm_attributes_t attr);
-message_info_t x86_64_pt_map (cte_t *slot, cte_t *vspace, word_t vaddr,
-                              x86_vm_attributes_t attr);
-message_info_t x86_64_page_map (cte_t *slot, cte_t *vspace, word_t vaddr,
-                                x86_vm_attributes_t attr);
-message_info_t x86_64_huge_page_map (cte_t *slot, cte_t *vspace, word_t vaddr,
-                                     x86_vm_attributes_t attr);
-message_info_t irq_control_get (cte_t *slot, word_t irq, cte_t *root,
+message_info_t x86_64_io_port_in8 (struct cap *slot, word_t port);
+message_info_t x86_64_io_port_in16 (struct cap *slot, word_t port);
+message_info_t x86_64_io_port_in32 (struct cap *slot, word_t port);
+message_info_t x86_64_io_port_out8 (struct cap *slot, word_t port,
+                                    word_t value);
+message_info_t x86_64_io_port_out16 (struct cap *slot, word_t port,
+                                     word_t value);
+message_info_t x86_64_io_port_out32 (struct cap *slot, word_t port,
+                                     word_t value);
+message_info_t x86_64_io_port_control_issue (struct cap *slot,
+                                             word_t first_port,
+                                             word_t last_port,
+                                             struct cap *root, word_t index,
+                                             uint8_t depth);
+message_info_t x86_64_pdpt_map (struct cap *slot, struct cap *vspace,
+                                word_t vaddr, x86_vm_attributes_t attr);
+message_info_t x86_64_pd_map (struct cap *slot, struct cap *vspace,
+                              word_t vaddr, x86_vm_attributes_t attr);
+message_info_t x86_64_pt_map (struct cap *slot, struct cap *vspace,
+                              word_t vaddr, x86_vm_attributes_t attr);
+message_info_t x86_64_page_map (struct cap *slot, struct cap *vspace,
+                                word_t vaddr, x86_vm_attributes_t attr);
+message_info_t x86_64_huge_page_map (struct cap *slot, struct cap *vspace,
+                                     word_t vaddr, x86_vm_attributes_t attr);
+message_info_t irq_control_get (struct cap *slot, word_t irq, struct cap *root,
                                 word_t index, uint8_t depth);
-message_info_t irq_handler_ack (cte_t *slot);
-message_info_t irq_handler_clear (cte_t *slot);
-message_info_t irq_handler_set_notification (cte_t *slot, cte_t *notification);
+message_info_t irq_handler_ack (struct cap *slot);
+message_info_t irq_handler_clear (struct cap *slot);
+message_info_t irq_handler_set_notification (struct cap *slot,
+                                             struct cap *notification);

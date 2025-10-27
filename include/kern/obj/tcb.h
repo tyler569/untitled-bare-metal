@@ -38,10 +38,10 @@ struct tcb
 
   uintptr_t tls_base;
 
-  cte_t cspace_root;
-  cte_t vspace_root;
-  cte_t ipc_buffer_frame;
-  cte_t reply;
+  struct cap cspace_root;
+  struct cap vspace_root;
+  struct cap ipc_buffer_frame;
+  struct cap reply;
 
   struct notification *bound_notification;
 
@@ -70,7 +70,7 @@ void schedule ();
 void send_message (struct tcb *receiver, uintptr_t message);
 void receive_message ();
 
-int invoke_tcb_method (cap_t tcb, word_t method);
+int invoke_tcb_method (struct cap *tcb, word_t method);
 
 void print_this_tcb ();
 

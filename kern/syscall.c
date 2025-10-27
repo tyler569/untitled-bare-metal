@@ -9,7 +9,7 @@
 #include "kern/syscall_dispatch.c"
 
 static inline void
-ASSERT_ENDPOINT (cte_t *slot)
+ASSERT_ENDPOINT (struct cap *slot)
 {
   if (cap_type (slot) != cap_endpoint && cap_type (slot) != cap_notification)
     {
@@ -59,7 +59,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
     default:
     }
 
-  cte_t *slot;
+  struct cap *slot;
   TRY (lookup_cap_slot_this_tcb (a0, &slot));
 
   switch (syscall_number)

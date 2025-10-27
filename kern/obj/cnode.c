@@ -5,27 +5,28 @@
 
 // Low-level lookup that returns error_t without touching IPC buffer
 error_t
-lookup_cap_slot_raw (cte_t *cspace_root, word_t index, word_t depth,
-                     cte_t **out)
+lookup_cap_slot_raw (struct cap *cspace_root, word_t index, word_t depth,
+                     struct cap **out)
 {
   *out = nullptr;
   assert_eq (depth, 64); // for now
 
-  if (cap_type (cspace_root->cap) != cap_cnode)
+  if (cap_type (cspace_root) != cap_cnode)
     return invalid_root;
 
-  cte_t *cte = cap_ptr (cspace_root->cap);
-  size_t length = cap_size (cspace_root->cap);
+  struct cap *slots = cap_ptr (cspace_root);
+  size_t length = cap_size (cspace_root);
   if (index >= length)
     return range_error;
 
-  *out = &cte[index];
+  *out = &slots[index];
   return no_error;
 }
 
 // High-level wrapper that formats errors into IPC buffer
 message_info_t
-lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
+lookup_cap_slot (struct cap *cspace_root, word_t index, word_t depth,
+                 struct cap **out)
 {
   error_t err = lookup_cap_slot_raw (cspace_root, index, depth, out);
 
@@ -34,7 +35,7 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 
   if (err == range_error)
     {
-      size_t length = cap_size (cspace_root->cap);
+      size_t length = cap_size (cspace_root);
       return msg_range_error (0, length);
     }
 
@@ -42,17 +43,17 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 }
 
 message_info_t
-cnode_debug_print (cte_t *obj)
+cnode_debug_print (struct cap *obj)
 {
-  cte_t *cte = cap_ptr (obj->cap);
-  size_t size = cap_size (obj->cap);
+  struct cap *slots = cap_ptr (obj);
+  size_t size = cap_size (obj);
 
-  printf ("CNode %p\n", cte);
+  printf ("CNode %p\n", slots);
   printf ("  size:: %lu\n", size);
 
   for (size_t i = 0; i < size; i++)
     {
-      word_t type = cap_type (cte[i].cap);
+      word_t type = cap_type (&slots[i]);
       if (type == cap_null)
         continue;
       if (type >= max_cap_type)
@@ -67,51 +68,99 @@ cnode_debug_print (cte_t *obj)
 }
 
 message_info_t
-cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
-            word_t src_offset, uint8_t src_depth, cap_rights_t rights)
+cnode_copy (struct cap *obj, word_t dst_offset, uint8_t dst_depth,
+            struct cap *root, word_t src_offset, uint8_t src_depth,
+            cap_rights_t rights)
 {
-  cte_t *dst;
+  struct cap *dst;
   TRY (lookup_cap_slot (obj, dst_offset, dst_depth, &dst));
 
-  cte_t *src;
+  struct cap *src;
   TRY (lookup_cap_slot (root, src_offset, src_depth, &src));
 
-  copy_cap (dst, src, rights);
+  // Check that destination is empty
+  if (cap_type (dst) != cap_null)
+    return msg_delete_first ();
+
+  // Copy capability data with rights restriction
+  copy_cap_data (dst, src, rights);
+
+  // Derived capabilities are not original (except badged endpoints - see mint)
+  dst->is_original = 0;
+
+  // Insert into capability derivation tree
+  // For untyped caps, no CDT insertion (they don't have siblings)
+  if (cap_type (src) != cap_untyped)
+    cdt_insert (dst, src, cap_next (src));
 
   return msg_ok (0);
 }
 
 message_info_t
-cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
+cnode_delete (struct cap *obj, word_t offset, uint8_t depth)
 {
-  cte_t *cte;
-  TRY (lookup_cap_slot (obj, offset, depth, &cte));
+  struct cap *cap;
+  TRY (lookup_cap_slot (obj, offset, depth, &cap));
 
-  // TODO: distribution tree validity
-  cte->cap = cap_null_new ();
+  // Use cap_delete which checks for children
+  error_t err = cap_delete (cap);
+  if (err == revoke_first)
+    return msg_revoke_first ();
+  if (err != no_error)
+    return new_message_info (err, 0, 0, 0);
 
   return msg_ok (0);
 }
 
 message_info_t
-cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
-            word_t src_offset, uint8_t src_depth, cap_rights_t rights,
-            word_t badge)
+cnode_revoke (struct cap *obj, word_t offset, uint8_t depth)
 {
-  cte_t *dst;
+  struct cap *cap;
+  TRY (lookup_cap_slot (obj, offset, depth, &cap));
+
+  // Recursively revoke all derived capabilities
+  error_t err = cap_revoke (cap);
+  if (err != no_error)
+    return new_message_info (err, 0, 0, 0);
+
+  return msg_ok (0);
+}
+
+message_info_t
+cnode_mint (struct cap *obj, word_t dst_offset, uint8_t dst_depth,
+            struct cap *root, word_t src_offset, uint8_t src_depth,
+            cap_rights_t rights, word_t badge)
+{
+  struct cap *dst;
   TRY (lookup_cap_slot (obj, dst_offset, dst_depth, &dst));
 
-  cte_t *src;
+  struct cap *src;
   TRY (lookup_cap_slot (root, src_offset, src_depth, &src));
 
+  // Check that destination is empty
+  if (cap_type (dst) != cap_null)
+    return msg_delete_first ();
+
+  // Only endpoints and notifications can be minted
   if (cap_type (src) != cap_endpoint && cap_type (src) != cap_notification)
     return msg_invalid_argument (4);
 
-  if (src->cap.badge)
+  // Source must not already be badged
+  if (src->badge)
     return msg_invalid_argument (4);
 
-  copy_cap (dst, src, rights);
-  dst->cap.badge = badge;
+  // Copy capability data with rights restriction
+  copy_cap_data (dst, src, rights);
+
+  // Set the badge
+  dst->badge = badge;
+
+  // Badged endpoints/notifications are treated as "original" capabilities
+  // They can have their own derived children (seL4 semantics)
+  dst->is_original = 1;
+
+  // Insert into capability derivation tree
+  cdt_insert (dst, src, cap_next (src));
 
   return msg_ok (0);
 }

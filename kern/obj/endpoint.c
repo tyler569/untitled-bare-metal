@@ -25,7 +25,7 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
   if (transfer_cap)
     {
       cptr_t send_cptr = sender->ipc_buffer->caps_or_badges[0];
-      cte_t *cap;
+      struct cap *cap;
       error_t err
           = lookup_cap_slot_raw (&sender->cspace_root, send_cptr, 64, &cap);
       if (err != no_error)
@@ -35,7 +35,7 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
           goto finish;
         }
 
-      cte_t *recv_cnode_root;
+      struct cap *recv_cnode_root;
       err = lookup_cap_slot_raw (&receiver->cspace_root,
                                  receiver->ipc_buffer->receive_cnode, 64,
                                  &recv_cnode_root);
@@ -45,7 +45,7 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
           goto finish;
         }
 
-      cte_t *recv_slot;
+      struct cap *recv_slot;
       err = lookup_cap_slot_raw (
           recv_cnode_root, receiver->ipc_buffer->receive_index,
           receiver->ipc_buffer->receive_depth, &recv_slot);
@@ -55,7 +55,10 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
           goto finish;
         }
 
-      copy_cap (recv_slot, cap, cap_rights_all);
+      copy_cap_data (recv_slot, cap, cap_rights_all);
+      // Insert into CDT if not untyped
+      if (cap_type (cap) != cap_untyped)
+        cdt_insert (recv_slot, cap, cap_next (cap));
     }
 
 finish:
@@ -199,7 +202,7 @@ maybe_init_endpoint (struct endpoint *e)
 }
 
 void
-invoke_endpoint_send (cte_t *cap)
+invoke_endpoint_send (struct cap *cap)
 {
   assert (cap_type (cap) == cap_endpoint);
 
@@ -209,13 +212,13 @@ invoke_endpoint_send (cte_t *cap)
   maybe_init_endpoint (e);
 
   message_info_t tag = this_tcb->ipc_buffer->tag;
-  endpoint_send (e, cap->cap.badge, tag, false);
+  endpoint_send (e, cap->badge, tag, false);
 }
 
 void
-invoke_endpoint_nbsend (cte_t *cap)
+invoke_endpoint_nbsend (struct cap *cap)
 {
-  printf ("nbsend: %s\n", cap_type_string (cap));
+  printf ("nbsend: %s\n", cap_type_string (cap_type (cap)));
   panic ("how did we get here\n");
 
   assert (cap_type (cap) == cap_endpoint);
@@ -226,7 +229,7 @@ invoke_endpoint_nbsend (cte_t *cap)
   maybe_init_endpoint (e);
 
   message_info_t tag = this_tcb->ipc_buffer->tag;
-  endpoint_nbsend (e, cap->cap.badge, tag);
+  endpoint_nbsend (e, cap->badge, tag);
 }
 
 bool
@@ -243,7 +246,7 @@ handle_recv_with_pending_notification ()
 }
 
 message_info_t
-invoke_endpoint_recv (cte_t *cap)
+invoke_endpoint_recv (struct cap *cap)
 {
   assert (cap_type (cap) == cap_endpoint);
 
@@ -256,7 +259,7 @@ invoke_endpoint_recv (cte_t *cap)
 }
 
 message_info_t
-invoke_endpoint_nbrecv (cte_t *cap)
+invoke_endpoint_nbrecv (struct cap *cap)
 {
   assert (cap_type (cap) == cap_endpoint);
 
@@ -269,7 +272,7 @@ invoke_endpoint_nbrecv (cte_t *cap)
 }
 
 void
-invoke_endpoint_call (cte_t *cap)
+invoke_endpoint_call (struct cap *cap)
 {
   assert (cap_type (cap) == cap_endpoint);
 
@@ -280,7 +283,7 @@ invoke_endpoint_call (cte_t *cap)
   maybe_init_endpoint (e);
 
   message_info_t tag = this_tcb->ipc_buffer->tag;
-  endpoint_send (e, cap->cap.badge, tag, true);
+  endpoint_send (e, cap->badge, tag, true);
 }
 
 void
@@ -301,7 +304,7 @@ invoke_reply ()
 }
 
 message_info_t
-invoke_reply_recv (cte_t *cap)
+invoke_reply_recv (struct cap *cap)
 {
   invoke_reply ();
   return invoke_endpoint_recv (cap);

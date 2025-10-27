@@ -3,22 +3,23 @@
 #include "kern/syscall.h"
 
 message_info_t
-x86_64_io_port_control_issue (cte_t *, uint16_t first_port, uint16_t last_port,
-                              cte_t *root, word_t index, word_t depth)
+x86_64_io_port_control_issue (struct cap *, uint16_t first_port,
+                              uint16_t last_port, struct cap *root,
+                              word_t index, word_t depth)
 {
-  cte_t *dest_slot;
+  struct cap *dest_slot;
   TRY (lookup_cap_slot (root, index, depth, &dest_slot));
 
-  dest_slot->cap = cap_x86_64_io_port_new (first_port, last_port);
+  cap_x86_64_io_port_init (dest_slot, first_port, last_port);
 
   return msg_ok (0);
 }
 
 static message_info_t
-x86_64_io_port_range_check (cte_t *slot, word_t port, word_t size)
+x86_64_io_port_range_check (struct cap *slot, word_t port, word_t size)
 {
-  uint16_t first_port = cap_x86_64_io_port_first_port (slot->cap);
-  uint16_t last_port = cap_x86_64_io_port_last_port (slot->cap);
+  uint16_t first_port = cap_x86_64_io_port_first_port (slot);
+  uint16_t last_port = cap_x86_64_io_port_last_port (slot);
 
   if (port < first_port || port + size > last_port)
     return msg_range_error (first_port, last_port);
@@ -27,7 +28,7 @@ x86_64_io_port_range_check (cte_t *slot, word_t port, word_t size)
 }
 
 message_info_t
-x86_64_io_port_in8 (cte_t *slot, word_t port)
+x86_64_io_port_in8 (struct cap *slot, word_t port)
 {
   TRY (x86_64_io_port_range_check (slot, port, 1));
 
@@ -36,7 +37,7 @@ x86_64_io_port_in8 (cte_t *slot, word_t port)
 }
 
 message_info_t
-x86_64_io_port_in16 (cte_t *slot, word_t port)
+x86_64_io_port_in16 (struct cap *slot, word_t port)
 {
   TRY (x86_64_io_port_range_check (slot, port, 1));
 
@@ -45,7 +46,7 @@ x86_64_io_port_in16 (cte_t *slot, word_t port)
 }
 
 message_info_t
-x86_64_io_port_in32 (cte_t *slot, word_t port)
+x86_64_io_port_in32 (struct cap *slot, word_t port)
 {
   TRY (x86_64_io_port_range_check (slot, port, 1));
 
@@ -54,7 +55,7 @@ x86_64_io_port_in32 (cte_t *slot, word_t port)
 }
 
 message_info_t
-x86_64_io_port_out8 (cte_t *slot, word_t port, word_t value)
+x86_64_io_port_out8 (struct cap *slot, word_t port, word_t value)
 {
   TRY (x86_64_io_port_range_check (slot, port, 1));
 
@@ -63,7 +64,7 @@ x86_64_io_port_out8 (cte_t *slot, word_t port, word_t value)
 }
 
 message_info_t
-x86_64_io_port_out16 (cte_t *slot, word_t port, word_t value)
+x86_64_io_port_out16 (struct cap *slot, word_t port, word_t value)
 {
   TRY (x86_64_io_port_range_check (slot, port, 1));
 
@@ -72,7 +73,7 @@ x86_64_io_port_out16 (cte_t *slot, word_t port, word_t value)
 }
 
 message_info_t
-x86_64_io_port_out32 (cte_t *slot, word_t port, word_t value)
+x86_64_io_port_out32 (struct cap *slot, word_t port, word_t value)
 {
   TRY (x86_64_io_port_range_check (slot, port, 1));
 

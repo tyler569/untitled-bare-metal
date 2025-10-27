@@ -78,7 +78,7 @@ suspend_tcb (struct tcb *t)
 }
 
 message_info_t
-tcb_resume (cte_t *cap)
+tcb_resume (struct cap *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
   make_tcb_runnable (tcb);
@@ -86,7 +86,7 @@ tcb_resume (cte_t *cap)
 }
 
 message_info_t
-tcb_suspend (cte_t *cap)
+tcb_suspend (struct cap *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
   suspend_tcb (tcb);
@@ -94,7 +94,7 @@ tcb_suspend (cte_t *cap)
 }
 
 message_info_t
-tcb_read_registers (cte_t *cap, bool suspend_source, word_t arch_flags,
+tcb_read_registers (struct cap *cap, bool suspend_source, word_t arch_flags,
                     word_t count, frame_t *regs)
 {
   (void)suspend_source;
@@ -107,7 +107,7 @@ tcb_read_registers (cte_t *cap, bool suspend_source, word_t arch_flags,
 }
 
 message_info_t
-tcb_write_registers (cte_t *cap, bool resume_target, word_t arch_flags,
+tcb_write_registers (struct cap *cap, bool resume_target, word_t arch_flags,
                      word_t count, frame_t *regs)
 {
   (void)resume_target;
@@ -127,9 +127,10 @@ tcb_vm_root (struct tcb *t)
 }
 
 message_info_t
-tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
-               word_t cspace_root_data, cte_t *vspace_root,
-               word_t vspace_root_data, word_t buffer, cte_t *buffer_frame)
+tcb_configure (struct cap *slot, word_t fault_ep, struct cap *cspace_root,
+               word_t cspace_root_data, struct cap *vspace_root,
+               word_t vspace_root_data, word_t buffer,
+               struct cap *buffer_frame)
 {
   (void)fault_ep;
   (void)cspace_root_data;
@@ -138,9 +139,9 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
 
   struct tcb *tcb = cap_ptr (slot);
 
-  copy_cap (&tcb->cspace_root, cspace_root, cap_rights_all);
-  copy_cap (&tcb->vspace_root, vspace_root, cap_rights_all);
-  copy_cap (&tcb->ipc_buffer_frame, buffer_frame, cap_rights_all);
+  copy_cap_data (&tcb->cspace_root, cspace_root, cap_rights_all);
+  copy_cap_data (&tcb->vspace_root, vspace_root, cap_rights_all);
+  copy_cap_data (&tcb->ipc_buffer_frame, buffer_frame, cap_rights_all);
 
   tcb->ipc_buffer = cap_ptr (buffer_frame);
 
@@ -148,7 +149,7 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
 }
 
 message_info_t
-tcb_bind_notification (cte_t *cap, cte_t *notification)
+tcb_bind_notification (struct cap *cap, struct cap *notification)
 {
   struct tcb *tcb = cap_ptr (cap);
   if (cap_type (notification) != cap_notification)
@@ -165,7 +166,7 @@ tcb_bind_notification (cte_t *cap, cte_t *notification)
 }
 
 message_info_t
-tcb_set_tls_base (cte_t *cap, word_t tls_base)
+tcb_set_tls_base (struct cap *cap, word_t tls_base)
 {
   struct tcb *tcb = cap_ptr (cap);
   tcb->tls_base = tls_base;
@@ -175,7 +176,7 @@ tcb_set_tls_base (cte_t *cap, word_t tls_base)
 }
 
 message_info_t
-tcb_set_debug (cte_t *cap, word_t flags)
+tcb_set_debug (struct cap *cap, word_t flags)
 {
   struct tcb *tcb = cap_ptr (cap);
   tcb->debug = flags != 0;
@@ -183,7 +184,7 @@ tcb_set_debug (cte_t *cap, word_t flags)
 }
 
 message_info_t
-tcb_set_name (cte_t *cap, char *name, word_t len)
+tcb_set_name (struct cap *cap, char *name, word_t len)
 {
   struct tcb *tcb = cap_ptr (cap);
   strncpy (tcb->name, name, len);

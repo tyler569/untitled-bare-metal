@@ -74,18 +74,18 @@ notification_signal (struct notification *nfn, word_t badge)
 }
 
 message_info_t
-invoke_notification_send (cte_t *cap)
+invoke_notification_send (struct cap *cap)
 {
   assert (cap_type (cap) == cap_notification);
 
   struct notification *nfn = cap_ptr (cap);
   maybe_init_notification (nfn);
-  notification_signal (nfn, cap->cap.badge);
+  notification_signal (nfn, cap->badge);
   return msg_ok (0);
 }
 
 message_info_t
-invoke_notification_recv (cte_t *cap)
+invoke_notification_recv (struct cap *cap)
 {
   assert (cap_type (cap) == cap_notification);
 

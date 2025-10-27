@@ -20,7 +20,7 @@ def format_type_only_list(params)
   end.join(", ")
 end
 
-K_CAP_TYPE = 'cte_t *'
+K_CAP_TYPE = 'struct cap *'
 
 class KMethod
   attr_reader :name, :parameters, :type
@@ -58,9 +58,9 @@ class KMethod
   end
 
   def kernel_print_param_list
-    l = ['cap_type_string (slot)'] + @parameters.map do |param|
+    l = ['cap_type_string (cap_type (slot))'] + @parameters.map do |param|
       if param['type'] == 'cptr_t'
-        'cap_type_string (' + param['name'] + ')'
+        'cap_type_string (cap_type (' + param['name'] + '))'
       else
         param['name']
       end

@@ -29,10 +29,10 @@ types:
           - { name: src_depth, type: uint8_t }
           - { name: rights, type: cap_rights_t }
           - { name: badge, type: word_t }
-      # - name: revoke
-      #   parameters:
-      #     - { name: index, type: word_t }
-      #     - { name: depth, type: uint8_t }
+      - name: revoke
+        parameters:
+          - { name: index, type: word_t }
+          - { name: depth, type: uint8_t }
       - name: debug_print
         parameters: []
   - name: tcb

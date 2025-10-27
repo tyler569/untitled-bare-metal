@@ -24,336 +24,265 @@ set_bits_pointer (word_t *bits, void *ptr)
   *bits |= (word_t)ptr & BITS_POINTER_MASK;
 }
 
-union capability
+// Unified capability structure: merges capability data + derivation tree
+struct cap
 {
-  word_t words[2];
-  struct
+  // Capability data (16 bytes) - bitfield encoded
+  union
   {
-    word_t reserved : 1;
-    word_t is_device : 1;
-    word_t ptr : 46;
-    word_t size_bits : 6;
-    word_t rights : 5;
-    word_t type : 5;
-    word_t badge;
+    word_t words[2];
+    struct
+    {
+      word_t is_original : 1;
+      word_t is_device : 1;
+      word_t ptr : 46;
+      word_t size_bits : 6;
+      word_t rights : 5;
+      word_t type : 5;
+      word_t badge;
+    };
   };
+
+  // Capability derivation tree (16 bytes)
+  struct cap *prev;
+  struct cap *next;
 };
 
-typedef union capability cap_t;
+static_assert (sizeof (struct cap) == 32, "struct cap size is not 32 bytes");
 
-static_assert (sizeof (cap_t) == 16, "cap_t size is not 16 bytes");
-
+// Capability accessors
 static inline void *
-cap_ptr (cap_t cap)
+cap_ptr (struct cap *cap)
 {
-  return bits_pointer (cap.words[0]);
+  return bits_pointer (cap->words[0]);
 }
 
 static inline void
-cap_set_ptr (cap_t *cap, void *ptr)
+cap_set_ptr (struct cap *cap, void *ptr)
 {
   set_bits_pointer (&cap->words[0], ptr);
 }
 
 static inline word_t
-cap_type (cap_t cap)
+cap_type (struct cap *cap)
 {
-  return cap.type;
+  return cap->type;
 }
 
 static inline word_t
-cap_size (cap_t cap)
+cap_size (struct cap *cap)
 {
-  return BIT (cap.size_bits);
+  return BIT (cap->size_bits);
 }
 
 static inline void
-cap_set_size (cap_t *cap, word_t size_bits)
+cap_set_size (struct cap *cap, word_t size_bits)
 {
   cap->size_bits = size_bits;
 }
 
 static inline word_t
-cap_rights (cap_t cap)
+cap_rights (struct cap *cap)
 {
-  return cap.rights;
+  return cap->rights;
 }
 
 static inline void
-cap_set_rights (cap_t *cap, word_t rights)
+cap_set_rights (struct cap *cap, word_t rights)
 {
   cap->rights = rights;
 }
 
-struct cdt_node
+// Capability derivation tree accessors
+static inline struct cap *
+cap_prev (struct cap *cap)
 {
-  word_t words[2];
-};
-
-typedef struct cdt_node cdt_node_t;
-
-static inline cdt_node_t
-cdt_new (cdt_node_t *prev, cdt_node_t *next)
-{
-  cdt_node_t cdt;
-  cdt.words[0] = (word_t)prev;
-  cdt.words[1] = (word_t)next;
-  return cdt;
+  return cap->prev;
 }
 
-static inline cdt_node_t *
-cdt_prev (cdt_node_t *cdt)
+static inline struct cap *
+cap_next (struct cap *cap)
 {
-  return (cdt_node_t *)cdt->words[0];
-}
-
-static inline cdt_node_t *
-cdt_next (cdt_node_t *cdt)
-{
-  return (cdt_node_t *)cdt->words[1];
+  return cap->next;
 }
 
 static inline void
-cdt_set_prev (cdt_node_t *cdt, cdt_node_t *prev)
+cap_set_prev (struct cap *cap, struct cap *prev)
 {
-  set_bits_pointer (&cdt->words[0], prev);
+  cap->prev = prev;
 }
 
 static inline void
-cdt_set_next (cdt_node_t *cdt, cdt_node_t *next)
+cap_set_next (struct cap *cap, struct cap *next)
 {
-  set_bits_pointer (&cdt->words[1], next);
+  cap->next = next;
 }
 
-struct cte
+// Capability initializers
+static inline void
+cap_null_init (struct cap *cap)
 {
-  cap_t cap;
-  cdt_node_t cdt;
-};
-
-typedef struct cte cte_t;
-
-static_assert (sizeof (cte_t) == 32, "cte_t size is not 32 bytes");
-
-static inline cap_t
-cap_null_new ()
-{
-  cap_t cap = { .type = cap_null };
-  return cap;
+  *cap = (struct cap){ .type = cap_null };
 }
 
-static inline cap_t
-cap_untyped_new (uintptr_t paddr, uintptr_t size_bits)
+static inline void
+cap_untyped_init (struct cap *cap, uintptr_t paddr, uintptr_t size_bits)
 {
-  cap_t cap = { .type = cap_untyped, .size_bits = size_bits };
-  cap_set_ptr (&cap, (void *)paddr);
-  return cap;
+  *cap = (struct cap){ .type = cap_untyped,
+                       .size_bits = size_bits,
+                       .is_original = 1 };
+  cap_set_ptr (cap, (void *)paddr);
 }
 
-static inline cap_t
-cap_untyped_device_new (uintptr_t paddr, uintptr_t size_bits)
+static inline void
+cap_untyped_device_init (struct cap *cap, uintptr_t paddr, uintptr_t size_bits)
 {
-  cap_t cap = {
+  *cap = (struct cap){
     .type = cap_untyped,
     .size_bits = size_bits,
     .is_device = 1,
+    .is_original = 1,
   };
-  cap_set_ptr (&cap, (void *)paddr);
-  return cap;
+  cap_set_ptr (cap, (void *)paddr);
 }
 
-static inline cap_t
-cap_endpoint_new (void *endpoint, uintptr_t badge)
+static inline void
+cap_endpoint_init (struct cap *cap, void *endpoint, uintptr_t badge)
 {
-  cap_t cap = { .type = cap_endpoint, .badge = badge };
-  cap_set_ptr (&cap, endpoint);
-  return cap;
+  *cap
+      = (struct cap){ .type = cap_endpoint, .badge = badge, .is_original = 1 };
+  cap_set_ptr (cap, endpoint);
 }
 
-static inline cap_t
-cap_cnode_new (void *cnode, uintptr_t size_bits)
+static inline void
+cap_cnode_init (struct cap *cap, void *cnode, uintptr_t size_bits)
 {
-  cap_t cap = { .type = cap_cnode, .size_bits = size_bits };
-  cap_set_ptr (&cap, cnode);
-  return cap;
+  *cap = (struct cap){ .type = cap_cnode,
+                       .size_bits = size_bits,
+                       .is_original = 1 };
+  cap_set_ptr (cap, cnode);
 }
 
-static inline cap_t
-cap_tcb_new (void *tcb)
+static inline void
+cap_tcb_init (struct cap *cap, void *tcb)
 {
-  cap_t cap = { .type = cap_tcb };
-  cap_set_ptr (&cap, tcb);
-  return cap;
+  *cap = (struct cap){ .type = cap_tcb, .is_original = 1 };
+  cap_set_ptr (cap, tcb);
 }
 
-static inline cap_t
-cap_x86_64_io_port_control_new ()
+static inline void
+cap_x86_64_io_port_control_init (struct cap *cap)
 {
-  cap_t cap = { .type = cap_x86_64_io_port_control };
-  return cap;
+  *cap = (struct cap){ .type = cap_x86_64_io_port_control, .is_original = 1 };
 }
 
-static inline cap_t
-cap_x86_64_io_port_new (uint16_t first_port, uint16_t last_port)
+static inline void
+cap_x86_64_io_port_init (struct cap *cap, uint16_t first_port,
+                         uint16_t last_port)
 {
-  cap_t cap
-      = { .type = cap_x86_64_io_port, .ptr = first_port, .badge = last_port };
-  return cap;
-}
-
-static inline uint16_t
-cap_x86_64_io_port_first_port (cap_t cap)
-{
-  return cap.ptr;
+  *cap = (struct cap){
+    .type = cap_x86_64_io_port,
+    .ptr = first_port,
+    .badge = last_port,
+    .is_original = 1,
+  };
 }
 
 static inline uint16_t
-cap_x86_64_io_port_last_port (cap_t cap)
+cap_x86_64_io_port_first_port (struct cap *cap)
 {
-  return cap.badge;
+  return cap->ptr;
 }
 
-static inline cap_t
-cap_x86_64_pml4_new (uintptr_t pml4_phy)
+static inline uint16_t
+cap_x86_64_io_port_last_port (struct cap *cap)
 {
-  cap_t cap = { .type = cap_x86_64_pml4 };
-  cap_set_ptr (&cap, (void *)pml4_phy);
-  return cap;
+  return cap->badge;
 }
 
-static inline cap_t
-cap_x86_64_pdpt_new (uintptr_t pdpt_phy)
+static inline void
+cap_x86_64_pml4_init (struct cap *cap, uintptr_t pml4_phy)
 {
-  cap_t cap = { .type = cap_x86_64_pdpt };
-  cap_set_ptr (&cap, (void *)pdpt_phy);
-  return cap;
+  *cap = (struct cap){ .type = cap_x86_64_pml4, .is_original = 1 };
+  cap_set_ptr (cap, (void *)pml4_phy);
 }
 
-static inline cap_t
-cap_x86_64_pd_new (uintptr_t pd_phy)
+static inline void
+cap_x86_64_pdpt_init (struct cap *cap, uintptr_t pdpt_phy)
 {
-  cap_t cap = { .type = cap_x86_64_pd };
-  cap_set_ptr (&cap, (void *)pd_phy);
-  return cap;
+  *cap = (struct cap){ .type = cap_x86_64_pdpt, .is_original = 1 };
+  cap_set_ptr (cap, (void *)pdpt_phy);
 }
 
-static inline cap_t
-cap_x86_64_pt_new (uintptr_t pt_phy)
+static inline void
+cap_x86_64_pd_init (struct cap *cap, uintptr_t pd_phy)
 {
-  cap_t cap = { .type = cap_x86_64_pt };
-  cap_set_ptr (&cap, (void *)pt_phy);
-  return cap;
+  *cap = (struct cap){ .type = cap_x86_64_pd, .is_original = 1 };
+  cap_set_ptr (cap, (void *)pd_phy);
 }
 
-static inline cap_t
-cap_x86_64_page_new (uintptr_t frame_phy)
+static inline void
+cap_x86_64_pt_init (struct cap *cap, uintptr_t pt_phy)
 {
-  cap_t cap = { .type = cap_x86_64_page };
-  cap_set_ptr (&cap, (void *)frame_phy);
-  return cap;
+  *cap = (struct cap){ .type = cap_x86_64_pt, .is_original = 1 };
+  cap_set_ptr (cap, (void *)pt_phy);
 }
 
-static inline cap_t
-cap_irq_control_new ()
+static inline void
+cap_x86_64_page_init (struct cap *cap, uintptr_t frame_phy)
 {
-  return (cap_t){ .type = cap_irq_control };
+  *cap = (struct cap){ .type = cap_x86_64_page, .is_original = 1 };
+  cap_set_ptr (cap, (void *)frame_phy);
 }
 
-static inline cap_t
-cap_irq_handler_new (word_t irq)
+static inline void
+cap_irq_control_init (struct cap *cap)
 {
-  cap_t cap = { .type = cap_irq_handler, .size_bits = irq };
-  return cap;
+  *cap = (struct cap){ .type = cap_irq_control, .is_original = 1 };
+}
+
+static inline void
+cap_irq_handler_init (struct cap *cap, word_t irq)
+{
+  *cap = (struct cap){ .type = cap_irq_handler,
+                       .size_bits = irq,
+                       .is_original = 1 };
 }
 
 // Low-level lookup that returns error_t without touching IPC buffer
-error_t lookup_cap_slot_raw (cte_t *cspace_root, word_t index, word_t depth,
-                             cte_t **out);
+error_t lookup_cap_slot_raw (struct cap *cspace_root, word_t index,
+                             word_t depth, struct cap **out);
 
 // High-level lookup that formats errors into IPC buffer
-message_info_t lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
-                                cte_t **out);
+message_info_t lookup_cap_slot (struct cap *cspace_root, word_t index,
+                                word_t depth, struct cap **out);
 
 #define lookup_cap_slot_this_tcb(index, out)                                  \
   lookup_cap_slot (&this_tcb->cspace_root, index, 64, out)
 
-static inline word_t
-cte_ptr_type (cte_t *cte)
-{
-  return cap_type (cte->cap);
-}
-
-static inline void *
-cte_ptr (cte_t *cte)
-{
-  return cap_ptr (cte->cap);
-}
-
-static inline void
-cte_set_ptr (cte_t *cte, void *ptr)
-{
-  cap_set_ptr (&cte->cap, ptr);
-}
-
-static inline word_t
-cte_size (cte_t *cte)
-{
-  return cap_size (cte->cap);
-}
-
-static inline void
-cte_set_size (cte_t *cte, word_t size)
-{
-  cte->cap.size_bits = size;
-}
-
-static inline word_t
-cte_rights (cte_t *cte)
-{
-  return cte->cap.rights;
-}
-
-static inline void
-cte_set_rights (cte_t *cte, word_t rights)
-{
-  cte->cap.rights = rights;
-}
-
-#define cap_type(c) _Generic ((c), cap_t: cap_type, cte_t *: cte_ptr_type) (c)
-#define cap_ptr(c) _Generic ((c), cap_t: cap_ptr, cte_t *: cte_ptr) (c)
-#define cap_size(c) _Generic ((c), cap_t: cap_size, cte_t *: cte_size) (c)
-#define cap_rights(c)                                                         \
-  _Generic ((c), cap_t: cap_rights, cte_t *: cte_rights) (c)
-#define cap_set_ptr(c, p)                                                     \
-  _Generic ((c), cap_t: cap_set_ptr, cte_t *: cte_set_ptr) (c, p)
-#define cap_set_size(c, s)                                                    \
-  _Generic ((c), cap_t: cap_set_size, cte_t *: cte_set_size) (c, s)
-#define cap_set_rights(c, r)                                                  \
-  _Generic ((c), cap_t: cap_set_rights, cte_t *: cte_set_rights) (c, r)
-
+// Capability type string helper
 static inline const char *
-cte_type_string (cte_t *cte)
-{
-  return cap_type_string (cte_ptr_type (cte));
-}
-
-static inline const char *
-cap_value_type_string (cap_t cap)
+cap_type_string_from_cap (struct cap *cap)
 {
   return cap_type_string (cap_type (cap));
 }
 
-#define cap_type_string(t)                                                    \
-  _Generic ((t),                                                              \
-      word_t: cap_type_string,                                                \
-      cap_t: cap_value_type_string,                                           \
-      cte_t *: cte_type_string) (t)
-
+// Copy capability data (without CDT manipulation)
 static inline void
-copy_cap (cte_t *dest, cte_t *src, cap_rights_t rights)
+copy_cap_data (struct cap *dest, struct cap *src, cap_rights_t rights)
 {
-  // TODO: insert into CDT
-
-  dest->cap = src->cap;
-  dest->cap.rights &= rights;
+  // Copy the capability bitfield data (first 16 bytes)
+  dest->words[0] = src->words[0];
+  dest->words[1] = src->words[1];
+  // Restrict rights
+  dest->rights &= rights;
+  // Note: prev/next are NOT copied - CDT linkage is separate
+  // Note: is_original IS copied - caller must set it explicitly afterward
 }
+
+// Capability Derivation Tree operations
+void cdt_insert (struct cap *new, struct cap *parent, struct cap *next);
+void cdt_remove (struct cap *cap);
+bool is_child (struct cap *child, struct cap *parent);
+error_t cap_delete (struct cap *cap);
+error_t cap_revoke (struct cap *cap);
