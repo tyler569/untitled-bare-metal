@@ -2,12 +2,19 @@
 #include "pci.h"
 #include "sys/types.h"
 
-uint32_t pci_read_l (cptr_t port, uint32_t addr);
-uint16_t pci_read_w (cptr_t port, uint32_t addr);
-uint8_t pci_read_b (cptr_t port, uint32_t addr);
-void pci_write_l (cptr_t port, uint32_t addr, uint32_t value);
-void pci_write_w (cptr_t port, uint32_t addr, uint16_t value);
-void pci_write_b (cptr_t port, uint32_t addr, uint8_t value);
+enum pci_manager_caps
+{
+  pci_endpoint_cap,
+  pci_port_cap,
+  pci_cnode_cap,
+  pci_tmp_cap,
+};
 
-void print_device_info (cptr_t port, uint32_t pci_address);
-void enumerate_pci_bus (cptr_t port);
+enum pci_manager_message
+{
+  pci_manager_issue,
+  pci_manager_read,
+  pci_manager_write,
+  pci_manager_device_info,
+  pci_manager_enumerate,
+};

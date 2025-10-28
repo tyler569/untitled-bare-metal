@@ -36,8 +36,8 @@ print_test (const char *name, int actual, int expected)
   if (actual == expected)
     printf ("  [PASS] %s\n", name);
   else
-    printf ("  [FAIL] %s (got %s, expected %s)\n", name,
-            error_string (actual), error_string (expected));
+    printf ("  [FAIL] %s (got %s, expected %s)\n", name, error_string (actual),
+            error_string (expected));
 }
 
 int
@@ -105,7 +105,8 @@ main ()
                         cdt_cnode_cap, 64, cdt_notification_orig, 1);
   print_test ("Create notification", err, no_error);
 
-  // Mint notification with badge (notifications don't create bi-level structure)
+  // Mint notification with badge (notifications don't create bi-level
+  // structure)
   err = cnode_mint (cdt_cnode_cap, cdt_notification_mint1, 64, cdt_cnode_cap,
                     cdt_notification_orig, 64, cap_rights_all, 0xF00D);
   print_test ("Mint notification with badge", err, no_error);
@@ -124,7 +125,8 @@ main ()
   err = cnode_delete (cdt_cnode_cap, cdt_endpoint_copy1, 64);
   print_test ("Delete with children (auto-revokes)", err, no_error);
 
-  // Verify copy3 was also deleted by trying to delete it (should be no-op or fail)
+  // Verify copy3 was also deleted by trying to delete it (should be no-op or
+  // fail)
   err = cnode_delete (cdt_cnode_cap, cdt_endpoint_copy3, 64);
   print_test ("Copy3 already deleted", err, no_error);
 

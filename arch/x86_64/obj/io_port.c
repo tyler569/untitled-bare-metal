@@ -20,7 +20,7 @@ x86_64_io_port_range_check (cte_t *slot, word_t port, word_t size)
   uint16_t first_port = cap_x86_64_io_port_first_port (slot->cap);
   uint16_t last_port = cap_x86_64_io_port_last_port (slot->cap);
 
-  if (port < first_port || port + size > last_port)
+  if (port < first_port || port + size > last_port + 1)
     return msg_range_error (first_port, last_port);
 
   return msg_ok (0);

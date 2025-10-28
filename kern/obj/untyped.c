@@ -14,8 +14,9 @@
 cap_t root_untyped_capabilities[MAX_UNTYPED_ROOT_CAPS];
 size_t root_untyped_cap_count = 0;
 
-int create_objects (cte_t *untyped, word_t type, word_t size_bits, cte_t *dest_slot_0,
-                    word_t num_objects, uintptr_t usable_memory);
+int create_objects (cte_t *untyped, word_t type, word_t size_bits,
+                    cte_t *dest_slot_0, word_t num_objects,
+                    uintptr_t usable_memory);
 
 message_info_t
 untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
@@ -52,7 +53,8 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
   uintptr_t untyped_paddr = (uintptr_t)cap_ptr (*untyped);
   uintptr_t usable_memory = untyped_paddr + untyped_offset;
 
-  create_objects (slot, type, size_bits, dest_slot_0, num_objects, usable_memory);
+  create_objects (slot, type, size_bits, dest_slot_0, num_objects,
+                  usable_memory);
 
   untyped->badge = untyped_offset + total_size;
 
@@ -61,7 +63,8 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
 
 int
 create_objects (cte_t *untyped, word_t type, word_t size_bits,
-                cte_t *dest_slot_0, word_t num_objects, uintptr_t usable_memory)
+                cte_t *dest_slot_0, word_t num_objects,
+                uintptr_t usable_memory)
 {
   size_t obj_size = object_size (type, size_bits);
 

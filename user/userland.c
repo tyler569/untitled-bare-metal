@@ -250,7 +250,7 @@ spawn_cdt_test (cptr_t main_untyped, cptr_t test_untyped)
 
   struct thread_data td = {
     .elf_header = cdt_test_elf,
-    .untyped = main_untyped,  // Use main untyped for thread infrastructure
+    .untyped = main_untyped, // Use main untyped for thread infrastructure
     .scratch_vspace = init_cap_init_vspace,
     .cspace_root = test_cnode,
     .name = "cdt_test",
@@ -263,6 +263,59 @@ spawn_cdt_test (cptr_t main_untyped, cptr_t test_untyped)
     {
       printf ("Successfully spawned CDT test\n");
       tcb_resume (td.tcb);
+    }
+}
+
+cptr_t
+spawn_pci_manager (cptr_t untyped, cptr_t port)
+{
+  void *pci_manager_elf = find_tar_entry (bi->initrd, "pci_manager");
+  if (!pci_manager_elf)
+    {
+      printf ("Could not find pci_manager elf\n");
+      return 0;
+    }
+
+  int err;
+
+  // Create a cnode for the PCI manager (4 slots: endpoint, port, cnode, tmp)
+  cptr_t pci_cnode = allocate_with_size (untyped, cap_cnode, 1, 4);
+
+  // pci_endpoint_cap (slot 0)
+  cptr_t pci_endpoint = allocate (untyped, cap_endpoint, 1);
+  cnode_copy (pci_cnode, pci_endpoint_cap, 64, init_cap_root_cnode,
+              pci_endpoint, 64, cap_rights_all);
+
+  // pci_port_cap (slot 1)
+  cnode_copy (pci_cnode, pci_port_cap, 64, init_cap_root_cnode,
+              port, 64, cap_rights_all);
+
+  // pci_cnode_cap (slot 2)
+  cnode_copy (pci_cnode, pci_cnode_cap, 64, init_cap_root_cnode, pci_cnode, 64,
+              cap_rights_all);
+
+  // pci_tmp_cap (slot 3) - left empty for now
+
+  struct thread_data td = {
+    .elf_header = pci_manager_elf,
+    .untyped = untyped,
+    .scratch_vspace = init_cap_init_vspace,
+    .cspace_root = pci_cnode,
+    .name = "pci_manager",
+  };
+
+  err = spawn_thread (&td);
+
+  if (err)
+    {
+      printf ("Error creating pci_manager process: %d\n", err);
+      return 0;
+    }
+  else
+    {
+      printf ("Successfully created pci_manager process\n");
+      tcb_resume (td.tcb);
+      return pci_endpoint;
     }
 }
 
@@ -334,6 +387,84 @@ serial_capitalization_server (cptr_t serial_write_endpoint,
 
       info = new_message_info (serial_driver_write, 0, 0, regs);
       send (serial_write_endpoint, info);
+    }
+}
+
+void
+enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
+{
+  // Call enumerate to get all PCI device addresses
+  message_info_t info = new_message_info (pci_manager_enumerate, 0, 0, 0);
+  info = call (pci_manager_endpoint, info, nullptr);
+
+  size_t num_devices = get_message_length (info);
+  uint32_t addrs[num_devices];
+  for (size_t i = 0; i < num_devices; i++)
+    addrs[i] = get_mr (i) >> 32;
+
+  if (num_devices == 0)
+    {
+      printf ("No PCI devices found\n");
+      return;
+    }
+
+  printf ("\nEnumerating %zu PCI device(s):\n\n", num_devices);
+
+  for (size_t i = 0; i < num_devices; i++)
+    {
+      uint32_t pci_address = addrs[i];
+
+      // Call device_info to get the first 64 bytes of config space
+      set_mr (0, pci_address);
+      info = new_message_info (pci_manager_device_info, 0, 0, 1);
+      info = call (pci_manager_endpoint, info, nullptr);
+
+      // Parse config space from returned MRs (8 qwords = 64 bytes)
+      // Convert qwords back to dwords for easier access
+      uint32_t config[16];
+      for (int j = 0; j < 8; j++)
+        {
+          uint64_t qword = get_mr (j);
+          config[j * 2] = qword & 0xFFFFFFFF;
+          config[j * 2 + 1] = qword >> 32;
+        }
+
+      // Extract fields from config space
+      uint16_t vendor_id = config[0] & 0xFFFF;
+      uint16_t device_id = config[0] >> 16;
+      uint16_t status = config[1] >> 16;
+      uint8_t revision_id = config[2] & 0xFF;
+      uint8_t prog_if = (config[2] >> 8) & 0xFF;
+      uint8_t subclass = (config[2] >> 16) & 0xFF;
+      uint8_t class_code = (config[2] >> 24) & 0xFF;
+      uint8_t irq = config[15] & 0xFF;
+
+      printf ("PCI Device: %04x:%04x at addr %08x\n", vendor_id, device_id,
+              pci_address);
+      printf ("  Class: %02x, Subclass: %02x, Prog IF: %02x, Revision: %02x "
+              "IRQ: %02x Status: %04x\n",
+              class_code, subclass, prog_if, revision_id, irq, status);
+
+      // Print BARs (at offsets 0x10-0x27, which is dwords 4-9)
+      for (uint32_t bar_idx = 0; bar_idx < 6; bar_idx++)
+        {
+          uint32_t bar = config[4 + bar_idx];
+          if (bar == 0)
+            continue;
+
+          bool is_io = bar & 1;
+          if (is_io)
+            {
+              uint32_t addr = bar & 0xFFFFFFFC;
+              printf ("  - BAR%d: I/O %08x\n", bar_idx, addr);
+            }
+          else
+            {
+              uint32_t addr = bar & 0xFFFFFFF0;
+              printf ("  - BAR%d: Mem %08x\n", bar_idx, addr);
+            }
+        }
+      printf ("\n");
     }
 }
 
@@ -455,7 +586,11 @@ main (void *boot_info)
   cptr_t pci_io_port = cptr_alloc ();
   x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
                                 init_cap_root_cnode, pci_io_port, 64);
-  enumerate_pci_bus (pci_io_port);
+
+  // Spawn PCI manager and enumerate devices
+  cptr_t pci_manager_endpoint = spawn_pci_manager (untyped, pci_io_port);
+  if (pci_manager_endpoint)
+    enumerate_and_print_pci_devices (pci_manager_endpoint);
 
   cptr_t e9_io_port = cptr_alloc ();
   x86_64_io_port_control_issue (init_cap_io_port_control, 0xe9, 0xe9,
@@ -474,7 +609,8 @@ main (void *boot_info)
   cptr_t serial_write_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_read_endpoint = allocate (untyped, cap_endpoint, 1);
 
-  // Run CDT tests first (uses main untyped for infra, test_untyped for testing)
+  // Run CDT tests first (uses main untyped for infra, test_untyped for
+  // testing)
   spawn_cdt_test (untyped, test_untyped);
 
   spawn_calculator_thread (untyped, calculator_endpoint);
