@@ -18,14 +18,27 @@ const kernel_cflags = [_][]const u8{
 };
 
 pub fn build(b: *std.Build) void {
-    // Use freestanding x86_64 target for kernel and userland
-    // Explicitly disable SSE/MMX to prevent use in kernel
-    const target = b.resolveTargetQuery(.{
+    const userTarget = b.resolveTargetQuery(.{
         .cpu_arch = .x86_64,
         .cpu_model = .{ .explicit = .generic(.x86_64) },
         .os_tag = .freestanding,
         .abi = .none,
         .cpu_features_add = std.Target.x86.featureSet(&.{.soft_float}),
+        .cpu_features_sub = std.Target.x86.featureSet(&.{
+            .x87,
+            .@"3dnow",
+            .mmx,
+            .sse,
+            .sse2,
+            .sse3,
+        }),
+    });
+
+    const kernelTarget = b.resolveTargetQuery(.{
+        .cpu_arch = .x86_64,
+        .cpu_model = .{ .explicit = .generic(.x86_64) },
+        .os_tag = .freestanding,
+        .abi = .none,
         .cpu_features_sub = std.Target.x86.featureSet(&.{
             .x87,
             .@"3dnow",
@@ -45,6 +58,8 @@ pub fn build(b: *std.Build) void {
     const userland_programs = [_][]const u8{
         "userland",
         "calculator_server",
+        "cdt_test",
+        "pci_manager",
         "serial_driver",
     };
 
@@ -62,14 +77,14 @@ pub fn build(b: *std.Build) void {
 
     var userland_exes: [userland_programs.len]*std.Build.Step.Compile = undefined;
     for (userland_programs, 0..) |program, i| {
-        userland_exes[i] = buildUserland(b, target, optimize, program, &userland_sources);
+        userland_exes[i] = buildUserland(b, userTarget, optimize, program, &userland_sources);
         // Install userland programs to zig-out/bin
         b.installArtifact(userland_exes[i]);
     }
 
     const initrd_tar = createInitrdTarball(b, &userland_exes);
 
-    const kernel = buildKernel(b, target, optimize);
+    const kernel = buildKernel(b, kernelTarget, optimize);
     // Ensure limine is cloned before building kernel (needed for limine.h header)
     kernel.step.dependOn(&limine_step.step);
 
@@ -217,6 +232,7 @@ fn buildKernel(
     const root_module = b.createModule(.{
         .target = target,
         .optimize = optimize,
+        .sanitize_c = .off,
         .code_model = .kernel,
         .red_zone = false,
     });
@@ -224,13 +240,17 @@ fn buildKernel(
     const kernel = b.addExecutable(.{
         .name = "untitled_bare_metal",
         .root_module = root_module,
+        .use_llvm = true,
+        .use_lld = true,
     });
+    kernel.bundle_compiler_rt = false;
 
     // Kernel sources
     const kernel_sources = [_][]const u8{
         "kern/main.c",
         "kern/alloc.c",
         "kern/boot.c",
+        "kern/cap.c",
         "kern/debug.c",
         "kern/elf.c",
         "kern/ipc.c",
