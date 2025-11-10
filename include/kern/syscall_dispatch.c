@@ -125,6 +125,33 @@ dispatch_method (cte_t *slot, message_info_t info)
                            src_depth, rights, badge);
         break;
       }
+    case METHOD_cnode_revoke:
+      {
+        word_t index = (word_t)get_mr (0);
+        uint8_t depth = (uint8_t)get_mr (1);
+
+        dbg_printf ("cnode_revoke ");
+
+        if (cap_type (slot) != cap_cnode)
+          {
+            err_printf ("invalid cap type: %s\n",
+                        cap_type_string (cap_type (slot)));
+            return msg_illegal_operation ();
+          }
+        do
+          {
+            word_t len = get_message_length (info);
+            if (len < 2)
+              return msg_truncated_message (len, 2);
+          }
+        while (0);
+
+        dbg_printf ("(cap:%s, index=%#lx, depth=%hhu)\n",
+                    cap_type_string (slot), index, depth);
+
+        return cnode_revoke (slot, index, depth);
+        break;
+      }
     case METHOD_cnode_debug_print:
       {
 
@@ -140,6 +167,33 @@ dispatch_method (cte_t *slot, message_info_t info)
         dbg_printf ("(cap:%s)\n", cap_type_string (slot));
 
         return cnode_debug_print (slot);
+        break;
+      }
+    case METHOD_cnode_debug_get:
+      {
+        word_t index = (word_t)get_mr (0);
+        uint8_t depth = (uint8_t)get_mr (1);
+
+        dbg_printf ("cnode_debug_get ");
+
+        if (cap_type (slot) != cap_cnode)
+          {
+            err_printf ("invalid cap type: %s\n",
+                        cap_type_string (cap_type (slot)));
+            return msg_illegal_operation ();
+          }
+        do
+          {
+            word_t len = get_message_length (info);
+            if (len < 2)
+              return msg_truncated_message (len, 2);
+          }
+        while (0);
+
+        dbg_printf ("(cap:%s, index=%#lx, depth=%hhu)\n",
+                    cap_type_string (slot), index, depth);
+
+        return cnode_debug_get (slot, index, depth);
         break;
       }
     case METHOD_tcb_configure:

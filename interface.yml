@@ -35,6 +35,10 @@ types:
           - { name: depth, type: uint8_t }
       - name: debug_print
         parameters: []
+      - name: debug_get
+        parameters:
+          - { name: index, type: word_t }
+          - { name: depth, type: uint8_t }
   - name: tcb
     methods:
       - name: configure

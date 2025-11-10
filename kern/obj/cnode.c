@@ -119,3 +119,15 @@ cnode_revoke (cte_t *obj, word_t offset, uint8_t depth)
 
   return msg_ok (0);
 }
+
+message_info_t
+cnode_debug_get (cte_t *obj, word_t offset, uint8_t depth)
+{
+  cte_t *cte;
+  TRY (lookup_cap_slot (obj, offset, depth, &cte));
+
+  set_mr (0, cte->cap.words[0]);
+  set_mr (1, cte->cap.words[1]);
+
+  return msg_ok (2);
+}
