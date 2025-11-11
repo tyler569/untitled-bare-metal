@@ -4,6 +4,8 @@ types:
     methods: []
   - name: endpoint
     methods: []
+  - name: reply
+    methods: []
   - name: notification
     methods: []
   - name: cnode

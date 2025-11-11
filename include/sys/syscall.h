@@ -8,6 +8,7 @@ enum object_type
 {
   cap_null,
   cap_endpoint,
+  cap_reply,
   cap_notification,
   cap_cnode,
   cap_tcb,
@@ -34,6 +35,8 @@ cap_type_string (word_t type)
       return "null";
     case cap_endpoint:
       return "endpoint";
+    case cap_reply:
+      return "reply";
     case cap_notification:
       return "notification";
     case cap_cnode:
