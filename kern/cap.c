@@ -1,6 +1,7 @@
 #include "kern/cap.h"
 #include "assert.h"
 #include "kern/mem.h"
+#include "kern/obj/untyped.h"
 #include "kern/syscall.h"
 #include "sys/syscall.h"
 
@@ -81,14 +82,7 @@ is_child (struct cte *c, struct cte *parent)
   if (!c)
     return false;
   if (parent->cap.type == cap_untyped)
-    {
-      uintptr_t parent_base = (uintptr_t)cap_ptr (parent);
-      uintptr_t parent_len = cap_size (parent);
-      uintptr_t parent_end = parent_base + parent_len;
-      uintptr_t child_base = physical_of ((uintptr_t)cap_ptr (c));
-
-      return child_base >= parent_base && child_base < parent_end;
-    }
+    return untyped_contains (parent, c);
   if (c->cap.type != parent->cap.type)
     return false;
   if (!parent->cap.is_original)

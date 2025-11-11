@@ -88,3 +88,14 @@ create_objects (cte_t *untyped, word_t type, word_t size_bits,
 
   return 0;
 }
+
+bool
+untyped_contains (cte_t *untyped, cte_t *obj)
+{
+  void *base = cap_ptr (untyped);
+  size_t size = cap_size (untyped);
+
+  void *ptr = cap_ptr (obj);
+
+  return ptr >= base && ptr < (base + size);
+}
