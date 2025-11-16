@@ -204,9 +204,9 @@ handle_device_info (message_info_t, word_t badge)
   // Read 64 bytes (0x00-0x3F) as 8 qwords
   for (uint32_t i = 0; i < 8; i++)
     {
-      uint32_t low = pci_read_l (pci_address + i*8);
-      uint32_t high = pci_read_l (pci_address + i*8 + 4);
-      pci_config_space[i] = (uint64_t)high<<32 | low;
+      uint32_t low = pci_read_l (pci_address + i * 8);
+      uint32_t high = pci_read_l (pci_address + i * 8 + 4);
+      pci_config_space[i] = (uint64_t)high << 32 | low;
     }
 
   for (size_t i = 0; i < 8; i++)

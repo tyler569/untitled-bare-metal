@@ -287,8 +287,8 @@ spawn_pci_manager (cptr_t untyped, cptr_t port)
               pci_endpoint, 64, cap_rights_all);
 
   // pci_port_cap (slot 1)
-  cnode_copy (pci_cnode, pci_port_cap, 64, init_cap_root_cnode,
-              port, 64, cap_rights_all);
+  cnode_copy (pci_cnode, pci_port_cap, 64, init_cap_root_cnode, port, 64,
+              cap_rights_all);
 
   // pci_cnode_cap (slot 2)
   cnode_copy (pci_cnode, pci_cnode_cap, 64, init_cap_root_cnode, pci_cnode, 64,

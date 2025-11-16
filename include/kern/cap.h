@@ -327,7 +327,7 @@ cap_value_type_string (cap_t cap)
 
 #define copy_cap copy
 
-void insert (struct cte *new, struct cte *src, struct cte *next);
+void insert_after (struct cte *new, struct cte *src);
 void remove (struct cte *del);
 message_info_t copy (struct cte *dest, struct cte *src, cap_rights_t);
 message_info_t mint (struct cte *dest, struct cte *src, word_t badge,
