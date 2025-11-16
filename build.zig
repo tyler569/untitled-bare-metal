@@ -8,13 +8,11 @@ const limine_repo = "https://github.com/limine-bootloader/limine.git";
 const limine_branch = "v10.x-binary";
 
 const userland_cflags = [_][]const u8{
-    "-std=c23",
-    "-fasm",
+    "-std=gnu23",
 };
 
 const kernel_cflags = [_][]const u8{
-    "-std=c23",
-    "-fasm",
+    "-std=gnu23",
 };
 
 pub fn build(b: *std.Build) void {

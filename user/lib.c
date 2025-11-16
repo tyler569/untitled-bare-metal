@@ -130,6 +130,16 @@ exit (int)
   unreachable ();
 }
 
+[[noreturn]] void
+panic (const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  vprintf (format, args);
+  va_end (args);
+  exit (1);
+}
+
 long
 write (FILE *, const void *str, unsigned long len)
 {

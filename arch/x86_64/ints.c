@@ -50,7 +50,6 @@ print_interrupt_info (frame_t *f)
       bool handle_irq (word_t irq);
       if (!handle_irq (f->int_no - 32))
         send_eoi (f->int_no);
-
       return;
     case 255:
       return;

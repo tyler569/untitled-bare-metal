@@ -66,8 +66,9 @@ mint (struct cte *dest, struct cte *src, unsigned long badge,
   dest->cap = src->cap;
   dest->cap.badge = badge;
 
-  if (cap_type (src) == cap_endpoint)
-    dest->cap.is_original = true;
+  // minted badged endpoints are marked original, notifications are not
+  if (cap_type (src) == cap_notification)
+    dest->cap.is_original = false;
 
   cap_set_rights (dest, cap_rights (src) & rights_mask);
 

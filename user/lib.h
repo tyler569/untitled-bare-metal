@@ -1,4 +1,6 @@
 #pragma once
+
+#include "assert.h"
 #include "stddef.h"
 #include "stdint.h"
 #include "stdio.h"
@@ -6,12 +8,12 @@
 #include "sys/ipc.h"
 #include "sys/types.h"
 
-#define assert(x)                                                             \
-  if (!(x))                                                                   \
-    {                                                                         \
-      printf ("assertion failed: %s\n", #x);                                  \
-      unreachable ();                                                         \
-    }
+// #define assert(x)                                                             \
+//   if (!(x))                                                                   \
+//     {                                                                         \
+//       printf ("assertion failed: %s\n", #x);                                  \
+//       unreachable ();                                                         \
+//     }
 
 extern struct ipc_buffer *__ipc_buffer;
 

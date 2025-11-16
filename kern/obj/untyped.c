@@ -81,6 +81,8 @@ create_objects (cte_t *untyped, word_t type, word_t size_bits,
       dest_slot->cap.type = type;
       dest_slot->cap.size_bits = size_bits;
       dest_slot->cap.badge = 0;
+	  dest_slot->cap.is_original = 1;
+	  dest_slot->cap.rights = cap_rights_all;
       cap_set_ptr (dest_slot, obj_ptr);
 
       insert_after (dest_slot, untyped);
