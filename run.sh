@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-iso="untitled_bare_metal.iso"
+iso="build/untitled_bare_metal.iso"
 mem="128M"
 smp=2
 debugopt="-chardev stdio,id=dbgio,logfile=last_output -device isa-debugcon,chardev=dbgio,iobase=0xe9"

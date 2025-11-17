@@ -53,10 +53,10 @@ pub fn build(b: *std.Build) void {
     };
 
     const userland_sources = [_][]const u8{
-        "user/cptr_alloc.c",
-        "user/exec.c",
-        "user/lib.c",
-        "user/pci.c",
+        "lib/cptr_alloc.c",
+        "lib/exec.c",
+        "lib/lib.c",
+        "lib/pci.c",
         "lib/num.c",
         "lib/print.c",
         "lib/sort.c",
@@ -190,6 +190,7 @@ fn buildUserland(
     });
 
     exe.addIncludePath(b.path("include"));
+    exe.addIncludePath(b.path("lib"));
     exe.addIncludePath(b.path("limine"));
     root_module.addCMacro("__shrike__", "1");
 
