@@ -8,6 +8,7 @@ set(CMAKE_C_FLAGS_DEBUG "-g -O1")
 set(limine_dir "${CMAKE_SOURCE_DIR}/limine")
 set(iso_file "${CMAKE_SOURCE_DIR}/untitled_bare_metal.iso")
 set(iso_dir "${CMAKE_BINARY_DIR}/isodir")
+set(archive_name "${CMAKE_BINARY_DIR}/user/initrd.tar")
 file(MAKE_DIRECTORY ${iso_dir}/boot/limine)
 
 # We do this as a manual git download as a workaround for the fact that
@@ -38,48 +39,12 @@ ExternalProject_Add(limine_binary
 
 project(untitled_bare_metal C ASM)
 
+add_compile_definitions(__shrike__=1)
+
 add_compile_options(-Wall -Wextra -fbuiltin)
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/limine)
 
-add_compile_definitions(__shrike__=1)
-
-set(targets_to_archive userland calculator_server serial_driver pci_manager cdt_test)
-set(archive_dir "${CMAKE_BINARY_DIR}/initrd")
-set(archive_name "${CMAKE_BINARY_DIR}/initrd.tar")
-set(archive_file_paths)
-
-foreach (program ${targets_to_archive})
-  add_executable(${program}
-    user/${program}.c
-    user/cptr_alloc.c
-    user/exec.c
-    user/lib.c
-    user/pci.c
-    lib/num.c
-    lib/print.c
-    lib/sort.c
-    lib/string.c
-    lib/tar.c
-  )
-  list(APPEND archive_file_paths $<TARGET_FILE:${program}>)
-endforeach ()
-
-find_program(tar_command NAMES gtar tar REQUIRED)
-if (NOT tar_command)
-  message(FATAL_ERROR "tar command not found")
-endif()
-
-add_custom_command(
-  OUTPUT ${archive_name}
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${archive_dir}
-  COMMAND ${CMAKE_COMMAND} -E copy ${archive_file_paths} ${archive_dir}
-  COMMAND ${CMAKE_COMMAND} -E chdir ${archive_dir}
-          ${tar_command} -cf ${archive_name} ${targets_to_archive}
-  DEPENDS ${targets_to_archive}
-  VERBATIM
-)
-add_custom_target(initrd_tarball DEPENDS ${archive_name})
-
+add_subdirectory(user)
 add_subdirectory(kern)
 
 add_custom_command(
