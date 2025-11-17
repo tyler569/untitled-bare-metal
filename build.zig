@@ -53,6 +53,7 @@ pub fn build(b: *std.Build) void {
     };
 
     const userland_sources = [_][]const u8{
+        "lib/arch/x86_64/crt0.c",
         "lib/cptr_alloc.c",
         "lib/exec.c",
         "lib/lib.c",
@@ -243,7 +244,6 @@ fn buildKernel(
         "kern/cap.c",
         "kern/debug.c",
         "kern/elf.c",
-        "kern/ipc.c",
         "kern/syscall.c",
         "kern/obj/cnode.c",
         "kern/obj/endpoint.c",

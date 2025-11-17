@@ -5,7 +5,6 @@ add_executable(untitled_bare_metal
   cap.c
   debug.c
   elf.c
-  ipc.c
   syscall.c
   obj/cnode.c
   obj/endpoint.c
