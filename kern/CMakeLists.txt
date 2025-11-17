@@ -37,36 +37,38 @@ add_compile_definitions(
 
 if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
   target_sources(untitled_bare_metal PRIVATE
-    ../arch/x86_64/debug.c
-    ../arch/x86_64/entry.c
-    ../arch/x86_64/isrs.S
-    ../arch/x86_64/frame.c
-    ../arch/x86_64/gdt.c
-    ../arch/x86_64/idt.c
-    ../arch/x86_64/initrd.c
-    ../arch/x86_64/intrin.c
-    ../arch/x86_64/ints.c
-    ../arch/x86_64/ioapic.c
-    ../arch/x86_64/lapic.c
-    ../arch/x86_64/pci.c
-    ../arch/x86_64/phy_mem.c
-    ../arch/x86_64/pic.c
-    ../arch/x86_64/mmu.c
-    ../arch/x86_64/smp.c
-    ../arch/x86_64/sse.c
-    ../arch/x86_64/syscall.c
-    ../arch/x86_64/syscall.S
-    ../arch/x86_64/obj/io_port.c
-    ../arch/x86_64/obj/page.c
+    arch/x86_64/debug.c
+    arch/x86_64/entry.c
+    arch/x86_64/isrs.S
+    arch/x86_64/frame.c
+    arch/x86_64/gdt.c
+    arch/x86_64/idt.c
+    arch/x86_64/initrd.c
+    arch/x86_64/intrin.c
+    arch/x86_64/ints.c
+    arch/x86_64/ioapic.c
+    arch/x86_64/lapic.c
+    arch/x86_64/pci.c
+    arch/x86_64/phy_mem.c
+    arch/x86_64/pic.c
+    arch/x86_64/mmu.c
+    arch/x86_64/smp.c
+    arch/x86_64/sse.c
+    arch/x86_64/syscall.c
+    arch/x86_64/syscall.S
+    arch/x86_64/obj/io_port.c
+    arch/x86_64/obj/page.c
   )
+
+  set(linker_script "${CMAKE_SOURCE_DIR}/kern/arch/x86_64/link.ld")
 
   target_compile_options(untitled_bare_metal PRIVATE -mcmodel=kernel)
   target_link_options(untitled_bare_metal PRIVATE
-    -T ${CMAKE_SOURCE_DIR}/arch/x86_64/link.ld
+    -T ${linker_script}
     -z max-page-size=0x1000
   )
   set_target_properties(untitled_bare_metal
-    PROPERTIES LINK_DEPENDS ${CMAKE_SOURCE_DIR}/arch/x86_64/link.ld
+    PROPERTIES LINK_DEPENDS ${linker_script}
   )
 else ()
   message(FATAL_ERROR "Unsupported target: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}")

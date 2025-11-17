@@ -266,25 +266,25 @@ fn buildKernel(
 
     // x86_64 architecture sources
     const arch_sources = [_][]const u8{
-        "arch/x86_64/debug.c",
-        "arch/x86_64/entry.c",
-        "arch/x86_64/frame.c",
-        "arch/x86_64/gdt.c",
-        "arch/x86_64/idt.c",
-        "arch/x86_64/initrd.c",
-        "arch/x86_64/intrin.c",
-        "arch/x86_64/ints.c",
-        "arch/x86_64/ioapic.c",
-        "arch/x86_64/lapic.c",
-        "arch/x86_64/pci.c",
-        "arch/x86_64/phy_mem.c",
-        "arch/x86_64/pic.c",
-        "arch/x86_64/mmu.c",
-        "arch/x86_64/smp.c",
-        "arch/x86_64/sse.c",
-        "arch/x86_64/syscall.c",
-        "arch/x86_64/obj/io_port.c",
-        "arch/x86_64/obj/page.c",
+        "kern/arch/x86_64/debug.c",
+        "kern/arch/x86_64/entry.c",
+        "kern/arch/x86_64/frame.c",
+        "kern/arch/x86_64/gdt.c",
+        "kern/arch/x86_64/idt.c",
+        "kern/arch/x86_64/initrd.c",
+        "kern/arch/x86_64/intrin.c",
+        "kern/arch/x86_64/ints.c",
+        "kern/arch/x86_64/ioapic.c",
+        "kern/arch/x86_64/lapic.c",
+        "kern/arch/x86_64/pci.c",
+        "kern/arch/x86_64/phy_mem.c",
+        "kern/arch/x86_64/pic.c",
+        "kern/arch/x86_64/mmu.c",
+        "kern/arch/x86_64/smp.c",
+        "kern/arch/x86_64/sse.c",
+        "kern/arch/x86_64/syscall.c",
+        "kern/arch/x86_64/obj/io_port.c",
+        "kern/arch/x86_64/obj/page.c",
     };
 
     kernel.addCSourceFiles(.{
@@ -293,14 +293,14 @@ fn buildKernel(
     });
 
     // Assembly sources
-    kernel.addAssemblyFile(b.path("arch/x86_64/isrs.S"));
-    kernel.addAssemblyFile(b.path("arch/x86_64/syscall.S"));
+    kernel.addAssemblyFile(b.path("kern/arch/x86_64/isrs.S"));
+    kernel.addAssemblyFile(b.path("kern/arch/x86_64/syscall.S"));
 
     kernel.addIncludePath(b.path("include"));
     kernel.addIncludePath(b.path("limine"));
     root_module.addCMacro("__KERNEL__", "1");
     root_module.addCMacro("__shrike__", "1");
-    kernel.setLinkerScript(b.path("arch/x86_64/link.ld"));
+    kernel.setLinkerScript(b.path("kern/arch/x86_64/link.ld"));
 
     return kernel;
 }
