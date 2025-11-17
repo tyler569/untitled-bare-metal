@@ -90,6 +90,20 @@ write_gsbase (uintptr_t value)
 }
 
 uint64_t
+read_cr0 ()
+{
+  uint64_t ret;
+  asm volatile ("mov %%cr0, %0" : "=r"(ret));
+  return ret;
+}
+
+void
+write_cr0 (uint64_t value)
+{
+  asm volatile ("mov %0, %%cr0" : : "r"(value));
+}
+
+uint64_t
 read_cr2 ()
 {
   uint64_t ret;

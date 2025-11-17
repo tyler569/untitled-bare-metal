@@ -15,6 +15,7 @@ _start ()
 {
   init_bsp_gdt ();
   init_idt ();
+  init_sse ();
   init_syscall ();
   init_page_mmap ();
   init_int_stacks ();

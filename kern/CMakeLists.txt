@@ -53,6 +53,7 @@ if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
     ../arch/x86_64/pic.c
     ../arch/x86_64/mmu.c
     ../arch/x86_64/smp.c
+    ../arch/x86_64/sse.c
     ../arch/x86_64/syscall.c
     ../arch/x86_64/syscall.S
     ../arch/x86_64/obj/io_port.c

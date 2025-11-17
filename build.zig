@@ -21,15 +21,6 @@ pub fn build(b: *std.Build) void {
         .cpu_model = .{ .explicit = .generic(.x86_64) },
         .os_tag = .freestanding,
         .abi = .none,
-        .cpu_features_add = std.Target.x86.featureSet(&.{.soft_float}),
-        .cpu_features_sub = std.Target.x86.featureSet(&.{
-            .x87,
-            .@"3dnow",
-            .mmx,
-            .sse,
-            .sse2,
-            .sse3,
-        }),
     });
 
     const kernelTarget = b.resolveTargetQuery(.{
@@ -289,6 +280,7 @@ fn buildKernel(
         "arch/x86_64/pic.c",
         "arch/x86_64/mmu.c",
         "arch/x86_64/smp.c",
+        "arch/x86_64/sse.c",
         "arch/x86_64/syscall.c",
         "arch/x86_64/obj/io_port.c",
         "arch/x86_64/obj/page.c",

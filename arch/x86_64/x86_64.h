@@ -19,6 +19,10 @@
 
 #define IA32_EFER_SCE 0x1
 
+#define CR0_MP (1 << 1)
+#define CR0_EM (1 << 2)
+#define CR4_OSFXSR (1 << 9)
+#define CR4_OSXMMEXCPT (1 << 10)
 #define CR4_FSGSBASE (1 << 16)
 
 #define KERNEL_CS 0x08l
@@ -79,6 +83,7 @@ void init_ap_gdt (per_cpu_t *cpu);
 void init_ap_idt ();
 void init_idt ();
 void init_aps ();
+void init_sse ();
 void init_syscall ();
 void init_int_stacks ();
 void init_pic ();
@@ -109,6 +114,8 @@ uint64_t read_msr (uint32_t msr_id);
 void write_fsbase (uintptr_t);
 void write_gsbase (uintptr_t);
 
+uint64_t read_cr0 ();
+void write_cr0 (uint64_t);
 uint64_t read_cr2 ();
 uint64_t read_cr4 ();
 void write_cr4 (uint64_t);
