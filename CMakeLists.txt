@@ -44,6 +44,7 @@ add_compile_definitions(__shrike__=1)
 add_compile_options(-Wall -Wextra -fbuiltin)
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/limine)
 
+add_subdirectory(lib)
 add_subdirectory(user)
 add_subdirectory(kern)
 

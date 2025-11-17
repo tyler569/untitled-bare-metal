@@ -1,17 +1,3 @@
-add_library(userlib STATIC
-  ../lib/cptr_alloc.c
-  ../lib/exec.c
-  ../lib/lib.c
-  ../lib/pci.c
-  ../lib/num.c
-  ../lib/print.c
-  ../lib/sort.c
-  ../lib/string.c
-  ../lib/tar.c
-)
-
-target_include_directories(userlib PUBLIC ../lib)
-
 set(targets_to_archive userland calculator_server serial_driver pci_manager cdt_test)
 set(archive_dir "${CMAKE_BINARY_DIR}/user/initrd")
 set(archive_file_paths)
