@@ -14,9 +14,33 @@
 cap_t root_untyped_capabilities[MAX_UNTYPED_ROOT_CAPS];
 size_t root_untyped_cap_count = 0;
 
-int create_objects (cte_t *untyped, word_t type, word_t size_bits,
-                    cte_t *dest_slot_0, word_t num_objects,
-                    uintptr_t usable_memory);
+static void
+create_objects (cte_t *untyped, word_t type, word_t size_bits,
+                cte_t *dest_slot_0, word_t num_objects,
+                uintptr_t usable_memory)
+{
+  size_t obj_size = object_size (type, size_bits);
+
+  for (word_t i = 0; i < num_objects; i++)
+    {
+      cte_t *dest_slot = dest_slot_0 + i;
+      uintptr_t obj_paddr = usable_memory + i * obj_size;
+      void *obj_ptr = (void *)direct_map_of (obj_paddr);
+      memset (obj_ptr, 0, obj_size);
+
+      // printf ("Creating object of type %s at %p\n", cap_type_string (type),
+      //         obj_ptr);
+
+      dest_slot->cap.type = type;
+      dest_slot->cap.size_bits = size_bits;
+      dest_slot->cap.badge = 0;
+	  dest_slot->cap.is_original = 1;
+	  dest_slot->cap.rights = cap_rights_all;
+      cap_set_ptr (dest_slot, obj_ptr);
+
+      insert_after (dest_slot, untyped);
+    }
+}
 
 message_info_t
 untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
@@ -59,36 +83,6 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
   untyped->badge = untyped_offset + total_size;
 
   return msg_ok (0);
-}
-
-int
-create_objects (cte_t *untyped, word_t type, word_t size_bits,
-                cte_t *dest_slot_0, word_t num_objects,
-                uintptr_t usable_memory)
-{
-  size_t obj_size = object_size (type, size_bits);
-
-  for (word_t i = 0; i < num_objects; i++)
-    {
-      cte_t *dest_slot = dest_slot_0 + i;
-      uintptr_t obj_paddr = usable_memory + i * obj_size;
-      void *obj_ptr = (void *)direct_map_of (obj_paddr);
-      memset (obj_ptr, 0, obj_size);
-
-      // printf ("Creating object of type %s at %p\n", cap_type_string (type),
-      //         obj_ptr);
-
-      dest_slot->cap.type = type;
-      dest_slot->cap.size_bits = size_bits;
-      dest_slot->cap.badge = 0;
-	  dest_slot->cap.is_original = 1;
-	  dest_slot->cap.rights = cap_rights_all;
-      cap_set_ptr (dest_slot, obj_ptr);
-
-      insert_after (dest_slot, untyped);
-    }
-
-  return 0;
 }
 
 bool
