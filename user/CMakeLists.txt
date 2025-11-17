@@ -1,20 +1,23 @@
+add_library(userlib STATIC
+  cptr_alloc.c
+  exec.c
+  lib.c
+  pci.c
+  ../lib/num.c
+  ../lib/print.c
+  ../lib/sort.c
+  ../lib/string.c
+  ../lib/tar.c
+)
+
 set(targets_to_archive userland calculator_server serial_driver pci_manager cdt_test)
 set(archive_dir "${CMAKE_BINARY_DIR}/user/initrd")
 set(archive_file_paths)
 
 foreach (program ${targets_to_archive})
-  add_executable(${program}
-    ${program}.c
-    cptr_alloc.c
-    exec.c
-    lib.c
-    pci.c
-    ../lib/num.c
-    ../lib/print.c
-    ../lib/sort.c
-    ../lib/string.c
-    ../lib/tar.c
-  )
+  add_executable(${program} ${program}.c)
+  target_link_libraries(${program} PRIVATE userlib)
+
   list(APPEND archive_file_paths $<TARGET_FILE:${program}>)
 endforeach ()
 
