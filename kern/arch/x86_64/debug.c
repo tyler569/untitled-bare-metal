@@ -1,4 +1,4 @@
-#include "arch/x86_64/exports.h"
+#include "kern/arch/x86_64/exports.h"
 #include "kern/per_cpu.h"
 #include "stdio.h"
 

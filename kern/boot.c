@@ -1,4 +1,4 @@
-#include "arch/x86_64/exports.h"
+#include "kern/arch.h"
 #include "kern/cap.h"
 #include "kern/kernel.h"
 #include "kern/mem.h"

@@ -78,24 +78,24 @@ mint (struct cte *dest, struct cte *src, unsigned long badge,
 }
 
 /*
-* This function is only called to determine the end of the list of derived
-* capabilities off of a specific original cap; it does not establish a
-* total parent->child relationship for all capabilities, so this is only
-* valid for the run of caps in the CDT list such that
-*  [original] -> derived -> derived -> derived -> [original]
-* -- this will return `true` for all derived caps, then return false when
-* no longer looking at a derived cap of the original.
-*
-* The rules are as follows
-*
-* only ->is_original caps can be parents
-* untyped are the parents of all caps whose pointers lie inside their region
-* otherwise, caps can only parent their own type
-*   (children can only be created with `untyped_retype`, `copy`, and `mint`)
-* and endpoints with badge 0 parent all derived caps, endpointed with badge
-*   nonzero parent all dervied caps with matching endpoint. The original
-*   badged cap does have ->is_original set.
-*/
+ * This function is only called to determine the end of the list of derived
+ * capabilities off of a specific original cap; it does not establish a
+ * total parent->child relationship for all capabilities, so this is only
+ * valid for the run of caps in the CDT list such that
+ *  [original] -> derived -> derived -> derived -> [original]
+ * -- this will return `true` for all derived caps, then return false when
+ * no longer looking at a derived cap of the original.
+ *
+ * The rules are as follows
+ *
+ * only ->is_original caps can be parents
+ * untyped are the parents of all caps whose pointers lie inside their region
+ * otherwise, caps can only parent their own type
+ *   (children can only be created with `untyped_retype`, `copy`, and `mint`)
+ * and endpoints with badge 0 parent all derived caps, endpointed with badge
+ *   nonzero parent all dervied caps with matching endpoint. The original
+ *   badged cap does have ->is_original set.
+ */
 bool
 is_child (struct cte *c, struct cte *parent)
 {
@@ -136,7 +136,7 @@ message_info_t
 revoke (struct cte *c)
 {
   while (is_child (c->next, c))
-	delete (c->next);
+    delete (c->next);
 
   return msg_ok (0);
 }

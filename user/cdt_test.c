@@ -240,7 +240,8 @@ main ()
 
   // Verify copy3 was not deleted
   cap_t copy3_after = get_cap_at_slot (cdt_endpoint_copy3);
-  assert_cap_type ("endpoint_copy3 after parent delete", copy3_after, cap_endpoint);
+  assert_cap_type ("endpoint_copy3 after parent delete", copy3_after,
+                   cap_endpoint);
 
   // Deleting an already-null slot is a no-op
   err = cnode_delete (cdt_cnode_cap, cdt_endpoint_copy3, 64);
@@ -307,7 +308,8 @@ main ()
   print_test ("Create endpoint for rights test", err, no_error);
 
   cap_t rights_orig = get_cap_at_slot (70);
-  assert_cap_rights ("rights_orig has all rights", rights_orig, cap_rights_all);
+  assert_cap_rights ("rights_orig has all rights", rights_orig,
+                     cap_rights_all);
 
   // Copy with reduced rights (read only = 0x1)
   err = cnode_copy (cdt_cnode_cap, 71, 64, cdt_cnode_cap, 70, 64, 0x1);
