@@ -2,7 +2,7 @@ add_executable(untitled_bare_metal
   main.c
   alloc.c
   boot.c
-  cap.c
+  cdt.c
   debug.c
   elf.c
   syscall.c

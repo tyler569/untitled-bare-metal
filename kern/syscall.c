@@ -9,7 +9,7 @@
 #include "kern/syscall_dispatch.c"
 
 static inline void
-ASSERT_ENDPOINT (cte_t *slot)
+assert_endpoint (cte_t *slot)
 {
   if (cap_type (slot) != cap_endpoint && cap_type (slot) != cap_notification)
     {
@@ -19,7 +19,7 @@ ASSERT_ENDPOINT (cte_t *slot)
     }
 }
 
-message_info_t
+static message_info_t
 op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
             bool *should_return)
 {
@@ -82,7 +82,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
         dbg_printf ("sys_send (dest: %#lx)\n", a0);
         *should_return = false;
 
-        ASSERT_ENDPOINT (slot);
+        assert_endpoint (slot);
 
         if (cap_type (slot) == cap_notification)
           invoke_notification_send (slot);
@@ -95,7 +95,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
         dbg_printf ("sys_nbsend (dest: %#lx)\n", a0);
         *should_return = false;
 
-        ASSERT_ENDPOINT (slot);
+        assert_endpoint (slot);
 
         if (cap_type (slot) == cap_endpoint)
           invoke_endpoint_nbsend (slot);
@@ -105,7 +105,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
       {
         dbg_printf ("sys_recv (dest: %#lx)\n", a0);
 
-        ASSERT_ENDPOINT (slot);
+        assert_endpoint (slot);
 
         if (cap_type (slot) == cap_notification)
           return invoke_notification_recv (slot);
@@ -117,7 +117,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
       {
         dbg_printf ("sys_nbrecv (dest: %#lx)\n", a0);
 
-        ASSERT_ENDPOINT (slot);
+        assert_endpoint (slot);
 
         if (cap_type (slot) == cap_endpoint)
           return invoke_endpoint_nbrecv (slot);
@@ -127,7 +127,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
       {
         dbg_printf ("sys_replyrecv (dest: %#lx)\n", a0);
 
-        ASSERT_ENDPOINT (slot);
+        assert_endpoint (slot);
 
         return invoke_reply_recv (slot);
       }

@@ -26,47 +26,40 @@ struct power_of_two_region
 struct power_of_two_region regions[MAX_REGIONS];
 size_t region_count = 0;
 
+static size_t
+largest_fitting_block (uintptr_t start, uintptr_t end)
+{
+  // Determine the largest power-of-two block naturally aligned at 'start'
+  size_t block = start & -start; // This is a power of two.
+
+  // If the block goes past 'end', reduce its size until it fits.
+  while (start + block > end)
+	block >>= 1; // Move to the next smaller power of two.
+
+  return block;
+}
+
+static size_t
+page_count (size_t block_size)
+{
+  return __builtin_ctzll (block_size) - 12;
+}
+
 void
 allocate_aligned_regions (struct physical_extent *extent)
 {
-  // size_t len = extent->len;
-  // uintptr_t acc = extent->start;
-  // while (len > 0)
-  //   {
-  //     // find the largest power of 2 that fits in len
-  //     int zeros = __builtin_clzll (len);
-  //     size_t max_len = 1 << (63 - zeros);
-
-  //     assert (max_len <= len);
-  //     assert (max_len >> 12 > 0);
-
-  //     regions[region_count].addr = acc;
-  //     regions[region_count].size_bits = 63 - zeros - 12;
-  //     region_count++;
-
-  //     acc += max_len;
-  //     len -= max_len;
-  //   }
-
   uintptr_t start = extent->start;
   uintptr_t end = extent->start + extent->len;
 
   while (start < end)
     {
-      // Determine the largest power-of-two block naturally aligned at 'start'
-      size_t block = start & -start; // This is a power of two.
+	  size_t block = largest_fitting_block (start, end);
 
-      // If the block goes past 'end', reduce its size until it fits.
-      while (start + block > end)
-        block >>= 1; // Move to the next smaller power of two.
+	  regions[region_count++] = (struct power_of_two_region){
+	    .addr = start,
+		.size_bits = page_count (block),
+	  };
 
-      // Process this block (e.g. record it, use it, etc.)
-      // process_block(start, block);
-      regions[region_count].addr = start;
-      regions[region_count].size_bits = 63 - __builtin_clzll (block) - 12;
-      region_count++;
-
-      // Move to the next block.
       start += block;
     }
 }

@@ -241,7 +241,7 @@ fn buildKernel(
         "kern/main.c",
         "kern/alloc.c",
         "kern/boot.c",
-        "kern/cap.c",
+        "kern/cdt.c",
         "kern/debug.c",
         "kern/elf.c",
         "kern/syscall.c",
