@@ -4,7 +4,7 @@
 #include "stdio.h"
 
 static struct limine_module_request moduleinfo = {
-  .id = LIMINE_MODULE_REQUEST,
+  .id = LIMINE_MODULE_REQUEST_ID,
 };
 
 bool

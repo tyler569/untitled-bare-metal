@@ -14,7 +14,7 @@ struct tcb init_tcb;
 cte_t init_cnode[cnode_slots];
 
 static struct limine_framebuffer_request fbinfo = {
-  .id = LIMINE_FRAMEBUFFER_REQUEST,
+  .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
 };
 
 // --- constants for "magic" addrs & flags ---

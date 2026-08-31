@@ -13,7 +13,7 @@ tar_number (char *p)
   if (end == p || *end != '\0')
     {
       printf ("Invalid octal number: %s\n", p);
-      return -1;
+      return 0;
     }
   return result;
 }

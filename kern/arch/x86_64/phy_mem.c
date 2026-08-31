@@ -5,11 +5,11 @@
 #include "stdio.h"
 
 static struct limine_memmap_request mmapinfo = {
-  .id = LIMINE_MEMMAP_REQUEST,
+  .id = LIMINE_MEMMAP_REQUEST_ID,
 };
 
 static struct limine_hhdm_request hhdminfo = {
-  .id = LIMINE_HHDM_REQUEST,
+  .id = LIMINE_HHDM_REQUEST_ID,
 };
 
 const char *limine_memmap_type_str[] = {
@@ -19,7 +19,7 @@ const char *limine_memmap_type_str[] = {
   [LIMINE_MEMMAP_ACPI_NVS] = "ACPI NVS",
   [LIMINE_MEMMAP_BAD_MEMORY] = "Bad memory",
   [LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE] = "Bootloader reclaimable",
-  [LIMINE_MEMMAP_KERNEL_AND_MODULES] = "Kernel and modules",
+  [LIMINE_MEMMAP_EXECUTABLE_AND_MODULES] = "Kernel and modules",
   [LIMINE_MEMMAP_FRAMEBUFFER] = "Framebuffer",
 };
 
@@ -28,7 +28,7 @@ bool limine_memmap_type_available[] = {
   [LIMINE_MEMMAP_ACPI_RECLAIMABLE] = true,
   [LIMINE_MEMMAP_ACPI_NVS] = true,
   [LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE] = true,
-  [LIMINE_MEMMAP_KERNEL_AND_MODULES] = true,
+  [LIMINE_MEMMAP_EXECUTABLE_AND_MODULES] = true,
 };
 
 uintptr_t

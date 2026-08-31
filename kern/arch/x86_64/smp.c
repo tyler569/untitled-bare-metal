@@ -6,14 +6,14 @@
 
 #define MAX_CPUS 32
 
-static struct limine_smp_request smpinfo = {
-  .id = LIMINE_SMP_REQUEST,
+static struct limine_mp_request smpinfo = {
+  .id = LIMINE_MP_REQUEST_ID,
 };
 
 struct per_cpu cpus[MAX_CPUS];
 
 void
-ap_entry (struct limine_smp_info *info)
+ap_entry (struct limine_mp_info *info)
 {
   per_cpu_t *cpu = &cpus[info->processor_id];
   cpu->self = cpu;
@@ -31,7 +31,7 @@ ap_entry (struct limine_smp_info *info)
 void
 init_aps ()
 {
-  struct limine_smp_response *resp = volatile_read (smpinfo.response);
+  struct limine_mp_response *resp = volatile_read (smpinfo.response);
 
   if (!resp || resp->cpu_count <= 1)
     return;
