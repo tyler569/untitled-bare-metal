@@ -58,9 +58,9 @@ class KMethod
   end
 
   def kernel_print_param_list
-    l = ['cap_type_string (slot)'] + @parameters.map do |param|
+    l = ['cap_type_string (slot)', 'cap_ptr (slot)'] + @parameters.flat_map do |param|
       if param['type'] == 'cptr_t'
-        'cap_type_string (' + param['name'] + ')'
+        ['cap_type_string (' + param['name'] + ')', 'cap_ptr (' + param['name'] + ')']
       else
         param['name']
       end
@@ -69,10 +69,10 @@ class KMethod
   end
 
   def kernel_print_format
-    l = ['cap:%s']
+    l = ['cap:%s@%p']
     l += @parameters.map do |param|
       if param['type'] == 'cptr_t'
-        "#{param['name']}=cap:%s"
+        "#{param['name']}=cap:%s@%p"
       elsif param['type'] == 'uint8_t'
         "#{param['name']}=%hhu"
       elsif param['type'] == 'bool'

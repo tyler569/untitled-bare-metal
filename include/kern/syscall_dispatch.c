@@ -41,11 +41,12 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &src_root));
 
-        dbg_printf (
-            "(cap:%s, dest_index=%#lx, dest_depth=%hhu, src_root=cap:%s, "
-            "src_index=%#lx, src_depth=%hhu, rights=%#lx)\n",
-            cap_type_string (slot), dest_index, dest_depth,
-            cap_type_string (src_root), src_index, src_depth, rights);
+        dbg_printf ("(cap:%s@%p, dest_index=%#lx, dest_depth=%hhu, "
+                    "src_root=cap:%s@%p, src_index=%#lx, src_depth=%hhu, "
+                    "rights=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot), dest_index,
+                    dest_depth, cap_type_string (src_root), cap_ptr (src_root),
+                    src_index, src_depth, rights);
 
         return cnode_copy (slot, dest_index, dest_depth, src_root, src_index,
                            src_depth, rights);
@@ -72,8 +73,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, index=%#lx, depth=%hhu)\n",
-                    cap_type_string (slot), index, depth);
+        dbg_printf ("(cap:%s@%p, index=%#lx, depth=%hhu)\n",
+                    cap_type_string (slot), cap_ptr (slot), index, depth);
 
         return cnode_delete (slot, index, depth);
         break;
@@ -115,11 +116,12 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &src_root));
 
-        dbg_printf (
-            "(cap:%s, dest_index=%#lx, dest_depth=%hhu, src_root=cap:%s, "
-            "src_index=%#lx, src_depth=%hhu, rights=%#lx, badge=%#lx)\n",
-            cap_type_string (slot), dest_index, dest_depth,
-            cap_type_string (src_root), src_index, src_depth, rights, badge);
+        dbg_printf ("(cap:%s@%p, dest_index=%#lx, dest_depth=%hhu, "
+                    "src_root=cap:%s@%p, src_index=%#lx, src_depth=%hhu, "
+                    "rights=%#lx, badge=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot), dest_index,
+                    dest_depth, cap_type_string (src_root), cap_ptr (src_root),
+                    src_index, src_depth, rights, badge);
 
         return cnode_mint (slot, dest_index, dest_depth, src_root, src_index,
                            src_depth, rights, badge);
@@ -146,8 +148,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, index=%#lx, depth=%hhu)\n",
-                    cap_type_string (slot), index, depth);
+        dbg_printf ("(cap:%s@%p, index=%#lx, depth=%hhu)\n",
+                    cap_type_string (slot), cap_ptr (slot), index, depth);
 
         return cnode_revoke (slot, index, depth);
         break;
@@ -164,7 +166,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return msg_illegal_operation ();
           }
 
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
+        dbg_printf ("(cap:%s@%p)\n", cap_type_string (slot), cap_ptr (slot));
 
         return cnode_debug_print (slot);
         break;
@@ -190,8 +192,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, index=%#lx, depth=%hhu)\n",
-                    cap_type_string (slot), index, depth);
+        dbg_printf ("(cap:%s@%p, index=%#lx, depth=%hhu)\n",
+                    cap_type_string (slot), cap_ptr (slot), index, depth);
 
         return cnode_debug_get (slot, index, depth);
         break;
@@ -238,12 +240,14 @@ dispatch_method (cte_t *slot, message_info_t info)
                               &buffer_frame));
 
         dbg_printf (
-            "(cap:%s, fault_ep=%#lx, cspace_root=cap:%s, "
-            "cspace_root_data=%#lx, vspace_root=cap:%s, "
-            "vspace_root_data=%#lx, buffer=%#lx, buffer_frame=cap:%s)\n",
-            cap_type_string (slot), fault_ep, cap_type_string (cspace_root),
-            cspace_root_data, cap_type_string (vspace_root), vspace_root_data,
-            buffer, cap_type_string (buffer_frame));
+            "(cap:%s@%p, fault_ep=%#lx, cspace_root=cap:%s@%p, "
+            "cspace_root_data=%#lx, vspace_root=cap:%s@%p, "
+            "vspace_root_data=%#lx, buffer=%#lx, buffer_frame=cap:%s@%p)\n",
+            cap_type_string (slot), cap_ptr (slot), fault_ep,
+            cap_type_string (cspace_root), cap_ptr (cspace_root),
+            cspace_root_data, cap_type_string (vspace_root),
+            cap_ptr (vspace_root), vspace_root_data, buffer,
+            cap_type_string (buffer_frame), cap_ptr (buffer_frame));
 
         return tcb_configure (slot, fault_ep, cspace_root, cspace_root_data,
                               vspace_root, vspace_root_data, buffer,
@@ -273,10 +277,10 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, suspend_source=%d, arch_flags=%#lx, count=%#lx, "
-                    "regs=%p)\n",
-                    cap_type_string (slot), suspend_source, arch_flags, count,
-                    regs);
+        dbg_printf ("(cap:%s@%p, suspend_source=%d, arch_flags=%#lx, "
+                    "count=%#lx, regs=%p)\n",
+                    cap_type_string (slot), cap_ptr (slot), suspend_source,
+                    arch_flags, count, regs);
 
         return tcb_read_registers (slot, suspend_source, arch_flags, count,
                                    regs);
@@ -294,7 +298,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return msg_illegal_operation ();
           }
 
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
+        dbg_printf ("(cap:%s@%p)\n", cap_type_string (slot), cap_ptr (slot));
 
         return tcb_resume (slot);
         break;
@@ -323,8 +327,9 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &notification));
 
-        dbg_printf ("(cap:%s, notification=cap:%s)\n", cap_type_string (slot),
-                    cap_type_string (notification));
+        dbg_printf ("(cap:%s@%p, notification=cap:%s@%p)\n",
+                    cap_type_string (slot), cap_ptr (slot),
+                    cap_type_string (notification), cap_ptr (notification));
 
         return tcb_bind_notification (slot, notification);
         break;
@@ -349,8 +354,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, tls_base=%#lx)\n", cap_type_string (slot),
-                    tls_base);
+        dbg_printf ("(cap:%s@%p, tls_base=%#lx)\n", cap_type_string (slot),
+                    cap_ptr (slot), tls_base);
 
         return tcb_set_tls_base (slot, tls_base);
         break;
@@ -367,7 +372,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return msg_illegal_operation ();
           }
 
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
+        dbg_printf ("(cap:%s@%p)\n", cap_type_string (slot), cap_ptr (slot));
 
         return tcb_suspend (slot);
         break;
@@ -395,10 +400,10 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, resume_target=%d, arch_flags=%#lx, count=%#lx, "
-                    "regs=%p)\n",
-                    cap_type_string (slot), resume_target, arch_flags, count,
-                    regs);
+        dbg_printf ("(cap:%s@%p, resume_target=%d, arch_flags=%#lx, "
+                    "count=%#lx, regs=%p)\n",
+                    cap_type_string (slot), cap_ptr (slot), resume_target,
+                    arch_flags, count, regs);
 
         return tcb_write_registers (slot, resume_target, arch_flags, count,
                                     regs);
@@ -424,7 +429,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, flags=%#lx)\n", cap_type_string (slot), flags);
+        dbg_printf ("(cap:%s@%p, flags=%#lx)\n", cap_type_string (slot),
+                    cap_ptr (slot), flags);
 
         return tcb_set_debug (slot, flags);
         break;
@@ -450,8 +456,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, name=%p, len=%#lx)\n", cap_type_string (slot),
-                    name, len);
+        dbg_printf ("(cap:%s@%p, name=%p, len=%#lx)\n", cap_type_string (slot),
+                    cap_ptr (slot), name, len);
 
         return tcb_set_name (slot, name, len);
         break;
@@ -492,12 +498,12 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64, &root));
 
-        dbg_printf ("(cap:%s, type=%#lx, size_bits=%#lx, root=cap:%s, "
+        dbg_printf ("(cap:%s@%p, type=%#lx, size_bits=%#lx, root=cap:%s@%p, "
                     "node_index=%#lx, node_depth=%hhu, node_offset=%#lx, "
                     "num_objects=%#lx)\n",
-                    cap_type_string (slot), type, size_bits,
-                    cap_type_string (root), node_index, node_depth,
-                    node_offset, num_objects);
+                    cap_type_string (slot), cap_ptr (slot), type, size_bits,
+                    cap_type_string (root), cap_ptr (root), node_index,
+                    node_depth, node_offset, num_objects);
 
         return untyped_retype (slot, type, size_bits, root, node_index,
                                node_depth, node_offset, num_objects);
@@ -523,7 +529,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, port=%#lx)\n", cap_type_string (slot), port);
+        dbg_printf ("(cap:%s@%p, port=%#lx)\n", cap_type_string (slot),
+                    cap_ptr (slot), port);
 
         return x86_64_io_port_in8 (slot, port);
         break;
@@ -548,7 +555,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, port=%#lx)\n", cap_type_string (slot), port);
+        dbg_printf ("(cap:%s@%p, port=%#lx)\n", cap_type_string (slot),
+                    cap_ptr (slot), port);
 
         return x86_64_io_port_in16 (slot, port);
         break;
@@ -573,7 +581,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, port=%#lx)\n", cap_type_string (slot), port);
+        dbg_printf ("(cap:%s@%p, port=%#lx)\n", cap_type_string (slot),
+                    cap_ptr (slot), port);
 
         return x86_64_io_port_in32 (slot, port);
         break;
@@ -599,8 +608,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, port=%#lx, value=%#lx)\n",
-                    cap_type_string (slot), port, value);
+        dbg_printf ("(cap:%s@%p, port=%#lx, value=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot), port, value);
 
         return x86_64_io_port_out8 (slot, port, value);
         break;
@@ -626,8 +635,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, port=%#lx, value=%#lx)\n",
-                    cap_type_string (slot), port, value);
+        dbg_printf ("(cap:%s@%p, port=%#lx, value=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot), port, value);
 
         return x86_64_io_port_out16 (slot, port, value);
         break;
@@ -653,8 +662,8 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         while (0);
 
-        dbg_printf ("(cap:%s, port=%#lx, value=%#lx)\n",
-                    cap_type_string (slot), port, value);
+        dbg_printf ("(cap:%s@%p, port=%#lx, value=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot), port, value);
 
         return x86_64_io_port_out32 (slot, port, value);
         break;
@@ -693,10 +702,11 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64, &root));
 
-        dbg_printf ("(cap:%s, first_port=%#lx, last_port=%#lx, root=cap:%s, "
-                    "index=%#lx, depth=%hhu)\n",
-                    cap_type_string (slot), first_port, last_port,
-                    cap_type_string (root), index, depth);
+        dbg_printf ("(cap:%s@%p, first_port=%#lx, last_port=%#lx, "
+                    "root=cap:%s@%p, index=%#lx, depth=%hhu)\n",
+                    cap_type_string (slot), cap_ptr (slot), first_port,
+                    last_port, cap_type_string (root), cap_ptr (root), index,
+                    depth);
 
         return x86_64_io_port_control_issue (slot, first_port, last_port, root,
                                              index, depth);
@@ -735,9 +745,9 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &vspace));
 
-        dbg_printf ("(cap:%s, vspace=cap:%s, vaddr=%#lx, attr=%#lx)\n",
-                    cap_type_string (slot), cap_type_string (vspace), vaddr,
-                    attr);
+        dbg_printf ("(cap:%s@%p, vspace=cap:%s@%p, vaddr=%#lx, attr=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot),
+                    cap_type_string (vspace), cap_ptr (vspace), vaddr, attr);
 
         return x86_64_pdpt_map (slot, vspace, vaddr, attr);
         break;
@@ -775,9 +785,9 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &vspace));
 
-        dbg_printf ("(cap:%s, vspace=cap:%s, vaddr=%#lx, attr=%#lx)\n",
-                    cap_type_string (slot), cap_type_string (vspace), vaddr,
-                    attr);
+        dbg_printf ("(cap:%s@%p, vspace=cap:%s@%p, vaddr=%#lx, attr=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot),
+                    cap_type_string (vspace), cap_ptr (vspace), vaddr, attr);
 
         return x86_64_pd_map (slot, vspace, vaddr, attr);
         break;
@@ -815,9 +825,9 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &vspace));
 
-        dbg_printf ("(cap:%s, vspace=cap:%s, vaddr=%#lx, attr=%#lx)\n",
-                    cap_type_string (slot), cap_type_string (vspace), vaddr,
-                    attr);
+        dbg_printf ("(cap:%s@%p, vspace=cap:%s@%p, vaddr=%#lx, attr=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot),
+                    cap_type_string (vspace), cap_ptr (vspace), vaddr, attr);
 
         return x86_64_pt_map (slot, vspace, vaddr, attr);
         break;
@@ -855,9 +865,9 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &vspace));
 
-        dbg_printf ("(cap:%s, vspace=cap:%s, vaddr=%#lx, attr=%#lx)\n",
-                    cap_type_string (slot), cap_type_string (vspace), vaddr,
-                    attr);
+        dbg_printf ("(cap:%s@%p, vspace=cap:%s@%p, vaddr=%#lx, attr=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot),
+                    cap_type_string (vspace), cap_ptr (vspace), vaddr, attr);
 
         return x86_64_page_map (slot, vspace, vaddr, attr);
         break;
@@ -895,9 +905,9 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &vspace));
 
-        dbg_printf ("(cap:%s, vspace=cap:%s, vaddr=%#lx, attr=%#lx)\n",
-                    cap_type_string (slot), cap_type_string (vspace), vaddr,
-                    attr);
+        dbg_printf ("(cap:%s@%p, vspace=cap:%s@%p, vaddr=%#lx, attr=%#lx)\n",
+                    cap_type_string (slot), cap_ptr (slot),
+                    cap_type_string (vspace), cap_ptr (vspace), vaddr, attr);
 
         return x86_64_huge_page_map (slot, vspace, vaddr, attr);
         break;
@@ -936,8 +946,9 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64, &root));
 
         dbg_printf (
-            "(cap:%s, irq=%#lx, root=cap:%s, index=%#lx, depth=%hhu)\n",
-            cap_type_string (slot), irq, cap_type_string (root), index, depth);
+            "(cap:%s@%p, irq=%#lx, root=cap:%s@%p, index=%#lx, depth=%hhu)\n",
+            cap_type_string (slot), cap_ptr (slot), irq,
+            cap_type_string (root), cap_ptr (root), index, depth);
 
         return irq_control_get (slot, irq, root, index, depth);
         break;
@@ -954,7 +965,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return msg_illegal_operation ();
           }
 
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
+        dbg_printf ("(cap:%s@%p)\n", cap_type_string (slot), cap_ptr (slot));
 
         return irq_handler_ack (slot);
         break;
@@ -971,7 +982,7 @@ dispatch_method (cte_t *slot, message_info_t info)
             return msg_illegal_operation ();
           }
 
-        dbg_printf ("(cap:%s)\n", cap_type_string (slot));
+        dbg_printf ("(cap:%s@%p)\n", cap_type_string (slot), cap_ptr (slot));
 
         return irq_handler_clear (slot);
         break;
@@ -1000,8 +1011,9 @@ dispatch_method (cte_t *slot, message_info_t info)
         TRY (lookup_cap_slot (&this_tcb->cspace_root, get_cap (0), 64,
                               &notification));
 
-        dbg_printf ("(cap:%s, notification=cap:%s)\n", cap_type_string (slot),
-                    cap_type_string (notification));
+        dbg_printf ("(cap:%s@%p, notification=cap:%s@%p)\n",
+                    cap_type_string (slot), cap_ptr (slot),
+                    cap_type_string (notification), cap_ptr (notification));
 
         return irq_handler_set_notification (slot, notification);
         break;

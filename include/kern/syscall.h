@@ -12,10 +12,10 @@ typedef struct frame frame_t;
 void do_syscall (uintptr_t, uintptr_t, enum syscall_number);
 
 // Used substantially in kern/syscall.c and generated syscall dispatch
-#define dbg_printf(fmt, ...)                                                  \
+#define dbg_printf(...)                                                       \
   do                                                                          \
     if (this_tcb->debug)                                                      \
-      printf (fmt __VA_OPT__ (, ) __VA_ARGS__);                               \
+      printf (__VA_ARGS__);                                                   \
   while (0)
 #define err_printf(...) printf (__VA_ARGS__)
 
