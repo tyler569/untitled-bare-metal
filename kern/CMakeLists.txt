@@ -1,4 +1,4 @@
-add_executable(untitled_bare_metal
+add_executable(tern
   main.c
   alloc.c
   boot.c
@@ -21,13 +21,13 @@ add_executable(untitled_bare_metal
   ../lib/tar.c
 )
 
-target_include_directories(untitled_bare_metal PRIVATE
+target_include_directories(tern PRIVATE
   ${CMAKE_SOURCE_DIR}/limine
 )
 
 # Ensure limine is cloned before building kernel (needed for limine.h header)
 if (TARGET limine)
-  add_dependencies(untitled_bare_metal limine)
+  add_dependencies(tern limine)
 endif ()
 
 add_compile_definitions(
@@ -35,7 +35,7 @@ add_compile_definitions(
 )
 
 if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
-  target_sources(untitled_bare_metal PRIVATE
+  target_sources(tern PRIVATE
     arch/x86_64/debug.c
     arch/x86_64/entry.c
     arch/x86_64/isrs.S
@@ -61,12 +61,12 @@ if ("${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Generic x86_64")
 
   set(linker_script "${CMAKE_SOURCE_DIR}/kern/arch/x86_64/link.ld")
 
-  target_compile_options(untitled_bare_metal PRIVATE -mcmodel=kernel)
-  target_link_options(untitled_bare_metal PRIVATE
+  target_compile_options(tern PRIVATE -mcmodel=kernel)
+  target_link_options(tern PRIVATE
     -T ${linker_script}
     -z max-page-size=0x1000
   )
-  set_target_properties(untitled_bare_metal
+  set_target_properties(tern
     PROPERTIES LINK_DEPENDS ${linker_script}
   )
 else ()
