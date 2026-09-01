@@ -34,7 +34,7 @@ largest_fitting_block (uintptr_t start, uintptr_t end)
 
   // If the block goes past 'end', reduce its size until it fits.
   while (start + block > end)
-	block >>= 1; // Move to the next smaller power of two.
+    block >>= 1; // Move to the next smaller power of two.
 
   return block;
 }
@@ -53,12 +53,12 @@ allocate_aligned_regions (struct physical_extent *extent)
 
   while (start < end)
     {
-	  size_t block = largest_fitting_block (start, end);
+      size_t block = largest_fitting_block (start, end);
 
-	  regions[region_count++] = (struct power_of_two_region){
-	    .addr = start,
-		.size_bits = page_count (block),
-	  };
+      regions[region_count++] = (struct power_of_two_region){
+        .addr = start,
+        .size_bits = page_count (block),
+      };
 
       start += block;
     }
@@ -144,8 +144,8 @@ done:
 int
 power_of_two_region_compare (const void *a, const void *b)
 {
-  return ((struct power_of_two_region *)b)->size_bits
-         - ((struct power_of_two_region *)a)->size_bits;
+  const struct power_of_two_region *pa = a, *pb = b;
+  return pb->size_bits - pa->size_bits;
 }
 
 void

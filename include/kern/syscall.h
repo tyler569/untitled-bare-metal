@@ -165,5 +165,11 @@ MUST_USE
 static inline message_info_t
 msg_noreturn ()
 {
-  return new_message_info (~0, 0, 0, 0);
+  return (message_info_t) { .value = ~0ul };
+}
+
+static inline bool
+msg_is_noreturn (message_info_t msg)
+{
+  return msg.value == ~0ul;
 }

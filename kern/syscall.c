@@ -8,20 +8,8 @@
 
 #include "kern/syscall_dispatch.c"
 
-static inline void
-assert_endpoint (cte_t *slot)
-{
-  if (cap_type (slot) != cap_endpoint && cap_type (slot) != cap_notification)
-    {
-      dbg_printf ("Invalid cap type\n");
-      kill_tcb (this_tcb);
-      schedule ();
-    }
-}
-
 static message_info_t
-op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
-            bool *should_return)
+op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 {
   if (syscall_number != sys_debug_write && syscall_number != sys_exit)
     dbg_printf ("Task %p a0:%#lx ", this_tcb, a0);
@@ -52,10 +40,9 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
     case sys_reply:
       dbg_printf ("sys_reply (info: %#lx)\n", a0);
 
-      *should_return = false;
       invoke_reply ();
 
-      return msg_ok (0);
+      return msg_noreturn ();
     default:
     }
 
@@ -70,80 +57,74 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number,
 
         if (cap_type (slot) != cap_endpoint)
           return dispatch_method (slot, this_tcb->ipc_buffer->tag);
-        else
-          {
-            *should_return = false;
-            invoke_endpoint_call (slot);
-          }
-        break;
+
+        invoke_endpoint_call (slot);
+        return msg_noreturn ();
       }
     case sys_send:
       {
         dbg_printf ("sys_send (dest: %#lx)\n", a0);
-        *should_return = false;
 
-        assert_endpoint (slot);
+        if (cap_type (slot) != cap_notification && cap_type (slot) != cap_endpoint)
+          return msg_err (invalid_capability, 0);
 
         if (cap_type (slot) == cap_notification)
           invoke_notification_send (slot);
         else if (cap_type (slot) == cap_endpoint)
           invoke_endpoint_send (slot);
-        break;
+
+        return msg_noreturn ();
       }
     case sys_nbsend:
       {
         dbg_printf ("sys_nbsend (dest: %#lx)\n", a0);
-        *should_return = false;
 
-        assert_endpoint (slot);
+        if (cap_type (slot) != cap_endpoint)
+          return msg_err (invalid_capability, 0);
 
-        if (cap_type (slot) == cap_endpoint)
-          invoke_endpoint_nbsend (slot);
-        break;
+        invoke_endpoint_nbsend (slot);
+        return msg_noreturn ();
       }
     case sys_recv:
       {
         dbg_printf ("sys_recv (dest: %#lx)\n", a0);
 
-        assert_endpoint (slot);
+        if (cap_type (slot) != cap_notification && cap_type (slot) != cap_endpoint)
+          return msg_err (invalid_capability, 0);
 
         if (cap_type (slot) == cap_notification)
           return invoke_notification_recv (slot);
         else if (cap_type (slot) == cap_endpoint)
           return invoke_endpoint_recv (slot);
-        break;
       }
     case sys_nbrecv:
       {
         dbg_printf ("sys_nbrecv (dest: %#lx)\n", a0);
 
-        assert_endpoint (slot);
+        if (cap_type (slot) != cap_endpoint)
+          return msg_err (invalid_capability, 0);
 
-        if (cap_type (slot) == cap_endpoint)
-          return invoke_endpoint_nbrecv (slot);
-        break;
+        return invoke_endpoint_nbrecv (slot);
       }
     case sys_replyrecv:
       {
         dbg_printf ("sys_replyrecv (dest: %#lx)\n", a0);
 
-        assert_endpoint (slot);
+        if (cap_type (slot) != cap_endpoint)
+          return msg_err (invalid_capability, 0);
 
         return invoke_reply_recv (slot);
       }
     default:
       err_printf ("Invalid syscall number: %d\n", syscall_number);
-      kill_tcb (this_tcb);
+      return msg_err (invalid_syscall, 0);
     }
-
-  return msg_ok (0);
 }
 
 void
 do_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 {
-  bool should_return = true;
-  message_info_t tag = op_syscall (a0, a1, syscall_number, &should_return);
-  if (should_return)
+  message_info_t tag = op_syscall (a0, a1, syscall_number);
+  if (!msg_is_noreturn (tag))
     this_tcb->ipc_buffer->tag = tag;
 }

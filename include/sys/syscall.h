@@ -116,6 +116,7 @@ enum error_code
   illegal_operation,
   invalid_argument,
   invalid_capability,
+  invalid_syscall,
   invalid_root,
   not_enough_memory,
   range_error,
@@ -143,6 +144,8 @@ error_string (error_t error)
       return "invalid argument";
     case invalid_capability:
       return "invalid capability";
+    case invalid_syscall:
+      return "invalid syscall";
     case invalid_root:
       return "invalid root";
     case not_enough_memory:

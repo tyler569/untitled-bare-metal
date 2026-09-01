@@ -1,5 +1,5 @@
-#include "kern/cap.h"
 #include "assert.h"
+#include "kern/cap.h"
 #include "kern/mem.h"
 #include "kern/obj/untyped.h"
 #include "kern/syscall.h"

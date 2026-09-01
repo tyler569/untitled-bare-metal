@@ -229,6 +229,7 @@ errors:
   - illegal_operation
   - invalid_argument
   - invalid_capability
+  - invalid_syscall
   - invalid_root
   - not_enough_memory
   - range_error

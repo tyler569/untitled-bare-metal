@@ -1,8 +1,8 @@
 #pragma once
 
-#include "sys/ipc.h"
 #include "kern/obj/tcb.h"
 #include "kern/per_cpu.h"
+#include "sys/ipc.h"
 
 static inline message_info_t
 get_ipc_info ()
