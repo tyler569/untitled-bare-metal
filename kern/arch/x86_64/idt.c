@@ -1,10 +1,11 @@
 #include "sys/cdefs.h"
+#include "kern/mem.h"
 #include "x86_64.h"
 
 constexpr uint8_t TYPE_INT = 0x8E;
 constexpr uint8_t TYPE_USER_INT = 0x60 | 0x8E;
 
-constexpr size_t INT_STACK_SIZE = PAGE_SIZE * 2;
+constexpr size_t INT_STACK_SIZE = PAGE_SIZE;
 
 struct PACKED idt_entry
 {
@@ -124,4 +125,17 @@ init_int_stacks ()
   this_cpu->arch.tss.rsp[0] = this_cpu->kernel_stack_top;
   this_cpu->arch.tss.ist[0] = (uintptr_t)nmi_stack + INT_STACK_SIZE;
   this_cpu->arch.tss.ist[0] = (uintptr_t)df_stack + INT_STACK_SIZE;
+}
+
+void
+init_ap_int_stacks ()
+{
+  uintptr_t int_stack = alloc_page ();
+  uintptr_t nmi_stack = alloc_page ();
+  uintptr_t df_stack = alloc_page ();
+
+  this_cpu->kernel_stack_top = int_stack + INT_STACK_SIZE;
+  this_cpu->arch.tss.rsp[0] = this_cpu->kernel_stack_top;
+  this_cpu->arch.tss.ist[0] = nmi_stack + INT_STACK_SIZE;
+  this_cpu->arch.tss.ist[0] = df_stack + INT_STACK_SIZE;
 }

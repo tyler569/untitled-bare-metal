@@ -70,6 +70,7 @@ void init_aps ();
 void init_sse ();
 void init_syscall ();
 void init_int_stacks ();
+void init_ap_int_stacks ();
 void init_pic ();
 void init_ioapic ();
 void init_lapic ();

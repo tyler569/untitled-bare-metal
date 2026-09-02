@@ -12,7 +12,7 @@ video="-display none -vga virtio"
 while getopts "dmustv" opt; do
   case $opt in
     d)
-      debugopt="$debugopt -d int,cpu_reset"
+      debugopt="-d int,cpu_reset"
       ;;
     m)
       debugopt="-monitor stdio"

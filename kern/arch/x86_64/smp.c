@@ -10,7 +10,7 @@ static struct limine_mp_request smpinfo = {
   .id = LIMINE_MP_REQUEST_ID,
 };
 
-struct per_cpu cpus[MAX_CPUS];
+per_cpu_t cpus[MAX_CPUS];
 
 void
 ap_entry (struct limine_mp_info *info)
@@ -20,8 +20,7 @@ ap_entry (struct limine_mp_info *info)
 
   init_ap_idt ();
   init_ap_gdt (cpu);
-
-  init_int_stacks ();
+  init_ap_int_stacks ();
 
   printf ("AP started\n");
 

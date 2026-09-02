@@ -22,7 +22,7 @@ _start ()
   init_pic ();
   init_lapic ();
   init_ioapic ();
-  // init_aps ();
+  init_aps ();
 
   kernel_main ();
 

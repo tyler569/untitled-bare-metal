@@ -88,7 +88,7 @@ init_gdt (per_cpu_t *cpu)
 
   struct gdt_ptr ptr = {
     .limit = sizeof (cpu->arch.gdt) - 1,
-    .base = (uintptr_t)cpu->arch.gdt,
+    .base = (uintptr_t)&cpu->arch.gdt,
   };
 
   load_gdt (&ptr);
@@ -111,6 +111,10 @@ init_ap_gdt (per_cpu_t *cpu)
 {
   memcpy (cpu->arch.gdt, bsp_cpu.arch.gdt, sizeof (bsp_cpu.arch.gdt));
   memset (&cpu->arch.tss, 0, sizeof (tss_t));
+
+  // ltr on the BSP marks the original TSS busy - fix that
+  cpu->arch.gdt[5].access = TSS;
+  cpu->arch.tss.iomap_base = sizeof (tss_t);
 
   init_gdt (cpu);
 }
