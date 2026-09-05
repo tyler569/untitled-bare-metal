@@ -1,54 +1,62 @@
-name: Build untitled
+name: Build tern
 
-on: [ push ]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
 jobs:
   build-x86_64:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out source
+        uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - name: Install OS dependancies
-        run: |
-          sudo apt update
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository -y "deb https://apt.llvm.org/jammy/ llvm-toolchain-jammy main"
-          sudo apt-get update
-          sudo apt-get upgrade
-          sudo apt install git make cmake ninja-build ruby clang lld xorriso mtools qemu-system
-      - name: build
-        run: |
-          mkdir -p build
-          cmake -B build -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchains/x86_64.cmake
-          cmake --build build
-      - name: Upload ISO
-        uses: actions/upload-artifact@v4
-        with:
-          name: untitled_bare_metal.iso
-          path: untitled_bare_metal.iso
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: untitled_bare_metal.iso
+          persist-credentials: false
 
-  # build-native:
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Install OS dependancies
-  #       run: |
-  #         sudo apt update
-  #         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-  #         sudo add-apt-repository -y "deb https://apt.llvm.org/jammy/ llvm-toolchain-jammy main"
-  #         sudo apt-get update
-  #         sudo apt-get upgrade
-  #         sudo apt install git make cmake ninja-build ruby clang lld xorriso mtools qemu-system
-  #     - name: build
-  #       run: |
-  #         mkdir -p build
-  #         cmake -B build -DCMAKE_C_COMPILER=clang
-  #         cmake --build build
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential cmake ninja-build clang lld xorriso
+
+      - name: Configure
+        run: cmake --preset debug
+
+      - name: Build ISO
+        run: cmake --build build --target iso --parallel
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v7
+        with:
+          name: tern-x86_64
+          path: build/tern.iso
+          if-no-files-found: error
+
+  release:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: build-x86_64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download ISO
+        uses: actions/download-artifact@v8
+        with:
+          name: tern-x86_64
+          path: dist
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: dist/tern.iso
+          fail_on_unmatched_files: true
