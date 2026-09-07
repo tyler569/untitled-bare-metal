@@ -14,7 +14,7 @@
 #include "./serial_driver.h"
 #include <stddef.h>
 
-#define PAGE_SIZE 4096
+[[maybe_unused]] constexpr size_t PAGE_SIZE = 4096;
 
 struct boot_info *bi = nullptr;
 

@@ -2,7 +2,7 @@
 #include "limine.h"
 #include "sys/types.h"
 
-#define INIT_CNODE_SIZE_BITS 12
+constexpr uint8_t INIT_CNODE_SIZE_BITS = 12;
 
 enum boot_capabilities
 {

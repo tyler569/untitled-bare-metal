@@ -3,10 +3,10 @@
 #include "kern/mem.h"
 #include "kern/syscall.h"
 
-#define PML4E_SHIFT 39
-#define PDPTE_SHIFT 30
-#define PDE_SHIFT 21
-#define PTE_SHIFT 12
+constexpr unsigned int PML4E_SHIFT = 39;
+constexpr unsigned int PDPTE_SHIFT = 30;
+constexpr unsigned int PDE_SHIFT = 21;
+[[maybe_unused]] constexpr unsigned int PTE_SHIFT = 12;
 
 #define MASK(n) ((1UL << (n)) - 1)
 

@@ -7,8 +7,8 @@
 #include "stdlib.h"
 #include "sys/bootinfo.h"
 
-#define MAX_EXTENTS 32
-#define MAX_REGIONS 64
+constexpr size_t MAX_EXTENTS = 32;
+constexpr size_t MAX_REGIONS = 64;
 
 struct physical_extent extents[MAX_EXTENTS];
 size_t extent_count = MAX_EXTENTS;

@@ -1,5 +1,9 @@
 #pragma once
 
+// Segment selectors shared with syscall.S.
+#define USER_CS 0x23UL
+#define USER_SS 0x1BUL
+
 #ifndef __ASSEMBLER__
 
 #include "kern/arch/x86_64/exports.h"
@@ -7,57 +11,48 @@
 #include "stddef.h"
 #include "stdint.h"
 
-#endif // __ASSEMBLER__
+constexpr uint32_t IA32_EFER = 0xC0000080;
+constexpr uint32_t IA32_STAR = 0xC0000081;
+constexpr uint32_t IA32_LSTAR = 0xC0000082;
+constexpr uint32_t IA32_CSTAR = 0xC0000083;
+constexpr uint32_t IA32_FMASK = 0xC0000084;
+constexpr uint32_t IA32_FS_BASE = 0xC0000100;
+constexpr uint32_t IA32_GS_BASE = 0xC0000101;
 
-#define IA32_EFER 0xC0000080U
-#define IA32_STAR 0xC0000081U
-#define IA32_LSTAR 0xC0000082U
-#define IA32_CSTAR 0xC0000083U
-#define IA32_FMASK 0xC0000084U
-#define IA32_FS_BASE 0xC0000100U
-#define IA32_GS_BASE 0xC0000101U
+constexpr uint64_t IA32_EFER_SCE = 1;
 
-#define IA32_EFER_SCE 1
+constexpr uint64_t CR0_MP = 1 << 1;
+constexpr uint64_t CR0_EM = 1 << 2;
+constexpr uint64_t CR4_OSFXSR = 1 << 9;
+constexpr uint64_t CR4_OSXMMEXCPT = 1 << 10;
+constexpr uint64_t CR4_FSGSBASE = 1 << 16;
 
-#define CR0_MP (1UL << 1)
-#define CR0_EM (1UL << 2)
-#define CR4_OSFXSR (1UL << 9)
-#define CR4_OSXMMEXCPT (1UL << 10)
-#define CR4_FSGSBASE (1UL << 16)
-
-#define KERNEL_CS 0x08UL
-#define KERNEL_SS 0x10UL
-#define USER_CS 0x23UL
-#define USER_SS 0x1BUL
+constexpr uint64_t KERNEL_CS = 0x08;
+constexpr uint64_t KERNEL_SS = 0x10;
 // In long mode, SYSRET pulls its code segment from IA32_STAR 63:48 + 16
 // and its stack segment from IA32_STAR 63:48 + 8. This is the fake code
 // segment that we load into IA32_STAR, so that the real code segment is
 // KERNEL_CS.
-#define USER_FAKE_SYSRET_CS (USER_CS - 16L)
+constexpr uint64_t USER_FAKE_SYSRET_CS = USER_CS - 16;
 
-#define FLAG_CF 0x0001
-#define FLAG_PF 0x0004
-#define FLAG_AF 0x0010
-#define FLAG_ZF 0x0040
-#define FLAG_SF 0x0080
-#define FLAG_TF 0x0100
-#define FLAG_IF 0x0200
-#define FLAG_DF 0x0400
-#define FLAG_OF 0x0800
+constexpr uint64_t FLAG_CF = 0x1;
+constexpr uint64_t FLAG_PF = 0x4;
+constexpr uint64_t FLAG_AF = 0x10;
+constexpr uint64_t FLAG_ZF = 0x40;
+constexpr uint64_t FLAG_SF = 0x80;
+constexpr uint64_t FLAG_TF = 0x100;
+constexpr uint64_t FLAG_IF = 0x200;
+constexpr uint64_t FLAG_DF = 0x400;
+constexpr uint64_t FLAG_OF = 0x800;
 
-// #define PF_PRESENT 0x1
-// #define PF_WRITE 0x2
-// #define PF_USER 0x4
-// #define PF_RESERVED 0x8
-// #define PF_EXECUTE 0x10
-// #define PF_PROTECTION_KEY 0x20
-// #define PF_SHADOW_STACK 0x40
+constexpr uint8_t IST_NMI = 1;
+constexpr uint8_t IST_DF = 2;
 
+#endif // __ASSEMBLER__
+
+// Offsets shared with syscall.S.
 #define TSS_RSP2 28UL
 #define TSS_STACK 168UL
-
-#define IST_NMI 1
-#define IST_DF 2
 
 #ifndef __ASSEMBLER__
 

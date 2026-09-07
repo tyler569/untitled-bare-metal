@@ -4,7 +4,7 @@
 #include "stdio.h"
 #include "x86_64.h"
 
-#define MAX_CPUS 32
+constexpr size_t MAX_CPUS = 32;
 
 static struct limine_mp_request smpinfo = {
   .id = LIMINE_MP_REQUEST_ID,

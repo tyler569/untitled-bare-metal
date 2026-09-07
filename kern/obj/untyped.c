@@ -10,7 +10,7 @@
 #include "string.h"
 #include "sys/types.h"
 
-#define MAX_UNTYPED_ROOT_CAPS 256
+constexpr size_t MAX_UNTYPED_ROOT_CAPS = 256;
 cap_t root_untyped_capabilities[MAX_UNTYPED_ROOT_CAPS];
 size_t root_untyped_cap_count = 0;
 

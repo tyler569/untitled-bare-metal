@@ -116,8 +116,8 @@ get_number (struct format_spec *spec, bool signed_, va_list *args)
 
 const char *const lower_hex_charset = "0123456789abcdef";
 const char *const upper_hex_charset = "0123456789ABCDEF";
-#define NUM_MAX_DIGITS 64
-#define NUM_BUF_SIZE (NUM_MAX_DIGITS + 1)
+constexpr int NUM_MAX_DIGITS = 64;
+constexpr int NUM_BUF_SIZE = NUM_MAX_DIGITS + 1;
 
 MUST_USE
 static const char *

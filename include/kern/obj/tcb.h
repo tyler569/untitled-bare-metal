@@ -10,7 +10,7 @@
 #include "sys/ipc.h"
 #include "sys/types.h"
 
-#define MAX_PRIORITY 254
+constexpr uint8_t MAX_PRIORITY = 254;
 
 enum tcb_state
 {

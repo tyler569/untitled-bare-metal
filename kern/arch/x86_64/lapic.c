@@ -1,9 +1,9 @@
 #include "kern/mem.h"
 #include "x86_64.h"
 
-#define DESTINATION_SELF 1
-#define DESTINATION_ALL_INCLUDING_SELF 2
-#define DESTINATION_ALL_EXCLUDING_SELF 3
+[[maybe_unused]] constexpr uint32_t DESTINATION_SELF = 1;
+[[maybe_unused]] constexpr uint32_t DESTINATION_ALL_INCLUDING_SELF = 2;
+[[maybe_unused]] constexpr uint32_t DESTINATION_ALL_EXCLUDING_SELF = 3;
 
 constexpr uintptr_t IA32_APIC_BASE = 0x1B;
 

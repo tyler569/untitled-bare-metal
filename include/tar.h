@@ -1,3 +1,6 @@
+#pragma once
+
+#include "stddef.h"
 #include "stdint.h"
 #include "sys/cdefs.h"
 
@@ -22,18 +25,18 @@ struct PACKED tar_header
 };
 
 #define TMAGIC "ustar" /* ustar and a null */
-#define TMAGLEN 6
+constexpr size_t TMAGLEN = 6;
 #define TVERSION "00" /* 00 and no null */
-#define TVERSLEN 2
+constexpr size_t TVERSLEN = 2;
 
-#define REGTYPE '0'   /* regular file */
-#define AREGTYPE '\0' /* regular file */
-#define LNKTYPE '1'   /* link */
-#define SYMTYPE '2'   /* reserved */
-#define CHRTYPE '3'   /* character special */
-#define BLKTYPE '4'   /* block special */
-#define DIRTYPE '5'   /* directory */
-#define FIFOTYPE '6'  /* FIFO special */
-#define CONTTYPE '7'  /* reserved */
+constexpr char REGTYPE = '0';   /* regular file */
+constexpr char AREGTYPE = '\0'; /* regular file */
+constexpr char LNKTYPE = '1';   /* link */
+constexpr char SYMTYPE = '2';   /* reserved */
+constexpr char CHRTYPE = '3';   /* character special */
+constexpr char BLKTYPE = '4';   /* block special */
+constexpr char DIRTYPE = '5';   /* directory */
+constexpr char FIFOTYPE = '6';  /* FIFO special */
+constexpr char CONTTYPE = '7';   /* reserved */
 
 void *find_tar_entry (struct tar_header *tar, const char *name);

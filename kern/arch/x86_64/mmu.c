@@ -7,17 +7,17 @@
 #define PTE_ADDR(pte) ((pte) & 0x000FFFFFFFFFF000)
 #define PTE(pte) (pte_t *)(direct_map_of (PTE_ADDR (pte)))
 
-#define PML4_SHIFT 39
-#define PML4_MASK 0x1FF
+constexpr unsigned int PML4_SHIFT = 39;
+constexpr uintptr_t PML4_MASK = 0x1FF;
 
-#define PDP_SHIFT 30
-#define PDP_MASK 0x1FF
+constexpr unsigned int PDP_SHIFT = 30;
+constexpr uintptr_t PDP_MASK = 0x1FF;
 
-#define PD_SHIFT 21
-#define PD_MASK 0x1FF
+constexpr unsigned int PD_SHIFT = 21;
+constexpr uintptr_t PD_MASK = 0x1FF;
 
-#define PT_SHIFT 12
-#define PT_MASK 0x1FF
+constexpr unsigned int PT_SHIFT = 12;
+constexpr uintptr_t PT_MASK = 0x1FF;
 
 extern uintptr_t KERNEL_END;
 static _Atomic uintptr_t vm_alloc_base = (uintptr_t)&KERNEL_END;

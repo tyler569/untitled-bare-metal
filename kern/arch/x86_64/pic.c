@@ -1,9 +1,9 @@
 #include "x86_64.h"
 
-#define PRIMARY_COMMAND 0x20
-#define PRIMARY_DATA 0x21
-#define SECONDARY_COMMAND 0xA0
-#define SECONDARY_DATA 0xA1
+constexpr uint16_t PRIMARY_COMMAND = 0x20;
+constexpr uint16_t PRIMARY_DATA = 0x21;
+constexpr uint16_t SECONDARY_COMMAND = 0xA0;
+constexpr uint16_t SECONDARY_DATA = 0xA1;
 
 void
 init_pic ()

@@ -2,12 +2,12 @@
 #include "sys/cdefs.h"
 #include "x86_64.h"
 
-#define KERNEL_CODE 0x9A
-#define KERNEL_DATA 0x92
-#define USER_CODE 0xFA
-#define USER_DATA 0xF2
-#define TSS 0x89
-#define LONG_MODE 0x20
+constexpr uint8_t KERNEL_CODE = 0x9A;
+constexpr uint8_t KERNEL_DATA = 0x92;
+constexpr uint8_t USER_CODE = 0xFA;
+constexpr uint8_t USER_DATA = 0xF2;
+constexpr uint8_t TSS = 0x89;
+constexpr uint8_t LONG_MODE = 0x20;
 
 #define DESCRIPTOR(a, g) { .access = a, .granularity = g }
 #define TSS_DESCRIPTOR_LOW() { .access = TSS, .limit_low = sizeof (tss_t) - 1 }
