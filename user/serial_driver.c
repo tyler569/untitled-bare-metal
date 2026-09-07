@@ -28,13 +28,13 @@ bool have_receiver = false;
 void
 port_write (uint16_t port, uint8_t value)
 {
-  x86_64_io_port_out8 (serial_serial_port_cap, SERIAL_PORT + port, value);
+  x86_64_io_port_out8 (SERIAL_SERIAL_PORT_CAP, SERIAL_PORT + port, value);
 }
 
 uint8_t
 port_read (uint16_t port)
 {
-  x86_64_io_port_in8 (serial_serial_port_cap, SERIAL_PORT + port);
+  x86_64_io_port_in8 (SERIAL_SERIAL_PORT_CAP, SERIAL_PORT + port);
   return get_mr (0);
 }
 
@@ -75,7 +75,7 @@ read_uart (message_info_t)
 {
   if (buffer_size == 0)
 	{
-	  reply (new_message_info (would_block, 0, 0, 0));
+	  reply (new_message_info (WOULD_BLOCK, 0, 0, 0));
 	  return;
 	}
 
@@ -98,10 +98,10 @@ handle_irq ()
           buffer[buffer_size++] = b;
         }
 
-      signal (serial_read_notification_cap);
+      signal (SERIAL_READ_NOTIFICATION_CAP);
     }
 
-  irq_handler_ack (serial_irq_cap);
+  irq_handler_ack (SERIAL_IRQ_CAP);
 }
 
 [[noreturn]] int
@@ -112,21 +112,21 @@ driver_thread_main ()
   initialize_uart ();
   printf ("UART initialized\n");
 
-  irq_handler_set_notification (serial_irq_cap, serial_irq_notification_cap);
-  tcb_bind_notification (serial_tcb_cap, serial_irq_notification_cap);
+  irq_handler_set_notification (SERIAL_IRQ_CAP, SERIAL_IRQ_NOTIFICATION_CAP);
+  tcb_bind_notification (SERIAL_TCB_CAP, SERIAL_IRQ_NOTIFICATION_CAP);
 
   while (true)
     {
       message_info_t info;
       word_t badge = 0;
 
-      info = recv (serial_endpoint_cap, &badge);
+      info = recv (SERIAL_ENDPOINT_CAP, &badge);
 
       if (badge == 0xFFFF)
         handle_irq ();
-      else if (get_message_label (info) == serial_driver_write)
+      else if (get_message_label (info) == SERIAL_DRIVER_WRITE)
         write_uart (info);
-	  else if (get_message_label (info) == serial_driver_read)
+	  else if (get_message_label (info) == SERIAL_DRIVER_READ)
 		read_uart (info);
     }
 }

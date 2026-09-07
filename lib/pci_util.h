@@ -4,17 +4,17 @@
 
 enum pci_manager_caps
 {
-  pci_endpoint_cap,
-  pci_port_cap,
-  pci_cnode_cap,
-  pci_tmp_cap,
+  PCI_ENDPOINT_CAP,
+  PCI_PORT_CAP,
+  PCI_CNODE_CAP,
+  PCI_TMP_CAP,
 };
 
 enum pci_manager_message
 {
-  pci_manager_issue,
-  pci_manager_read,
-  pci_manager_write,
-  pci_manager_device_info,
-  pci_manager_enumerate,
+  PCI_MANAGER_ISSUE,
+  PCI_MANAGER_READ,
+  PCI_MANAGER_WRITE,
+  PCI_MANAGER_DEVICE_INFO,
+  PCI_MANAGER_ENUMERATE,
 };

@@ -5,17 +5,17 @@
 
 #include "./lib.h"
 
-constexpr size_t bitmap_size = 512;
-constexpr size_t bits_per_word = 64;
-uint64_t bitmap[bitmap_size];
+constexpr size_t BITMAP_SIZE = 512;
+constexpr size_t BITS_PER_WORD = 64;
+uint64_t bitmap[BITMAP_SIZE];
 
 static inline void
 cptr_set_range (cptr_t start, cptr_t end)
 {
   for (size_t i = start; i < end; i++)
     {
-      size_t idx = i / bits_per_word;
-      size_t bit = i % bits_per_word;
+      size_t idx = i / BITS_PER_WORD;
+      size_t bit = i % BITS_PER_WORD;
       bitmap[idx] |= (1ULL << bit);
     }
 }
@@ -25,8 +25,8 @@ cptr_clear_range (cptr_t start, cptr_t end)
 {
   for (size_t i = start; i < end; i++)
     {
-      size_t idx = i / bits_per_word;
-      size_t bit = i % bits_per_word;
+      size_t idx = i / BITS_PER_WORD;
+      size_t bit = i % BITS_PER_WORD;
       bitmap[idx] &= ~(1ULL << bit);
     }
 }
@@ -41,7 +41,7 @@ cptr_alloc_init (struct boot_info *bi)
 cptr_t
 cptr_alloc ()
 {
-  for (size_t i = 0; i < bitmap_size; i++)
+  for (size_t i = 0; i < BITMAP_SIZE; i++)
     if (bitmap[i] != 0xFFFFFFFFFFFFFFFF)
       for (size_t j = 0; j < 64; j++)
         if ((bitmap[i] & (1 << j)) == 0)
@@ -55,20 +55,20 @@ cptr_alloc ()
 cptr_t
 cptr_alloc_range (size_t n)
 {
-  for (size_t i = 0; i < bitmap_size; i++)
+  for (size_t i = 0; i < BITMAP_SIZE; i++)
     if (bitmap[i] != 0xFFFFFFFFFFFFFFFF)
       for (size_t j = 0; j < 64; j++)
-        for (size_t j = 0; j < bits_per_word; j++)
+        for (size_t j = 0; j < BITS_PER_WORD; j++)
           {
             // Check if there is enough space for `n` bits starting at position
             // (i * 64 + j).
             bool found = true;
             for (size_t k = 0; k < n; k++)
               {
-                size_t idx = i + ((j + k) / bits_per_word);
-                size_t bit = (j + k) % bits_per_word;
+                size_t idx = i + ((j + k) / BITS_PER_WORD);
+                size_t bit = (j + k) % BITS_PER_WORD;
 
-                if (idx >= bitmap_size || (bitmap[idx] & (1ULL << bit)) != 0)
+                if (idx >= BITMAP_SIZE || (bitmap[idx] & (1ULL << bit)) != 0)
                   {
                     found = false;
                     break;
@@ -80,12 +80,12 @@ cptr_alloc_range (size_t n)
                 // Mark the range as allocated.
                 for (size_t k = 0; k < n; k++)
                   {
-                    size_t idx = (i * bits_per_word + j + k) / bits_per_word;
-                    size_t bit = (j + k) % bits_per_word;
+                    size_t idx = (i * BITS_PER_WORD + j + k) / BITS_PER_WORD;
+                    size_t bit = (j + k) % BITS_PER_WORD;
                     bitmap[idx] |= (1ULL << bit);
                   }
 
-                return (i * bits_per_word) + j;
+                return (i * BITS_PER_WORD) + j;
               }
           }
   return -1;

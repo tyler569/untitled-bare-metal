@@ -6,14 +6,14 @@ constexpr uint8_t INIT_CNODE_SIZE_BITS = 12;
 
 enum boot_capabilities
 {
-  init_cap_null,
-  init_cap_init_tcb,
-  init_cap_root_cnode,
-  init_cap_init_vspace,
-  init_cap_io_port_control,
-  init_cap_irq_control,
+  INIT_CAP_NULL,
+  INIT_CAP_INIT_TCB,
+  INIT_CAP_ROOT_CNODE,
+  INIT_CAP_INIT_VSPACE,
+  INIT_CAP_IO_PORT_CONTROL,
+  INIT_CAP_IRQ_CONTROL,
 
-  init_cap_first_untyped,
+  INIT_CAP_FIRST_UNTYPED,
 };
 
 struct cap_range

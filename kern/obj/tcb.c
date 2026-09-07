@@ -13,7 +13,7 @@
 #include "string.h"
 #include "sys/syscall.h"
 
-static_assert (sizeof (struct tcb) <= BIT (tcb_size_bits),
+static_assert (sizeof (struct tcb) <= BIT (TCB_SIZE_BITS),
                "tcb size is too large");
 
 // struct list_head runnable_tcbs[MAX_PRIORITY];
@@ -137,9 +137,9 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
 
   struct tcb *tcb = cap_ptr (slot);
 
-  copy_cap (&tcb->cspace_root, cspace_root, cap_rights_all);
-  copy_cap (&tcb->vspace_root, vspace_root, cap_rights_all);
-  copy_cap (&tcb->ipc_buffer_frame, buffer_frame, cap_rights_all);
+  copy_cap (&tcb->cspace_root, cspace_root, CAP_RIGHTS_ALL);
+  copy_cap (&tcb->vspace_root, vspace_root, CAP_RIGHTS_ALL);
+  copy_cap (&tcb->ipc_buffer_frame, buffer_frame, CAP_RIGHTS_ALL);
 
   tcb->ipc_buffer = cap_ptr (buffer_frame);
 
@@ -150,7 +150,7 @@ message_info_t
 tcb_bind_notification (cte_t *cap, cte_t *notification)
 {
   struct tcb *tcb = cap_ptr (cap);
-  if (cap_type (notification) != cap_notification)
+  if (cap_type (notification) != CAP_NOTIFICATION)
     return msg_illegal_operation ();
 
   struct notification *n = cap_ptr (notification);

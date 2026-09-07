@@ -20,7 +20,7 @@ irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
   cte_t *result_cte;
   TRY (lookup_cap_slot (root, index, depth, &result_cte));
 
-  if (cap_type (result_cte) != cap_null)
+  if (cap_type (result_cte) != CAP_NULL)
     return msg_delete_first ();
 
   if (irq >= 16)

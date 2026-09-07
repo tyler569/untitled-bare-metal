@@ -10,7 +10,7 @@ struct endpoint
   struct list_head list;
 };
 
-static_assert (sizeof (struct endpoint) <= BIT (endpoint_size_bits));
+static_assert (sizeof (struct endpoint) <= BIT (ENDPOINT_SIZE_BITS));
 
 // sends
 void invoke_endpoint_send (cte_t *cap);

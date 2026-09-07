@@ -62,7 +62,7 @@ print_bootinfo_information ()
 halt_forever ()
 {
   printf ("Halting forever\n");
-  tcb_suspend (init_cap_init_tcb);
+  tcb_suspend (INIT_CAP_INIT_TCB);
   unreachable ();
 }
 
@@ -110,7 +110,7 @@ spawn_calculator_thread (cptr_t untyped, cptr_t calculator_endpoint)
   struct thread_data td = {
     .elf_header = calculator_elf,
     .untyped = untyped,
-    .scratch_vspace = init_cap_init_vspace,
+    .scratch_vspace = INIT_CAP_INIT_VSPACE,
     .name = "calculator_server",
     .arguments[0] = calculator_endpoint,
   };
@@ -138,41 +138,41 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint, cptr_t serial_read_
 
   int err;
 
-  cptr_t cnode = allocate_with_size (untyped, cap_cnode, 1, 4);
+  cptr_t cnode = allocate_with_size (untyped, CAP_CNODE, 1, 4);
 
   // serial_cnode_cap
-  cnode_copy (cnode, serial_cnode_cap, 64, init_cap_root_cnode, cnode, 64,
-              cap_rights_all);
+  cnode_copy (cnode, SERIAL_CNODE_CAP, 64, INIT_CAP_ROOT_CNODE, cnode, 64,
+              CAP_RIGHTS_ALL);
 
   // serial_serial_port_cap
-  x86_64_io_port_control_issue (init_cap_io_port_control, 0x3F8, 0x3FF, cnode,
-                                serial_serial_port_cap, 64);
+  x86_64_io_port_control_issue (INIT_CAP_IO_PORT_CONTROL, 0x3F8, 0x3FF, cnode,
+                                SERIAL_SERIAL_PORT_CAP, 64);
 
   // serial_endpoint_cap
-  cnode_copy (cnode, serial_endpoint_cap, 64, init_cap_root_cnode,
-              serial_endpoint, 64, cap_rights_all);
+  cnode_copy (cnode, SERIAL_ENDPOINT_CAP, 64, INIT_CAP_ROOT_CNODE,
+              serial_endpoint, 64, CAP_RIGHTS_ALL);
 
   // serial_read_notification_cap
-  cnode_copy (cnode, serial_read_notification_cap, 64, init_cap_root_cnode,
-			  serial_read_ntfn, 64, cap_rights_all);
+  cnode_copy (cnode, SERIAL_READ_NOTIFICATION_CAP, 64, INIT_CAP_ROOT_CNODE,
+			  serial_read_ntfn, 64, CAP_RIGHTS_ALL);
 
   // serial_irq_cap
-  irq_control_get (init_cap_irq_control, 4, cnode, serial_irq_cap, 64);
+  irq_control_get (INIT_CAP_IRQ_CONTROL, 4, cnode, SERIAL_IRQ_CAP, 64);
 
   // serial_notification_cap
-  untyped_retype (untyped, cap_notification, 0, init_cap_root_cnode, cnode, 64,
-                  serial_notification_cap, 1);
+  untyped_retype (untyped, CAP_NOTIFICATION, 0, INIT_CAP_ROOT_CNODE, cnode, 64,
+                  SERIAL_NOTIFICATION_CAP, 1);
 
   // serial_badged_notification_cap
-  err = cnode_mint (cnode, serial_irq_notification_cap, 64, cnode,
-                    serial_notification_cap, 64, cap_rights_all, 0xFFFF);
+  err = cnode_mint (cnode, SERIAL_IRQ_NOTIFICATION_CAP, 64, cnode,
+                    SERIAL_NOTIFICATION_CAP, 64, CAP_RIGHTS_ALL, 0xFFFF);
   if (err)
     printf ("Failed to mint badged notification cap 1: %d\n", err);
 
   struct thread_data tdd = {
     .elf_header = serial_driver_elf,
     .untyped = untyped,
-    .scratch_vspace = init_cap_init_vspace,
+    .scratch_vspace = INIT_CAP_INIT_VSPACE,
     .cspace_root = cnode,
     .name = "serial_driver",
   };
@@ -185,8 +185,8 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint, cptr_t serial_read_
     printf ("Successfully created serial_driver process\n");
 
   // serial_tcb_cap
-  cnode_copy (cnode, serial_tcb_cap, 64, init_cap_root_cnode, tdd.tcb, 64,
-              cap_rights_all);
+  cnode_copy (cnode, SERIAL_TCB_CAP, 64, INIT_CAP_ROOT_CNODE, tdd.tcb, 64,
+              CAP_RIGHTS_ALL);
 
   tcb_resume (tdd.tcb);
 }
@@ -202,15 +202,15 @@ spawn_cdt_test (cptr_t main_untyped, cptr_t test_untyped)
     }
 
   // Create a cnode for the CDT test using the main untyped
-  cptr_t test_cnode = allocate_with_size (main_untyped, cap_cnode, 1, 7);
+  cptr_t test_cnode = allocate_with_size (main_untyped, CAP_CNODE, 1, 7);
 
   // Copy the cnode cap into the test cnode itself (slot 0)
-  cnode_copy (test_cnode, 0, 64, init_cap_root_cnode, test_cnode, 64,
-              cap_rights_all);
+  cnode_copy (test_cnode, 0, 64, INIT_CAP_ROOT_CNODE, test_cnode, 64,
+              CAP_RIGHTS_ALL);
 
   // Delegate the TEST untyped into slot 1 (so test can revoke it safely)
-  cnode_copy (test_cnode, 1, 64, init_cap_root_cnode, test_untyped, 64,
-              cap_rights_all);
+  cnode_copy (test_cnode, 1, 64, INIT_CAP_ROOT_CNODE, test_untyped, 64,
+              CAP_RIGHTS_ALL);
 
   printf ("CDT Test cnode contents:\n");
   cnode_debug_print (test_cnode);
@@ -218,7 +218,7 @@ spawn_cdt_test (cptr_t main_untyped, cptr_t test_untyped)
   struct thread_data td = {
     .elf_header = cdt_test_elf,
     .untyped = main_untyped, // Use main untyped for thread infrastructure
-    .scratch_vspace = init_cap_init_vspace,
+    .scratch_vspace = INIT_CAP_INIT_VSPACE,
     .cspace_root = test_cnode,
     .name = "cdt_test",
   };
@@ -246,27 +246,27 @@ spawn_pci_manager (cptr_t untyped, cptr_t port)
   int err;
 
   // Create a cnode for the PCI manager (4 slots: endpoint, port, cnode, tmp)
-  cptr_t pci_cnode = allocate_with_size (untyped, cap_cnode, 1, 4);
+  cptr_t pci_cnode = allocate_with_size (untyped, CAP_CNODE, 1, 4);
 
   // pci_endpoint_cap (slot 0)
-  cptr_t pci_endpoint = allocate (untyped, cap_endpoint, 1);
-  cnode_copy (pci_cnode, pci_endpoint_cap, 64, init_cap_root_cnode,
-              pci_endpoint, 64, cap_rights_all);
+  cptr_t pci_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
+  cnode_copy (pci_cnode, PCI_ENDPOINT_CAP, 64, INIT_CAP_ROOT_CNODE,
+              pci_endpoint, 64, CAP_RIGHTS_ALL);
 
   // pci_port_cap (slot 1)
-  cnode_copy (pci_cnode, pci_port_cap, 64, init_cap_root_cnode, port, 64,
-              cap_rights_all);
+  cnode_copy (pci_cnode, PCI_PORT_CAP, 64, INIT_CAP_ROOT_CNODE, port, 64,
+              CAP_RIGHTS_ALL);
 
   // pci_cnode_cap (slot 2)
-  cnode_copy (pci_cnode, pci_cnode_cap, 64, init_cap_root_cnode, pci_cnode, 64,
-              cap_rights_all);
+  cnode_copy (pci_cnode, PCI_CNODE_CAP, 64, INIT_CAP_ROOT_CNODE, pci_cnode, 64,
+              CAP_RIGHTS_ALL);
 
   // pci_tmp_cap (slot 3) - left empty for now
 
   struct thread_data td = {
     .elf_header = pci_manager_elf,
     .untyped = untyped,
-    .scratch_vspace = init_cap_init_vspace,
+    .scratch_vspace = INIT_CAP_INIT_VSPACE,
     .cspace_root = pci_cnode,
     .name = "pci_manager",
   };
@@ -291,7 +291,7 @@ calc_add (cptr_t calculator_endpoint, long a, long b)
 {
   set_mr (0, (word_t)a);
   set_mr (1, (word_t)b);
-  message_info_t info = new_message_info (calculator_add, 0, 0, 2);
+  message_info_t info = new_message_info (CALCULATOR_ADD, 0, 0, 2);
   call (calculator_endpoint, info, nullptr);
   return get_mr (0);
 }
@@ -349,7 +349,7 @@ serial_capitalization_server (cptr_t serial_endpoint, cptr_t serial_notification
             set_mr (i, byte + 'A' - 'a');
         }
 
-      info = new_message_info (serial_driver_write, 0, 0, regs);
+      info = new_message_info (SERIAL_DRIVER_WRITE, 0, 0, regs);
       send (serial_endpoint, info);
     }
 }
@@ -358,7 +358,7 @@ void
 enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
 {
   // Call enumerate to get all PCI device addresses
-  message_info_t info = new_message_info (pci_manager_enumerate, 0, 0, 0);
+  message_info_t info = new_message_info (PCI_MANAGER_ENUMERATE, 0, 0, 0);
   info = call (pci_manager_endpoint, info, nullptr);
 
   size_t num_devices = get_message_length (info);
@@ -380,7 +380,7 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
 
       // Call device_info to get the first 64 bytes of config space
       set_mr (0, pci_address);
-      info = new_message_info (pci_manager_device_info, 0, 0, 1);
+      info = new_message_info (PCI_MANAGER_DEVICE_INFO, 0, 0, 1);
       info = call (pci_manager_endpoint, info, nullptr);
 
       // Parse config space from returned MRs (8 qwords = 64 bytes)
@@ -447,7 +447,7 @@ map_framebuffer (cptr_t untyped)
         continue;
       if (bi->untypeds[i].base == fbaddr)
         {
-          fbuntyped = init_cap_first_untyped + i;
+          fbuntyped = INIT_CAP_FIRST_UNTYPED + i;
           break;
         }
     }
@@ -465,18 +465,18 @@ map_framebuffer (cptr_t untyped)
     {
       uintptr_t addr = fbaddr + page_offset;
       cptr_t cptr = cptr_alloc ();
-      int err = untyped_retype (fbuntyped, cap_x86_64_page, 12,
-                                init_cap_root_cnode, init_cap_root_cnode, 64,
+      int err = untyped_retype (fbuntyped, CAP_X86_64_PAGE, 12,
+                                INIT_CAP_ROOT_CNODE, INIT_CAP_ROOT_CNODE, 64,
                                 cptr, 1);
-      if (err != no_error)
+      if (err != NO_ERROR)
         {
           printf ("Error: could not allocate framebuffer page: (%s)\n",
                   error_string (err));
           return nullptr;
         }
 
-      err = map_page (untyped, init_cap_init_vspace, cptr, addr);
-      if (err != no_error)
+      err = map_page (untyped, INIT_CAP_INIT_VSPACE, cptr, addr);
+      if (err != NO_ERROR)
         {
           printf ("Error: could not map framebuffer page: (%s)\n",
                   error_string (err));
@@ -540,16 +540,16 @@ main (void *boot_info)
 
   setup_memory_information (bi);
 
-  word_t untyped = init_cap_first_untyped + untypeds[0].index;
-  word_t test_untyped = init_cap_first_untyped + untypeds[1].index;
+  word_t untyped = INIT_CAP_FIRST_UNTYPED + untypeds[0].index;
+  word_t test_untyped = INIT_CAP_FIRST_UNTYPED + untypeds[1].index;
 
   printf ("Largest untyped: %lx\n", untyped);
   printf ("CDT test untyped: %lx (size: %d bits)\n", test_untyped,
           untypeds[1].size_bits);
 
   cptr_t pci_io_port = cptr_alloc ();
-  x86_64_io_port_control_issue (init_cap_io_port_control, 0xCF8, 0xCFF,
-                                init_cap_root_cnode, pci_io_port, 64);
+  x86_64_io_port_control_issue (INIT_CAP_IO_PORT_CONTROL, 0xCF8, 0xCFF,
+                                INIT_CAP_ROOT_CNODE, pci_io_port, 64);
 
   // Spawn PCI manager and enumerate devices
   cptr_t pci_manager_endpoint = spawn_pci_manager (untyped, pci_io_port);
@@ -557,8 +557,8 @@ main (void *boot_info)
     enumerate_and_print_pci_devices (pci_manager_endpoint);
 
   cptr_t e9_io_port = cptr_alloc ();
-  x86_64_io_port_control_issue (init_cap_io_port_control, 0xE9, 0xE9,
-                                init_cap_root_cnode, e9_io_port, 64);
+  x86_64_io_port_control_issue (INIT_CAP_IO_PORT_CONTROL, 0xE9, 0xE9,
+                                INIT_CAP_ROOT_CNODE, e9_io_port, 64);
   print_to_e9 (e9_io_port, "Hello, E9 World!\n");
 
   // void *fb = map_framebuffer (untyped);
@@ -569,9 +569,9 @@ main (void *boot_info)
   // draw_square (fb, 400, 400, 100, 100, 0xFF000000);
   // draw_circle (fb, 150, 400, 50, 0xFF0000);
 
-  cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
-  cptr_t serial_endpoint = allocate (untyped, cap_endpoint, 1);
-  cptr_t serial_ntfn = allocate (untyped, cap_notification, 1);
+  cptr_t calculator_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
+  cptr_t serial_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
+  cptr_t serial_ntfn = allocate (untyped, CAP_NOTIFICATION, 1);
 
   // Run CDT tests first (uses main untyped for infra, test_untyped for
   // testing)

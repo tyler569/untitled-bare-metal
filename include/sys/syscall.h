@@ -6,24 +6,24 @@
 
 enum object_type
 {
-  cap_null,
-  cap_endpoint,
-  cap_reply,
-  cap_notification,
-  cap_cnode,
-  cap_tcb,
-  cap_untyped,
-  cap_x86_64_io_port,
-  cap_x86_64_io_port_control,
-  cap_x86_64_pml4,
-  cap_x86_64_pdpt,
-  cap_x86_64_pd,
-  cap_x86_64_pt,
-  cap_x86_64_page,
-  cap_x86_64_huge_page,
-  cap_irq_control,
-  cap_irq_handler,
-  max_cap_type,
+  CAP_NULL,
+  CAP_ENDPOINT,
+  CAP_REPLY,
+  CAP_NOTIFICATION,
+  CAP_CNODE,
+  CAP_TCB,
+  CAP_UNTYPED,
+  CAP_X86_64_IO_PORT,
+  CAP_X86_64_IO_PORT_CONTROL,
+  CAP_X86_64_PML4,
+  CAP_X86_64_PDPT,
+  CAP_X86_64_PD,
+  CAP_X86_64_PT,
+  CAP_X86_64_PAGE,
+  CAP_X86_64_HUGE_PAGE,
+  CAP_IRQ_CONTROL,
+  CAP_IRQ_HANDLER,
+  MAX_CAP_TYPE,
 };
 
 static inline const char *
@@ -31,39 +31,39 @@ cap_type_string (word_t type)
 {
   switch (type)
     {
-    case cap_null:
+    case CAP_NULL:
       return "null";
-    case cap_endpoint:
+    case CAP_ENDPOINT:
       return "endpoint";
-    case cap_reply:
+    case CAP_REPLY:
       return "reply";
-    case cap_notification:
+    case CAP_NOTIFICATION:
       return "notification";
-    case cap_cnode:
+    case CAP_CNODE:
       return "cnode";
-    case cap_tcb:
+    case CAP_TCB:
       return "tcb";
-    case cap_untyped:
+    case CAP_UNTYPED:
       return "untyped";
-    case cap_x86_64_io_port:
+    case CAP_X86_64_IO_PORT:
       return "x86_64_io_port";
-    case cap_x86_64_io_port_control:
+    case CAP_X86_64_IO_PORT_CONTROL:
       return "x86_64_io_port_control";
-    case cap_x86_64_pml4:
+    case CAP_X86_64_PML4:
       return "x86_64_pml4";
-    case cap_x86_64_pdpt:
+    case CAP_X86_64_PDPT:
       return "x86_64_pdpt";
-    case cap_x86_64_pd:
+    case CAP_X86_64_PD:
       return "x86_64_pd";
-    case cap_x86_64_pt:
+    case CAP_X86_64_PT:
       return "x86_64_pt";
-    case cap_x86_64_page:
+    case CAP_X86_64_PAGE:
       return "x86_64_page";
-    case cap_x86_64_huge_page:
+    case CAP_X86_64_HUGE_PAGE:
       return "x86_64_huge_page";
-    case cap_irq_control:
+    case CAP_IRQ_CONTROL:
       return "irq_control";
-    case cap_irq_handler:
+    case CAP_IRQ_HANDLER:
       return "irq_handler";
     default:
       return "unknown";
@@ -72,59 +72,59 @@ cap_type_string (word_t type)
 
 enum method_id
 {
-  METHOD_invalid,
-  METHOD_cnode_copy,
-  METHOD_cnode_delete,
-  METHOD_cnode_mint,
-  METHOD_cnode_revoke,
-  METHOD_cnode_debug_print,
-  METHOD_cnode_debug_get,
-  METHOD_tcb_configure,
-  METHOD_tcb_read_registers,
-  METHOD_tcb_resume,
-  METHOD_tcb_bind_notification,
-  METHOD_tcb_set_tls_base,
-  METHOD_tcb_suspend,
-  METHOD_tcb_write_registers,
-  METHOD_tcb_set_debug,
-  METHOD_tcb_set_name,
-  METHOD_untyped_retype,
-  METHOD_x86_64_io_port_in8,
-  METHOD_x86_64_io_port_in16,
-  METHOD_x86_64_io_port_in32,
-  METHOD_x86_64_io_port_out8,
-  METHOD_x86_64_io_port_out16,
-  METHOD_x86_64_io_port_out32,
-  METHOD_x86_64_io_port_control_issue,
-  METHOD_x86_64_pdpt_map,
-  METHOD_x86_64_pd_map,
-  METHOD_x86_64_pt_map,
-  METHOD_x86_64_page_map,
-  METHOD_x86_64_huge_page_map,
-  METHOD_irq_control_get,
-  METHOD_irq_handler_ack,
-  METHOD_irq_handler_clear,
-  METHOD_irq_handler_set_notification,
+  METHOD_INVALID,
+  METHOD_CNODE_COPY,
+  METHOD_CNODE_DELETE,
+  METHOD_CNODE_MINT,
+  METHOD_CNODE_REVOKE,
+  METHOD_CNODE_DEBUG_PRINT,
+  METHOD_CNODE_DEBUG_GET,
+  METHOD_TCB_CONFIGURE,
+  METHOD_TCB_READ_REGISTERS,
+  METHOD_TCB_RESUME,
+  METHOD_TCB_BIND_NOTIFICATION,
+  METHOD_TCB_SET_TLS_BASE,
+  METHOD_TCB_SUSPEND,
+  METHOD_TCB_WRITE_REGISTERS,
+  METHOD_TCB_SET_DEBUG,
+  METHOD_TCB_SET_NAME,
+  METHOD_UNTYPED_RETYPE,
+  METHOD_X86_64_IO_PORT_IN8,
+  METHOD_X86_64_IO_PORT_IN16,
+  METHOD_X86_64_IO_PORT_IN32,
+  METHOD_X86_64_IO_PORT_OUT8,
+  METHOD_X86_64_IO_PORT_OUT16,
+  METHOD_X86_64_IO_PORT_OUT32,
+  METHOD_X86_64_IO_PORT_CONTROL_ISSUE,
+  METHOD_X86_64_PDPT_MAP,
+  METHOD_X86_64_PD_MAP,
+  METHOD_X86_64_PT_MAP,
+  METHOD_X86_64_PAGE_MAP,
+  METHOD_X86_64_HUGE_PAGE_MAP,
+  METHOD_IRQ_CONTROL_GET,
+  METHOD_IRQ_HANDLER_ACK,
+  METHOD_IRQ_HANDLER_CLEAR,
+  METHOD_IRQ_HANDLER_SET_NOTIFICATION,
 };
 
 enum error_code
 {
-  no_error,
-  alignment_error,
-  delete_first,
-  failed_lookup,
-  illegal_operation,
-  invalid_argument,
-  invalid_capability,
-  invalid_syscall,
-  invalid_root,
-  not_enough_memory,
-  range_error,
-  revoke_first,
-  truncated_message,
-  unknown_message,
-  would_block,
-  max_error_code,
+  NO_ERROR,
+  ALIGNMENT_ERROR,
+  DELETE_FIRST,
+  FAILED_LOOKUP,
+  ILLEGAL_OPERATION,
+  INVALID_ARGUMENT,
+  INVALID_CAPABILITY,
+  INVALID_SYSCALL,
+  INVALID_ROOT,
+  NOT_ENOUGH_MEMORY,
+  RANGE_ERROR,
+  REVOKE_FIRST,
+  TRUNCATED_MESSAGE,
+  UNKNOWN_MESSAGE,
+  WOULD_BLOCK,
+  MAX_ERROR_CODE,
 };
 
 static inline const char *
@@ -132,35 +132,35 @@ error_string (error_t error)
 {
   switch (error)
     {
-    case no_error:
+    case NO_ERROR:
       return "no error";
-    case alignment_error:
+    case ALIGNMENT_ERROR:
       return "alignment error";
-    case delete_first:
+    case DELETE_FIRST:
       return "delete first";
-    case failed_lookup:
+    case FAILED_LOOKUP:
       return "failed lookup";
-    case illegal_operation:
+    case ILLEGAL_OPERATION:
       return "illegal operation";
-    case invalid_argument:
+    case INVALID_ARGUMENT:
       return "invalid argument";
-    case invalid_capability:
+    case INVALID_CAPABILITY:
       return "invalid capability";
-    case invalid_syscall:
+    case INVALID_SYSCALL:
       return "invalid syscall";
-    case invalid_root:
+    case INVALID_ROOT:
       return "invalid root";
-    case not_enough_memory:
+    case NOT_ENOUGH_MEMORY:
       return "not enough memory";
-    case range_error:
+    case RANGE_ERROR:
       return "range error";
-    case revoke_first:
+    case REVOKE_FIRST:
       return "revoke first";
-    case truncated_message:
+    case TRUNCATED_MESSAGE:
       return "truncated message";
-    case unknown_message:
+    case UNKNOWN_MESSAGE:
       return "unknown message";
-    case would_block:
+    case WOULD_BLOCK:
       return "would block";
     default:
       return "unknown";
@@ -169,14 +169,14 @@ error_string (error_t error)
 
 enum syscall_number
 {
-  sys_exit,
-  sys_debug_write,
-  sys_call,
-  sys_yield,
-  sys_send,
-  sys_nbsend,
-  sys_recv,
-  sys_nbrecv,
-  sys_reply,
-  sys_replyrecv,
+  SYS_EXIT,
+  SYS_DEBUG_WRITE,
+  SYS_CALL,
+  SYS_YIELD,
+  SYS_SEND,
+  SYS_NBSEND,
+  SYS_RECV,
+  SYS_NBRECV,
+  SYS_REPLY,
+  SYS_REPLYRECV,
 };

@@ -1,10 +1,10 @@
 enum
 {
-  calculator_quit = 0,
-  calculator_ret42 = 1,
-  calculator_double = 2,
-  calculator_inc = 3,
-  calculator_add = 4,
+  CALCULATOR_QUIT = 0,
+  CALCULATOR_RET42 = 1,
+  CALCULATOR_DOUBLE = 2,
+  CALCULATOR_INC = 3,
+  CALCULATOR_ADD = 4,
 
-  calculator_error_unknown = 5,
+  CALCULATOR_ERROR_UNKNOWN = 5,
 };

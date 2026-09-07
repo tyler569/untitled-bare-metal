@@ -58,24 +58,24 @@ map_elf_to_new_vspace (struct elf_ehdr *ehdr, cptr_t untyped, cptr_t vspace,
   return highest_addr;
 }
 
-constexpr size_t default_stack_pages = 4;
+constexpr size_t DEFAULT_STACK_PAGES = 4;
 
 int
 spawn_thread (struct thread_data *data)
 {
   struct elf_ehdr *ehdr = data->elf_header;
   if (!is_elf (ehdr))
-    return invalid_argument;
+    return INVALID_ARGUMENT;
 
   cptr_t untyped = data->untyped;
   cptr_t our_vspace = data->scratch_vspace;
-  size_t stack_pages = data->stack_pages ?: default_stack_pages;
+  size_t stack_pages = data->stack_pages ?: DEFAULT_STACK_PAGES;
 
-  cptr_t tcb = allocate (untyped, cap_tcb, 1);
-  cptr_t vspace = allocate (untyped, cap_x86_64_pml4, 1);
+  cptr_t tcb = allocate (untyped, CAP_TCB, 1);
+  cptr_t vspace = allocate (untyped, CAP_X86_64_PML4, 1);
   buffer_t ipc_buffer = create_buffer (untyped, 1);
   buffer_t stack_buffer = create_buffer (untyped, stack_pages);
-  cptr_t cspace_root = data->cspace_root ?: init_cap_root_cnode;
+  cptr_t cspace_root = data->cspace_root ?: INIT_CAP_ROOT_CNODE;
 
   uintptr_t highest_addr
       = map_elf_to_new_vspace (ehdr, untyped, vspace, our_vspace);

@@ -40,7 +40,7 @@ class KMethod
   end
 
   def identifier_name
-    'METHOD_' + @type.name + '_' + @name
+    'METHOD_' + @type.name.upcase + '_' + @name.upcase
   end
 
   def user_param_list
@@ -181,7 +181,7 @@ class KType
   end
 
   def type_name
-    'cap_' + @name
+    'CAP_' + @name.upcase
   end
 end
 
@@ -216,7 +216,7 @@ File.open("include/#{HEADERS[:global_constants]}", 'w') do |f|
   type_objs.each do |type|
     f.puts "  #{type.type_name},"
   end
-  f.puts "  max_cap_type,"
+  f.puts "  MAX_CAP_TYPE,"
   f.puts "};"
   f.puts
   f.puts "static inline const char *cap_type_string (word_t type) {"
@@ -230,7 +230,7 @@ File.open("include/#{HEADERS[:global_constants]}", 'w') do |f|
   f.puts
   # method enum
   f.puts "enum method_id {"
-  f.puts "  METHOD_invalid,"
+  f.puts "  METHOD_INVALID,"
   type_objs.each do |type|
     type.kmethods.each do |method|
       f.puts "  #{method.identifier_name},"
@@ -241,15 +241,15 @@ File.open("include/#{HEADERS[:global_constants]}", 'w') do |f|
   # error enum
   f.puts "enum error_code {"
   intf['errors'].each do |error|
-    f.puts "  #{error},"
+    f.puts "  #{error.upcase},"
   end
-  f.puts "  max_error_code,"
+  f.puts "  MAX_ERROR_CODE,"
   f.puts "};"
   f.puts
   f.puts "static inline const char *error_string (error_t error) {"
   f.puts "  switch (error) {"
   intf['errors'].each do |error|
-    f.puts "    case #{error}: return \"#{error.gsub('_', ' ')}\";"
+    f.puts "    case #{error.upcase}: return \"#{error.gsub('_', ' ')}\";"
   end
   f.puts "    default: return \"unknown\";"
   f.puts "  }"
@@ -258,7 +258,7 @@ File.open("include/#{HEADERS[:global_constants]}", 'w') do |f|
   # syscall number
   f.puts "enum syscall_number {"
   intf['system_calls'].each do |syscall|
-    f.puts "  #{syscall},"
+    f.puts "  #{syscall.upcase},"
   end
   f.puts "};"
 end

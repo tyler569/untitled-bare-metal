@@ -6,7 +6,7 @@
 static message_info_t
 signal_waiting_receiver (struct tcb *receiver, word_t badge)
 {
-  message_info_t tag = new_message_info (no_error, 0, 0, 0);
+  message_info_t tag = new_message_info (NO_ERROR, 0, 0, 0);
 
   receiver->ipc_buffer->tag = tag;
   receiver->ipc_buffer->sender_badge = badge;
@@ -76,7 +76,7 @@ notification_signal (struct notification *nfn, word_t badge)
 message_info_t
 invoke_notification_send (cte_t *cap)
 {
-  assert (cap_type (cap) == cap_notification);
+  assert (cap_type (cap) == CAP_NOTIFICATION);
 
   struct notification *nfn = cap_ptr (cap);
   maybe_init_notification (nfn);
@@ -87,7 +87,7 @@ invoke_notification_send (cte_t *cap)
 message_info_t
 invoke_notification_recv (cte_t *cap)
 {
-  assert (cap_type (cap) == cap_notification);
+  assert (cap_type (cap) == CAP_NOTIFICATION);
 
   struct notification *nfn = cap_ptr (cap);
   maybe_init_notification (nfn);

@@ -8,10 +8,10 @@
 #include "sys/bootinfo.h"
 #include "tar.h"
 
-constexpr size_t cnode_slots = BIT (INIT_CNODE_SIZE_BITS);
+constexpr size_t CNODE_SLOTS = BIT (INIT_CNODE_SIZE_BITS);
 
 struct tcb init_tcb;
-cte_t init_cnode[cnode_slots];
+cte_t init_cnode[CNODE_SLOTS];
 
 static struct limine_framebuffer_request fbinfo = {
   .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
@@ -96,11 +96,11 @@ create_init_tcb (void *initrd, size_t initrd_size)
     size_t slot;
     cap_t cap;
   } seed_caps[] = {
-    { init_cap_init_tcb, init_tcb_cap },
-    { init_cap_root_cnode, init_cnode_cap },
-    { init_cap_init_vspace, init_vspace_cap },
-    { init_cap_io_port_control, init_io_port_cap },
-    { init_cap_irq_control, init_irq_control_cap },
+    { INIT_CAP_INIT_TCB, init_tcb_cap },
+    { INIT_CAP_ROOT_CNODE, init_cnode_cap },
+    { INIT_CAP_INIT_VSPACE, init_vspace_cap },
+    { INIT_CAP_IO_PORT_CONTROL, init_io_port_cap },
+    { INIT_CAP_IRQ_CONTROL, init_irq_control_cap },
   };
 
   for (size_t i = 0; i < sizeof (seed_caps) / sizeof (seed_caps[0]); i++)
@@ -110,12 +110,12 @@ create_init_tcb (void *initrd, size_t initrd_size)
   init_tcb.vspace_root.cap = init_vspace_cap;
 
   // untyped ranges
-  size_t n_untyped = cnode_slots - init_cap_first_untyped;
-  create_init_untyped_caps (init_cnode + init_cap_first_untyped, &n_untyped,
+  size_t n_untyped = CNODE_SLOTS - INIT_CAP_FIRST_UNTYPED;
+  create_init_untyped_caps (init_cnode + INIT_CAP_FIRST_UNTYPED, &n_untyped,
                             bi->untypeds);
 
-  size_t n_free_slots = cnode_slots - init_cap_first_untyped - n_untyped;
-  create_init_untyped_device_caps (init_cnode + init_cap_first_untyped
+  size_t n_free_slots = CNODE_SLOTS - INIT_CAP_FIRST_UNTYPED - n_untyped;
+  create_init_untyped_device_caps (init_cnode + INIT_CAP_FIRST_UNTYPED
                                        + n_untyped,
                                    &n_free_slots, bi->untypeds + n_untyped);
 
@@ -123,12 +123,12 @@ create_init_tcb (void *initrd, size_t initrd_size)
   bi->n_untypeds += n_untyped;
 
   bi->untyped_range = (struct cap_range){
-    .start = init_cap_first_untyped,
-    .end = init_cap_first_untyped + n_untyped,
+    .start = INIT_CAP_FIRST_UNTYPED,
+    .end = INIT_CAP_FIRST_UNTYPED + n_untyped,
   };
   bi->empty_range = (struct cap_range){
-    .start = init_cap_first_untyped + n_untyped,
-    .end = cnode_slots,
+    .start = INIT_CAP_FIRST_UNTYPED + n_untyped,
+    .end = CNODE_SLOTS,
   };
 
   bi->framebuffer_info = *volatile_read (fbinfo.response)->framebuffers[0];

@@ -31,27 +31,27 @@ void
 send (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall1 (sys_send, cap);
+  _syscall1 (SYS_SEND, cap);
 }
 
 void
 nbsend (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall1 (sys_nbsend, cap);
+  _syscall1 (SYS_NBSEND, cap);
 }
 
 void
 signal (cptr_t cap)
 {
-  _syscall1 (sys_send, cap);
+  _syscall1 (SYS_SEND, cap);
 }
 
 message_info_t
 call (cptr_t cap, message_info_t info, word_t *sender)
 {
   __ipc_buffer->tag = info;
-  _syscall1 (sys_call, cap);
+  _syscall1 (SYS_CALL, cap);
   if (sender)
     *sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
@@ -61,14 +61,14 @@ message_info_t
 __call_kernel (cptr_t cap, message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall1 (sys_call, cap);
+  _syscall1 (SYS_CALL, cap);
   return __ipc_buffer->tag;
 }
 
 message_info_t
 recv (cptr_t cap, word_t *sender)
 {
-  _syscall1 (sys_recv, cap);
+  _syscall1 (SYS_RECV, cap);
   if (sender)
     *sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
@@ -77,7 +77,7 @@ recv (cptr_t cap, word_t *sender)
 message_info_t
 nbrecv (cptr_t cap, word_t *sender)
 {
-  _syscall1 (sys_nbrecv, cap);
+  _syscall1 (SYS_NBRECV, cap);
   if (sender)
     *sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
@@ -86,7 +86,7 @@ nbrecv (cptr_t cap, word_t *sender)
 void
 wait (cptr_t cap, word_t *nfn_word)
 {
-  _syscall1 (sys_recv, cap);
+  _syscall1 (SYS_RECV, cap);
   if (nfn_word)
     *nfn_word = __ipc_buffer->sender_badge;
 }
@@ -95,7 +95,7 @@ message_info_t
 reply (message_info_t info)
 {
   __ipc_buffer->tag = info;
-  _syscall0 (sys_reply);
+  _syscall0 (SYS_REPLY);
   return __ipc_buffer->tag;
 }
 
@@ -103,7 +103,7 @@ message_info_t
 reply_recv (cptr_t cap, message_info_t info, word_t *sender)
 {
   __ipc_buffer->tag = info;
-  _syscall1 (sys_replyrecv, cap);
+  _syscall1 (SYS_REPLYRECV, cap);
   if (sender)
     *sender = __ipc_buffer->sender_badge;
   return __ipc_buffer->tag;
@@ -112,7 +112,7 @@ reply_recv (cptr_t cap, message_info_t info, word_t *sender)
 void
 yield ()
 {
-  _syscall0 (sys_yield);
+  _syscall0 (SYS_YIELD);
 }
 
 [[noreturn]] void
@@ -135,7 +135,7 @@ panic (const char *format, ...)
 long
 write (FILE *, const void *str, unsigned long len)
 {
-  _syscall2 (sys_debug_write, (uintptr_t)str, len);
+  _syscall2 (SYS_DEBUG_WRITE, (uintptr_t)str, len);
   return (long)len;
 }
 
@@ -143,7 +143,7 @@ cptr_t
 allocate (cptr_t untyped, word_t type, size_t n)
 {
   cptr_t cptr = cptr_alloc_range (n);
-  untyped_retype (untyped, type, 0, init_cap_root_cnode, init_cap_root_cnode,
+  untyped_retype (untyped, type, 0, INIT_CAP_ROOT_CNODE, INIT_CAP_ROOT_CNODE,
                   64, cptr, n);
   return cptr;
 }
@@ -152,8 +152,8 @@ cptr_t
 allocate_with_size (cptr_t untyped, word_t type, size_t n, uint8_t size_bits)
 {
   cptr_t cptr = cptr_alloc_range (n);
-  untyped_retype (untyped, type, size_bits, init_cap_root_cnode,
-                  init_cap_root_cnode, 64, cptr, n);
+  untyped_retype (untyped, type, size_bits, INIT_CAP_ROOT_CNODE,
+                  INIT_CAP_ROOT_CNODE, 64, cptr, n);
   return cptr;
 }
 
@@ -166,22 +166,22 @@ map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
     {
       int err = x86_64_page_map (page, vspace, addr, 0x7);
 
-      if (err != failed_lookup) // including "no_error"
+      if (err != FAILED_LOOKUP) // including "no_error"
         return err;
 
       switch (get_mr (0))
         {
         case 3:
-          cptr_t pdpt = allocate (untyped, cap_x86_64_pdpt, 1);
-          assert (x86_64_pdpt_map (pdpt, vspace, addr, 0x7) == no_error);
+          cptr_t pdpt = allocate (untyped, CAP_X86_64_PDPT, 1);
+          assert (x86_64_pdpt_map (pdpt, vspace, addr, 0x7) == NO_ERROR);
           break;
         case 2:
-          cptr_t pd = allocate (untyped, cap_x86_64_pd, 1);
-          assert (x86_64_pd_map (pd, vspace, addr, 0x7) == no_error);
+          cptr_t pd = allocate (untyped, CAP_X86_64_PD, 1);
+          assert (x86_64_pd_map (pd, vspace, addr, 0x7) == NO_ERROR);
           break;
         case 1:
-          cptr_t pt = allocate (untyped, cap_x86_64_pt, 1);
-          assert (x86_64_pt_map (pt, vspace, addr, 0x7) == no_error);
+          cptr_t pt = allocate (untyped, CAP_X86_64_PT, 1);
+          assert (x86_64_pt_map (pt, vspace, addr, 0x7) == NO_ERROR);
           break;
         default:
           assert (0);
@@ -192,7 +192,7 @@ map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
 buffer_t
 create_buffer (cptr_t untyped, size_t pages)
 {
-  return (buffer_t){ allocate (untyped, cap_x86_64_page, pages), pages };
+  return (buffer_t){ allocate (untyped, CAP_X86_64_PAGE, pages), pages };
 }
 
 int
@@ -207,7 +207,7 @@ map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer, uintptr_t addr)
         return err;
     }
 
-  return no_error;
+  return NO_ERROR;
 }
 
 uintptr_t mappable_addr = 0x900000;

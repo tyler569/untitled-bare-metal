@@ -28,7 +28,7 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
       cte_t *cap;
       error_t err
           = lookup_cap_slot_raw (&sender->cspace_root, send_cptr, 64, &cap);
-      if (err != no_error)
+      if (err != NO_ERROR)
         {
           // Silently drop cap transfer - clear extra_caps in receiver's tag
           receiver->ipc_buffer->tag.extra_caps = 0;
@@ -39,7 +39,7 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
       err = lookup_cap_slot_raw (&receiver->cspace_root,
                                  receiver->ipc_buffer->receive_cnode, 64,
                                  &recv_cnode_root);
-      if (err != no_error)
+      if (err != NO_ERROR)
         {
           receiver->ipc_buffer->tag.extra_caps = 0;
           goto finish;
@@ -49,13 +49,13 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
       err = lookup_cap_slot_raw (
           recv_cnode_root, receiver->ipc_buffer->receive_index,
           receiver->ipc_buffer->receive_depth, &recv_slot);
-      if (err != no_error)
+      if (err != NO_ERROR)
         {
           receiver->ipc_buffer->tag.extra_caps = 0;
           goto finish;
         }
 
-      copy_cap (recv_slot, cap, cap_rights_all);
+      copy_cap (recv_slot, cap, CAP_RIGHTS_ALL);
     }
 
 finish:
@@ -201,7 +201,7 @@ maybe_init_endpoint (struct endpoint *e)
 void
 invoke_endpoint_send (cte_t *cap)
 {
-  assert (cap_type (cap) == cap_endpoint);
+  assert (cap_type (cap) == CAP_ENDPOINT);
 
   this_tcb->expects_reply = false;
 
@@ -218,7 +218,7 @@ invoke_endpoint_nbsend (cte_t *cap)
   printf ("nbsend: %s\n", cap_type_string (cap));
   panic ("how did we get here\n");
 
-  assert (cap_type (cap) == cap_endpoint);
+  assert (cap_type (cap) == CAP_ENDPOINT);
 
   this_tcb->expects_reply = false;
 
@@ -245,7 +245,7 @@ handle_recv_with_pending_notification ()
 message_info_t
 invoke_endpoint_recv (cte_t *cap)
 {
-  assert (cap_type (cap) == cap_endpoint);
+  assert (cap_type (cap) == CAP_ENDPOINT);
 
   if (handle_recv_with_pending_notification ())
     return msg_ok (0);
@@ -258,7 +258,7 @@ invoke_endpoint_recv (cte_t *cap)
 message_info_t
 invoke_endpoint_nbrecv (cte_t *cap)
 {
-  assert (cap_type (cap) == cap_endpoint);
+  assert (cap_type (cap) == CAP_ENDPOINT);
 
   if (handle_recv_with_pending_notification ())
     return msg_ok (0);
@@ -271,7 +271,7 @@ invoke_endpoint_nbrecv (cte_t *cap)
 void
 invoke_endpoint_call (cte_t *cap)
 {
-  assert (cap_type (cap) == cap_endpoint);
+  assert (cap_type (cap) == CAP_ENDPOINT);
 
   this_tcb->expects_reply = true;
   this_tcb->state = TASK_STATE_CALLING;

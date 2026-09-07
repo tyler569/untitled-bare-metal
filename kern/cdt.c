@@ -32,15 +32,15 @@ remove (struct cte *del)
 message_info_t
 copy (struct cte *dest, struct cte *src, cap_rights_t rights_mask)
 {
-  if (cap_type (dest) != cap_null)
+  if (cap_type (dest) != CAP_NULL)
     return msg_delete_first ();
 
-  if (cap_type (src) == cap_untyped && src->cap.badge)
+  if (cap_type (src) == CAP_UNTYPED && src->cap.badge)
     return msg_revoke_first ();
 
   dest->cap = src->cap;
 
-  if (cap_type (src) != cap_untyped)
+  if (cap_type (src) != CAP_UNTYPED)
     dest->cap.is_original = false;
 
   cap_set_rights (dest, cap_rights (src) & rights_mask);
@@ -54,10 +54,10 @@ message_info_t
 mint (struct cte *dest, struct cte *src, unsigned long badge,
       cap_rights_t rights_mask)
 {
-  if (cap_type (dest) != cap_null)
+  if (cap_type (dest) != CAP_NULL)
     return msg_delete_first ();
 
-  if (cap_type (src) != cap_endpoint && cap_type (src) != cap_notification)
+  if (cap_type (src) != CAP_ENDPOINT && cap_type (src) != CAP_NOTIFICATION)
     return msg_illegal_operation ();
 
   if (src->cap.badge != 0)
@@ -67,7 +67,7 @@ mint (struct cte *dest, struct cte *src, unsigned long badge,
   dest->cap.badge = badge;
 
   // minted badged endpoints are marked original, notifications are not
-  if (cap_type (src) == cap_notification)
+  if (cap_type (src) == CAP_NOTIFICATION)
     dest->cap.is_original = false;
 
   cap_set_rights (dest, cap_rights (src) & rights_mask);
@@ -105,11 +105,11 @@ is_child (struct cte *c, struct cte *parent)
     return false;
   if (!parent->cap.is_original)
     return false;
-  if (parent->cap.type == cap_untyped)
+  if (parent->cap.type == CAP_UNTYPED)
     return untyped_contains (parent, c);
   if (c->cap.type != parent->cap.type)
     return false;
-  if (parent->cap.type == cap_endpoint)
+  if (parent->cap.type == CAP_ENDPOINT)
     return parent->cap.badge == c->cap.badge || parent->cap.badge == 0;
   return true;
 }

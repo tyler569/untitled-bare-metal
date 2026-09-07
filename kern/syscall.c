@@ -11,33 +11,33 @@
 static message_info_t
 op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 {
-  if (syscall_number != sys_debug_write && syscall_number != sys_exit)
+  if (syscall_number != SYS_DEBUG_WRITE && syscall_number != SYS_EXIT)
     dbg_printf ("Task %p a0:%#lx ", this_tcb, a0);
 
-  if (syscall_number == sys_exit)
+  if (syscall_number == SYS_EXIT)
     dbg_printf ("Task %p ", this_tcb);
 
   // the syscalls without a capability handle in a0
   switch (syscall_number)
     {
-    case sys_exit:
+    case SYS_EXIT:
       dbg_printf ("sys_exit ()\n");
 
       kill_tcb (this_tcb);
       schedule ();
 
       return msg_noreturn ();
-    case sys_debug_write:
+    case SYS_DEBUG_WRITE:
       write_debug (nullptr, (const void *)a0, a1);
 
       return msg_ok (0);
-    case sys_yield:
+    case SYS_YIELD:
       dbg_printf ("sys_yield ()\n");
 
       schedule ();
 
       return msg_noreturn ();
-    case sys_reply:
+    case SYS_REPLY:
       dbg_printf ("sys_reply (info: %#lx)\n", a0);
 
       invoke_reply ();
@@ -51,73 +51,73 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 
   switch (syscall_number)
     {
-    case sys_call:
+    case SYS_CALL:
       {
         dbg_printf ("sys_call (dest: %#lx)\n", a0);
 
-        if (cap_type (slot) != cap_endpoint)
+        if (cap_type (slot) != CAP_ENDPOINT)
           return dispatch_method (slot, this_tcb->ipc_buffer->tag);
 
         invoke_endpoint_call (slot);
         return msg_noreturn ();
       }
-    case sys_send:
+    case SYS_SEND:
       {
         dbg_printf ("sys_send (dest: %#lx)\n", a0);
 
-        if (cap_type (slot) != cap_notification && cap_type (slot) != cap_endpoint)
-          return msg_err (invalid_capability, 0);
+        if (cap_type (slot) != CAP_NOTIFICATION && cap_type (slot) != CAP_ENDPOINT)
+          return msg_err (INVALID_CAPABILITY, 0);
 
-        if (cap_type (slot) == cap_notification)
+        if (cap_type (slot) == CAP_NOTIFICATION)
           invoke_notification_send (slot);
-        else if (cap_type (slot) == cap_endpoint)
+        else if (cap_type (slot) == CAP_ENDPOINT)
           invoke_endpoint_send (slot);
 
         return msg_noreturn ();
       }
-    case sys_nbsend:
+    case SYS_NBSEND:
       {
         dbg_printf ("sys_nbsend (dest: %#lx)\n", a0);
 
-        if (cap_type (slot) != cap_endpoint)
-          return msg_err (invalid_capability, 0);
+        if (cap_type (slot) != CAP_ENDPOINT)
+          return msg_err (INVALID_CAPABILITY, 0);
 
         invoke_endpoint_nbsend (slot);
         return msg_noreturn ();
       }
-    case sys_recv:
+    case SYS_RECV:
       {
         dbg_printf ("sys_recv (dest: %#lx)\n", a0);
 
-        if (cap_type (slot) != cap_notification && cap_type (slot) != cap_endpoint)
-          return msg_err (invalid_capability, 0);
+        if (cap_type (slot) != CAP_NOTIFICATION && cap_type (slot) != CAP_ENDPOINT)
+          return msg_err (INVALID_CAPABILITY, 0);
 
-        if (cap_type (slot) == cap_notification)
+        if (cap_type (slot) == CAP_NOTIFICATION)
           return invoke_notification_recv (slot);
-        else if (cap_type (slot) == cap_endpoint)
+        else if (cap_type (slot) == CAP_ENDPOINT)
           return invoke_endpoint_recv (slot);
       }
-    case sys_nbrecv:
+    case SYS_NBRECV:
       {
         dbg_printf ("sys_nbrecv (dest: %#lx)\n", a0);
 
-        if (cap_type (slot) != cap_endpoint)
-          return msg_err (invalid_capability, 0);
+        if (cap_type (slot) != CAP_ENDPOINT)
+          return msg_err (INVALID_CAPABILITY, 0);
 
         return invoke_endpoint_nbrecv (slot);
       }
-    case sys_replyrecv:
+    case SYS_REPLYRECV:
       {
         dbg_printf ("sys_replyrecv (dest: %#lx)\n", a0);
 
-        if (cap_type (slot) != cap_endpoint)
-          return msg_err (invalid_capability, 0);
+        if (cap_type (slot) != CAP_ENDPOINT)
+          return msg_err (INVALID_CAPABILITY, 0);
 
         return invoke_reply_recv (slot);
       }
     default:
       err_printf ("Invalid syscall number: %d\n", syscall_number);
-      return msg_err (invalid_syscall, 0);
+      return msg_err (INVALID_SYSCALL, 0);
     }
 }
 

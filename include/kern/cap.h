@@ -6,7 +6,7 @@
 #include "sys/syscall.h"
 #include "sys/types.h"
 
-constexpr uintptr_t bits_ptr_mask = 0xFFFF'FFFF'FFF0;
+constexpr uintptr_t BITS_PTR_MASK = 0xFFFF'FFFF'FFF0;
 
 static inline bool
 is_safe_cap_ptr (void *ptr)
@@ -24,7 +24,7 @@ is_safe_cap_ptr (void *ptr)
 static inline void *
 bits_pointer (word_t bits)
 {
-  word_t ptr_bits = bits & bits_ptr_mask;
+  word_t ptr_bits = bits & BITS_PTR_MASK;
   if (ptr_bits & 0x8000'0000'0000)
     return (void *)(ptr_bits | 0xFFFF'0000'0000'0000);
   else
@@ -35,8 +35,8 @@ static inline void
 set_bits_pointer (word_t *bits, void *ptr)
 {
   assert (is_safe_cap_ptr (ptr));
-  *bits &= ~bits_ptr_mask;
-  *bits |= (word_t)ptr & bits_ptr_mask;
+  *bits &= ~BITS_PTR_MASK;
+  *bits |= (word_t)ptr & BITS_PTR_MASK;
 }
 
 union capability
@@ -114,14 +114,14 @@ cap_set_rights (cap_t *cap, word_t rights)
 static inline cap_t
 cap_null_new ()
 {
-  cap_t cap = { .type = cap_null };
+  cap_t cap = { .type = CAP_NULL };
   return cap;
 }
 
 static inline cap_t
 cap_untyped_new (uintptr_t paddr, uintptr_t size_bits)
 {
-  cap_t cap = { .type = cap_untyped, .size_bits = size_bits };
+  cap_t cap = { .type = CAP_UNTYPED, .size_bits = size_bits };
   cap_set_ptr (&cap, (void *)paddr);
   return cap;
 }
@@ -130,7 +130,7 @@ static inline cap_t
 cap_untyped_device_new (uintptr_t paddr, uintptr_t size_bits)
 {
   cap_t cap = {
-    .type = cap_untyped,
+    .type = CAP_UNTYPED,
     .size_bits = size_bits,
     .is_device = 1,
   };
@@ -141,7 +141,7 @@ cap_untyped_device_new (uintptr_t paddr, uintptr_t size_bits)
 static inline cap_t
 cap_endpoint_new (void *endpoint, uintptr_t badge)
 {
-  cap_t cap = { .type = cap_endpoint, .badge = badge };
+  cap_t cap = { .type = CAP_ENDPOINT, .badge = badge };
   cap_set_ptr (&cap, endpoint);
   return cap;
 }
@@ -149,7 +149,7 @@ cap_endpoint_new (void *endpoint, uintptr_t badge)
 static inline cap_t
 cap_cnode_new (void *cnode, uintptr_t size_bits)
 {
-  cap_t cap = { .type = cap_cnode, .size_bits = size_bits };
+  cap_t cap = { .type = CAP_CNODE, .size_bits = size_bits };
   cap_set_ptr (&cap, cnode);
   return cap;
 }
@@ -157,7 +157,7 @@ cap_cnode_new (void *cnode, uintptr_t size_bits)
 static inline cap_t
 cap_tcb_new (void *tcb)
 {
-  cap_t cap = { .type = cap_tcb };
+  cap_t cap = { .type = CAP_TCB };
   cap_set_ptr (&cap, tcb);
   return cap;
 }
@@ -165,7 +165,7 @@ cap_tcb_new (void *tcb)
 static inline cap_t
 cap_x86_64_io_port_control_new ()
 {
-  cap_t cap = { .type = cap_x86_64_io_port_control };
+  cap_t cap = { .type = CAP_X86_64_IO_PORT_CONTROL };
   return cap;
 }
 
@@ -173,7 +173,7 @@ static inline cap_t
 cap_x86_64_io_port_new (uint16_t first_port, uint16_t last_port)
 {
   cap_t cap
-      = { .type = cap_x86_64_io_port, .ptr = first_port, .badge = last_port };
+      = { .type = CAP_X86_64_IO_PORT, .ptr = first_port, .badge = last_port };
   return cap;
 }
 
@@ -192,7 +192,7 @@ cap_x86_64_io_port_last_port (cap_t cap)
 static inline cap_t
 cap_x86_64_pml4_new (uintptr_t pml4_phy)
 {
-  cap_t cap = { .type = cap_x86_64_pml4 };
+  cap_t cap = { .type = CAP_X86_64_PML4 };
   cap_set_ptr (&cap, (void *)pml4_phy);
   return cap;
 }
@@ -200,7 +200,7 @@ cap_x86_64_pml4_new (uintptr_t pml4_phy)
 static inline cap_t
 cap_x86_64_pdpt_new (uintptr_t pdpt_phy)
 {
-  cap_t cap = { .type = cap_x86_64_pdpt };
+  cap_t cap = { .type = CAP_X86_64_PDPT };
   cap_set_ptr (&cap, (void *)pdpt_phy);
   return cap;
 }
@@ -208,7 +208,7 @@ cap_x86_64_pdpt_new (uintptr_t pdpt_phy)
 static inline cap_t
 cap_x86_64_pd_new (uintptr_t pd_phy)
 {
-  cap_t cap = { .type = cap_x86_64_pd };
+  cap_t cap = { .type = CAP_X86_64_PD };
   cap_set_ptr (&cap, (void *)pd_phy);
   return cap;
 }
@@ -216,7 +216,7 @@ cap_x86_64_pd_new (uintptr_t pd_phy)
 static inline cap_t
 cap_x86_64_pt_new (uintptr_t pt_phy)
 {
-  cap_t cap = { .type = cap_x86_64_pt };
+  cap_t cap = { .type = CAP_X86_64_PT };
   cap_set_ptr (&cap, (void *)pt_phy);
   return cap;
 }
@@ -224,7 +224,7 @@ cap_x86_64_pt_new (uintptr_t pt_phy)
 static inline cap_t
 cap_x86_64_page_new (uintptr_t frame_phy)
 {
-  cap_t cap = { .type = cap_x86_64_page };
+  cap_t cap = { .type = CAP_X86_64_PAGE };
   cap_set_ptr (&cap, (void *)frame_phy);
   return cap;
 }
@@ -232,13 +232,13 @@ cap_x86_64_page_new (uintptr_t frame_phy)
 static inline cap_t
 cap_irq_control_new ()
 {
-  return (cap_t){ .type = cap_irq_control };
+  return (cap_t){ .type = CAP_IRQ_CONTROL };
 }
 
 static inline cap_t
 cap_irq_handler_new (word_t irq)
 {
-  cap_t cap = { .type = cap_irq_handler, .size_bits = irq };
+  cap_t cap = { .type = CAP_IRQ_HANDLER, .size_bits = irq };
   return cap;
 }
 

@@ -5,18 +5,18 @@
 
 enum object_size_bits
 {
-  endpoint_size_bits = 4,
-  notification_size_bits = 5,
-  cnode_slot_bits = 5,
-  tcb_size_bits = 9,
+  ENDPOINT_SIZE_BITS = 4,
+  NOTIFICATION_SIZE_BITS = 5,
+  CNODE_SLOT_BITS = 5,
+  TCB_SIZE_BITS = 9,
 
-  frame_size_bits = 12,
-  huge_frame_size_bits = 21,
+  FRAME_SIZE_BITS = 12,
+  HUGE_FRAME_SIZE_BITS = 21,
 
-  pml4_size_bits = 12,
-  pdpt_size_bits = 12,
-  pd_size_bits = 12,
-  pt_size_bits = 12,
+  PML4_SIZE_BITS = 12,
+  PDPT_SIZE_BITS = 12,
+  PD_SIZE_BITS = 12,
+  PT_SIZE_BITS = 12,
 };
 
 static inline word_t
@@ -24,30 +24,30 @@ object_size (word_t object_type, word_t size_bits)
 {
   switch (object_type)
     {
-    case cap_null:
+    case CAP_NULL:
       return 0;
-    case cap_tcb:
-      return BIT (tcb_size_bits);
-    case cap_cnode:
-      return BIT (size_bits + cnode_slot_bits);
-    case cap_endpoint:
-      return BIT (endpoint_size_bits);
-    case cap_notification:
-      return BIT (notification_size_bits);
-    case cap_untyped:
+    case CAP_TCB:
+      return BIT (TCB_SIZE_BITS);
+    case CAP_CNODE:
+      return BIT (size_bits + CNODE_SLOT_BITS);
+    case CAP_ENDPOINT:
+      return BIT (ENDPOINT_SIZE_BITS);
+    case CAP_NOTIFICATION:
+      return BIT (NOTIFICATION_SIZE_BITS);
+    case CAP_UNTYPED:
       return BIT (size_bits);
-    case cap_x86_64_pml4:
-      return BIT (pml4_size_bits);
-    case cap_x86_64_page:
-      return BIT (frame_size_bits);
-    case cap_x86_64_huge_page:
-      return BIT (huge_frame_size_bits);
-    case cap_x86_64_pdpt:
-      return BIT (pdpt_size_bits);
-    case cap_x86_64_pd:
-      return BIT (pd_size_bits);
-    case cap_x86_64_pt:
-      return BIT (pt_size_bits);
+    case CAP_X86_64_PML4:
+      return BIT (PML4_SIZE_BITS);
+    case CAP_X86_64_PAGE:
+      return BIT (FRAME_SIZE_BITS);
+    case CAP_X86_64_HUGE_PAGE:
+      return BIT (HUGE_FRAME_SIZE_BITS);
+    case CAP_X86_64_PDPT:
+      return BIT (PDPT_SIZE_BITS);
+    case CAP_X86_64_PD:
+      return BIT (PD_SIZE_BITS);
+    case CAP_X86_64_PT:
+      return BIT (PT_SIZE_BITS);
     default:
       assert (0 && "Invalid object type");
     }

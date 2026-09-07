@@ -11,16 +11,16 @@ lookup_cap_slot_raw (cte_t *cspace_root, word_t index, word_t depth,
   *out = nullptr;
   assert_eq (depth, 64); // for now
 
-  if (cap_type (cspace_root->cap) != cap_cnode)
-    return invalid_root;
+  if (cap_type (cspace_root->cap) != CAP_CNODE)
+    return INVALID_ROOT;
 
   cte_t *cte = cap_ptr (cspace_root->cap);
   size_t length = cap_size (cspace_root->cap);
   if (index >= length)
-    return range_error;
+    return RANGE_ERROR;
 
   *out = &cte[index];
-  return no_error;
+  return NO_ERROR;
 }
 
 // High-level wrapper that formats errors into IPC buffer
@@ -29,10 +29,10 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 {
   error_t err = lookup_cap_slot_raw (cspace_root, index, depth, out);
 
-  if (err == invalid_root)
+  if (err == INVALID_ROOT)
     return msg_invalid_root ();
 
-  if (err == range_error)
+  if (err == RANGE_ERROR)
     {
       size_t length = cap_size (cspace_root->cap);
       return msg_range_error (0, length);
@@ -54,9 +54,9 @@ cnode_debug_print (cte_t *obj)
     {
       cte_t *e = cte + i;
       word_t type = cap_type (e);
-      if (type == cap_null)
+      if (type == CAP_NULL)
         continue;
-      if (type >= max_cap_type)
+      if (type >= MAX_CAP_TYPE)
         {
           printf ("  %zu: Invalid cap type %lu\n", i, type);
           continue;

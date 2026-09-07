@@ -5,30 +5,30 @@
 
 enum
 {
-  serial_null_cap,
-  serial_tcb_cap,
-  serial_cnode_cap,
-  serial_serial_port_cap,
-  serial_endpoint_cap,
-  serial_read_notification_cap,
-  serial_notification_cap,
-  serial_irq_cap,
-  serial_irq_notification_cap,
+  SERIAL_NULL_CAP,
+  SERIAL_TCB_CAP,
+  SERIAL_CNODE_CAP,
+  SERIAL_SERIAL_PORT_CAP,
+  SERIAL_ENDPOINT_CAP,
+  SERIAL_READ_NOTIFICATION_CAP,
+  SERIAL_NOTIFICATION_CAP,
+  SERIAL_IRQ_CAP,
+  SERIAL_IRQ_NOTIFICATION_CAP,
 };
 
 enum
 {
-  serial_driver_write = 1,
-  serial_driver_read = 2,
+  SERIAL_DRIVER_WRITE = 1,
+  SERIAL_DRIVER_READ = 2,
 };
 
 static inline message_info_t
 read_serial (cptr_t serial_endpoint, cptr_t serial_notification)
 {
   while (true) {
-    message_info_t info = new_message_info (serial_driver_read, 0, 0, 0);
+    message_info_t info = new_message_info (SERIAL_DRIVER_READ, 0, 0, 0);
     info = call (serial_endpoint, info, nullptr);
-    if (get_message_label (info) != would_block)
+    if (get_message_label (info) != WOULD_BLOCK)
       return info;
 
     wait (serial_notification, nullptr);

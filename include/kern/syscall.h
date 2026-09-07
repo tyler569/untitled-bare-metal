@@ -24,7 +24,7 @@ void do_syscall (uintptr_t, uintptr_t, enum syscall_number);
   do                                                                          \
     {                                                                         \
       message_info_t __tag = (expr);                                          \
-      if (__tag.label != no_error)                                            \
+      if (__tag.label != NO_ERROR)                                            \
         return __tag;                                                         \
     }                                                                         \
   while (0)
@@ -33,16 +33,16 @@ void do_syscall (uintptr_t, uintptr_t, enum syscall_number);
 static inline message_info_t
 msg_ok (word_t registers)
 {
-  return new_message_info (no_error, 0, 0, registers);
+  return new_message_info (NO_ERROR, 0, 0, registers);
 }
 
 // Helper to create error message_info_t
 static inline message_info_t
 msg_err (word_t label, word_t registers)
 {
-  if (label != no_error && label < max_error_code)
+  if (label != NO_ERROR && label < MAX_ERROR_CODE)
     dbg_printf ("msg_err: err='%s'\n", error_string (label));
-  else if (label != no_error)
+  else if (label != NO_ERROR)
     dbg_printf ("msg_err: err='%lu'\n", label);
 
   return new_message_info (label, 0, 0, registers);
@@ -53,9 +53,9 @@ MUST_USE
 static inline error_t
 return_ipc (error_t err, word_t registers)
 {
-  if (err != no_error && err < max_error_code)
+  if (err != NO_ERROR && err < MAX_ERROR_CODE)
     dbg_printf ("return_ipc: err='%s'\n", error_string (err));
-  else if (err != no_error)
+  else if (err != NO_ERROR)
     dbg_printf ("return_ipc: err='%lu'\n", err);
 
   message_info_t info = new_message_info (err, 0, 0, registers);
@@ -68,7 +68,7 @@ MUST_USE
 static inline error_t
 ipc_ok (word_t registers)
 {
-  return return_ipc (no_error, registers);
+  return return_ipc (NO_ERROR, registers);
 }
 
 MUST_USE
@@ -82,7 +82,7 @@ MUST_USE
 static inline error_t
 ipc_illegal_operation ()
 {
-  return return_ipc (illegal_operation, 0);
+  return return_ipc (ILLEGAL_OPERATION, 0);
 }
 
 // New message_info_t-based error functions
@@ -92,7 +92,7 @@ msg_range_error (word_t min, word_t max)
 {
   set_mr (0, min);
   set_mr (1, max);
-  return msg_err (range_error, 2);
+  return msg_err (RANGE_ERROR, 2);
 }
 
 MUST_USE
@@ -101,21 +101,21 @@ msg_truncated_message (word_t expected, word_t provided)
 {
   set_mr (0, expected);
   set_mr (1, provided);
-  return msg_err (truncated_message, 2);
+  return msg_err (TRUNCATED_MESSAGE, 2);
 }
 
 MUST_USE
 static inline message_info_t
 msg_delete_first ()
 {
-  return msg_err (delete_first, 0);
+  return msg_err (DELETE_FIRST, 0);
 }
 
 MUST_USE
 static inline message_info_t
 msg_revoke_first ()
 {
-  return msg_err (revoke_first, 0);
+  return msg_err (REVOKE_FIRST, 0);
 }
 
 MUST_USE
@@ -123,14 +123,14 @@ static inline message_info_t
 msg_invalid_argument (word_t argument_number)
 {
   set_mr (0, argument_number);
-  return msg_err (invalid_argument, 1);
+  return msg_err (INVALID_ARGUMENT, 1);
 }
 
 MUST_USE
 static inline message_info_t
 msg_invalid_root ()
 {
-  return msg_err (invalid_root, 0);
+  return msg_err (INVALID_ROOT, 0);
 }
 
 MUST_USE
@@ -138,7 +138,7 @@ static inline message_info_t
 msg_not_enough_memory (word_t available_memory)
 {
   set_mr (0, available_memory);
-  return msg_err (not_enough_memory, 1);
+  return msg_err (NOT_ENOUGH_MEMORY, 1);
 }
 
 MUST_USE
@@ -146,14 +146,14 @@ static inline message_info_t
 msg_failed_lookup (word_t level)
 {
   set_mr (0, level);
-  return msg_err (failed_lookup, 1);
+  return msg_err (FAILED_LOOKUP, 1);
 }
 
 MUST_USE
 static inline message_info_t
 msg_illegal_operation ()
 {
-  return msg_err (illegal_operation, 0);
+  return msg_err (ILLEGAL_OPERATION, 0);
 }
 
 // This is used internally to represent the condition that "this ipc return

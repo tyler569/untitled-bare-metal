@@ -35,7 +35,7 @@ create_objects (cte_t *untyped, word_t type, word_t size_bits,
       dest_slot->cap.size_bits = size_bits;
       dest_slot->cap.badge = 0;
       dest_slot->cap.is_original = 1;
-      dest_slot->cap.rights = cap_rights_all;
+      dest_slot->cap.rights = CAP_RIGHTS_ALL;
       cap_set_ptr (dest_slot, obj_ptr);
 
       insert_after (dest_slot, untyped);
@@ -66,7 +66,7 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
   TRY (lookup_cap_slot (root, node_index, node_depth, &dest_cnode));
 
   // TODO: return an error in this case/ invalid argument or smth
-  assert (cap_type (dest_cnode) == cap_cnode);
+  assert (cap_type (dest_cnode) == CAP_CNODE);
 
   if (cap_size (dest_cnode) < node_offset + num_objects)
     return msg_range_error (0, cap_size (dest_cnode));
