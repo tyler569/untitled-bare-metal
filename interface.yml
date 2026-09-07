@@ -235,3 +235,5 @@ errors:
   - range_error
   - revoke_first
   - truncated_message
+  - unknown_message
+  - would_block

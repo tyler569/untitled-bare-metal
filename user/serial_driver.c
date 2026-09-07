@@ -71,6 +71,23 @@ write_uart (message_info_t info)
 }
 
 void
+read_uart (message_info_t)
+{
+  if (buffer_size == 0)
+	{
+	  reply (new_message_info (would_block, 0, 0, 0));
+	  return;
+	}
+
+  size_t i;
+  for (i = 0; i < buffer_size && i < MESSAGE_MAX_LENGTH; i++)
+    set_mr (i, buffer[i]);
+  buffer_size = 0;
+
+  reply (new_message_info (0, 0, 0, i));
+}
+
+void
 handle_irq ()
 {
   while (is_data_available ())
@@ -81,9 +98,7 @@ handle_irq ()
           buffer[buffer_size++] = b;
         }
 
-      serial_driver_ring_write (shared_ring, buffer, buffer_size);
-      signal (serial_broker_notification_cap);
-      buffer_size = 0;
+      signal (serial_read_notification_cap);
     }
 
   irq_handler_ack (serial_irq_cap);
@@ -111,51 +126,15 @@ driver_thread_main ()
         handle_irq ();
       else if (get_message_label (info) == serial_driver_write)
         write_uart (info);
-    }
-}
-
-[[noreturn]] int
-broker_thread_main ()
-{
-  printf ("Hello from serial broker\n");
-
-  while (true)
-    {
-      word_t badge;
-      message_info_t info;
-
-      wait (serial_broker_notification_cap, &badge);
-
-      // there is data to read
-      while (!serial_driver_ring_empty (shared_ring))
-        {
-          info = recv (serial_broker_endpoint_cap, &badge);
-
-          if (get_message_label (info) != serial_driver_read)
-            {
-              reply (new_message_info (illegal_operation, 0, 0, 0));
-              continue;
-            }
-
-          char buffer[100];
-          size_t size = serial_driver_ring_read (shared_ring, buffer, 100);
-
-          for (size_t i = 0; i < size; i++)
-            set_mr (i, buffer[i]);
-
-          info = new_message_info (0, 0, 0, size);
-          reply (info);
-        }
+	  else if (get_message_label (info) == serial_driver_read)
+		read_uart (info);
     }
 }
 
 int
-main (bool is_broker)
+main ()
 {
-  if (is_broker)
-    broker_thread_main ();
-  else
-    driver_thread_main ();
+  driver_thread_main ();
 
   exit (1);
 }

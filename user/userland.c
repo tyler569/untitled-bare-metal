@@ -126,8 +126,7 @@ spawn_calculator_thread (cptr_t untyped, cptr_t calculator_endpoint)
 }
 
 void
-spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
-                     cptr_t serial_read_endpoint)
+spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint, cptr_t serial_read_ntfn)
 {
   void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
 
@@ -151,7 +150,11 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
 
   // serial_endpoint_cap
   cnode_copy (cnode, serial_endpoint_cap, 64, init_cap_root_cnode,
-              serial_write_endpoint, 64, cap_rights_all);
+              serial_endpoint, 64, cap_rights_all);
+
+  // serial_read_notification_cap
+  cnode_copy (cnode, serial_read_notification_cap, 64, init_cap_root_cnode,
+			  serial_read_ntfn, 64, cap_rights_all);
 
   // serial_irq_cap
   irq_control_get (init_cap_irq_control, 4, cnode, serial_irq_cap, 64);
@@ -166,44 +169,13 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
   if (err)
     printf ("Failed to mint badged notification cap 1: %d\n", err);
 
-  // serial_broker_notification_cap
-  cptr_t sb_notification_cap = allocate (untyped, cap_notification, 1);
-  err = cnode_mint (cnode, serial_broker_notification_cap, 64,
-                    init_cap_root_cnode, sb_notification_cap, 64,
-                    cap_rights_all, 1);
-  if (err)
-    printf ("Failed to mint badged notification cap 2: %d\n", err);
-
-  // serial_broker_endpoint_cap
-  cnode_copy (cnode, serial_broker_endpoint_cap, 64, init_cap_root_cnode,
-              serial_read_endpoint, 64, cap_rights_all);
-
-  cptr_t ring_page = allocate (untyped, cap_x86_64_page, 1);
-
-  struct thread_data tdb = {
-    .elf_header = serial_driver_elf,
-    .untyped = untyped,
-    .scratch_vspace = init_cap_init_vspace,
-    .cspace_root = cnode,
-    .name = "serial_broker",
-    .arguments[0] = true,
-  };
-
   struct thread_data tdd = {
     .elf_header = serial_driver_elf,
     .untyped = untyped,
     .scratch_vspace = init_cap_init_vspace,
     .cspace_root = cnode,
     .name = "serial_driver",
-    .arguments[0] = false,
   };
-
-  err = spawn_thread (&tdb);
-
-  if (err)
-    printf ("Error creating serial_broker process\n");
-  else
-    printf ("Successfully created serial_broker process\n");
 
   err = spawn_thread (&tdd);
 
@@ -212,15 +184,10 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_write_endpoint,
   else
     printf ("Successfully created serial_driver process\n");
 
-  map_page (untyped, tdb.vspace, ring_page, 0x120'0000);
-  map_page (untyped, tdd.vspace, ring_page, 0x120'0000);
-
   // serial_tcb_cap
   cnode_copy (cnode, serial_tcb_cap, 64, init_cap_root_cnode, tdd.tcb, 64,
               cap_rights_all);
 
-  // tcb_set_debug (td.tcb, true);
-  tcb_resume (tdb.tcb);
   tcb_resume (tdd.tcb);
 }
 
@@ -350,25 +317,22 @@ calculate_fibonacci_numbers (cptr_t calculator_endpoint, word_t up_to)
 }
 
 void
-print_to_serial (cptr_t serial_write_endpoint, const char *message)
+print_to_serial (cptr_t serial_endpoint, const char *message)
 {
   for (const char *c = message; *c; c++)
     {
       set_mr (0, *c);
       message_info_t info = new_message_info (1, 0, 0, 1);
-      send (serial_write_endpoint, info);
+      send (serial_endpoint, info);
     }
 }
 
 void
-serial_capitalization_server (cptr_t serial_write_endpoint,
-                              cptr_t serial_read_endpoint)
+serial_capitalization_server (cptr_t serial_endpoint, cptr_t serial_notification)
 {
   while (true)
     {
-      word_t badge;
-      message_info_t info = new_message_info (serial_driver_read, 0, 0, 0);
-      info = call (serial_read_endpoint, info, &badge);
+      message_info_t info = read_serial (serial_endpoint, serial_notification);
       size_t regs = get_message_length (info);
 
       if (regs == 0)
@@ -386,7 +350,7 @@ serial_capitalization_server (cptr_t serial_write_endpoint,
         }
 
       info = new_message_info (serial_driver_write, 0, 0, regs);
-      send (serial_write_endpoint, info);
+      send (serial_endpoint, info);
     }
 }
 
@@ -606,20 +570,20 @@ main (void *boot_info)
   // draw_circle (fb, 150, 400, 50, 0xff0000);
 
   cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
-  cptr_t serial_write_endpoint = allocate (untyped, cap_endpoint, 1);
-  cptr_t serial_read_endpoint = allocate (untyped, cap_endpoint, 1);
+  cptr_t serial_endpoint = allocate (untyped, cap_endpoint, 1);
+  cptr_t serial_ntfn = allocate (untyped, cap_notification, 1);
 
   // Run CDT tests first (uses main untyped for infra, test_untyped for
   // testing)
   spawn_cdt_test (untyped, test_untyped);
 
   spawn_calculator_thread (untyped, calculator_endpoint);
-  spawn_serial_driver (untyped, serial_write_endpoint, serial_read_endpoint);
+  spawn_serial_driver (untyped, serial_endpoint, serial_ntfn);
 
-  print_to_serial (serial_write_endpoint, "Hello, Serial World!\n");
+  print_to_serial (serial_endpoint, "Hello, Serial World!\n");
 
   calculate_fibonacci_numbers (calculator_endpoint, 10'000);
-  serial_capitalization_server (serial_write_endpoint, serial_read_endpoint);
+  serial_capitalization_server (serial_endpoint, serial_ntfn);
 
   exit (0);
 }

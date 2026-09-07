@@ -122,6 +122,8 @@ enum error_code
   range_error,
   revoke_first,
   truncated_message,
+  unknown_message,
+  would_block,
   max_error_code,
 };
 
@@ -156,6 +158,10 @@ error_string (error_t error)
       return "revoke first";
     case truncated_message:
       return "truncated message";
+    case unknown_message:
+      return "unknown message";
+    case would_block:
+      return "would block";
     default:
       return "unknown";
     }
