@@ -89,7 +89,7 @@ assert_cap_badge (const char *name, cap_t cap, word_t expected_badge)
   if (cap.badge != expected_badge)
     {
       failed_tests++;
-      printf ("  [FAIL] %s has badge 0x%lx (expected 0x%lx)\n", name,
+      printf ("  [FAIL] %s has badge 0x%lX (expected 0x%lX)\n", name,
               cap.badge, expected_badge);
     }
 }
@@ -101,7 +101,7 @@ assert_cap_rights (const char *name, cap_t cap, word_t expected_rights)
   if (cap.rights != expected_rights)
     {
       failed_tests++;
-      printf ("  [FAIL] %s has rights 0x%x (expected 0x%lx)\n", name,
+      printf ("  [FAIL] %s has rights 0x%X (expected 0x%lX)\n", name,
               cap.rights, expected_rights);
     }
 }

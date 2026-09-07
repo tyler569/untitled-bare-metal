@@ -12,7 +12,7 @@ static message_info_t
 op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 {
   if (syscall_number != SYS_DEBUG_WRITE && syscall_number != SYS_EXIT)
-    dbg_printf ("Task %p a0:%#lx ", this_tcb, a0);
+    dbg_printf ("Task %p a0:0x%lX ", this_tcb, a0);
 
   if (syscall_number == SYS_EXIT)
     dbg_printf ("Task %p ", this_tcb);
@@ -40,7 +40,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 
       return msg_noreturn ();
     case SYS_REPLY:
-      dbg_printf ("sys_reply (info: %#lx)\n", message_info_to_word (info));
+      dbg_printf ("sys_reply (info: 0x%lX)\n", message_info_to_word (info));
 
       invoke_reply (info);
 
@@ -55,7 +55,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
     {
     case SYS_CALL:
       {
-        dbg_printf ("sys_call (dest: %#lx)\n", a0);
+        dbg_printf ("sys_call (dest: 0x%lX)\n", a0);
 
         if (cap_type (slot) != CAP_ENDPOINT)
           return dispatch_method (slot, info);
@@ -65,7 +65,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
       }
     case SYS_SEND:
       {
-        dbg_printf ("sys_send (dest: %#lx)\n", a0);
+        dbg_printf ("sys_send (dest: 0x%lX)\n", a0);
 
         if (cap_type (slot) != CAP_NOTIFICATION && cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);
@@ -79,7 +79,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
       }
     case SYS_NBSEND:
       {
-        dbg_printf ("sys_nbsend (dest: %#lx)\n", a0);
+        dbg_printf ("sys_nbsend (dest: 0x%lX)\n", a0);
 
         if (cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);
@@ -89,7 +89,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
       }
     case SYS_RECV:
       {
-        dbg_printf ("sys_recv (dest: %#lx)\n", a0);
+        dbg_printf ("sys_recv (dest: 0x%lX)\n", a0);
 
         if (cap_type (slot) != CAP_NOTIFICATION && cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);
@@ -101,7 +101,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
       }
     case SYS_NBRECV:
       {
-        dbg_printf ("sys_nbrecv (dest: %#lx)\n", a0);
+        dbg_printf ("sys_nbrecv (dest: 0x%lX)\n", a0);
 
         if (cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);
@@ -110,7 +110,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
       }
     case SYS_REPLYRECV:
       {
-        dbg_printf ("sys_replyrecv (dest: %#lx)\n", a0);
+        dbg_printf ("sys_replyrecv (dest: 0x%lX)\n", a0);
 
         if (cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);

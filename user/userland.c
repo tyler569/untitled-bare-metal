@@ -42,7 +42,7 @@ print_bootinfo_information ()
 
   for (word_t i = 0; i < bi->n_untypeds; i++)
     {
-      printf ("  .untyped[%lu]: paddr = %016lx, size = %lu, is_device = %i\n",
+      printf ("  .untyped[%lu]: paddr = %016lX, size = %lu, is_device = %i\n",
               i, bi->untypeds[i].base, 1UL << bi->untypeds[i].size_bits,
               bi->untypeds[i].is_device);
 
@@ -53,7 +53,7 @@ print_bootinfo_information ()
           total_untyped_size / 1024 / 1024);
   printf ("\n");
 
-  printf ("  limine fb: %p, size: %zx\n", bi->framebuffer_info.address,
+  printf ("  limine fb: %p, size: %zX\n", bi->framebuffer_info.address,
           bi->framebuffer_info.height * bi->framebuffer_info.width
               * bi->framebuffer_info.bpp / 8);
 }
@@ -403,10 +403,10 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
       uint8_t class_code = (config[2] >> 24) & 0xFF;
       uint8_t irq = config[15] & 0xFF;
 
-      printf ("PCI Device: %04x:%04x at addr %08x\n", vendor_id, device_id,
+      printf ("PCI Device: %04X:%04X at addr %08X\n", vendor_id, device_id,
               pci_address);
-      printf ("  Class: %02x, Subclass: %02x, Prog IF: %02x, Revision: %02x "
-              "IRQ: %02x Status: %04x\n",
+      printf ("  Class: %02X, Subclass: %02X, Prog IF: %02X, Revision: %02X "
+              "IRQ: %02X Status: %04X\n",
               class_code, subclass, prog_if, revision_id, irq, status);
 
       // Print BARs (at offsets 0x10-0x27, which is dwords 4-9)
@@ -420,12 +420,12 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
           if (is_io)
             {
               uint32_t addr = bar & 0xFFFFFFFC;
-              printf ("  - BAR%d: I/O %08x\n", bar_idx, addr);
+              printf ("  - BAR%d: I/O %08X\n", bar_idx, addr);
             }
           else
             {
               uint32_t addr = bar & 0xFFFFFFF0;
-              printf ("  - BAR%d: Mem %08x\n", bar_idx, addr);
+              printf ("  - BAR%d: Mem %08X\n", bar_idx, addr);
             }
         }
       printf ("\n");
@@ -452,8 +452,8 @@ map_framebuffer (cptr_t untyped)
         }
     }
 
-  printf ("untyped = %zx\n", untyped);
-  printf ("fbuntyped = %zx\n", fbuntyped);
+  printf ("untyped = %zX\n", untyped);
+  printf ("fbuntyped = %zX\n", fbuntyped);
 
   if (fbuntyped == 0)
     {
@@ -543,8 +543,8 @@ main (void *boot_info)
   word_t untyped = INIT_CAP_FIRST_UNTYPED + untypeds[0].index;
   word_t test_untyped = INIT_CAP_FIRST_UNTYPED + untypeds[1].index;
 
-  printf ("Largest untyped: %lx\n", untyped);
-  printf ("CDT test untyped: %lx (size: %d bits)\n", test_untyped,
+  printf ("Largest untyped: %lX\n", untyped);
+  printf ("CDT test untyped: %lX (size: %d bits)\n", test_untyped,
           untypeds[1].size_bits);
 
   cptr_t pci_io_port = cptr_alloc ();

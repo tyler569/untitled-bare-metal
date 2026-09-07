@@ -18,11 +18,11 @@ print_byte_char_line (const char *c, size_t remaining_len)
 static void
 hexdump_line (const void *data, size_t remaining_len, uintptr_t base_address)
 {
-  printf ("%08lx: ", base_address);
+  printf ("%08lX: ", base_address);
   size_t i;
   for (i = 0; i < remaining_len; i++)
     {
-      printf ("%02hhx ", ((const unsigned char *)data)[i]);
+      printf ("%02hhX ", ((const unsigned char *)data)[i]);
       if (i == 7)
         printf (" ");
     }

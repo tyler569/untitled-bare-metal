@@ -145,10 +145,10 @@ format_layout_int (struct format_spec *spec, struct number number,
       divisor = 10;
       break;
     case BASE_16_CAPS:
+    case BASE_PTR:
       charset = upper_hex_charset;
       [[fallthrough]];
     case BASE_16:
-    case BASE_PTR:
       divisor = 16;
       break;
     case BASE_8:

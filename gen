@@ -80,7 +80,7 @@ class KMethod
       elsif param['type'].include? '*'
         "#{param['name']}=%p"
       else
-        "#{param['name']}=%#lx"
+        "#{param['name']}=0x%lX"
       end
     end
     l.join(', ')

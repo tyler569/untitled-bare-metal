@@ -13,12 +13,12 @@ void
 print_interrupt_info (frame_t *f)
 {
   if (f->int_no < 32)
-    printf ("Interrupt %lu (%s) @ %#lx\n", f->int_no,
+    printf ("Interrupt %lu (%s) @ 0x%lX\n", f->int_no,
             interrupt_acronyms[f->int_no], f->rip);
   else if (f->int_no == 255)
-    printf ("Interrupt %lu @ %#lx\n", f->int_no, f->rip);
+    printf ("Interrupt %lu @ 0x%lX\n", f->int_no, f->rip);
   // else
-  //   printf ("Interrupt %lu @ %#lx\n", f->int_no, f->rip);
+  //   printf ("Interrupt %lu @ 0x%lX\n", f->int_no, f->rip);
 
   switch (f->int_no)
     {
@@ -42,8 +42,8 @@ print_interrupt_info (frame_t *f)
       print_backtrace (f);
       break;
     case 14:
-      printf ("Page fault at %#lx\n", read_cr2 ());
-      printf ("Error code: %#lx\n", f->err_code);
+      printf ("Page fault at 0x%lX\n", read_cr2 ());
+      printf ("Error code: 0x%lX\n", f->err_code);
       print_backtrace (f);
       break;
     case 32 ... 48:

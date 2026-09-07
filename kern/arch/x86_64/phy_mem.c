@@ -59,7 +59,7 @@ get_physical_extents (struct physical_extent *extents, size_t *extent_count)
     {
       struct limine_memmap_entry *entry = resp->entries[i];
 
-      // printf ("Memory map entry %zu: %#zx - %#zx (%s)\n", i, entry->base,
+      // printf ("Memory map entry %zu: 0x%zX - 0x%zX (%s)\n", i, entry->base,
       //         entry->base + entry->length,
       //         limine_memmap_type_str[entry->type]);
 
