@@ -60,13 +60,6 @@ call (cptr_t cap, message_info_t info, word_t *sender)
 }
 
 message_info_t
-__call_kernel (cptr_t cap, message_info_t info)
-{
-  return message_info_from_word (
-      _syscall2 (SYS_CALL, cap, message_info_to_word (info)));
-}
-
-message_info_t
 recv (cptr_t cap, word_t *sender)
 {
   message_info_t info = message_info_from_word (_syscall1 (SYS_RECV, cap));

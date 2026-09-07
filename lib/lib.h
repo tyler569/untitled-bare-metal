@@ -107,7 +107,6 @@ void send (cptr_t cap, message_info_t info);
 void nbsend (cptr_t cap, message_info_t info);
 void signal (cptr_t cap);
 message_info_t call (cptr_t cap, message_info_t info, word_t *sender);
-message_info_t __call_kernel (cptr_t cap, message_info_t info);
 message_info_t recv (cptr_t cap, word_t *sender);
 message_info_t nbrecv (cptr_t cap, word_t *sender);
 void wait (cptr_t cap, word_t *nfn_word);
