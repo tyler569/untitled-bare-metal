@@ -48,44 +48,6 @@ msg_err (word_t label, word_t registers)
   return new_message_info (label, 0, 0, registers);
 }
 
-// Legacy compatibility - deprecated
-MUST_USE
-static inline error_t
-return_ipc (error_t err, word_t registers)
-{
-  if (err != NO_ERROR && err < MAX_ERROR_CODE)
-    dbg_printf ("return_ipc: err='%s'\n", error_string (err));
-  else if (err != NO_ERROR)
-    dbg_printf ("return_ipc: err='%lu'\n", err);
-
-  message_info_t info = new_message_info (err, 0, 0, registers);
-  set_ipc_info (info);
-
-  return err;
-}
-
-MUST_USE
-static inline error_t
-ipc_ok (word_t registers)
-{
-  return return_ipc (NO_ERROR, registers);
-}
-
-MUST_USE
-static inline error_t
-ipc_error (word_t error, word_t registers)
-{
-  return return_ipc (error, registers);
-}
-
-MUST_USE
-static inline error_t
-ipc_illegal_operation ()
-{
-  return return_ipc (ILLEGAL_OPERATION, 0);
-}
-
-// New message_info_t-based error functions
 MUST_USE
 static inline message_info_t
 msg_range_error (word_t min, word_t max)
