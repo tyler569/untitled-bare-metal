@@ -3,7 +3,7 @@
 iso="build/tern.iso"
 mem="128M"
 smp=2
-debugopt="-chardev stdio,id=dbgio,logfile=last_output -device isa-debugcon,chardev=dbgio,iobase=0xe9"
+debugopt="-chardev stdio,id=dbgio,logfile=last_output -device isa-debugcon,chardev=dbgio,iobase=0xE9"
 serialopt="-serial unix:/tmp/vm_uart.sock,server,nowait"
 netopt="-net nic,model=e1000e -net user"
 gdbserver=""

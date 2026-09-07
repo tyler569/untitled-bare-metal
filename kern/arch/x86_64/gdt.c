@@ -49,7 +49,7 @@ struct PACKED long_jump
 void
 jump_to_gdt ()
 {
-  asm volatile ("push $0x08\n\t"
+  asm volatile ("push $8\n\t"
                 "push $1f\n\t"
                 "lretq\n\t"
                 "1:\n\t");

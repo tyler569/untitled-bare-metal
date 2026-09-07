@@ -22,7 +22,7 @@ void
 print_to_e9 (cptr_t port_cap, const char *string)
 {
   for (const char *c = string; *c; c++)
-    x86_64_io_port_out8 (port_cap, 0xe9, *c);
+    x86_64_io_port_out8 (port_cap, 0xE9, *c);
 }
 
 void
@@ -43,11 +43,11 @@ print_bootinfo_information ()
   for (word_t i = 0; i < bi->n_untypeds; i++)
     {
       printf ("  .untyped[%lu]: paddr = %016lx, size = %lu, is_device = %i\n",
-              i, bi->untypeds[i].base, 1ul << bi->untypeds[i].size_bits,
+              i, bi->untypeds[i].base, 1UL << bi->untypeds[i].size_bits,
               bi->untypeds[i].is_device);
 
       if (!bi->untypeds[i].is_device)
-        total_untyped_size += 1ul << bi->untypeds[i].size_bits;
+        total_untyped_size += 1UL << bi->untypeds[i].size_bits;
     }
   printf ("Total untyped size: %zu (%zu MB)\n", total_untyped_size,
           total_untyped_size / 1024 / 1024);
@@ -145,7 +145,7 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint, cptr_t serial_read_
               cap_rights_all);
 
   // serial_serial_port_cap
-  x86_64_io_port_control_issue (init_cap_io_port_control, 0x3f8, 0x3ff, cnode,
+  x86_64_io_port_control_issue (init_cap_io_port_control, 0x3F8, 0x3FF, cnode,
                                 serial_serial_port_cap, 64);
 
   // serial_endpoint_cap
@@ -437,7 +437,7 @@ map_framebuffer (cptr_t untyped)
 {
   struct limine_framebuffer fbinfo = bi->framebuffer_info;
   size_t fbsize = fbinfo.height * fbinfo.width * fbinfo.bpp / 8;
-  uintptr_t fbaddr = (uintptr_t)fbinfo.address - 0xffff800000000000;
+  uintptr_t fbaddr = (uintptr_t)fbinfo.address - 0xFFFF800000000000;
 
   cptr_t fbuntyped = 0;
 
@@ -548,7 +548,7 @@ main (void *boot_info)
           untypeds[1].size_bits);
 
   cptr_t pci_io_port = cptr_alloc ();
-  x86_64_io_port_control_issue (init_cap_io_port_control, 0xcf8, 0xcff,
+  x86_64_io_port_control_issue (init_cap_io_port_control, 0xCF8, 0xCFF,
                                 init_cap_root_cnode, pci_io_port, 64);
 
   // Spawn PCI manager and enumerate devices
@@ -557,17 +557,17 @@ main (void *boot_info)
     enumerate_and_print_pci_devices (pci_manager_endpoint);
 
   cptr_t e9_io_port = cptr_alloc ();
-  x86_64_io_port_control_issue (init_cap_io_port_control, 0xe9, 0xe9,
+  x86_64_io_port_control_issue (init_cap_io_port_control, 0xE9, 0xE9,
                                 init_cap_root_cnode, e9_io_port, 64);
   print_to_e9 (e9_io_port, "Hello, E9 World!\n");
 
   // void *fb = map_framebuffer (untyped);
-  // clear_fb (fb, 0xffffffff);
-  // draw_square (fb, 100, 100, 100, 100, 0xff);
-  // draw_square (fb, 200, 200, 100, 100, 0xff00);
-  // draw_square (fb, 300, 300, 100, 100, 0xff0000);
-  // draw_square (fb, 400, 400, 100, 100, 0xff000000);
-  // draw_circle (fb, 150, 400, 50, 0xff0000);
+  // clear_fb (fb, 0xFFFFFFFF);
+  // draw_square (fb, 100, 100, 100, 100, 0xFF);
+  // draw_square (fb, 200, 200, 100, 100, 0xFF00);
+  // draw_square (fb, 300, 300, 100, 100, 0xFF0000);
+  // draw_square (fb, 400, 400, 100, 100, 0xFF000000);
+  // draw_circle (fb, 150, 400, 50, 0xFF0000);
 
   cptr_t calculator_endpoint = allocate (untyped, cap_endpoint, 1);
   cptr_t serial_endpoint = allocate (untyped, cap_endpoint, 1);

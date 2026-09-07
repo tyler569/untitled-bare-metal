@@ -40,8 +40,8 @@ hexdump_line (const void *data, size_t remaining_len, uintptr_t base_address)
 void
 hexdump_addr (const void *data, size_t len, uintptr_t base_address)
 {
-  for (size_t i = 0; i < len; i += 16)
-    hexdump_line (data + i, MIN (len - i, 16u), base_address + i);
+  for (size_t i = 0; i < len; i += 16U)
+    hexdump_line (data + i, MIN (len - i, 16U), base_address + i);
 }
 
 void

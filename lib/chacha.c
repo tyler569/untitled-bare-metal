@@ -4,7 +4,7 @@
 #undef xor_chacha
 
 const uint32_t constants[16]
-    = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
+    = { 0x61707865, 0x3320646E, 0x79622D32, 0x6B206574 };
 
 static inline uint32_t
 rol (uint32_t x, int n)
@@ -55,7 +55,7 @@ xor_chacha (struct chacha *cc, unsigned char *buf, size_t len, int rounds)
   size_t count = 0;
   do
     {
-      uint32_t state[16] = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
+      uint32_t state[16] = { 0x61707865, 0x3320646E, 0x79622D32, 0x6B206574 };
       memcpy (state + 4, cc->key, 32);
       state[12] = cc->counter;
       memcpy (state + 13, cc->nonce, 12);
@@ -64,7 +64,7 @@ xor_chacha (struct chacha *cc, unsigned char *buf, size_t len, int rounds)
 
       size_t i;
       for (i = 0; i < 64 && count + i < len; i++)
-        buf[count + i] ^= ((unsigned char *)state)[i] & 0xff;
+        buf[count + i] ^= ((unsigned char *)state)[i] & 0xFF;
       count += i;
 
       cc->counter++;

@@ -56,7 +56,7 @@ format_pad (FILE *f, struct format_spec *spec, int pad_len, size_t n)
 {
   size_t written = 0;
   for (int i = 0; i < pad_len; i++)
-    WRITE (&spec->padding_char, 1u);
+    WRITE (&spec->padding_char, 1U);
   return written;
 }
 
@@ -178,15 +178,15 @@ format_number_sign (FILE *f, struct format_spec *spec, struct number number,
   size_t written = 0;
   if (number.negative)
     {
-      WRITE ("-", 1u);
+      WRITE ("-", 1U);
     }
   else if (spec->print_plus)
     {
-      WRITE ("+", 1u);
+      WRITE ("+", 1U);
     }
   else if (spec->leave_space)
     {
-      WRITE (" ", 1u);
+      WRITE (" ", 1U);
     }
   return written;
 }
@@ -201,19 +201,19 @@ format_number_alternate_form (FILE *f, struct format_spec *spec, size_t n)
       switch (spec->base)
         {
         case BASE_2:
-          WRITE ("0b", 2u);
+          WRITE ("0b", 2U);
           break;
         case BASE_8:
-          WRITE ("0", 1u);
+          WRITE ("0", 1U);
           break;
         case BASE_10:
           break;
         case BASE_16_CAPS:
-          WRITE ("0X", 2u);
+          WRITE ("0X", 2U);
           break;
         case BASE_16:
         case BASE_PTR:
-          WRITE ("0x", 2u);
+          WRITE ("0x", 2U);
           break;
         }
     }
@@ -344,6 +344,7 @@ vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
   va_copy (args, args_orig);
 
   while (*fmt != 0)
+
     {
       struct format_spec spec = {
         .base = BASE_10,
@@ -371,7 +372,7 @@ vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
         {
         case '\0':
         case '%':
-          WRITE ("%", 1u);
+          WRITE ("%", 1U);
           break;
         case '-':
           spec.left_justify = true;
@@ -447,7 +448,7 @@ vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
         case 'c':
           {
             char c = va_arg (args, int);
-            WRITE (&c, 1u);
+            WRITE (&c, 1U);
             break;
           }
         case 's':
@@ -514,7 +515,7 @@ vfnprintf (FILE *f, size_t n, const char *format, va_list args_orig)
     }
 
   va_end (args);
-  F_WRITE (f, "", 1u);
+  F_WRITE (f, "", 1U);
   return (int)written;
 }
 
@@ -608,14 +609,14 @@ int
 puts (const char *str)
 {
   int ret = F_WRITE (w_stdout, str, strlen (str));
-  F_WRITE (w_stdout, "\n", 1);
+  F_WRITE (w_stdout, "\n", 1U);
   return ret;
 }
 
 int
 putchar (int c)
 {
-  return F_WRITE (w_stdout, &c, 1u);
+  return F_WRITE (w_stdout, &c, 1U);
 }
 
 #ifdef __KERNEL__

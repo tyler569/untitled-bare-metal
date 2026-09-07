@@ -165,11 +165,11 @@ MUST_USE
 static inline message_info_t
 msg_noreturn ()
 {
-  return (message_info_t) { .value = ~0ul };
+  return (message_info_t) { .value = ~0UL };
 }
 
 static inline bool
 msg_is_noreturn (message_info_t msg)
 {
-  return msg.value == ~0ul;
+  return msg.value == ~0UL;
 }

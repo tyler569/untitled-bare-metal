@@ -6,17 +6,17 @@
 #include "sys/syscall.h"
 #include "sys/types.h"
 
-constexpr uintptr_t bits_ptr_mask = 0xffff'ffff'fff0;
+constexpr uintptr_t bits_ptr_mask = 0xFFFF'FFFF'FFF0;
 
 static inline bool
 is_safe_cap_ptr (void *ptr)
 {
   uintptr_t p = (uintptr_t)ptr;
-  uintptr_t low_bits = p & 0xf;
+  uintptr_t low_bits = p & 0xF;
   if (low_bits != 0)
     return false;
   uintptr_t high_bits = p >> 47;
-  if (high_bits != 0x1ffff && high_bits != 0)
+  if (high_bits != 0x1FFFF && high_bits != 0)
     return false;
   return true;
 }
@@ -26,7 +26,7 @@ bits_pointer (word_t bits)
 {
   word_t ptr_bits = bits & bits_ptr_mask;
   if (ptr_bits & 0x8000'0000'0000)
-    return (void *)(ptr_bits | 0xffff'0000'0000'0000);
+    return (void *)(ptr_bits | 0xFFFF'0000'0000'0000);
   else
     return (void *)ptr_bits;
 }

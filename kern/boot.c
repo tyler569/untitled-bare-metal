@@ -20,11 +20,11 @@ static struct limine_framebuffer_request fbinfo = {
 // --- constants for "magic" addrs & flags ---
 enum
 {
-  VA_IPC_BUFFER = 0x7fff'ffe0'0000,
-  VA_BOOTINFO = 0x7fff'ffe0'1000,
-  VA_INITRD = 0x1'0000'0000,
+  VA_IPC_BUFFER = 0x7FFF'FFE0'0000UL,
+  VA_BOOTINFO = 0x7FFF'FFE0'1000UL,
+  VA_INITRD = 0x1'0000'0000UL,
 
-  VA_STACK = 0x7fff'fff0'0000,
+  VA_STACK = 0x7FFF'FFF0'0000UL,
   STACK_PAGES = 4,
   VA_STACK_TOP = VA_STACK + STACK_PAGES * PAGE_SIZE,
 

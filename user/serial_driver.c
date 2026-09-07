@@ -5,18 +5,18 @@
 #include "lib.h"
 #include "serial_driver.h"
 
-constexpr uint16_t SERIAL_PORT = 0x3f8;
+constexpr uint16_t SERIAL_PORT = 0x3F8;
 
-constexpr uint16_t UART_DATA = 0x0;
-constexpr uint16_t UART_INT_ENABLE = 0x1;
+constexpr uint16_t UART_DATA = 0;
+constexpr uint16_t UART_INT_ENABLE = 1;
 
-constexpr uint16_t UART_BAUD_LOW = 0x0;
-constexpr uint16_t UART_BAUD_HIGH = 0x1;
-constexpr uint16_t UART_FIFO_CONTROL = 0x2;
-constexpr uint16_t UART_LINE_CONTROL = 0x3;
-constexpr uint16_t UART_MODEM_CONTROL = 0x4;
-constexpr uint16_t UART_LINE_STATUS = 0x5;
-// constexpr uint16_t UART_MODEM_STATUS = 0x6;
+constexpr uint16_t UART_BAUD_LOW = 0;
+constexpr uint16_t UART_BAUD_HIGH = 1;
+constexpr uint16_t UART_FIFO_CONTROL = 2;
+constexpr uint16_t UART_LINE_CONTROL = 3;
+constexpr uint16_t UART_MODEM_CONTROL = 4;
+constexpr uint16_t UART_LINE_STATUS = 5;
+// constexpr uint16_t UART_MODEM_STATUS = 6;
 
 constexpr size_t SERIAL_BUFFER_SIZE = 256;
 
@@ -41,20 +41,20 @@ port_read (uint16_t port)
 void
 initialize_uart ()
 {
-  port_write (UART_BAUD_HIGH, 0x00);
+  port_write (UART_BAUD_HIGH, 0);
   port_write (UART_LINE_CONTROL, 0x80);
-  port_write (UART_BAUD_LOW, 0x03);
-  port_write (UART_BAUD_HIGH, 0x00);
-  port_write (UART_LINE_CONTROL, 0x03);
-  port_write (UART_FIFO_CONTROL, 0xc7);
-  port_write (UART_MODEM_CONTROL, 0x0b);
-  port_write (UART_INT_ENABLE, 0x09);
+  port_write (UART_BAUD_LOW, 3);
+  port_write (UART_BAUD_HIGH, 0);
+  port_write (UART_LINE_CONTROL, 3);
+  port_write (UART_FIFO_CONTROL, 0xC7);
+  port_write (UART_MODEM_CONTROL, 0xB);
+  port_write (UART_INT_ENABLE, 9);
 }
 
 bool
 is_data_available ()
 {
-  return port_read (UART_LINE_STATUS) & 0x1;
+  return port_read (UART_LINE_STATUS) & 1;
 }
 
 void

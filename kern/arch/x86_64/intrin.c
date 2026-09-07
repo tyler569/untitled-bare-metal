@@ -62,7 +62,7 @@ DEFINE_PORT_IO (l, uint32_t)
 void
 write_msr (uint32_t msr_id, uint64_t value)
 {
-  uint32_t low = value & 0xffffffff;
+  uint32_t low = value & 0xFFFFFFFF;
   uint32_t high = value >> 32;
   asm volatile ("wrmsr" : : "c"(msr_id), "a"(low), "d"(high));
 }
@@ -128,7 +128,7 @@ write_cr4 (uint64_t value)
 void
 write_e9 (char c)
 {
-  write_port_b (0xe9, c);
+  write_port_b (0xE9, c);
 }
 
 ssize_t

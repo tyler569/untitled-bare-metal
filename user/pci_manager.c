@@ -100,13 +100,13 @@ handle_read (message_info_t info, uint64_t badge)
   switch (get_mr (1))
     {
     case 1:
-      set_mr (0, pci_read_b (badge | (get_mr (0) & 0xff)));
+      set_mr (0, pci_read_b (badge | (get_mr (0) & 0xFF)));
       return new_message_info (no_error, 0, 0, 1);
     case 2:
-      set_mr (0, pci_read_w (badge | (get_mr (0) & 0xff)));
+      set_mr (0, pci_read_w (badge | (get_mr (0) & 0xFF)));
       return new_message_info (no_error, 0, 0, 1);
     case 4:
-      set_mr (0, pci_read_l (badge | (get_mr (0) & 0xff)));
+      set_mr (0, pci_read_l (badge | (get_mr (0) & 0xFF)));
       return new_message_info (no_error, 0, 0, 1);
     default:
       set_mr (0, 1);
@@ -129,13 +129,13 @@ handle_write (message_info_t info, uint64_t badge)
   switch (get_mr (2))
     {
     case 1:
-      pci_write_b (badge | (get_mr (0) & 0xff), get_mr (1));
+      pci_write_b (badge | (get_mr (0) & 0xFF), get_mr (1));
       return new_message_info (no_error, 0, 0, 0);
     case 2:
-      pci_write_w (badge | (get_mr (0) & 0xff), get_mr (1));
+      pci_write_w (badge | (get_mr (0) & 0xFF), get_mr (1));
       return new_message_info (no_error, 0, 0, 0);
     case 4:
-      pci_write_l (badge | (get_mr (0) & 0xff), get_mr (1));
+      pci_write_l (badge | (get_mr (0) & 0xFF), get_mr (1));
       return new_message_info (no_error, 0, 0, 0);
     default:
       set_mr (0, 1);
@@ -230,7 +230,7 @@ handle_enumerate (message_info_t, word_t badge)
 
   for (uint32_t bus = 0; bus < 256; bus++)
     {
-      if (pci_read_l (pci_addr (bus, 0, 0, 0)) == 0xffffffff)
+      if (pci_read_l (pci_addr (bus, 0, 0, 0)) == 0xFFFFFFFF)
         continue;
 
       for (uint32_t dev = 0; dev < 32; dev++)
@@ -238,7 +238,7 @@ handle_enumerate (message_info_t, word_t badge)
           {
             uint32_t addr = pci_addr (bus, dev, func, 0);
             uint32_t info = pci_read_l (addr);
-            if (info != 0xffffffff)
+            if (info != 0xFFFFFFFF)
               mrs[mr++] = (uint64_t)addr << 32 | info;
             if (mr >= MESSAGE_MAX_LENGTH)
               goto done;

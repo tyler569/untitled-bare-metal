@@ -23,10 +23,10 @@ buffer_t
 map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
           struct elf_phdr *phdr)
 {
-  size_t offset = phdr->vaddr & 0xfff;
+  size_t offset = phdr->vaddr & 0xFFF;
 
   buffer_t buffer
-      = create_buffer (untyped, (phdr->memsz + offset + 0xfff) / 0x1000);
+      = create_buffer (untyped, (phdr->memsz + offset + 0xFFF) / 0x1000);
   uintptr_t mapped_addr
       = map_buffer_to_mappable_space (untyped, vspace, buffer);
 
@@ -81,7 +81,7 @@ spawn_thread (struct thread_data *data)
       = map_elf_to_new_vspace (ehdr, untyped, vspace, our_vspace);
 
   highest_addr += 0x1000;
-  highest_addr = (highest_addr + 0xfff) & ~0xfff;
+  highest_addr = (highest_addr + 0xFFF) & ~0xFFF;
   uintptr_t ipc_addr = highest_addr;
 
   map_buffer (untyped, vspace, ipc_buffer, highest_addr);
@@ -98,7 +98,7 @@ spawn_thread (struct thread_data *data)
     .rip = ehdr->entry,
     .rsp = stack_addr,
     .cs = 0x23,
-    .ss = 0x1b,
+    .ss = 0x1B,
     .r15 = ipc_addr,
     .rdi = data->arguments[0],
     .rsi = data->arguments[1],

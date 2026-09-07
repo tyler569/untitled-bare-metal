@@ -4,7 +4,19 @@
 #include "stdint.h"
 #include "sys/cdefs.h"
 
-#define PAGE_SIZE 4096ul
+static constexpr size_t PAGE_SIZE = 4096;
+
+static constexpr uint64_t PTE_PRESENT = 1;
+static constexpr uint64_t PTE_WRITE = 1 << 1;
+static constexpr uint64_t PTE_USER = 1 << 2;
+static constexpr uint64_t PTE_PWT = 1 << 3;
+static constexpr uint64_t PTE_PCD = 1 << 4;
+static constexpr uint64_t PTE_ACCESSED = 1 << 5;
+static constexpr uint64_t PTE_DIRTY = 1 << 6;
+static constexpr uint64_t PTE_PSE = 1 << 7;
+static constexpr uint64_t PTE_GLOBAL = 1 << 8;
+static constexpr uint64_t PTE_PAT = 1 << 12;
+static constexpr uint64_t PTE_NX = 1UL << 63;
 
 union PACKED gdt_entry
 {

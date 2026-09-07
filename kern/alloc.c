@@ -105,7 +105,7 @@ create_init_untyped_device_caps (cte_t *base, size_t *count,
         {
           uint32_t addr = pci_addr (bus, dev, func, 0);
           uint32_t id = read_pci_l (addr);
-          if (id == 0xffffffff)
+          if (id == 0xFFFFFFFF)
             continue;
 
           for (uint32_t i = 0; i < 6; i++)
@@ -114,12 +114,12 @@ create_init_untyped_device_caps (cte_t *base, size_t *count,
               if (bar == 0 || bar & 1)
                 continue;
 
-              write_pci_l (addr + PCI_BAR0 + i * 4, 0xffffffff);
+              write_pci_l (addr + PCI_BAR0 + i * 4, 0xFFFFFFFF);
               uint32_t mask = read_pci_l (addr + PCI_BAR0 + i * 4);
               write_pci_l (addr + PCI_BAR0 + i * 4, bar);
 
-              bar &= 0xfffffff0;
-              mask &= 0xfffffff0;
+              bar &= 0xFFFFFFF0;
+              mask &= 0xFFFFFFF0;
               size_t size = ~mask + 1;
               size_t size_bits = 63 - __builtin_clzll (size);
 

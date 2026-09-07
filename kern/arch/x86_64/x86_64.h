@@ -9,31 +9,31 @@
 
 #endif // __ASSEMBLER__
 
-#define IA32_EFER 0xC0000080
-#define IA32_STAR 0xC0000081
-#define IA32_LSTAR 0xC0000082
-#define IA32_CSTAR 0xC0000083
-#define IA32_FMASK 0xC0000084
-#define IA32_FS_BASE 0xC0000100
-#define IA32_GS_BASE 0xC0000101
+#define IA32_EFER 0xC0000080U
+#define IA32_STAR 0xC0000081U
+#define IA32_LSTAR 0xC0000082U
+#define IA32_CSTAR 0xC0000083U
+#define IA32_FMASK 0xC0000084U
+#define IA32_FS_BASE 0xC0000100U
+#define IA32_GS_BASE 0xC0000101U
 
-#define IA32_EFER_SCE 0x1
+#define IA32_EFER_SCE 1
 
-#define CR0_MP (1 << 1)
-#define CR0_EM (1 << 2)
-#define CR4_OSFXSR (1 << 9)
-#define CR4_OSXMMEXCPT (1 << 10)
-#define CR4_FSGSBASE (1 << 16)
+#define CR0_MP (1UL << 1)
+#define CR0_EM (1UL << 2)
+#define CR4_OSFXSR (1UL << 9)
+#define CR4_OSXMMEXCPT (1UL << 10)
+#define CR4_FSGSBASE (1UL << 16)
 
-#define KERNEL_CS 0x08l
-#define KERNEL_SS 0x10l
-#define USER_CS 0x23l
-#define USER_SS 0x1Bl
+#define KERNEL_CS 0x08UL
+#define KERNEL_SS 0x10UL
+#define USER_CS 0x23UL
+#define USER_SS 0x1BUL
 // In long mode, SYSRET pulls its code segment from IA32_STAR 63:48 + 16
 // and its stack segment from IA32_STAR 63:48 + 8. This is the fake code
 // segment that we load into IA32_STAR, so that the real code segment is
 // KERNEL_CS.
-#define USER_FAKE_SYSRET_CS (USER_CS - 16)
+#define USER_FAKE_SYSRET_CS (USER_CS - 16L)
 
 #define FLAG_CF 0x0001
 #define FLAG_PF 0x0004
@@ -53,20 +53,8 @@
 // #define PF_PROTECTION_KEY 0x20
 // #define PF_SHADOW_STACK 0x40
 
-#define PTE_PRESENT (1 << 0)
-#define PTE_WRITE (1 << 1)
-#define PTE_USER (1 << 2)
-#define PTE_PWT (1 << 3)
-#define PTE_PCD (1 << 4)
-#define PTE_ACCESSED (1 << 5)
-#define PTE_DIRTY (1 << 6)
-#define PTE_PSE (1 << 7)
-#define PTE_GLOBAL (1 << 8)
-#define PTE_PAT (1 << 12)
-#define PTE_NX (1ULL << 63)
-
-#define TSS_RSP2 28
-#define TSS_STACK 168
+#define TSS_RSP2 28UL
+#define TSS_STACK 168UL
 
 #define IST_NMI 1
 #define IST_DF 2

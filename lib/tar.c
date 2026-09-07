@@ -32,8 +32,8 @@ find_tar_entry (struct tar_header *tar, const char *name)
       uintptr_t next_tar = (uintptr_t)tar;
       next_tar += len + 0x200;
 
-      next_tar += 0x1ff;
-      next_tar &= ~0x1ff;
+      next_tar += 0x1FF;
+      next_tar &= ~0x1FF;
 
       tar = (struct tar_header *)next_tar;
     }
