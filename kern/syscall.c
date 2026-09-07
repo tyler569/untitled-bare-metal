@@ -17,6 +17,8 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
   if (syscall_number == SYS_EXIT)
     dbg_printf ("Task %p ", this_tcb);
 
+  message_info_t info = message_info_from_word (a1);
+
   // the syscalls without a capability handle in a0
   switch (syscall_number)
     {
@@ -38,11 +40,11 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 
       return msg_noreturn ();
     case SYS_REPLY:
-      dbg_printf ("sys_reply (info: %#lx)\n", a0);
+      dbg_printf ("sys_reply (info: %#lx)\n", message_info_to_word (info));
 
-      invoke_reply ();
+      invoke_reply (info);
 
-      return msg_noreturn ();
+      return info;
     default:
     }
 
@@ -56,9 +58,9 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
         dbg_printf ("sys_call (dest: %#lx)\n", a0);
 
         if (cap_type (slot) != CAP_ENDPOINT)
-          return dispatch_method (slot, this_tcb->ipc_buffer->tag);
+          return dispatch_method (slot, info);
 
-        invoke_endpoint_call (slot);
+        invoke_endpoint_call (slot, info);
         return msg_noreturn ();
       }
     case SYS_SEND:
@@ -71,7 +73,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
         if (cap_type (slot) == CAP_NOTIFICATION)
           invoke_notification_send (slot);
         else if (cap_type (slot) == CAP_ENDPOINT)
-          invoke_endpoint_send (slot);
+          invoke_endpoint_send (slot, info);
 
         return msg_noreturn ();
       }
@@ -82,7 +84,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
         if (cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);
 
-        invoke_endpoint_nbsend (slot);
+        invoke_endpoint_nbsend (slot, info);
         return msg_noreturn ();
       }
     case SYS_RECV:
@@ -113,7 +115,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
         if (cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);
 
-        return invoke_reply_recv (slot);
+        return invoke_reply_recv (slot, info);
       }
     default:
       err_printf ("Invalid syscall number: %d\n", syscall_number);
@@ -126,5 +128,5 @@ do_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 {
   message_info_t tag = op_syscall (a0, a1, syscall_number);
   if (!msg_is_noreturn (tag))
-    this_tcb->ipc_buffer->tag = tag;
+    set_ipc_result (this_tcb, tag);
 }

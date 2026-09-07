@@ -9,6 +9,8 @@ jump_to_userland:
     swapgs
     sysretq
 
+// IPC: RDI = capability, RSI = outgoing tag, RAX = syscall number.
+// The kernel writes the returned tag into the saved RAX slot.
 .global syscall_entry
 syscall_entry:
     swapgs

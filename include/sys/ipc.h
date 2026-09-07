@@ -23,6 +23,18 @@ union message_info_t
 typedef union message_info_t message_info_t;
 
 static inline message_info_t
+message_info_from_word (word_t value)
+{
+  return (message_info_t){ .value = value };
+}
+
+static inline word_t
+message_info_to_word (message_info_t info)
+{
+  return info.value;
+}
+
+static inline message_info_t
 new_message_info (word_t label, word_t caps_unwrapped, word_t extra_caps,
                   word_t length)
 {
@@ -58,10 +70,9 @@ get_message_length (message_info_t tag)
   return tag.length;
 }
 
+// The message tag travels in syscall registers, not in this buffer.
 struct ipc_buffer
 {
-  message_info_t tag;
-
   word_t msg[MESSAGE_MAX_LENGTH];
   word_t sender_badge;
   word_t caps_or_badges[MESSAGE_MAX_EXTRA_CAPS];

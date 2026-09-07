@@ -6,39 +6,41 @@
 
 #include "lib.h"
 
-static inline void
-_syscall0 (int syscall_num)
-{
-  asm volatile ("syscall" ::"a"(syscall_num) : "rcx", "r11");
-}
-
-static inline void
-_syscall1 (int syscall_num, uintptr_t a1)
-{
-  asm volatile ("syscall" : : "a"(syscall_num), "D"(a1) : "rcx", "r11");
-}
-
-static inline void
+// IPC ABI: RAX = syscall number / returned tag, RDI = capability,
+// RSI = outgoing tag. Payload words and sender badges stay in the IPC buffer.
+static inline word_t
 _syscall2 (int syscall_num, uintptr_t a1, uintptr_t a2)
 {
+  word_t result = syscall_num;
   asm volatile ("syscall"
-                :
-                : "a"(syscall_num), "D"(a1), "S"(a2)
-                : "rcx", "r11");
+                : "+a"(result)
+                : "D"(a1), "S"(a2)
+                : "rcx", "r11", "memory");
+  return result;
+}
+
+static inline word_t
+_syscall0 (int syscall_num)
+{
+  return _syscall2 (syscall_num, 0, 0);
+}
+
+static inline word_t
+_syscall1 (int syscall_num, uintptr_t a1)
+{
+  return _syscall2 (syscall_num, a1, 0);
 }
 
 void
 send (cptr_t cap, message_info_t info)
 {
-  __ipc_buffer->tag = info;
-  _syscall1 (SYS_SEND, cap);
+  _syscall2 (SYS_SEND, cap, message_info_to_word (info));
 }
 
 void
 nbsend (cptr_t cap, message_info_t info)
 {
-  __ipc_buffer->tag = info;
-  _syscall1 (SYS_NBSEND, cap);
+  _syscall2 (SYS_NBSEND, cap, message_info_to_word (info));
 }
 
 void
@@ -50,37 +52,36 @@ signal (cptr_t cap)
 message_info_t
 call (cptr_t cap, message_info_t info, word_t *sender)
 {
-  __ipc_buffer->tag = info;
-  _syscall1 (SYS_CALL, cap);
+  info = message_info_from_word (
+      _syscall2 (SYS_CALL, cap, message_info_to_word (info)));
   if (sender)
     *sender = __ipc_buffer->sender_badge;
-  return __ipc_buffer->tag;
+  return info;
 }
 
 message_info_t
 __call_kernel (cptr_t cap, message_info_t info)
 {
-  __ipc_buffer->tag = info;
-  _syscall1 (SYS_CALL, cap);
-  return __ipc_buffer->tag;
+  return message_info_from_word (
+      _syscall2 (SYS_CALL, cap, message_info_to_word (info)));
 }
 
 message_info_t
 recv (cptr_t cap, word_t *sender)
 {
-  _syscall1 (SYS_RECV, cap);
+  message_info_t info = message_info_from_word (_syscall1 (SYS_RECV, cap));
   if (sender)
     *sender = __ipc_buffer->sender_badge;
-  return __ipc_buffer->tag;
+  return info;
 }
 
 message_info_t
 nbrecv (cptr_t cap, word_t *sender)
 {
-  _syscall1 (SYS_NBRECV, cap);
+  message_info_t info = message_info_from_word (_syscall1 (SYS_NBRECV, cap));
   if (sender)
     *sender = __ipc_buffer->sender_badge;
-  return __ipc_buffer->tag;
+  return info;
 }
 
 void
@@ -94,19 +95,18 @@ wait (cptr_t cap, word_t *nfn_word)
 message_info_t
 reply (message_info_t info)
 {
-  __ipc_buffer->tag = info;
-  _syscall0 (SYS_REPLY);
-  return __ipc_buffer->tag;
+  return message_info_from_word (
+      _syscall2 (SYS_REPLY, 0, message_info_to_word (info)));
 }
 
 message_info_t
 reply_recv (cptr_t cap, message_info_t info, word_t *sender)
 {
-  __ipc_buffer->tag = info;
-  _syscall1 (SYS_REPLYRECV, cap);
+  info = message_info_from_word (
+      _syscall2 (SYS_REPLYRECV, cap, message_info_to_word (info)));
   if (sender)
     *sender = __ipc_buffer->sender_badge;
-  return __ipc_buffer->tag;
+  return info;
 }
 
 void

@@ -18,7 +18,6 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
   word_t size = get_message_length (tag) * sizeof (word_t);
   memcpy (receiver->ipc_buffer->msg, sender->ipc_buffer->msg, size);
 
-  receiver->ipc_buffer->tag = tag;
   receiver->ipc_buffer->sender_badge = badge;
 
   word_t transfer_cap = get_message_extra_caps (tag);
@@ -31,7 +30,7 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
       if (err != NO_ERROR)
         {
           // Silently drop cap transfer - clear extra_caps in receiver's tag
-          receiver->ipc_buffer->tag.extra_caps = 0;
+          tag.extra_caps = 0;
           goto finish;
         }
 
@@ -41,7 +40,7 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
                                  &recv_cnode_root);
       if (err != NO_ERROR)
         {
-          receiver->ipc_buffer->tag.extra_caps = 0;
+          tag.extra_caps = 0;
           goto finish;
         }
 
@@ -51,7 +50,7 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
           receiver->ipc_buffer->receive_depth, &recv_slot);
       if (err != NO_ERROR)
         {
-          receiver->ipc_buffer->tag.extra_caps = 0;
+          tag.extra_caps = 0;
           goto finish;
         }
 
@@ -62,7 +61,8 @@ finish:
   if (sender->expects_reply)
     receiver->reply_to = sender;
 
-  return receiver->ipc_buffer->tag;
+  set_ipc_result (receiver, tag);
+  return tag;
 }
 
 static void
@@ -98,7 +98,8 @@ static void
 queue_message_on_endpoint (struct endpoint *e, word_t badge,
                            message_info_t tag, bool is_call)
 {
-  this_tcb->ipc_buffer->tag = tag;
+  assert (message_info_to_word (get_pending_ipc_info (this_tcb))
+          == message_info_to_word (tag));
   append_to_list (&this_tcb->send_receive_node, &e->list);
 
   if (is_call)
@@ -117,7 +118,7 @@ receive_message_from_blocked_sender (struct endpoint *e)
   struct list_head *next = pop_from_list (&e->list);
   struct tcb *sender = CONTAINER_OF (next, struct tcb, send_receive_node);
 
-  message_info_t tag = sender->ipc_buffer->tag;
+  message_info_t tag = get_pending_ipc_info (sender);
   message_info_t result
       = transfer_message (sender, this_tcb, sender->endpoint_badge, tag);
 
@@ -199,7 +200,7 @@ maybe_init_endpoint (struct endpoint *e)
 }
 
 void
-invoke_endpoint_send (cte_t *cap)
+invoke_endpoint_send (cte_t *cap, message_info_t tag)
 {
   assert (cap_type (cap) == CAP_ENDPOINT);
 
@@ -208,12 +209,11 @@ invoke_endpoint_send (cte_t *cap)
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
 
-  message_info_t tag = this_tcb->ipc_buffer->tag;
   endpoint_send (e, cap->cap.badge, tag, false);
 }
 
 void
-invoke_endpoint_nbsend (cte_t *cap)
+invoke_endpoint_nbsend (cte_t *cap, message_info_t tag)
 {
   printf ("nbsend: %s\n", cap_type_string (cap));
   panic ("how did we get here\n");
@@ -225,7 +225,6 @@ invoke_endpoint_nbsend (cte_t *cap)
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
 
-  message_info_t tag = this_tcb->ipc_buffer->tag;
   endpoint_nbsend (e, cap->cap.badge, tag);
 }
 
@@ -269,7 +268,7 @@ invoke_endpoint_nbrecv (cte_t *cap)
 }
 
 void
-invoke_endpoint_call (cte_t *cap)
+invoke_endpoint_call (cte_t *cap, message_info_t tag)
 {
   assert (cap_type (cap) == CAP_ENDPOINT);
 
@@ -279,12 +278,11 @@ invoke_endpoint_call (cte_t *cap)
   struct endpoint *e = cap_ptr (cap);
   maybe_init_endpoint (e);
 
-  message_info_t tag = this_tcb->ipc_buffer->tag;
   endpoint_send (e, cap->cap.badge, tag, true);
 }
 
 void
-invoke_reply ()
+invoke_reply (message_info_t tag)
 {
   // TODO: this should use tcb->reply capability
 
@@ -296,13 +294,12 @@ invoke_reply ()
       kill_tcb (this_tcb);
     }
 
-  message_info_t tag = this_tcb->ipc_buffer->tag;
   send_message_directly (receiver, 0, tag, false);
 }
 
 message_info_t
-invoke_reply_recv (cte_t *cap)
+invoke_reply_recv (cte_t *cap, message_info_t tag)
 {
-  invoke_reply ();
+  invoke_reply (tag);
   return invoke_endpoint_recv (cap);
 }

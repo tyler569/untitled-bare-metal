@@ -8,7 +8,7 @@ signal_waiting_receiver (struct tcb *receiver, word_t badge)
 {
   message_info_t tag = new_message_info (NO_ERROR, 0, 0, 0);
 
-  receiver->ipc_buffer->tag = tag;
+  set_ipc_result (receiver, tag);
   receiver->ipc_buffer->sender_badge = badge;
 
   receiver->state = TASK_STATE_RUNNABLE;
