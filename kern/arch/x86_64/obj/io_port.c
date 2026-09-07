@@ -9,7 +9,7 @@ x86_64_io_port_control_issue (cte_t *, uint16_t first_port, uint16_t last_port,
   cte_t *dest_slot;
   TRY (lookup_cap_slot (root, index, depth, &dest_slot));
 
-  dest_slot->cap = cap_x86_64_io_port_new (first_port, last_port);
+  dest_slot->cap = new_x86_64_io_port_cap (first_port, last_port);
 
   return msg_ok (0);
 }

@@ -30,7 +30,7 @@ irq_control_get (cte_t *, word_t irq, cte_t *root, word_t index, uint8_t depth)
     return msg_invalid_argument (0);
   irq_handlers_issued |= 1 << irq;
 
-  result_cte->cap = cap_irq_handler_new (irq);
+  result_cte->cap = new_irq_handler_cap (irq);
   cap_set_ptr (result_cte, &irq_handlers[irq]);
   irq_handlers[irq].irq = irq;
 

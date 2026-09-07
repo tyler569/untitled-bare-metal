@@ -38,7 +38,7 @@ create_objects (cte_t *untyped, word_t type, word_t size_bits,
       dest_slot->cap.rights = CAP_RIGHTS_ALL;
       cap_set_ptr (dest_slot, obj_ptr);
 
-      insert_after (dest_slot, untyped);
+      insert_cte_after (dest_slot, untyped);
     }
 }
 

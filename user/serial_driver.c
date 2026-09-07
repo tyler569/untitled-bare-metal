@@ -63,10 +63,10 @@ write_uart (message_info_t info)
   // These can't be interleaved because it will wipe out the IPC buffer
 
   uint8_t buffer[128];
-  for (size_t i = 0; i < get_message_length (info); i++)
+  for (size_t i = 0; i < message_length (info); i++)
     buffer[i] = get_mr (i);
 
-  for (size_t i = 0; i < get_message_length (info); i++)
+  for (size_t i = 0; i < message_length (info); i++)
     port_write (UART_DATA, buffer[i]);
 }
 
@@ -124,9 +124,9 @@ driver_thread_main ()
 
       if (badge == 0xFFFF)
         handle_irq ();
-      else if (get_message_label (info) == SERIAL_DRIVER_WRITE)
+      else if (message_label (info) == SERIAL_DRIVER_WRITE)
         write_uart (info);
-	  else if (get_message_label (info) == SERIAL_DRIVER_READ)
+	  else if (message_label (info) == SERIAL_DRIVER_READ)
 		read_uart (info);
     }
 }

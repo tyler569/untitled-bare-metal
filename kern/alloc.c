@@ -78,7 +78,7 @@ create_init_untyped_caps (cte_t *base, size_t *count,
       regions[i].in_user_use = true;
 
       base[cap_i].cap
-          = cap_untyped_new (regions[i].addr, regions[i].size_bits + 12);
+          = new_untyped_cap (regions[i].addr, regions[i].size_bits + 12);
 
       desc[cap_i].base = regions[i].addr;
       desc[cap_i].size_bits = regions[i].size_bits + 12;
@@ -123,7 +123,7 @@ create_init_untyped_device_caps (cte_t *base, size_t *count,
               size_t size = ~mask + 1;
               size_t size_bits = 63 - __builtin_clzll (size);
 
-              cap_t cap = cap_untyped_device_new (bar, size_bits);
+              cap_t cap = new_untyped_device_cap (bar, size_bits);
               base[cap_i].cap = cap;
 
               desc[cap_i].base = bar;

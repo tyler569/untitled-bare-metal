@@ -77,7 +77,7 @@ cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   cte_t *src;
   TRY (lookup_cap_slot (root, src_offset, src_depth, &src));
 
-  TRY (copy (dst, src, rights));
+  TRY (copy_cap (dst, src, rights));
 
   return msg_ok (0);
 }
@@ -93,7 +93,7 @@ cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   cte_t *src;
   TRY (lookup_cap_slot (root, src_offset, src_depth, &src));
 
-  TRY (mint (dst, src, badge, rights));
+  TRY (mint_cap (dst, src, badge, rights));
 
   return msg_ok (0);
 }
@@ -104,7 +104,7 @@ cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
   cte_t *cte;
   TRY (lookup_cap_slot (obj, offset, depth, &cte));
 
-  TRY (delete (cte));
+  TRY (delete_cap (cte));
 
   return msg_ok (0);
 }
@@ -115,7 +115,7 @@ cnode_revoke (cte_t *obj, word_t offset, uint8_t depth)
   cte_t *cte;
   TRY (lookup_cap_slot (obj, offset, depth, &cte));
 
-  TRY (revoke (cte));
+  TRY (revoke_cap (cte));
 
   return msg_ok (0);
 }

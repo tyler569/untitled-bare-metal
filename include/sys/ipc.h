@@ -47,25 +47,25 @@ new_message_info (word_t label, word_t caps_unwrapped, word_t extra_caps,
 }
 
 static inline word_t
-get_message_label (message_info_t tag)
+message_label (message_info_t tag)
 {
   return tag.label;
 }
 
 static inline word_t
-get_message_extra_caps (message_info_t tag)
+message_extra_caps (message_info_t tag)
 {
   return tag.extra_caps;
 }
 
 static inline word_t
-get_message_caps_unwrapped (message_info_t tag)
+message_caps_unwrapped (message_info_t tag)
 {
   return tag.caps_unwrapped;
 }
 
 static inline word_t
-get_message_length (message_info_t tag)
+message_length (message_info_t tag)
 {
   return tag.length;
 }

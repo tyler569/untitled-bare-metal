@@ -16,7 +16,7 @@ main (cptr_t endpoint_cap)
 
   while (!done)
     {
-      word_t label = get_message_label (info);
+      word_t label = message_label (info);
       int err = 0;
 
       switch (label)

@@ -27,7 +27,7 @@ main ()
 
   while (!done)
     {
-      word_t label = get_message_label (info);
+      word_t label = message_label (info);
 
       switch (label)
         {
@@ -71,7 +71,7 @@ handle_issue (message_info_t info, uint64_t badge)
   if (badge != 0)
     return new_message_info (ILLEGAL_OPERATION, 0, 0, 0);
 
-  if (get_message_length (info) < 1)
+  if (message_length (info) < 1)
     {
       set_mr (0, 1);
       return new_message_info (TRUNCATED_MESSAGE, 0, 0, 1);
@@ -92,7 +92,7 @@ handle_issue (message_info_t info, uint64_t badge)
 static message_info_t
 handle_read (message_info_t info, uint64_t badge)
 {
-  if (get_message_length (info) < 2)
+  if (message_length (info) < 2)
     {
       set_mr (0, 2);
       return new_message_info (TRUNCATED_MESSAGE, 0, 0, 1);
@@ -121,7 +121,7 @@ handle_read (message_info_t info, uint64_t badge)
 static message_info_t
 handle_write (message_info_t info, uint64_t badge)
 {
-  if (get_message_length (info) < 3)
+  if (message_length (info) < 3)
     {
       set_mr (0, 3);
       return new_message_info (TRUNCATED_MESSAGE, 0, 0, 1);

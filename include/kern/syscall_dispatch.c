@@ -3,7 +3,7 @@
 message_info_t
 dispatch_method (cte_t *slot, message_info_t info)
 {
-  switch (get_message_label (info))
+  switch (message_label (info))
     {
     case METHOD_CNODE_COPY:
       {
@@ -24,7 +24,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 5)
               return msg_truncated_message (len, 5);
           }
@@ -32,7 +32,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -67,7 +67,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -99,7 +99,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 6)
               return msg_truncated_message (len, 6);
           }
@@ -107,7 +107,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -142,7 +142,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -186,7 +186,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -218,7 +218,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 4)
               return msg_truncated_message (len, 4);
           }
@@ -226,7 +226,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 3)
               return msg_truncated_message (len, 3);
           }
@@ -271,7 +271,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 4)
               return msg_truncated_message (len, 4);
           }
@@ -318,7 +318,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -348,7 +348,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -394,7 +394,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 4)
               return msg_truncated_message (len, 4);
           }
@@ -423,7 +423,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -450,7 +450,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -482,7 +482,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 6)
               return msg_truncated_message (len, 6);
           }
@@ -490,7 +490,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -523,7 +523,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -549,7 +549,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -575,7 +575,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -602,7 +602,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -629,7 +629,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -656,7 +656,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -686,7 +686,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 4)
               return msg_truncated_message (len, 4);
           }
@@ -694,7 +694,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -728,7 +728,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -736,7 +736,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -768,7 +768,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -776,7 +776,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -808,7 +808,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -816,7 +816,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -848,7 +848,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -856,7 +856,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -888,7 +888,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 2)
               return msg_truncated_message (len, 2);
           }
@@ -896,7 +896,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -929,7 +929,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_length (info);
+            word_t len = message_length (info);
             if (len < 3)
               return msg_truncated_message (len, 3);
           }
@@ -937,7 +937,7 @@ dispatch_method (cte_t *slot, message_info_t info)
 
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }
@@ -1002,7 +1002,7 @@ dispatch_method (cte_t *slot, message_info_t info)
           }
         do
           {
-            word_t len = get_message_extra_caps (info);
+            word_t len = message_extra_caps (info);
             if (len < 1)
               return msg_truncated_message (len, 1);
           }

@@ -20,7 +20,7 @@ cnode_copy (cptr_t obj, word_t dest_index, uint8_t dest_depth, cptr_t src_root,
   set_mr (4, (word_t)rights);
   set_cap (0, src_root);
   message_info_t _info = new_message_info (METHOD_CNODE_COPY, 0, 1, 5);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 cnode_delete (cptr_t obj, word_t index, uint8_t depth)
@@ -29,7 +29,7 @@ cnode_delete (cptr_t obj, word_t index, uint8_t depth)
   set_mr (1, (word_t)depth);
 
   message_info_t _info = new_message_info (METHOD_CNODE_DELETE, 0, 0, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 cnode_mint (cptr_t obj, word_t dest_index, uint8_t dest_depth, cptr_t src_root,
@@ -44,7 +44,7 @@ cnode_mint (cptr_t obj, word_t dest_index, uint8_t dest_depth, cptr_t src_root,
   set_mr (5, (word_t)badge);
   set_cap (0, src_root);
   message_info_t _info = new_message_info (METHOD_CNODE_MINT, 0, 1, 6);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 cnode_revoke (cptr_t obj, word_t index, uint8_t depth)
@@ -53,14 +53,14 @@ cnode_revoke (cptr_t obj, word_t index, uint8_t depth)
   set_mr (1, (word_t)depth);
 
   message_info_t _info = new_message_info (METHOD_CNODE_REVOKE, 0, 0, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 cnode_debug_print (cptr_t obj)
 {
 
   message_info_t _info = new_message_info (METHOD_CNODE_DEBUG_PRINT, 0, 0, 0);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 cnode_debug_get (cptr_t obj, word_t index, uint8_t depth)
@@ -69,7 +69,7 @@ cnode_debug_get (cptr_t obj, word_t index, uint8_t depth)
   set_mr (1, (word_t)depth);
 
   message_info_t _info = new_message_info (METHOD_CNODE_DEBUG_GET, 0, 0, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_configure (cptr_t obj, word_t fault_ep, cptr_t cspace_root,
@@ -84,7 +84,7 @@ tcb_configure (cptr_t obj, word_t fault_ep, cptr_t cspace_root,
   set_cap (1, vspace_root);
   set_cap (2, buffer_frame);
   message_info_t _info = new_message_info (METHOD_TCB_CONFIGURE, 0, 3, 4);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_read_registers (cptr_t obj, bool suspend_source, word_t arch_flags,
@@ -96,14 +96,14 @@ tcb_read_registers (cptr_t obj, bool suspend_source, word_t arch_flags,
   set_mr (3, (word_t)regs);
 
   message_info_t _info = new_message_info (METHOD_TCB_READ_REGISTERS, 0, 0, 4);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_resume (cptr_t obj)
 {
 
   message_info_t _info = new_message_info (METHOD_TCB_RESUME, 0, 0, 0);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_bind_notification (cptr_t obj, cptr_t notification)
@@ -112,7 +112,7 @@ tcb_bind_notification (cptr_t obj, cptr_t notification)
   set_cap (0, notification);
   message_info_t _info
       = new_message_info (METHOD_TCB_BIND_NOTIFICATION, 0, 1, 0);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_set_tls_base (cptr_t obj, word_t tls_base)
@@ -120,14 +120,14 @@ tcb_set_tls_base (cptr_t obj, word_t tls_base)
   set_mr (0, (word_t)tls_base);
 
   message_info_t _info = new_message_info (METHOD_TCB_SET_TLS_BASE, 0, 0, 1);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_suspend (cptr_t obj)
 {
 
   message_info_t _info = new_message_info (METHOD_TCB_SUSPEND, 0, 0, 0);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_write_registers (cptr_t obj, bool resume_target, word_t arch_flags,
@@ -140,7 +140,7 @@ tcb_write_registers (cptr_t obj, bool resume_target, word_t arch_flags,
 
   message_info_t _info
       = new_message_info (METHOD_TCB_WRITE_REGISTERS, 0, 0, 4);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_set_debug (cptr_t obj, word_t flags)
@@ -148,7 +148,7 @@ tcb_set_debug (cptr_t obj, word_t flags)
   set_mr (0, (word_t)flags);
 
   message_info_t _info = new_message_info (METHOD_TCB_SET_DEBUG, 0, 0, 1);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 tcb_set_name (cptr_t obj, char *name, word_t len)
@@ -157,7 +157,7 @@ tcb_set_name (cptr_t obj, char *name, word_t len)
   set_mr (1, (word_t)len);
 
   message_info_t _info = new_message_info (METHOD_TCB_SET_NAME, 0, 0, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 untyped_retype (cptr_t obj, word_t type, word_t size_bits, cptr_t root,
@@ -172,7 +172,7 @@ untyped_retype (cptr_t obj, word_t type, word_t size_bits, cptr_t root,
   set_mr (5, (word_t)num_objects);
   set_cap (0, root);
   message_info_t _info = new_message_info (METHOD_UNTYPED_RETYPE, 0, 1, 6);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_io_port_in8 (cptr_t obj, word_t port)
@@ -180,7 +180,7 @@ x86_64_io_port_in8 (cptr_t obj, word_t port)
   set_mr (0, (word_t)port);
 
   message_info_t _info = new_message_info (METHOD_X86_64_IO_PORT_IN8, 0, 0, 1);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_io_port_in16 (cptr_t obj, word_t port)
@@ -189,7 +189,7 @@ x86_64_io_port_in16 (cptr_t obj, word_t port)
 
   message_info_t _info
       = new_message_info (METHOD_X86_64_IO_PORT_IN16, 0, 0, 1);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_io_port_in32 (cptr_t obj, word_t port)
@@ -198,7 +198,7 @@ x86_64_io_port_in32 (cptr_t obj, word_t port)
 
   message_info_t _info
       = new_message_info (METHOD_X86_64_IO_PORT_IN32, 0, 0, 1);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_io_port_out8 (cptr_t obj, word_t port, word_t value)
@@ -208,7 +208,7 @@ x86_64_io_port_out8 (cptr_t obj, word_t port, word_t value)
 
   message_info_t _info
       = new_message_info (METHOD_X86_64_IO_PORT_OUT8, 0, 0, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_io_port_out16 (cptr_t obj, word_t port, word_t value)
@@ -218,7 +218,7 @@ x86_64_io_port_out16 (cptr_t obj, word_t port, word_t value)
 
   message_info_t _info
       = new_message_info (METHOD_X86_64_IO_PORT_OUT16, 0, 0, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_io_port_out32 (cptr_t obj, word_t port, word_t value)
@@ -228,7 +228,7 @@ x86_64_io_port_out32 (cptr_t obj, word_t port, word_t value)
 
   message_info_t _info
       = new_message_info (METHOD_X86_64_IO_PORT_OUT32, 0, 0, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_io_port_control_issue (cptr_t obj, word_t first_port, word_t last_port,
@@ -241,7 +241,7 @@ x86_64_io_port_control_issue (cptr_t obj, word_t first_port, word_t last_port,
   set_cap (0, root);
   message_info_t _info
       = new_message_info (METHOD_X86_64_IO_PORT_CONTROL_ISSUE, 0, 1, 4);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_pdpt_map (cptr_t obj, cptr_t vspace, word_t vaddr,
@@ -251,7 +251,7 @@ x86_64_pdpt_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   set_mr (1, (word_t)attr);
   set_cap (0, vspace);
   message_info_t _info = new_message_info (METHOD_X86_64_PDPT_MAP, 0, 1, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_pd_map (cptr_t obj, cptr_t vspace, word_t vaddr,
@@ -261,7 +261,7 @@ x86_64_pd_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   set_mr (1, (word_t)attr);
   set_cap (0, vspace);
   message_info_t _info = new_message_info (METHOD_X86_64_PD_MAP, 0, 1, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_pt_map (cptr_t obj, cptr_t vspace, word_t vaddr,
@@ -271,7 +271,7 @@ x86_64_pt_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   set_mr (1, (word_t)attr);
   set_cap (0, vspace);
   message_info_t _info = new_message_info (METHOD_X86_64_PT_MAP, 0, 1, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_page_map (cptr_t obj, cptr_t vspace, word_t vaddr,
@@ -281,7 +281,7 @@ x86_64_page_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   set_mr (1, (word_t)attr);
   set_cap (0, vspace);
   message_info_t _info = new_message_info (METHOD_X86_64_PAGE_MAP, 0, 1, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 x86_64_huge_page_map (cptr_t obj, cptr_t vspace, word_t vaddr,
@@ -292,7 +292,7 @@ x86_64_huge_page_map (cptr_t obj, cptr_t vspace, word_t vaddr,
   set_cap (0, vspace);
   message_info_t _info
       = new_message_info (METHOD_X86_64_HUGE_PAGE_MAP, 0, 1, 2);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 irq_control_get (cptr_t obj, word_t irq, cptr_t root, word_t index,
@@ -303,21 +303,21 @@ irq_control_get (cptr_t obj, word_t irq, cptr_t root, word_t index,
   set_mr (2, (word_t)depth);
   set_cap (0, root);
   message_info_t _info = new_message_info (METHOD_IRQ_CONTROL_GET, 0, 1, 3);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 irq_handler_ack (cptr_t obj)
 {
 
   message_info_t _info = new_message_info (METHOD_IRQ_HANDLER_ACK, 0, 0, 0);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 irq_handler_clear (cptr_t obj)
 {
 
   message_info_t _info = new_message_info (METHOD_IRQ_HANDLER_CLEAR, 0, 0, 0);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }
 static inline int
 irq_handler_set_notification (cptr_t obj, cptr_t notification)
@@ -326,5 +326,5 @@ irq_handler_set_notification (cptr_t obj, cptr_t notification)
   set_cap (0, notification);
   message_info_t _info
       = new_message_info (METHOD_IRQ_HANDLER_SET_NOTIFICATION, 0, 1, 0);
-  return get_message_label (call (obj, _info, nullptr));
+  return message_label (call (obj, _info, nullptr));
 }

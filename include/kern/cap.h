@@ -94,7 +94,7 @@ cap_size (cap_t cap)
 }
 
 static inline void
-cap_set_size (cap_t *cap, word_t size_bits)
+cap_set_size_bits (cap_t *cap, word_t size_bits)
 {
   cap->size_bits = size_bits;
 }
@@ -112,14 +112,14 @@ cap_set_rights (cap_t *cap, word_t rights)
 }
 
 static inline cap_t
-cap_null_new ()
+new_null_cap ()
 {
   cap_t cap = { .type = CAP_NULL };
   return cap;
 }
 
 static inline cap_t
-cap_untyped_new (uintptr_t paddr, uintptr_t size_bits)
+new_untyped_cap (uintptr_t paddr, uintptr_t size_bits)
 {
   cap_t cap = { .type = CAP_UNTYPED, .size_bits = size_bits };
   cap_set_ptr (&cap, (void *)paddr);
@@ -127,7 +127,7 @@ cap_untyped_new (uintptr_t paddr, uintptr_t size_bits)
 }
 
 static inline cap_t
-cap_untyped_device_new (uintptr_t paddr, uintptr_t size_bits)
+new_untyped_device_cap (uintptr_t paddr, uintptr_t size_bits)
 {
   cap_t cap = {
     .type = CAP_UNTYPED,
@@ -139,7 +139,7 @@ cap_untyped_device_new (uintptr_t paddr, uintptr_t size_bits)
 }
 
 static inline cap_t
-cap_endpoint_new (void *endpoint, uintptr_t badge)
+new_endpoint_cap (void *endpoint, uintptr_t badge)
 {
   cap_t cap = { .type = CAP_ENDPOINT, .badge = badge };
   cap_set_ptr (&cap, endpoint);
@@ -147,7 +147,7 @@ cap_endpoint_new (void *endpoint, uintptr_t badge)
 }
 
 static inline cap_t
-cap_cnode_new (void *cnode, uintptr_t size_bits)
+new_cnode_cap (void *cnode, uintptr_t size_bits)
 {
   cap_t cap = { .type = CAP_CNODE, .size_bits = size_bits };
   cap_set_ptr (&cap, cnode);
@@ -155,7 +155,7 @@ cap_cnode_new (void *cnode, uintptr_t size_bits)
 }
 
 static inline cap_t
-cap_tcb_new (void *tcb)
+new_tcb_cap (void *tcb)
 {
   cap_t cap = { .type = CAP_TCB };
   cap_set_ptr (&cap, tcb);
@@ -163,14 +163,14 @@ cap_tcb_new (void *tcb)
 }
 
 static inline cap_t
-cap_x86_64_io_port_control_new ()
+new_x86_64_io_port_control_cap ()
 {
   cap_t cap = { .type = CAP_X86_64_IO_PORT_CONTROL };
   return cap;
 }
 
 static inline cap_t
-cap_x86_64_io_port_new (uint16_t first_port, uint16_t last_port)
+new_x86_64_io_port_cap (uint16_t first_port, uint16_t last_port)
 {
   cap_t cap
       = { .type = CAP_X86_64_IO_PORT, .ptr = first_port, .badge = last_port };
@@ -190,7 +190,7 @@ cap_x86_64_io_port_last_port (cap_t cap)
 }
 
 static inline cap_t
-cap_x86_64_pml4_new (uintptr_t pml4_phy)
+new_x86_64_pml4_cap (uintptr_t pml4_phy)
 {
   cap_t cap = { .type = CAP_X86_64_PML4 };
   cap_set_ptr (&cap, (void *)pml4_phy);
@@ -198,7 +198,7 @@ cap_x86_64_pml4_new (uintptr_t pml4_phy)
 }
 
 static inline cap_t
-cap_x86_64_pdpt_new (uintptr_t pdpt_phy)
+new_x86_64_pdpt_cap (uintptr_t pdpt_phy)
 {
   cap_t cap = { .type = CAP_X86_64_PDPT };
   cap_set_ptr (&cap, (void *)pdpt_phy);
@@ -206,7 +206,7 @@ cap_x86_64_pdpt_new (uintptr_t pdpt_phy)
 }
 
 static inline cap_t
-cap_x86_64_pd_new (uintptr_t pd_phy)
+new_x86_64_pd_cap (uintptr_t pd_phy)
 {
   cap_t cap = { .type = CAP_X86_64_PD };
   cap_set_ptr (&cap, (void *)pd_phy);
@@ -214,7 +214,7 @@ cap_x86_64_pd_new (uintptr_t pd_phy)
 }
 
 static inline cap_t
-cap_x86_64_pt_new (uintptr_t pt_phy)
+new_x86_64_pt_cap (uintptr_t pt_phy)
 {
   cap_t cap = { .type = CAP_X86_64_PT };
   cap_set_ptr (&cap, (void *)pt_phy);
@@ -222,7 +222,7 @@ cap_x86_64_pt_new (uintptr_t pt_phy)
 }
 
 static inline cap_t
-cap_x86_64_page_new (uintptr_t frame_phy)
+new_x86_64_page_cap (uintptr_t frame_phy)
 {
   cap_t cap = { .type = CAP_X86_64_PAGE };
   cap_set_ptr (&cap, (void *)frame_phy);
@@ -230,13 +230,13 @@ cap_x86_64_page_new (uintptr_t frame_phy)
 }
 
 static inline cap_t
-cap_irq_control_new ()
+new_irq_control_cap ()
 {
   return (cap_t){ .type = CAP_IRQ_CONTROL };
 }
 
 static inline cap_t
-cap_irq_handler_new (word_t irq)
+new_irq_handler_cap (word_t irq)
 {
   cap_t cap = { .type = CAP_IRQ_HANDLER, .size_bits = irq };
   return cap;
@@ -278,9 +278,9 @@ cte_size (cte_t *cte)
 }
 
 static inline void
-cte_set_size (cte_t *cte, word_t size)
+cte_set_size_bits (cte_t *cte, word_t size_bits)
 {
-  cte->cap.size_bits = size;
+  cte->cap.size_bits = size_bits;
 }
 
 static inline word_t
@@ -302,8 +302,8 @@ cte_set_rights (cte_t *cte, word_t rights)
   _Generic ((c), cap_t: cap_rights, cte_t *: cte_rights) (c)
 #define cap_set_ptr(c, p)                                                     \
   _Generic ((c), cap_t: cap_set_ptr, cte_t *: cte_set_ptr) (c, p)
-#define cap_set_size(c, s)                                                    \
-  _Generic ((c), cap_t: cap_set_size, cte_t *: cte_set_size) (c, s)
+#define cap_set_size_bits(c, s)                                               \
+  _Generic ((c), cap_t *: cap_set_size_bits, cte_t *: cte_set_size_bits) (c, s)
 #define cap_set_rights(c, r)                                                  \
   _Generic ((c), cap_t: cap_set_rights, cte_t *: cte_set_rights) (c, r)
 
@@ -325,13 +325,11 @@ cap_value_type_string (cap_t cap)
       cap_t: cap_value_type_string,                                           \
       cte_t *: cte_type_string) (t)
 
-#define copy_cap copy
-
-void insert_after (struct cte *new, struct cte *src);
-void remove (struct cte *del);
-message_info_t copy (struct cte *dest, struct cte *src, cap_rights_t);
-message_info_t mint (struct cte *dest, struct cte *src, word_t badge,
-                     cap_rights_t);
-bool is_child (struct cte *c, struct cte *parent);
-message_info_t delete (struct cte *c);
-message_info_t revoke (struct cte *c);
+void insert_cte_after (struct cte *new, struct cte *src);
+void unlink_cte (struct cte *del);
+message_info_t copy_cap (struct cte *dest, struct cte *src, cap_rights_t);
+message_info_t mint_cap (struct cte *dest, struct cte *src, word_t badge,
+                         cap_rights_t);
+bool is_child_cap (struct cte *c, struct cte *parent);
+message_info_t delete_cap (struct cte *c);
+message_info_t revoke_cap (struct cte *c);

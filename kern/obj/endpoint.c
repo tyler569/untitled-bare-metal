@@ -15,12 +15,12 @@ static message_info_t
 transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
                   message_info_t tag)
 {
-  word_t size = get_message_length (tag) * sizeof (word_t);
+  word_t size = message_length (tag) * sizeof (word_t);
   memcpy (receiver->ipc_buffer->msg, sender->ipc_buffer->msg, size);
 
   receiver->ipc_buffer->sender_badge = badge;
 
-  word_t transfer_cap = get_message_extra_caps (tag);
+  word_t transfer_cap = message_extra_caps (tag);
   if (transfer_cap)
     {
       cptr_t send_cptr = sender->ipc_buffer->caps_or_badges[0];

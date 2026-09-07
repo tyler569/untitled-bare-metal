@@ -28,7 +28,7 @@ read_serial (cptr_t serial_endpoint, cptr_t serial_notification)
   while (true) {
     message_info_t info = new_message_info (SERIAL_DRIVER_READ, 0, 0, 0);
     info = call (serial_endpoint, info, nullptr);
-    if (get_message_label (info) != WOULD_BLOCK)
+    if (message_label (info) != WOULD_BLOCK)
       return info;
 
     wait (serial_notification, nullptr);

@@ -6,7 +6,7 @@
 #include "sys/syscall.h"
 
 void
-insert_after (struct cte *new, struct cte *after)
+insert_cte_after (struct cte *new, struct cte *after)
 {
   struct cte *next = after->next;
 
@@ -19,7 +19,7 @@ insert_after (struct cte *new, struct cte *after)
 }
 
 void
-remove (struct cte *del)
+unlink_cte (struct cte *del)
 {
   if (del->prev)
     del->prev->next = del->next;
@@ -30,7 +30,7 @@ remove (struct cte *del)
 }
 
 message_info_t
-copy (struct cte *dest, struct cte *src, cap_rights_t rights_mask)
+copy_cap (struct cte *dest, struct cte *src, cap_rights_t rights_mask)
 {
   if (cap_type (dest) != CAP_NULL)
     return msg_delete_first ();
@@ -45,14 +45,14 @@ copy (struct cte *dest, struct cte *src, cap_rights_t rights_mask)
 
   cap_set_rights (dest, cap_rights (src) & rights_mask);
 
-  insert_after (dest, src);
+  insert_cte_after (dest, src);
 
   return msg_ok (0);
 }
 
 message_info_t
-mint (struct cte *dest, struct cte *src, unsigned long badge,
-      cap_rights_t rights_mask)
+mint_cap (struct cte *dest, struct cte *src, unsigned long badge,
+          cap_rights_t rights_mask)
 {
   if (cap_type (dest) != CAP_NULL)
     return msg_delete_first ();
@@ -72,7 +72,7 @@ mint (struct cte *dest, struct cte *src, unsigned long badge,
 
   cap_set_rights (dest, cap_rights (src) & rights_mask);
 
-  insert_after (dest, src);
+  insert_cte_after (dest, src);
 
   return msg_ok (0);
 }
@@ -91,13 +91,14 @@ mint (struct cte *dest, struct cte *src, unsigned long badge,
  * only ->is_original caps can be parents
  * untyped are the parents of all caps whose pointers lie inside their region
  * otherwise, caps can only parent their own type
- *   (children can only be created with `untyped_retype`, `copy`, and `mint`)
+ *   (children can only be created with `untyped_retype`, `copy_cap`,
+ *   and `mint_cap`)
  * and endpoints with badge 0 parent all derived caps, endpointed with badge
  *   nonzero parent all dervied caps with matching endpoint. The original
  *   badged cap does have ->is_original set.
  */
 bool
-is_child (struct cte *c, struct cte *parent)
+is_child_cap (struct cte *c, struct cte *parent)
 {
   assert (parent);
 
@@ -115,28 +116,28 @@ is_child (struct cte *c, struct cte *parent)
 }
 
 message_info_t
-delete (struct cte *c)
+delete_cap (struct cte *c)
 {
-  revoke (c);
-  remove (c);
+  revoke_cap (c);
+  unlink_cte (c);
 
   if (c->cap.is_original)
     {
       // TODO: deletion operation on kernel object
     }
 
-  c->cap = cap_null_new ();
+  c->cap = new_null_cap ();
 
   return msg_ok (0);
 }
 
-// revoke takes capability c and deletes any children it has. If c is not
+// revoke_cap takes capability c and deletes any children it has. If c is not
 // an original capability, this has no effect.
 message_info_t
-revoke (struct cte *c)
+revoke_cap (struct cte *c)
 {
-  while (is_child (c->next, c))
-    delete (c->next);
+  while (is_child_cap (c->next, c))
+    delete_cap (c->next);
 
   return msg_ok (0);
 }

@@ -333,7 +333,7 @@ serial_capitalization_server (cptr_t serial_endpoint, cptr_t serial_notification
   while (true)
     {
       message_info_t info = read_serial (serial_endpoint, serial_notification);
-      size_t regs = get_message_length (info);
+      size_t regs = message_length (info);
 
       if (regs == 0)
         continue;
@@ -361,7 +361,7 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
   message_info_t info = new_message_info (PCI_MANAGER_ENUMERATE, 0, 0, 0);
   info = call (pci_manager_endpoint, info, nullptr);
 
-  size_t num_devices = get_message_length (info);
+  size_t num_devices = message_length (info);
   uint32_t addrs[num_devices];
   for (size_t i = 0; i < num_devices; i++)
     addrs[i] = get_mr (i) >> 32;

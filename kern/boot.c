@@ -84,11 +84,11 @@ create_init_tcb (void *initrd, size_t initrd_size)
   init_tcb.ipc_buffer = (struct ipc_buffer *)direct_map_of (ipc_buf);
 
   // caps
-  cap_t init_tcb_cap = cap_tcb_new (&init_tcb);
-  cap_t init_cnode_cap = cap_cnode_new (init_cnode, INIT_CNODE_SIZE_BITS);
-  cap_t init_vspace_cap = cap_x86_64_pml4_new (direct_map_of (get_vm_root ()));
-  cap_t init_io_port_cap = cap_x86_64_io_port_control_new ();
-  cap_t init_irq_control_cap = cap_irq_control_new ();
+  cap_t init_tcb_cap = new_tcb_cap (&init_tcb);
+  cap_t init_cnode_cap = new_cnode_cap (init_cnode, INIT_CNODE_SIZE_BITS);
+  cap_t init_vspace_cap = new_x86_64_pml4_cap (direct_map_of (get_vm_root ()));
+  cap_t init_io_port_cap = new_x86_64_io_port_control_cap ();
+  cap_t init_irq_control_cap = new_irq_control_cap ();
 
   // fill well-known slots
   struct
