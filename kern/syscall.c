@@ -9,7 +9,8 @@
 #include "kern/syscall_dispatch.c"
 
 static message_info_t
-op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
+op_syscall (const uintptr_t a0, const uintptr_t a1,
+            const enum syscall_number syscall_number)
 {
   if (syscall_number != SYS_DEBUG_WRITE && syscall_number != SYS_EXIT)
     dbg_printf ("Task %p a0:0x%lX ", this_tcb, a0);
@@ -17,7 +18,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
   if (syscall_number == SYS_EXIT)
     dbg_printf ("Task %p ", this_tcb);
 
-  message_info_t info = message_info_from_word (a1);
+  const message_info_t info = message_info_from_word (a1);
 
   // the syscalls without a capability handle in a0
   switch (syscall_number)
@@ -67,7 +68,8 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
       {
         dbg_printf ("sys_send (dest: 0x%lX)\n", a0);
 
-        if (cap_type (slot) != CAP_NOTIFICATION && cap_type (slot) != CAP_ENDPOINT)
+        if (cap_type (slot) != CAP_NOTIFICATION
+            && cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);
 
         if (cap_type (slot) == CAP_NOTIFICATION)
@@ -91,7 +93,8 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
       {
         dbg_printf ("sys_recv (dest: 0x%lX)\n", a0);
 
-        if (cap_type (slot) != CAP_NOTIFICATION && cap_type (slot) != CAP_ENDPOINT)
+        if (cap_type (slot) != CAP_NOTIFICATION
+            && cap_type (slot) != CAP_ENDPOINT)
           return msg_err (INVALID_CAPABILITY, 0);
 
         if (cap_type (slot) == CAP_NOTIFICATION)
@@ -126,7 +129,7 @@ op_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 void
 do_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 {
-  message_info_t tag = op_syscall (a0, a1, syscall_number);
+  const message_info_t tag = op_syscall (a0, a1, syscall_number);
   if (!msg_is_noreturn (tag))
     set_ipc_result (this_tcb, tag);
 }

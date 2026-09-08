@@ -6,16 +6,16 @@
 #include "sys/syscall.h"
 #include "sys/types.h"
 
-constexpr uintptr_t BITS_PTR_MASK = 0xFFFF'FFFF'FFF0;
+constexpr uintptr_t BITS_PTR_MASK = 0xFFFF 'FFFF' FFF0;
 
 static inline bool
 is_safe_cap_ptr (void *ptr)
 {
-  uintptr_t p = (uintptr_t)ptr;
-  uintptr_t low_bits = p & 0xF;
+  const uintptr_t p = (uintptr_t)ptr;
+  const uintptr_t low_bits = p & 0xF;
   if (low_bits != 0)
     return false;
-  uintptr_t high_bits = p >> 47;
+  const uintptr_t high_bits = p >> 47;
   if (high_bits != 0x1FFFF && high_bits != 0)
     return false;
   return true;
@@ -24,8 +24,8 @@ is_safe_cap_ptr (void *ptr)
 static inline void *
 bits_pointer (word_t bits)
 {
-  word_t ptr_bits = bits & BITS_PTR_MASK;
-  if (ptr_bits & 0x8000'0000'0000)
+  const word_t ptr_bits = bits & BITS_PTR_MASK;
+  if (ptr_bits & 0x8000 '0000' 0000)
     return (void *)(ptr_bits | 0xFFFF'0000'0000'0000);
   else
     return (void *)ptr_bits;
@@ -254,13 +254,13 @@ message_info_t lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
   lookup_cap_slot (&this_tcb->cspace_root, index, 64, out)
 
 static inline word_t
-cte_ptr_type (cte_t *cte)
+cte_ptr_type (const cte_t *cte)
 {
   return cap_type (cte->cap);
 }
 
 static inline void *
-cte_ptr (cte_t *cte)
+cte_ptr (const cte_t *cte)
 {
   return cap_ptr (cte->cap);
 }
@@ -272,7 +272,7 @@ cte_set_ptr (cte_t *cte, void *ptr)
 }
 
 static inline word_t
-cte_size (cte_t *cte)
+cte_size (const cte_t *cte)
 {
   return cap_size (cte->cap);
 }
@@ -284,7 +284,7 @@ cte_set_size_bits (cte_t *cte, word_t size_bits)
 }
 
 static inline word_t
-cte_rights (cte_t *cte)
+cte_rights (const cte_t *cte)
 {
   return cte->cap.rights;
 }
@@ -295,20 +295,8 @@ cte_set_rights (cte_t *cte, word_t rights)
   cte->cap.rights = rights;
 }
 
-#define cap_type(c) _Generic ((c), cap_t: cap_type, cte_t *: cte_ptr_type) (c)
-#define cap_ptr(c) _Generic ((c), cap_t: cap_ptr, cte_t *: cte_ptr) (c)
-#define cap_size(c) _Generic ((c), cap_t: cap_size, cte_t *: cte_size) (c)
-#define cap_rights(c)                                                         \
-  _Generic ((c), cap_t: cap_rights, cte_t *: cte_rights) (c)
-#define cap_set_ptr(c, p)                                                     \
-  _Generic ((c), cap_t: cap_set_ptr, cte_t *: cte_set_ptr) (c, p)
-#define cap_set_size_bits(c, s)                                               \
-  _Generic ((c), cap_t *: cap_set_size_bits, cte_t *: cte_set_size_bits) (c, s)
-#define cap_set_rights(c, r)                                                  \
-  _Generic ((c), cap_t: cap_set_rights, cte_t *: cte_set_rights) (c, r)
-
 static inline const char *
-cte_type_string (cte_t *cte)
+cte_type_string (const cte_t *cte)
 {
   return cap_type_string (cte_ptr_type (cte));
 }
@@ -319,17 +307,41 @@ cap_value_type_string (cap_t cap)
   return cap_type_string (cap_type (cap));
 }
 
+#define cap_type(c)                                                           \
+  _Generic ((c),                                                              \
+      cap_t: cap_type,                                                        \
+      cte_t *: cte_ptr_type,                                                  \
+      const cte_t *: cte_ptr_type) (c)
+#define cap_ptr(c)                                                            \
+  _Generic ((c), cap_t: cap_ptr, cte_t *: cte_ptr, const cte_t *: cte_ptr) (c)
+#define cap_size(c)                                                           \
+  _Generic ((c),                                                              \
+      cap_t: cap_size,                                                        \
+      cte_t *: cte_size,                                                      \
+      const cte_t *: cte_size) (c)
+#define cap_rights(c)                                                         \
+  _Generic ((c),                                                              \
+      cap_t: cap_rights,                                                      \
+      cte_t *: cte_rights,                                                    \
+      const cte_t *: cte_rights) (c)
 #define cap_type_string(t)                                                    \
   _Generic ((t),                                                              \
       word_t: cap_type_string,                                                \
       cap_t: cap_value_type_string,                                           \
-      cte_t *: cte_type_string) (t)
+      cte_t *: cte_type_string,                                               \
+      const cte_t *: cte_type_string) (t)
+#define cap_set_ptr(c, p)                                                     \
+  _Generic ((c), cap_t: cap_set_ptr, cte_t *: cte_set_ptr) (c, p)
+#define cap_set_size_bits(c, s)                                               \
+  _Generic ((c), cap_t *: cap_set_size_bits, cte_t *: cte_set_size_bits) (c, s)
+#define cap_set_rights(c, r)                                                  \
+  _Generic ((c), cap_t: cap_set_rights, cte_t *: cte_set_rights) (c, r)
 
-void insert_cte_after (struct cte *new, struct cte *src);
+void insert_cte_after (struct cte *new, struct cte *after);
 void unlink_cte (struct cte *del);
 message_info_t copy_cap (struct cte *dest, struct cte *src, cap_rights_t);
 message_info_t mint_cap (struct cte *dest, struct cte *src, word_t badge,
                          cap_rights_t);
-bool is_child_cap (struct cte *c, struct cte *parent);
+bool is_child_cap (const struct cte *c, const struct cte *parent);
 message_info_t delete_cap (struct cte *c);
 message_info_t revoke_cap (struct cte *c);

@@ -100,7 +100,8 @@ setup_memory_information (struct boot_info *bi)
 void
 spawn_calculator_thread (cptr_t untyped, cptr_t calculator_endpoint)
 {
-  void *calculator_elf = find_tar_entry (bi->initrd, "calculator_server");
+  const void *calculator_elf
+      = find_tar_entry (bi->initrd, "calculator_server");
   if (!calculator_elf)
     {
       printf ("Could not find calculator_elf\n");
@@ -126,9 +127,10 @@ spawn_calculator_thread (cptr_t untyped, cptr_t calculator_endpoint)
 }
 
 void
-spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint, cptr_t serial_read_ntfn)
+spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint,
+                     cptr_t serial_read_ntfn)
 {
-  void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
+  const void *serial_driver_elf = find_tar_entry (bi->initrd, "serial_driver");
 
   if (!serial_driver_elf)
     {
@@ -136,9 +138,9 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint, cptr_t serial_read_
       return;
     }
 
-  int err;
+  int err = 0;
 
-  cptr_t cnode = allocate_with_size (untyped, CAP_CNODE, 1, 4);
+  const cptr_t cnode = allocate_with_size (untyped, CAP_CNODE, 1, 4);
 
   // serial_cnode_cap
   cnode_copy (cnode, SERIAL_CNODE_CAP, 64, INIT_CAP_ROOT_CNODE, cnode, 64,
@@ -154,7 +156,7 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint, cptr_t serial_read_
 
   // serial_read_notification_cap
   cnode_copy (cnode, SERIAL_READ_NOTIFICATION_CAP, 64, INIT_CAP_ROOT_CNODE,
-			  serial_read_ntfn, 64, CAP_RIGHTS_ALL);
+              serial_read_ntfn, 64, CAP_RIGHTS_ALL);
 
   // serial_irq_cap
   irq_control_get (INIT_CAP_IRQ_CONTROL, 4, cnode, SERIAL_IRQ_CAP, 64);
@@ -194,7 +196,7 @@ spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint, cptr_t serial_read_
 void
 spawn_cdt_test (cptr_t main_untyped, cptr_t test_untyped)
 {
-  void *cdt_test_elf = find_tar_entry (bi->initrd, "cdt_test");
+  const void *cdt_test_elf = find_tar_entry (bi->initrd, "cdt_test");
   if (!cdt_test_elf)
     {
       printf ("Could not find cdt_test elf\n");
@@ -202,7 +204,7 @@ spawn_cdt_test (cptr_t main_untyped, cptr_t test_untyped)
     }
 
   // Create a cnode for the CDT test using the main untyped
-  cptr_t test_cnode = allocate_with_size (main_untyped, CAP_CNODE, 1, 7);
+  const cptr_t test_cnode = allocate_with_size (main_untyped, CAP_CNODE, 1, 7);
 
   // Copy the cnode cap into the test cnode itself (slot 0)
   cnode_copy (test_cnode, 0, 64, INIT_CAP_ROOT_CNODE, test_cnode, 64,
@@ -236,20 +238,21 @@ spawn_cdt_test (cptr_t main_untyped, cptr_t test_untyped)
 cptr_t
 spawn_pci_manager (cptr_t untyped, cptr_t port)
 {
-  void *pci_manager_elf = find_tar_entry (bi->initrd, "pci_manager");
+  const void *pci_manager_elf = find_tar_entry (bi->initrd, "pci_manager");
   if (!pci_manager_elf)
     {
       printf ("Could not find pci_manager elf\n");
       return 0;
     }
 
-  int err;
+  int err = 0;
 
   // Create a cnode for the PCI manager (4 slots: endpoint, port, cnode, tmp)
-  cptr_t pci_cnode = allocate_with_size (untyped, CAP_CNODE, 1, 4);
+  const cptr_t pci_cnode = allocate_with_size (untyped, CAP_CNODE, 1, 4);
 
   // pci_endpoint_cap (slot 0)
-  cptr_t pci_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
+  const cptr_t pci_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
+
   cnode_copy (pci_cnode, PCI_ENDPOINT_CAP, 64, INIT_CAP_ROOT_CNODE,
               pci_endpoint, 64, CAP_RIGHTS_ALL);
 
@@ -278,20 +281,18 @@ spawn_pci_manager (cptr_t untyped, cptr_t port)
       printf ("Error creating pci_manager process: %d\n", err);
       return 0;
     }
-  else
-    {
-      printf ("Successfully created pci_manager process\n");
-      tcb_resume (td.tcb);
-      return pci_endpoint;
-    }
+
+  printf ("Successfully created pci_manager process\n");
+  tcb_resume (td.tcb);
+  return pci_endpoint;
 }
 
-long
-calc_add (cptr_t calculator_endpoint, long a, long b)
+word_t
+calc_add (cptr_t calculator_endpoint, word_t a, word_t b)
 {
-  set_mr (0, (word_t)a);
-  set_mr (1, (word_t)b);
-  message_info_t info = new_message_info (CALCULATOR_ADD, 0, 0, 2);
+  set_mr (0, a);
+  set_mr (1, b);
+  const message_info_t info = new_message_info (CALCULATOR_ADD, 0, 0, 2);
   call (calculator_endpoint, info, nullptr);
   return get_mr (0);
 }
@@ -299,12 +300,12 @@ calc_add (cptr_t calculator_endpoint, long a, long b)
 void
 calculate_fibonacci_numbers (cptr_t calculator_endpoint, word_t up_to)
 {
-  word_t a = 0, b = 1, tmp;
+  word_t a = 0, b = 1;
 
   printf ("Fibonacci: ");
   while (true)
     {
-      tmp = calc_add (calculator_endpoint, a, b);
+      const word_t tmp = calc_add (calculator_endpoint, a, b);
       a = b;
       b = tmp;
 
@@ -328,12 +329,13 @@ print_to_serial (cptr_t serial_endpoint, const char *message)
 }
 
 void
-serial_capitalization_server (cptr_t serial_endpoint, cptr_t serial_notification)
+serial_capitalization_server (cptr_t serial_endpoint,
+                              cptr_t serial_notification)
 {
   while (true)
     {
       message_info_t info = read_serial (serial_endpoint, serial_notification);
-      size_t regs = message_length (info);
+      const size_t regs = message_length (info);
 
       if (regs == 0)
         continue;
@@ -342,7 +344,7 @@ serial_capitalization_server (cptr_t serial_endpoint, cptr_t serial_notification
 
       for (size_t i = 0; i < regs; i++)
         {
-          uint8_t byte = get_mr (i);
+          const uint8_t byte = get_mr (i);
           printf ("%c", byte);
 
           if (byte >= 'a' && byte <= 'z')
@@ -361,7 +363,7 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
   message_info_t info = new_message_info (PCI_MANAGER_ENUMERATE, 0, 0, 0);
   info = call (pci_manager_endpoint, info, nullptr);
 
-  size_t num_devices = message_length (info);
+  const size_t num_devices = message_length (info);
   uint32_t addrs[num_devices];
   for (size_t i = 0; i < num_devices; i++)
     addrs[i] = get_mr (i) >> 32;
@@ -376,7 +378,7 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
 
   for (size_t i = 0; i < num_devices; i++)
     {
-      uint32_t pci_address = addrs[i];
+      const uint32_t pci_address = addrs[i];
 
       // Call device_info to get the first 64 bytes of config space
       set_mr (0, pci_address);
@@ -388,20 +390,20 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
       uint32_t config[16];
       for (int j = 0; j < 8; j++)
         {
-          uint64_t qword = get_mr (j);
+          const uint64_t qword = get_mr (j);
           config[j * 2] = qword & 0xFFFFFFFF;
           config[j * 2 + 1] = qword >> 32;
         }
 
       // Extract fields from config space
-      uint16_t vendor_id = config[0] & 0xFFFF;
-      uint16_t device_id = config[0] >> 16;
-      uint16_t status = config[1] >> 16;
-      uint8_t revision_id = config[2] & 0xFF;
-      uint8_t prog_if = (config[2] >> 8) & 0xFF;
-      uint8_t subclass = (config[2] >> 16) & 0xFF;
-      uint8_t class_code = (config[2] >> 24) & 0xFF;
-      uint8_t irq = config[15] & 0xFF;
+      const uint16_t vendor_id = config[0] & 0xFFFF;
+      const uint16_t device_id = config[0] >> 16;
+      const uint16_t status = config[1] >> 16;
+      const uint8_t revision_id = config[2] & 0xFF;
+      const uint8_t prog_if = (config[2] >> 8) & 0xFF;
+      const uint8_t subclass = (config[2] >> 16) & 0xFF;
+      const uint8_t class_code = (config[2] >> 24) & 0xFF;
+      const uint8_t irq = config[15] & 0xFF;
 
       printf ("PCI Device: %04X:%04X at addr %08X\n", vendor_id, device_id,
               pci_address);
@@ -412,19 +414,19 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
       // Print BARs (at offsets 0x10-0x27, which is dwords 4-9)
       for (uint32_t bar_idx = 0; bar_idx < 6; bar_idx++)
         {
-          uint32_t bar = config[4 + bar_idx];
+          const uint32_t bar = config[4 + bar_idx];
           if (bar == 0)
             continue;
 
-          bool is_io = bar & 1;
+          const bool is_io = bar & 1;
           if (is_io)
             {
-              uint32_t addr = bar & 0xFFFFFFFC;
+              const uint32_t addr = bar & 0xFFFFFFFC;
               printf ("  - BAR%d: I/O %08X\n", bar_idx, addr);
             }
           else
             {
-              uint32_t addr = bar & 0xFFFFFFF0;
+              const uint32_t addr = bar & 0xFFFFFFF0;
               printf ("  - BAR%d: Mem %08X\n", bar_idx, addr);
             }
         }
@@ -435,9 +437,9 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
 void *
 map_framebuffer (cptr_t untyped)
 {
-  struct limine_framebuffer fbinfo = bi->framebuffer_info;
-  size_t fbsize = fbinfo.height * fbinfo.width * fbinfo.bpp / 8;
-  uintptr_t fbaddr = (uintptr_t)fbinfo.address - 0xFFFF800000000000;
+  const struct limine_framebuffer fbinfo = bi->framebuffer_info;
+  const size_t fbsize = fbinfo.height * fbinfo.width * fbinfo.bpp / 8;
+  const uintptr_t fbaddr = (uintptr_t)fbinfo.address - 0xFFFF800000000000;
 
   cptr_t fbuntyped = 0;
 
@@ -490,8 +492,8 @@ map_framebuffer (cptr_t untyped)
 void
 clear_fb (uint32_t *framebuffer, uint32_t color)
 {
-  size_t width = bi->framebuffer_info.width;
-  size_t height = bi->framebuffer_info.height;
+  const size_t width = bi->framebuffer_info.width;
+  const size_t height = bi->framebuffer_info.height;
 
   for (size_t row = 0; row < height; row++)
     for (size_t col = 0; col < width; col++)
@@ -502,7 +504,7 @@ void
 draw_square (uint32_t *framebuffer, size_t r, size_t c, size_t w, size_t h,
              uint32_t color)
 {
-  size_t width = bi->framebuffer_info.width;
+  const size_t width = bi->framebuffer_info.width;
 
   for (size_t row = r; row < r + h; row++)
     for (size_t col = c; col < c + w; col++)
@@ -513,7 +515,7 @@ void
 draw_circle (uint32_t *framebuffer, size_t r, size_t c, size_t radius,
              uint32_t color)
 {
-  size_t width = bi->framebuffer_info.width;
+  const size_t width = bi->framebuffer_info.width;
 
   for (size_t row = r - radius; row < r + radius; row++)
     for (size_t col = c - radius; col < c + radius; col++)
@@ -523,8 +525,8 @@ draw_circle (uint32_t *framebuffer, size_t r, size_t c, size_t radius,
         if (col < 0 || col >= bi->framebuffer_info.width)
           continue;
 
-        size_t rr = row - r;
-        size_t cc = col - c;
+        const size_t rr = row - r;
+        const size_t cc = col - c;
         if (rr * rr + cc * cc < radius * radius)
           framebuffer[row * width + col] = color;
       }
@@ -540,23 +542,23 @@ main (void *boot_info)
 
   setup_memory_information (bi);
 
-  word_t untyped = INIT_CAP_FIRST_UNTYPED + untypeds[0].index;
-  word_t test_untyped = INIT_CAP_FIRST_UNTYPED + untypeds[1].index;
+  const word_t untyped = INIT_CAP_FIRST_UNTYPED + untypeds[0].index;
+  const word_t test_untyped = INIT_CAP_FIRST_UNTYPED + untypeds[1].index;
 
   printf ("Largest untyped: %lX\n", untyped);
   printf ("CDT test untyped: %lX (size: %d bits)\n", test_untyped,
           untypeds[1].size_bits);
 
-  cptr_t pci_io_port = cptr_alloc ();
+  const cptr_t pci_io_port = cptr_alloc ();
   x86_64_io_port_control_issue (INIT_CAP_IO_PORT_CONTROL, 0xCF8, 0xCFF,
                                 INIT_CAP_ROOT_CNODE, pci_io_port, 64);
 
   // Spawn PCI manager and enumerate devices
-  cptr_t pci_manager_endpoint = spawn_pci_manager (untyped, pci_io_port);
+  const cptr_t pci_manager_endpoint = spawn_pci_manager (untyped, pci_io_port);
   if (pci_manager_endpoint)
     enumerate_and_print_pci_devices (pci_manager_endpoint);
 
-  cptr_t e9_io_port = cptr_alloc ();
+  const cptr_t e9_io_port = cptr_alloc ();
   x86_64_io_port_control_issue (INIT_CAP_IO_PORT_CONTROL, 0xE9, 0xE9,
                                 INIT_CAP_ROOT_CNODE, e9_io_port, 64);
   print_to_e9 (e9_io_port, "Hello, E9 World!\n");
@@ -569,9 +571,9 @@ main (void *boot_info)
   // draw_square (fb, 400, 400, 100, 100, 0xFF000000);
   // draw_circle (fb, 150, 400, 50, 0xFF0000);
 
-  cptr_t calculator_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
-  cptr_t serial_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
-  cptr_t serial_ntfn = allocate (untyped, CAP_NOTIFICATION, 1);
+  const cptr_t calculator_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
+  const cptr_t serial_endpoint = allocate (untyped, CAP_ENDPOINT, 1);
+  const cptr_t serial_ntfn = allocate (untyped, CAP_NOTIFICATION, 1);
 
   // Run CDT tests first (uses main untyped for infra, test_untyped for
   // testing)
@@ -585,5 +587,5 @@ main (void *boot_info)
   calculate_fibonacci_numbers (calculator_endpoint, 10'000);
   serial_capitalization_server (serial_endpoint, serial_ntfn);
 
-  exit (0);
+  unreachable ();
 }

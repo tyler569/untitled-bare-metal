@@ -135,7 +135,7 @@ write (FILE *, const void *str, unsigned long len)
 cptr_t
 allocate (cptr_t untyped, word_t type, size_t n)
 {
-  cptr_t cptr = cptr_alloc_range (n);
+  const cptr_t cptr = cptr_alloc_range (n);
   untyped_retype (untyped, type, 0, INIT_CAP_ROOT_CNODE, INIT_CAP_ROOT_CNODE,
                   64, cptr, n);
   return cptr;
@@ -144,7 +144,7 @@ allocate (cptr_t untyped, word_t type, size_t n)
 cptr_t
 allocate_with_size (cptr_t untyped, word_t type, size_t n, uint8_t size_bits)
 {
-  cptr_t cptr = cptr_alloc_range (n);
+  const cptr_t cptr = cptr_alloc_range (n);
   untyped_retype (untyped, type, size_bits, INIT_CAP_ROOT_CNODE,
                   INIT_CAP_ROOT_CNODE, 64, cptr, n);
   return cptr;
@@ -165,15 +165,15 @@ map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
       switch (get_mr (0))
         {
         case 3:
-          cptr_t pdpt = allocate (untyped, CAP_X86_64_PDPT, 1);
+          const cptr_t pdpt = allocate (untyped, CAP_X86_64_PDPT, 1);
           assert (x86_64_pdpt_map (pdpt, vspace, addr, 0x7) == NO_ERROR);
           break;
         case 2:
-          cptr_t pd = allocate (untyped, CAP_X86_64_PD, 1);
+          const cptr_t pd = allocate (untyped, CAP_X86_64_PD, 1);
           assert (x86_64_pd_map (pd, vspace, addr, 0x7) == NO_ERROR);
           break;
         case 1:
-          cptr_t pt = allocate (untyped, CAP_X86_64_PT, 1);
+          const cptr_t pt = allocate (untyped, CAP_X86_64_PT, 1);
           assert (x86_64_pt_map (pt, vspace, addr, 0x7) == NO_ERROR);
           break;
         default:
@@ -185,17 +185,17 @@ map_page (cptr_t untyped, cptr_t vspace, cptr_t page, uintptr_t addr)
 buffer_t
 create_buffer (cptr_t untyped, size_t pages)
 {
-  return (buffer_t){ allocate (untyped, CAP_X86_64_PAGE, pages), pages };
+  return (buffer_t){ .cptr_base = allocate (untyped, CAP_X86_64_PAGE, pages),
+                     .pages = pages };
 }
 
 int
 map_buffer (cptr_t untyped, cptr_t vspace, buffer_t buffer, uintptr_t addr)
 {
-  int err;
   for (size_t i = 0; i < buffer.pages; i++)
     {
-      err = map_page (untyped, vspace, buffer.cptr_base + i,
-                      addr + i * 0x1000);
+      int err = map_page (untyped, vspace, buffer.cptr_base + i,
+                          addr + i * 0x1000);
       if (err != 0)
         return err;
     }
@@ -208,7 +208,7 @@ uintptr_t mappable_addr = 0x900000;
 uintptr_t
 map_buffer_to_mappable_space (cptr_t untyped, cptr_t vspace, buffer_t buffer)
 {
-  uintptr_t addr = mappable_addr;
+  const uintptr_t addr = mappable_addr;
   int err = map_buffer (untyped, vspace, buffer, addr);
   mappable_addr += buffer.pages * 0x1000;
   if (err != 0)

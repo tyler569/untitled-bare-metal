@@ -29,11 +29,11 @@ create_tcb (struct tcb *t)
 }
 
 struct tcb *
-create_tcb_from_elf_in_this_vm (struct tcb *t, struct elf_ehdr *elf)
+create_tcb_from_elf_in_this_vm (struct tcb *t, const struct elf_ehdr *elf)
 {
   create_tcb (t);
 
-  elf_load (elf);
+  load_elf (elf);
   new_user_frame (&t->saved_state, elf->entry, 0);
 
   return t;

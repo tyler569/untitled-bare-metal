@@ -6,11 +6,11 @@
 #include "tar.h"
 
 static long
-tar_number (char *p)
+tar_number (const char *p)
 {
   char *end;
-  long result = strtol (p, &end, 8);
-  if (end == p || *end != '\0')
+  const long result = strtol (p, &end, 8);
+  if (end == p)
     {
       printf ("Invalid octal number: %s\n", p);
       return 0;
@@ -18,8 +18,8 @@ tar_number (char *p)
   return result;
 }
 
-void *
-find_tar_entry (struct tar_header *tar, const char *name)
+const void *
+find_tar_entry (const struct tar_header *tar, const char *name)
 {
   while (tar->name[0])
     {

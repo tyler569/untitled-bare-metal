@@ -74,10 +74,10 @@ void
 read_uart (message_info_t)
 {
   if (buffer_size == 0)
-	{
-	  reply (new_message_info (WOULD_BLOCK, 0, 0, 0));
-	  return;
-	}
+    {
+      reply (new_message_info (WOULD_BLOCK, 0, 0, 0));
+      return;
+    }
 
   size_t i;
   for (i = 0; i < buffer_size && i < MESSAGE_MAX_LENGTH; i++)
@@ -126,8 +126,8 @@ driver_thread_main ()
         handle_irq ();
       else if (message_label (info) == SERIAL_DRIVER_WRITE)
         write_uart (info);
-	  else if (message_label (info) == SERIAL_DRIVER_READ)
-		read_uart (info);
+      else if (message_label (info) == SERIAL_DRIVER_READ)
+        read_uart (info);
     }
 }
 

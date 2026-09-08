@@ -15,7 +15,7 @@ lookup_cap_slot_raw (cte_t *cspace_root, word_t index, word_t depth,
     return INVALID_ROOT;
 
   cte_t *cte = cap_ptr (cspace_root->cap);
-  size_t length = cap_size (cspace_root->cap);
+  const size_t length = cap_size (cspace_root->cap);
   if (index >= length)
     return RANGE_ERROR;
 
@@ -27,14 +27,14 @@ lookup_cap_slot_raw (cte_t *cspace_root, word_t index, word_t depth,
 message_info_t
 lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 {
-  error_t err = lookup_cap_slot_raw (cspace_root, index, depth, out);
+  const error_t err = lookup_cap_slot_raw (cspace_root, index, depth, out);
 
   if (err == INVALID_ROOT)
     return msg_invalid_root ();
 
   if (err == RANGE_ERROR)
     {
-      size_t length = cap_size (cspace_root->cap);
+      const size_t length = cap_size (cspace_root->cap);
       return msg_range_error (0, length);
     }
 
@@ -45,7 +45,7 @@ message_info_t
 cnode_debug_print (cte_t *obj)
 {
   cte_t *cte = cap_ptr (obj->cap);
-  size_t size = cap_size (obj->cap);
+  const size_t size = cap_size (obj->cap);
 
   printf ("CNode %p\n", cte);
   printf ("  size:: %lu\n", size);
@@ -53,7 +53,7 @@ cnode_debug_print (cte_t *obj)
   for (size_t i = 0; i < size; i++)
     {
       cte_t *e = cte + i;
-      word_t type = cap_type (e);
+      const word_t type = cap_type (e);
       if (type == CAP_NULL)
         continue;
       if (type >= MAX_CAP_TYPE)

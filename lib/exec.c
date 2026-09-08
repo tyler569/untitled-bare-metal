@@ -8,20 +8,20 @@
 #include "./lib.h"
 
 static inline struct elf_phdr *
-get_phdr (struct elf_ehdr *ehdr, size_t i)
+get_phdr (const struct elf_ehdr *ehdr, size_t i)
 {
   return (struct elf_phdr *)((char *)ehdr + ehdr->phoff + i * ehdr->phentsize);
 }
 
 void *
-data_for_phdr (struct elf_ehdr *ehdr, struct elf_phdr *phdr)
+data_for_phdr (const struct elf_ehdr *ehdr, const struct elf_phdr *phdr)
 {
   return (void *)ehdr + phdr->offset;
 }
 
 buffer_t
-map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
-          struct elf_phdr *phdr)
+map_phdr (cptr_t untyped, cptr_t vspace, const struct elf_ehdr *ehdr,
+          const struct elf_phdr *phdr)
 {
   size_t offset = phdr->vaddr & 0xFFF;
 
@@ -36,8 +36,8 @@ map_phdr (cptr_t untyped, cptr_t vspace, struct elf_ehdr *ehdr,
 }
 
 uintptr_t
-map_elf_to_new_vspace (struct elf_ehdr *ehdr, cptr_t untyped, cptr_t vspace,
-                       cptr_t our_vspace)
+map_elf_to_new_vspace (const struct elf_ehdr *ehdr, cptr_t untyped,
+                       cptr_t vspace, cptr_t our_vspace)
 {
   uintptr_t highest_addr = 0;
 
@@ -63,31 +63,31 @@ constexpr size_t DEFAULT_STACK_PAGES = 4;
 int
 spawn_thread (struct thread_data *data)
 {
-  struct elf_ehdr *ehdr = data->elf_header;
+  const struct elf_ehdr *ehdr = data->elf_header;
   if (!is_elf (ehdr))
     return INVALID_ARGUMENT;
 
-  cptr_t untyped = data->untyped;
-  cptr_t our_vspace = data->scratch_vspace;
-  size_t stack_pages = data->stack_pages ?: DEFAULT_STACK_PAGES;
+  const cptr_t untyped = data->untyped;
+  const cptr_t our_vspace = data->scratch_vspace;
+  const size_t stack_pages = data->stack_pages ?: DEFAULT_STACK_PAGES;
 
-  cptr_t tcb = allocate (untyped, CAP_TCB, 1);
-  cptr_t vspace = allocate (untyped, CAP_X86_64_PML4, 1);
-  buffer_t ipc_buffer = create_buffer (untyped, 1);
-  buffer_t stack_buffer = create_buffer (untyped, stack_pages);
-  cptr_t cspace_root = data->cspace_root ?: INIT_CAP_ROOT_CNODE;
+  const cptr_t tcb = allocate (untyped, CAP_TCB, 1);
+  const cptr_t vspace = allocate (untyped, CAP_X86_64_PML4, 1);
+  const buffer_t ipc_buffer = create_buffer (untyped, 1);
+  const buffer_t stack_buffer = create_buffer (untyped, stack_pages);
+  const cptr_t cspace_root = data->cspace_root ?: INIT_CAP_ROOT_CNODE;
 
   uintptr_t highest_addr
       = map_elf_to_new_vspace (ehdr, untyped, vspace, our_vspace);
 
   highest_addr += 0x1000;
   highest_addr = (highest_addr + 0xFFF) & ~0xFFF;
-  uintptr_t ipc_addr = highest_addr;
+  const uintptr_t ipc_addr = highest_addr;
 
   map_buffer (untyped, vspace, ipc_buffer, highest_addr);
 
   highest_addr += 0x2000;
-  uintptr_t stack_addr = highest_addr + stack_pages * 0x1000;
+  const uintptr_t stack_addr = highest_addr + stack_pages * 0x1000;
 
   map_buffer (untyped, vspace, stack_buffer, highest_addr);
 

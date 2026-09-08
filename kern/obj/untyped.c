@@ -19,12 +19,12 @@ create_objects (cte_t *untyped, word_t type, word_t size_bits,
                 cte_t *dest_slot_0, word_t num_objects,
                 uintptr_t usable_memory)
 {
-  size_t obj_size = object_size (type, size_bits);
+  const size_t obj_size = object_size (type, size_bits);
 
   for (word_t i = 0; i < num_objects; i++)
     {
       cte_t *dest_slot = dest_slot_0 + i;
-      uintptr_t obj_paddr = usable_memory + i * obj_size;
+      const uintptr_t obj_paddr = usable_memory + i * obj_size;
       void *obj_ptr = (void *)direct_map_of (obj_paddr);
       memset (obj_ptr, 0, obj_size);
 
@@ -48,11 +48,11 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
                 word_t num_objects)
 {
   cap_t *untyped = &slot->cap;
-  size_t untyped_size = BIT (untyped->size_bits);
-  size_t obj_size = object_size (type, size_bits);
-  size_t total_size = obj_size * num_objects;
-  size_t untyped_offset = ALIGN_UP (untyped->badge, obj_size);
-  size_t available_memory = untyped_size - untyped_offset;
+  const size_t untyped_size = BIT (untyped->size_bits);
+  const size_t obj_size = object_size (type, size_bits);
+  const size_t total_size = obj_size * num_objects;
+  const size_t untyped_offset = ALIGN_UP (untyped->badge, obj_size);
+  const size_t available_memory = untyped_size - untyped_offset;
 
   if (available_memory < total_size)
     {
@@ -74,8 +74,8 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
   cte_t *dest_slot_0 = cte_for (dest_cnode, node_offset, node_depth);
   assert (dest_slot_0);
 
-  uintptr_t untyped_paddr = (uintptr_t)cap_ptr (*untyped);
-  uintptr_t usable_memory = untyped_paddr + untyped_offset;
+  const uintptr_t untyped_paddr = (uintptr_t)cap_ptr (*untyped);
+  const uintptr_t usable_memory = untyped_paddr + untyped_offset;
 
   create_objects (slot, type, size_bits, dest_slot_0, num_objects,
                   usable_memory);
@@ -86,12 +86,12 @@ untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
 }
 
 bool
-untyped_contains (cte_t *untyped, cte_t *obj)
+untyped_contains (const cte_t *untyped, const cte_t *obj)
 {
-  void *base = cap_ptr (untyped);
-  size_t size = cap_size (untyped);
+  const void *base = cap_ptr (untyped);
+  const size_t size = cap_size (untyped);
 
-  void *ptr = cap_ptr (obj);
+  const void *ptr = cap_ptr (obj);
 
   return ptr >= base && ptr < (base + size);
 }

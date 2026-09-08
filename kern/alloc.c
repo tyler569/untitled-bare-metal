@@ -3,15 +3,13 @@
 #include "kern/cap.h"
 #include "kern/mem.h"
 #include "pci.h"
-#include "stdio.h"
-#include "stdlib.h"
 #include "sys/bootinfo.h"
 
-constexpr size_t MAX_EXTENTS = 32;
-constexpr size_t MAX_REGIONS = 64;
+static constexpr size_t MAX_EXTENTS = 32;
+static constexpr size_t MAX_REGIONS = 64;
 
-struct physical_extent extents[MAX_EXTENTS];
-size_t extent_count = MAX_EXTENTS;
+static struct physical_extent extents[MAX_EXTENTS];
+static size_t extent_count = MAX_EXTENTS;
 
 struct power_of_two_region
 {
@@ -23,8 +21,8 @@ struct power_of_two_region
   size_t watermark;
 };
 
-struct power_of_two_region regions[MAX_REGIONS];
-size_t region_count = 0;
+static struct power_of_two_region regions[MAX_REGIONS];
+static size_t region_count = 0;
 
 static size_t
 largest_fitting_block (uintptr_t start, uintptr_t end)
@@ -45,15 +43,15 @@ page_count (size_t block_size)
   return __builtin_ctzll (block_size) - 12;
 }
 
-void
-allocate_aligned_regions (struct physical_extent *extent)
+static void
+allocate_aligned_regions (const struct physical_extent *extent)
 {
   uintptr_t start = extent->start;
-  uintptr_t end = extent->start + extent->len;
+  const uintptr_t end = extent->start + extent->len;
 
   while (start < end)
     {
-      size_t block = largest_fitting_block (start, end);
+      const size_t block = largest_fitting_block (start, end);
 
       regions[region_count++] = (struct power_of_two_region){
         .addr = start,
@@ -120,10 +118,10 @@ create_init_untyped_device_caps (cte_t *base, size_t *count,
 
               bar &= 0xFFFFFFF0;
               mask &= 0xFFFFFFF0;
-              size_t size = ~mask + 1;
-              size_t size_bits = 63 - __builtin_clzll (size);
+              const size_t size = ~mask + 1;
+              const size_t size_bits = 63 - __builtin_clzll (size);
 
-              cap_t cap = new_untyped_device_cap (bar, size_bits);
+              const cap_t cap = new_untyped_device_cap (bar, size_bits);
               base[cap_i].cap = cap;
 
               desc[cap_i].base = bar;
@@ -141,7 +139,7 @@ done:
   *count = cap_i;
 }
 
-int
+USED static int
 power_of_two_region_compare (const void *a, const void *b)
 {
   const struct power_of_two_region *pa = a, *pb = b;
@@ -167,18 +165,18 @@ alloc_page ()
   for (size_t i = 0; i < region_count; i++)
     {
       struct power_of_two_region *region = &regions[i];
-      size_t size = PAGE_SIZE << region->size_bits;
+      const size_t size = PAGE_SIZE << region->size_bits;
       if (region->in_kernel_use && region->for_pages
           && region->watermark < size - PAGE_SIZE)
         {
-          uintptr_t addr = region->addr + region->watermark;
+          const uintptr_t addr = region->addr + region->watermark;
           region->watermark += PAGE_SIZE;
           // printf ("Allocating page at %p\n", (void *)addr);
           return addr;
         }
     }
 
-  // otherwise, find a region that is not in use and use it, prefering
+  // otherwise, find a region that is not in use and use it, preferring
   // the smallest available region
   for (size_t i = 0; i < region_count; i++)
     {
