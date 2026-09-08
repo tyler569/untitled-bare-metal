@@ -6,7 +6,7 @@
 #include "sys/syscall.h"
 #include "sys/types.h"
 
-constexpr uintptr_t BITS_PTR_MASK = 0xFFFF 'FFFF' FFF0;
+constexpr uintptr_t BITS_PTR_MASK = 0xFFFF'FFFF'FFF0;
 
 static inline bool
 is_safe_cap_ptr (void *ptr)
@@ -25,7 +25,7 @@ static inline void *
 bits_pointer (word_t bits)
 {
   const word_t ptr_bits = bits & BITS_PTR_MASK;
-  if (ptr_bits & 0x8000 '0000' 0000)
+  if (ptr_bits & 0x8000'0000'0000)
     return (void *)(ptr_bits | 0xFFFF'0000'0000'0000);
   else
     return (void *)ptr_bits;

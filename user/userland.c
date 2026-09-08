@@ -127,6 +127,29 @@ spawn_calculator_thread (cptr_t untyped, cptr_t calculator_endpoint)
 }
 
 void
+spawn_calculator_client (cptr_t untyped, cptr_t endpoint)
+{
+  const void *elf = find_tar_entry (bi->initrd, "calculator_client");
+  if (!elf)
+    {
+      printf ("Could not find calculator_client\n");
+      return;
+    }
+  struct thread_data td = {
+    .elf_header = elf,
+    .untyped = untyped,
+    .scratch_vspace = INIT_CAP_INIT_VSPACE,
+    .name = "calculator_client",
+    .arguments[0] = endpoint,
+  };
+  int err = spawn_thread (&td);
+  if (!err)
+    err = tcb_resume (td.tcb);
+  if (err)
+    printf ("Error spawning calculator client: %d\n", err);
+}
+
+void
 spawn_serial_driver (cptr_t untyped, cptr_t serial_endpoint,
                      cptr_t serial_read_ntfn)
 {
@@ -585,6 +608,9 @@ main (void *boot_info)
   print_to_serial (serial_endpoint, "Hello, Serial World!\n");
 
   calculate_fibonacci_numbers (calculator_endpoint, 10'000);
+  // Keep calculator clients sequential: endpoint queues currently mishandle
+  // multiple blocked callers (TASK_STATE_CALLING).
+  spawn_calculator_client (untyped, calculator_endpoint);
   serial_capitalization_server (serial_endpoint, serial_ntfn);
 
   unreachable ();

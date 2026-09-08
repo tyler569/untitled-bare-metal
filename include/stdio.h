@@ -4,6 +4,10 @@
 #include "stddef.h"
 #include "sys/cdefs.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct stream;
 
 #ifndef UBM_HOSTED
@@ -28,4 +32,8 @@ int vfnprintf (struct stream *file, size_t len, const char *format,
 #define debug_printf(...) printf (__VA_ARGS__)
 #else
 #define debug_printf(...) ((void)0)
+#endif
+
+#ifdef __cplusplus
+}
 #endif

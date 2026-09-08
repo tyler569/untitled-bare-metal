@@ -1,10 +1,15 @@
-set(targets_to_archive userland calculator_server serial_driver pci_manager cdt_test)
+set(targets_to_archive userland calculator_server serial_driver pci_manager cdt_test calculator_client)
 set(archive_dir "${CMAKE_BINARY_DIR}/user/initrd")
 set(archive_file_paths)
 
 foreach (program ${targets_to_archive})
-  add_executable(${program} ${program}.c)
-  target_link_libraries(${program} PRIVATE userlib)
+  if (program STREQUAL "calculator_client")
+    add_executable(${program} ${program}.cpp)
+    target_link_libraries(${program} PRIVATE userlib_cxx)
+  else ()
+    add_executable(${program} ${program}.c)
+    target_link_libraries(${program} PRIVATE userlib)
+  endif ()
 
   list(APPEND archive_file_paths $<TARGET_FILE:${program}>)
 endforeach ()

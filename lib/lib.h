@@ -8,6 +8,10 @@
 #include "sys/ipc.h"
 #include "sys/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // #define assert(x) \
 //   if (!(x)) \
 //     { \
@@ -121,3 +125,7 @@ long write (FILE *, const void *str, unsigned long len);
 cptr_t allocate (cptr_t untyped, word_t type, size_t n);
 
 #include "sys/user_method_stubs.h"
+
+#ifdef __cplusplus
+}
+#endif

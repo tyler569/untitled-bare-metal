@@ -2,6 +2,10 @@
 
 #include "sys/cdefs.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 [[noreturn]] void panic (const char *msg, ...);
 
 #define assert(x)                                                             \
@@ -15,3 +19,7 @@
   while (0)
 
 #define assert_eq(x, y) assert ((x) == (y))
+
+#ifdef __cplusplus
+}
+#endif
