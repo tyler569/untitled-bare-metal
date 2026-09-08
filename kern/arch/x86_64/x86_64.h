@@ -29,6 +29,7 @@ constexpr uint64_t CR4_FSGSBASE = 1 << 16;
 
 constexpr uint64_t KERNEL_CS = 0x08;
 constexpr uint64_t KERNEL_SS = 0x10;
+
 // In long mode, SYSRET pulls its code segment from IA32_STAR 63:48 + 16
 // and its stack segment from IA32_STAR 63:48 + 8. This is the fake code
 // segment that we load into IA32_STAR, so that the real code segment is

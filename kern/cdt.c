@@ -1,6 +1,5 @@
 #include "assert.h"
 #include "kern/cap.h"
-#include "kern/mem.h"
 #include "kern/obj/untyped.h"
 #include "kern/syscall.h"
 #include "sys/syscall.h"
@@ -93,12 +92,12 @@ mint_cap (struct cte *dest, struct cte *src, unsigned long badge,
  * otherwise, caps can only parent their own type
  *   (children can only be created with `untyped_retype`, `copy_cap`,
  *   and `mint_cap`)
- * and endpoints with badge 0 parent all derived caps, endpointed with badge
- *   nonzero parent all dervied caps with matching endpoint. The original
+ * and endpoints with badge 0 parent all derived caps, endpoints with badge
+ *   nonzero parent all derived caps with matching endpoint. The original
  *   badged cap does have ->is_original set.
  */
 bool
-is_child_cap (struct cte *c, struct cte *parent)
+is_child_cap (const struct cte *c, const struct cte *parent)
 {
   assert (parent);
 

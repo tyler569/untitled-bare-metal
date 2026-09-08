@@ -8,10 +8,10 @@
 #include "sys/bootinfo.h"
 #include "tar.h"
 
-constexpr size_t CNODE_SLOTS = BIT (INIT_CNODE_SIZE_BITS);
+static constexpr size_t CNODE_SLOTS = BIT (INIT_CNODE_SIZE_BITS);
 
-struct tcb init_tcb;
-cte_t init_cnode[CNODE_SLOTS];
+static struct tcb init_tcb;
+static cte_t init_cnode[CNODE_SLOTS];
 
 static struct limine_framebuffer_request fbinfo = {
   .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
@@ -33,10 +33,10 @@ enum
 };
 
 // --- helpers ---
-static inline uintptr_t
+static uintptr_t
 alloc_and_map_page (uintptr_t pml4, uintptr_t va, uint64_t flags)
 {
-  uintptr_t pa = alloc_page ();
+  const uintptr_t pa = alloc_page ();
   add_vm_mapping (pml4, va, pa, flags);
   return pa;
 }
@@ -50,9 +50,9 @@ map_virt_from_virt_phys (uintptr_t pml4, uintptr_t dst_va, uintptr_t src_va,
 }
 
 void
-create_init_tcb (void *initrd, size_t initrd_size)
+create_init_tcb (const void *initrd, size_t initrd_size)
 {
-  struct elf_ehdr *init_elf = find_tar_entry (initrd, "userland");
+  const struct elf_ehdr *init_elf = find_tar_entry (initrd, "userland");
   assert (init_elf && is_elf (init_elf));
 
   create_tcb_from_elf_in_this_vm (&init_tcb, init_elf);

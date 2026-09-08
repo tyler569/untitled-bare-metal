@@ -1,7 +1,7 @@
 #pragma once
 
-#include <sys/syscall.h>
 #include "lib.h"
+#include <sys/syscall.h>
 
 enum
 {
@@ -25,12 +25,13 @@ enum
 static inline message_info_t
 read_serial (cptr_t serial_endpoint, cptr_t serial_notification)
 {
-  while (true) {
-    message_info_t info = new_message_info (SERIAL_DRIVER_READ, 0, 0, 0);
-    info = call (serial_endpoint, info, nullptr);
-    if (message_label (info) != WOULD_BLOCK)
-      return info;
+  while (true)
+    {
+      message_info_t info = new_message_info (SERIAL_DRIVER_READ, 0, 0, 0);
+      info = call (serial_endpoint, info, nullptr);
+      if (message_label (info) != WOULD_BLOCK)
+        return info;
 
-    wait (serial_notification, nullptr);
-  }
+      wait (serial_notification, nullptr);
+    }
 }

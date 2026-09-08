@@ -1,10 +1,8 @@
 #include "assert.h"
 #include "kern/arch.h"
 #include "kern/kernel.h"
-#include "stdarg.h"
 #include "stdio.h"
 #include "stdlib.h"
-#include "string.h"
 
 void hexdump (const void *data, size_t len);
 
@@ -24,17 +22,18 @@ panic (const char *msg, ...)
   halt_forever ();
 }
 
-int
+static int
 int_cmp (const void *a, const void *b)
 {
-  return *(int *)a - *(int *)b;
+  const int *ia = a, *ib = b;
+  return *ia - *ib;
 }
 
-void
+static void
 run_sort_test ()
 {
   int data[] = { 3, 1, 4, 1, 5, 9, 2, 6, 5, 3 };
-  size_t len = sizeof (data) / sizeof (data[0]);
+  constexpr size_t len = sizeof (data) / sizeof (data[0]);
 
   printf ("    Before: ");
   for (size_t i = 0; i < len; i++)
@@ -49,28 +48,28 @@ run_sort_test ()
   printf ("\n");
 }
 
-#define __cpuid_count(level, count, eax, ebx, ecx, edx)                       \
+#define CPUID_COUNT(level, count, eax, ebx, ecx, edx)                         \
   asm volatile ("cpuid"                                                       \
                 : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)                  \
                 : "a"(level), "c"(count))
 
-#define __cpuid(level, eax, ebx, ecx, edx)                                    \
-  __cpuid_count (level, 0, eax, ebx, ecx, edx)
+#define CPUID(level, eax, ebx, ecx, edx)                                      \
+  CPUID_COUNT (level, 0, eax, ebx, ecx, edx)
 
-void
+static void
 get_xsave_size ()
 {
   uint32_t eax, ebx, ecx, edx;
 
   // Check if CPU supports XSAVE
-  __cpuid (1, eax, ebx, ecx, edx);
+  CPUID (1, eax, ebx, ecx, edx);
   if (!(ecx & (1 << 26)))
     {
       printf ("    XSAVE not supported.\n");
       return;
     }
 
-  __cpuid (0xD, eax, ebx, ecx, edx);
+  CPUID (0xD, eax, ebx, ecx, edx);
   printf ("    Required XSAVE area size: %u bytes\n", ebx);
 }
 

@@ -5,8 +5,8 @@
 #include "kern/syscall.h"
 #include "string.h"
 
-static inline struct tcb *
-first_tcb (struct endpoint *e)
+static struct tcb *
+first_tcb (const struct endpoint *e)
 {
   return CONTAINER_OF (e->list.next, struct tcb, send_receive_node);
 }
@@ -20,10 +20,10 @@ transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
 
   receiver->ipc_buffer->sender_badge = badge;
 
-  word_t transfer_cap = message_extra_caps (tag);
+  const word_t transfer_cap = message_extra_caps (tag);
   if (transfer_cap)
     {
-      cptr_t send_cptr = sender->ipc_buffer->caps_or_badges[0];
+      const cptr_t send_cptr = sender->ipc_buffer->caps_or_badges[0];
       cte_t *cap;
       error_t err
           = lookup_cap_slot_raw (&sender->cspace_root, send_cptr, 64, &cap);
@@ -118,8 +118,8 @@ receive_message_from_blocked_sender (struct endpoint *e)
   struct list_head *next = pop_from_list (&e->list);
   struct tcb *sender = CONTAINER_OF (next, struct tcb, send_receive_node);
 
-  message_info_t tag = get_pending_ipc_info (sender);
-  message_info_t result
+  const message_info_t tag = get_pending_ipc_info (sender);
+  const message_info_t result
       = transfer_message (sender, this_tcb, sender->endpoint_badge, tag);
 
   if (sender->expects_reply)
@@ -139,14 +139,14 @@ queue_receiver_on_endpoint (struct endpoint *e)
   return msg_noreturn ();
 }
 
-static inline bool
+static bool
 is_receive_blocked (struct endpoint *e)
 {
   return is_list_empty (&e->list)
          || first_tcb (e)->state == TASK_STATE_RECEIVING;
 }
 
-static inline bool
+static bool
 is_send_blocked (struct endpoint *e)
 {
   return is_list_empty (&e->list)
@@ -177,8 +177,8 @@ endpoint_recv (struct endpoint *e)
 {
   if (is_receive_blocked (e))
     return queue_receiver_on_endpoint (e);
-  else
-    return receive_message_from_blocked_sender (e);
+
+  return receive_message_from_blocked_sender (e);
 }
 
 static message_info_t
@@ -228,7 +228,7 @@ invoke_endpoint_nbsend (cte_t *cap, message_info_t tag)
   endpoint_nbsend (e, cap->cap.badge, tag);
 }
 
-bool
+static bool
 handle_recv_with_pending_notification ()
 {
   if (this_tcb->bound_notification && this_tcb->bound_notification->word)

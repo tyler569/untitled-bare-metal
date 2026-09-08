@@ -37,6 +37,6 @@ constexpr char CHRTYPE = '3';   /* character special */
 constexpr char BLKTYPE = '4';   /* block special */
 constexpr char DIRTYPE = '5';   /* directory */
 constexpr char FIFOTYPE = '6';  /* FIFO special */
-constexpr char CONTTYPE = '7';   /* reserved */
+constexpr char CONTTYPE = '7';  /* reserved */
 
-void *find_tar_entry (struct tar_header *tar, const char *name);
+const void *find_tar_entry (const struct tar_header *tar, const char *name);

@@ -56,7 +56,7 @@ void init_tcbs (void *init_elf);
 
 struct tcb *create_tcb (struct tcb *);
 struct tcb *create_tcb_from_elf_in_this_vm (struct tcb *,
-                                            struct elf_ehdr *elf);
+                                            const struct elf_ehdr *elf);
 void kill_tcb (struct tcb *t);
 void destroy_tcb (struct tcb *t);
 

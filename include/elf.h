@@ -126,7 +126,7 @@ struct elf_dyn
 };
 
 static inline bool
-is_elf (struct elf_ehdr *e)
+is_elf (const struct elf_ehdr *e)
 {
   return memcmp (e->ident, ELFMAGIC, 4) == 0;
 }

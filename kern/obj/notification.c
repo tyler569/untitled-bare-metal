@@ -6,7 +6,7 @@
 static message_info_t
 signal_waiting_receiver (struct tcb *receiver, word_t badge)
 {
-  message_info_t tag = new_message_info (NO_ERROR, 0, 0, 0);
+  const message_info_t tag = new_message_info (NO_ERROR, 0, 0, 0);
 
   set_ipc_result (receiver, tag);
   receiver->ipc_buffer->sender_badge = badge;
@@ -50,7 +50,7 @@ notification_signal (struct notification *nfn, word_t badge)
   maybe_init_notification (nfn);
 
   nfn->word |= badge;
-  word_t nfn_word = nfn->word;
+  const word_t nfn_word = nfn->word;
 
   if (is_list_empty (&nfn->list) && nfn->bound_tcb
       && nfn->bound_tcb->state == TASK_STATE_RECEIVING)

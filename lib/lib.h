@@ -51,7 +51,7 @@ cptr_t allocate_with_size (cptr_t untyped, word_t type, size_t n,
 
 struct thread_data
 {
-  void *elf_header;
+  const void *elf_header;
   size_t elf_size;
   cptr_t untyped;
   cptr_t scratch_vspace;
