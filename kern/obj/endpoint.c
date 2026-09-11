@@ -137,24 +137,25 @@ queue_receiver_on_endpoint (struct endpoint *e)
 }
 
 static bool
-is_receive_blocked (struct endpoint *e)
+recv_will_block (struct endpoint *e)
 {
   return is_list_empty (&e->list)
          || first_tcb (e)->state == TASK_STATE_RECEIVING;
 }
 
 static bool
-is_send_blocked (struct endpoint *e)
+send_will_block (struct endpoint *e)
 {
   return is_list_empty (&e->list)
-         || first_tcb (e)->state == TASK_STATE_SENDING;
+         || first_tcb (e)->state == TASK_STATE_SENDING
+		 || first_tcb (e)->state == TASK_STATE_CALLING;
 }
 
 static void
 endpoint_send (struct endpoint *e, word_t badge, message_tag_t tag,
                bool is_call)
 {
-  if (is_send_blocked (e))
+  if (send_will_block (e))
     queue_message_on_endpoint (e, badge, tag, is_call);
   else
     send_message_to_blocked_receiver (e, badge, tag, true);
@@ -163,7 +164,7 @@ endpoint_send (struct endpoint *e, word_t badge, message_tag_t tag,
 static void
 endpoint_nbsend (struct endpoint *e, word_t badge, message_tag_t tag)
 {
-  if (is_send_blocked (e))
+  if (send_will_block (e))
     return;
 
   send_message_to_blocked_receiver (e, badge, tag, false);
@@ -172,7 +173,7 @@ endpoint_nbsend (struct endpoint *e, word_t badge, message_tag_t tag)
 static message_tag_t
 endpoint_recv (struct endpoint *e)
 {
-  if (is_receive_blocked (e))
+  if (recv_will_block (e))
     return queue_receiver_on_endpoint (e);
 
   return receive_message_from_blocked_sender (e);
@@ -181,7 +182,7 @@ endpoint_recv (struct endpoint *e)
 static message_tag_t
 endpoint_nbrecv (struct endpoint *e)
 {
-  if (is_receive_blocked (e))
+  if (recv_will_block (e))
     return msg_ok (0);
 
   return receive_message_from_blocked_sender (e);
