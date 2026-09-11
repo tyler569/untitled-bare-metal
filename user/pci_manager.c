@@ -3,11 +3,11 @@
 #include "./lib.h"
 #include "./pci_util.h"
 
-static message_info_t handle_issue (message_info_t, word_t badge);
-static message_info_t handle_read (message_info_t, word_t badge);
-static message_info_t handle_write (message_info_t, word_t badge);
-static message_info_t handle_device_info (message_info_t, word_t badge);
-static message_info_t handle_enumerate (message_info_t, word_t badge);
+static message_tag_t handle_issue (message_tag_t, word_t badge);
+static message_tag_t handle_read (message_tag_t, word_t badge);
+static message_tag_t handle_write (message_tag_t, word_t badge);
+static message_tag_t handle_device_info (message_tag_t, word_t badge);
+static message_tag_t handle_enumerate (message_tag_t, word_t badge);
 
 static uint32_t pci_read_l (uint32_t addr);
 static uint16_t pci_read_w (uint32_t addr);
@@ -20,7 +20,7 @@ int
 main ()
 {
   bool done = false;
-  message_info_t info, resp;
+  message_tag_t info, resp;
   word_t badge;
 
   info = recv (PCI_ENDPOINT_CAP, &badge);
@@ -48,7 +48,7 @@ main ()
           break;
         default:
           set_mr (0, 0);
-          resp = new_message_info (INVALID_ARGUMENT, 0, 0, 1);
+          resp = new_message_tag (INVALID_ARGUMENT, 0, 0, 1);
           break;
         }
 
@@ -65,16 +65,16 @@ main ()
  * in: [addr]
  * out: cap
  */
-static message_info_t
-handle_issue (message_info_t info, uint64_t badge)
+static message_tag_t
+handle_issue (message_tag_t info, uint64_t badge)
 {
   if (badge != 0)
-    return new_message_info (ILLEGAL_OPERATION, 0, 0, 0);
+    return new_message_tag (ILLEGAL_OPERATION, 0, 0, 0);
 
   if (message_length (info) < 1)
     {
       set_mr (0, 1);
-      return new_message_info (TRUNCATED_MESSAGE, 0, 0, 1);
+      return new_message_tag (TRUNCATED_MESSAGE, 0, 0, 1);
     }
 
   cnode_delete (PCI_CNODE_CAP, PCI_TMP_CAP,
@@ -82,35 +82,35 @@ handle_issue (message_info_t info, uint64_t badge)
   cnode_mint (PCI_CNODE_CAP, PCI_TMP_CAP, 64, PCI_CNODE_CAP, PCI_ENDPOINT_CAP,
               64, CAP_RIGHTS_ALL, get_mr (1));
   set_cap (0, PCI_TMP_CAP);
-  return new_message_info (NO_ERROR, 0, 1, 0);
+  return new_message_tag (NO_ERROR, 0, 1, 0);
 }
 
 /*
  * in: [addr, width]
  * out: [value]
  */
-static message_info_t
-handle_read (message_info_t info, uint64_t badge)
+static message_tag_t
+handle_read (message_tag_t info, uint64_t badge)
 {
   if (message_length (info) < 2)
     {
       set_mr (0, 2);
-      return new_message_info (TRUNCATED_MESSAGE, 0, 0, 1);
+      return new_message_tag (TRUNCATED_MESSAGE, 0, 0, 1);
     }
   switch (get_mr (1))
     {
     case 1:
       set_mr (0, pci_read_b (badge | (get_mr (0) & 0xFF)));
-      return new_message_info (NO_ERROR, 0, 0, 1);
+      return new_message_tag (NO_ERROR, 0, 0, 1);
     case 2:
       set_mr (0, pci_read_w (badge | (get_mr (0) & 0xFF)));
-      return new_message_info (NO_ERROR, 0, 0, 1);
+      return new_message_tag (NO_ERROR, 0, 0, 1);
     case 4:
       set_mr (0, pci_read_l (badge | (get_mr (0) & 0xFF)));
-      return new_message_info (NO_ERROR, 0, 0, 1);
+      return new_message_tag (NO_ERROR, 0, 0, 1);
     default:
       set_mr (0, 1);
-      return new_message_info (INVALID_ARGUMENT, 0, 0, 1);
+      return new_message_tag (INVALID_ARGUMENT, 0, 0, 1);
     }
 }
 
@@ -118,28 +118,28 @@ handle_read (message_info_t info, uint64_t badge)
  * in: [addr, value, width]
  * out: []
  */
-static message_info_t
-handle_write (message_info_t info, uint64_t badge)
+static message_tag_t
+handle_write (message_tag_t info, uint64_t badge)
 {
   if (message_length (info) < 3)
     {
       set_mr (0, 3);
-      return new_message_info (TRUNCATED_MESSAGE, 0, 0, 1);
+      return new_message_tag (TRUNCATED_MESSAGE, 0, 0, 1);
     }
   switch (get_mr (2))
     {
     case 1:
       pci_write_b (badge | (get_mr (0) & 0xFF), get_mr (1));
-      return new_message_info (NO_ERROR, 0, 0, 0);
+      return new_message_tag (NO_ERROR, 0, 0, 0);
     case 2:
       pci_write_w (badge | (get_mr (0) & 0xFF), get_mr (1));
-      return new_message_info (NO_ERROR, 0, 0, 0);
+      return new_message_tag (NO_ERROR, 0, 0, 0);
     case 4:
       pci_write_l (badge | (get_mr (0) & 0xFF), get_mr (1));
-      return new_message_info (NO_ERROR, 0, 0, 0);
+      return new_message_tag (NO_ERROR, 0, 0, 0);
     default:
       set_mr (0, 1);
-      return new_message_info (INVALID_ARGUMENT, 0, 0, 1);
+      return new_message_tag (INVALID_ARGUMENT, 0, 0, 1);
     }
 }
 
@@ -192,14 +192,14 @@ pci_write_b (uint32_t addr, uint8_t value)
  * in: [pci_address]
  * out: [config_space] (8 qwords = 64 bytes)
  */
-static message_info_t
-handle_device_info (message_info_t, word_t badge)
+static message_tag_t
+handle_device_info (message_tag_t, word_t badge)
 {
   uint32_t pci_address = get_mr (0);
   uint64_t pci_config_space[8];
 
   if (badge != 0 && badge != pci_address)
-    return new_message_info (ILLEGAL_OPERATION, 0, 0, 0);
+    return new_message_tag (ILLEGAL_OPERATION, 0, 0, 0);
 
   // Read 64 bytes (0x00-0x3F) as 8 qwords
   for (uint32_t i = 0; i < 8; i++)
@@ -212,18 +212,18 @@ handle_device_info (message_info_t, word_t badge)
   for (size_t i = 0; i < 8; i++)
     set_mr (i, pci_config_space[i]);
 
-  return new_message_info (NO_ERROR, 0, 0, 8);
+  return new_message_tag (NO_ERROR, 0, 0, 8);
 }
 
 /*
  * in: []
  * out: [(vendor.device.addr)...] packed
  */
-static message_info_t
-handle_enumerate (message_info_t, word_t badge)
+static message_tag_t
+handle_enumerate (message_tag_t, word_t badge)
 {
   if (badge != 0)
-    return new_message_info (ILLEGAL_OPERATION, 0, 0, 0);
+    return new_message_tag (ILLEGAL_OPERATION, 0, 0, 0);
 
   uint32_t mr = 0;
   uint64_t mrs[64];
@@ -249,5 +249,5 @@ done:
   for (size_t i = 0; i < mr; i++)
     set_mr (i, mrs[i]);
 
-  return new_message_info (NO_ERROR, 0, 0, mr);
+  return new_message_tag (NO_ERROR, 0, 0, mr);
 }

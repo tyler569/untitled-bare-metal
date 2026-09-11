@@ -31,7 +31,7 @@ unlink_cte (struct cte *del)
   del->prev = nullptr;
 }
 
-message_info_t
+message_tag_t
 copy_cap (struct cte *dest, struct cte *src, cap_rights_t rights_mask)
 {
   if (cap_type (dest) != CAP_NULL)
@@ -52,7 +52,7 @@ copy_cap (struct cte *dest, struct cte *src, cap_rights_t rights_mask)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 mint_cap (struct cte *dest, struct cte *src, unsigned long badge,
           cap_rights_t rights_mask)
 {
@@ -117,7 +117,7 @@ is_child_cap (const struct cte *c, const struct cte *parent)
   return true;
 }
 
-message_info_t
+message_tag_t
 delete_cap (struct cte *c)
 {
   revoke_cap (c);
@@ -135,7 +135,7 @@ delete_cap (struct cte *c)
 
 // revoke_cap takes capability c and deletes any children it has. If c is not
 // an original capability, this has no effect.
-message_info_t
+message_tag_t
 revoke_cap (struct cte *c)
 {
   while (is_child_cap (c->next, c))

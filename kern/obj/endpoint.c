@@ -11,9 +11,9 @@ first_tcb (const struct endpoint *e)
   return CONTAINER_OF (e->list.next, struct tcb, send_receive_node);
 }
 
-static message_info_t
+static message_tag_t
 transfer_message (struct tcb *sender, struct tcb *receiver, word_t badge,
-                  message_info_t tag)
+                  message_tag_t tag)
 {
   word_t size = message_length (tag) * sizeof (word_t);
   memcpy (receiver->ipc_buffer->msg, sender->ipc_buffer->msg, size);
@@ -66,7 +66,7 @@ finish:
 }
 
 static void
-send_message_directly (struct tcb *receiver, word_t badge, message_info_t tag,
+send_message_directly (struct tcb *receiver, word_t badge, message_tag_t tag,
                        bool resume_now)
 {
   assert (receiver && "Receiver is NULL");
@@ -86,7 +86,7 @@ send_message_directly (struct tcb *receiver, word_t badge, message_info_t tag,
 
 static void
 send_message_to_blocked_receiver (struct endpoint *e, word_t badge,
-                                  message_info_t tag, bool resume_now)
+                                  message_tag_t tag, bool resume_now)
 {
   struct list_head *next = pop_from_list (&e->list);
   struct tcb *receiver = CONTAINER_OF (next, struct tcb, send_receive_node);
@@ -95,8 +95,8 @@ send_message_to_blocked_receiver (struct endpoint *e, word_t badge,
 }
 
 static void
-queue_message_on_endpoint (struct endpoint *e, word_t badge,
-                           message_info_t tag, bool is_call)
+queue_message_on_endpoint (struct endpoint *e, word_t badge, message_tag_t tag,
+                           bool is_call)
 {
   assert (message_info_to_word (get_pending_ipc_info (this_tcb))
           == message_info_to_word (tag));
@@ -112,14 +112,14 @@ queue_message_on_endpoint (struct endpoint *e, word_t badge,
   schedule ();
 }
 
-static message_info_t
+static message_tag_t
 receive_message_from_blocked_sender (struct endpoint *e)
 {
   struct list_head *next = pop_from_list (&e->list);
   struct tcb *sender = CONTAINER_OF (next, struct tcb, send_receive_node);
 
-  const message_info_t tag = get_pending_ipc_info (sender);
-  const message_info_t result
+  const message_tag_t tag = get_pending_ipc_info (sender);
+  const message_tag_t result
       = transfer_message (sender, this_tcb, sender->endpoint_badge, tag);
 
   if (sender->expects_reply)
@@ -130,7 +130,7 @@ receive_message_from_blocked_sender (struct endpoint *e)
   return result;
 }
 
-static message_info_t
+static message_tag_t
 queue_receiver_on_endpoint (struct endpoint *e)
 {
   append_to_list (&this_tcb->send_receive_node, &e->list);
@@ -154,7 +154,7 @@ is_send_blocked (struct endpoint *e)
 }
 
 static void
-endpoint_send (struct endpoint *e, word_t badge, message_info_t tag,
+endpoint_send (struct endpoint *e, word_t badge, message_tag_t tag,
                bool is_call)
 {
   if (is_send_blocked (e))
@@ -164,7 +164,7 @@ endpoint_send (struct endpoint *e, word_t badge, message_info_t tag,
 }
 
 static void
-endpoint_nbsend (struct endpoint *e, word_t badge, message_info_t tag)
+endpoint_nbsend (struct endpoint *e, word_t badge, message_tag_t tag)
 {
   if (is_send_blocked (e))
     return;
@@ -172,7 +172,7 @@ endpoint_nbsend (struct endpoint *e, word_t badge, message_info_t tag)
   send_message_to_blocked_receiver (e, badge, tag, false);
 }
 
-static message_info_t
+static message_tag_t
 endpoint_recv (struct endpoint *e)
 {
   if (is_receive_blocked (e))
@@ -181,7 +181,7 @@ endpoint_recv (struct endpoint *e)
   return receive_message_from_blocked_sender (e);
 }
 
-static message_info_t
+static message_tag_t
 endpoint_nbrecv (struct endpoint *e)
 {
   if (is_receive_blocked (e))
@@ -200,7 +200,7 @@ maybe_init_endpoint (struct endpoint *e)
 }
 
 void
-invoke_endpoint_send (cte_t *cap, message_info_t tag)
+invoke_endpoint_send (cte_t *cap, message_tag_t tag)
 {
   assert (cap_type (cap) == CAP_ENDPOINT);
 
@@ -213,7 +213,7 @@ invoke_endpoint_send (cte_t *cap, message_info_t tag)
 }
 
 void
-invoke_endpoint_nbsend (cte_t *cap, message_info_t tag)
+invoke_endpoint_nbsend (cte_t *cap, message_tag_t tag)
 {
   printf ("nbsend: %s\n", cap_type_string (cap));
   panic ("how did we get here\n");
@@ -241,7 +241,7 @@ handle_recv_with_pending_notification ()
     return false;
 }
 
-message_info_t
+message_tag_t
 invoke_endpoint_recv (cte_t *cap)
 {
   assert (cap_type (cap) == CAP_ENDPOINT);
@@ -254,7 +254,7 @@ invoke_endpoint_recv (cte_t *cap)
   return endpoint_recv (e);
 }
 
-message_info_t
+message_tag_t
 invoke_endpoint_nbrecv (cte_t *cap)
 {
   assert (cap_type (cap) == CAP_ENDPOINT);
@@ -268,7 +268,7 @@ invoke_endpoint_nbrecv (cte_t *cap)
 }
 
 void
-invoke_endpoint_call (cte_t *cap, message_info_t tag)
+invoke_endpoint_call (cte_t *cap, message_tag_t tag)
 {
   assert (cap_type (cap) == CAP_ENDPOINT);
 
@@ -282,7 +282,7 @@ invoke_endpoint_call (cte_t *cap, message_info_t tag)
 }
 
 void
-invoke_reply (message_info_t tag)
+invoke_reply (message_tag_t tag)
 {
   // TODO: this should use tcb->reply capability
 
@@ -297,8 +297,8 @@ invoke_reply (message_info_t tag)
   send_message_directly (receiver, 0, tag, false);
 }
 
-message_info_t
-invoke_reply_recv (cte_t *cap, message_info_t tag)
+message_tag_t
+invoke_reply_recv (cte_t *cap, message_tag_t tag)
 {
   invoke_reply (tag);
   return invoke_endpoint_recv (cap);

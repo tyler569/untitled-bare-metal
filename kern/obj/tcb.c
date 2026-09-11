@@ -76,7 +76,7 @@ suspend_tcb (struct tcb *t)
   spin_unlock (&runnable_tcbs_lock);
 }
 
-message_info_t
+message_tag_t
 tcb_resume (cte_t *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
@@ -84,7 +84,7 @@ tcb_resume (cte_t *cap)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 tcb_suspend (cte_t *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
@@ -92,7 +92,7 @@ tcb_suspend (cte_t *cap)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 tcb_read_registers (cte_t *cap, bool suspend_source, word_t arch_flags,
                     word_t count, frame_t *regs)
 {
@@ -105,7 +105,7 @@ tcb_read_registers (cte_t *cap, bool suspend_source, word_t arch_flags,
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 tcb_write_registers (cte_t *cap, bool resume_target, word_t arch_flags,
                      word_t count, frame_t *regs)
 {
@@ -125,7 +125,7 @@ tcb_vm_root (struct tcb *t)
   return physical_of ((uintptr_t)vm_root_page);
 }
 
-message_info_t
+message_tag_t
 tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
                word_t cspace_root_data, cte_t *vspace_root,
                word_t vspace_root_data, word_t buffer, cte_t *buffer_frame)
@@ -146,7 +146,7 @@ tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 tcb_bind_notification (cte_t *cap, cte_t *notification)
 {
   struct tcb *tcb = cap_ptr (cap);
@@ -163,7 +163,7 @@ tcb_bind_notification (cte_t *cap, cte_t *notification)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 tcb_set_tls_base (cte_t *cap, word_t tls_base)
 {
   struct tcb *tcb = cap_ptr (cap);
@@ -173,7 +173,7 @@ tcb_set_tls_base (cte_t *cap, word_t tls_base)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 tcb_set_debug (cte_t *cap, word_t flags)
 {
   struct tcb *tcb = cap_ptr (cap);
@@ -181,7 +181,7 @@ tcb_set_debug (cte_t *cap, word_t flags)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 tcb_set_name (cte_t *cap, char *name, word_t len)
 {
   struct tcb *tcb = cap_ptr (cap);

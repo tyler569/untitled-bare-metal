@@ -18,19 +18,19 @@ constexpr unsigned int PDE_SHIFT = 21;
  * and that is the ASID.
  */
 
-static message_info_t
+static message_tag_t
 already_mapped ()
 {
   return msg_delete_first ();
 }
 
-static message_info_t
+static message_tag_t
 table_missing (int level)
 {
   return msg_failed_lookup (level);
 }
 
-message_info_t
+message_tag_t
 x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -58,7 +58,7 @@ x86_64_pdpt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -81,7 +81,7 @@ x86_64_pd_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   (void)attr;
@@ -108,7 +108,7 @@ x86_64_pt_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);
@@ -135,7 +135,7 @@ x86_64_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 x86_64_huge_page_map (cte_t *cte, cte_t *vspace, word_t vaddr, word_t attr)
 {
   uintptr_t root_phy = (uintptr_t)cap_ptr (vspace);

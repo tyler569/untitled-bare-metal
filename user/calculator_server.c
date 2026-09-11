@@ -9,7 +9,7 @@ main (cptr_t endpoint_cap)
   printf ("Hello, World from userland thread! Arg is %lu\n", endpoint_cap);
 
   bool done = false;
-  message_info_t info, resp;
+  message_tag_t info, resp;
   word_t badge;
 
   info = recv (endpoint_cap, &badge);
@@ -42,9 +42,9 @@ main (cptr_t endpoint_cap)
         }
 
       if (err)
-        resp = new_message_info (err, 0, 0, 0);
+        resp = new_message_tag (err, 0, 0, 0);
       else
-        resp = new_message_info (label, 0, 0, 1);
+        resp = new_message_tag (label, 0, 0, 1);
 
       if (done)
         reply (resp);

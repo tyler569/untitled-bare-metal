@@ -103,15 +103,15 @@ set_receive_path (cptr_t root_cnode, word_t index, uint8_t depth)
   __ipc_buffer->receive_depth = depth;
 }
 
-void send (cptr_t cap, message_info_t info);
-void nbsend (cptr_t cap, message_info_t info);
+void send (cptr_t cap, message_tag_t info);
+void nbsend (cptr_t cap, message_tag_t info);
 void signal (cptr_t cap);
-message_info_t call (cptr_t cap, message_info_t info, word_t *sender);
-message_info_t recv (cptr_t cap, word_t *sender);
-message_info_t nbrecv (cptr_t cap, word_t *sender);
+message_tag_t call (cptr_t cap, message_tag_t info, word_t *sender);
+message_tag_t recv (cptr_t cap, word_t *sender);
+message_tag_t nbrecv (cptr_t cap, word_t *sender);
 void wait (cptr_t cap, word_t *nfn_word);
-message_info_t reply (message_info_t info);
-message_info_t reply_recv (cptr_t cap, message_info_t info, word_t *sender);
+message_tag_t reply (message_tag_t info);
+message_tag_t reply_recv (cptr_t cap, message_tag_t info, word_t *sender);
 
 void yield ();
 [[noreturn]] void exit (int);

@@ -18,7 +18,7 @@ ipc_frame (struct tcb *t)
   return &t->saved_state;
 }
 
-static inline message_info_t
+static inline message_tag_t
 get_pending_ipc_info (struct tcb *t)
 {
   // The outgoing tag remains in RSI while a sender is blocked.
@@ -26,7 +26,7 @@ get_pending_ipc_info (struct tcb *t)
 }
 
 static inline void
-set_ipc_result (struct tcb *t, message_info_t tag)
+set_ipc_result (struct tcb *t, message_tag_t tag)
 {
   set_frame_return (ipc_frame (t), message_info_to_word (tag));
 }
@@ -56,7 +56,7 @@ set_mr (word_t i, word_t v)
 }
 
 static inline void
-set_ipc_info (message_info_t tag)
+set_ipc_info (message_tag_t tag)
 {
   set_ipc_result (this_tcb, tag);
 }

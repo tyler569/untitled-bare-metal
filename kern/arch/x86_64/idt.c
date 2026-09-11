@@ -1,5 +1,5 @@
-#include "sys/cdefs.h"
 #include "kern/mem.h"
+#include "sys/cdefs.h"
 #include "x86_64.h"
 
 constexpr uint8_t TYPE_INT = 0x8E;

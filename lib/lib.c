@@ -32,13 +32,13 @@ _syscall1 (int syscall_num, uintptr_t a1)
 }
 
 void
-send (cptr_t cap, message_info_t info)
+send (cptr_t cap, message_tag_t info)
 {
   _syscall2 (SYS_SEND, cap, message_info_to_word (info));
 }
 
 void
-nbsend (cptr_t cap, message_info_t info)
+nbsend (cptr_t cap, message_tag_t info)
 {
   _syscall2 (SYS_NBSEND, cap, message_info_to_word (info));
 }
@@ -49,8 +49,8 @@ signal (cptr_t cap)
   _syscall1 (SYS_SEND, cap);
 }
 
-message_info_t
-call (cptr_t cap, message_info_t info, word_t *sender)
+message_tag_t
+call (cptr_t cap, message_tag_t info, word_t *sender)
 {
   info = message_info_from_word (
       _syscall2 (SYS_CALL, cap, message_info_to_word (info)));
@@ -59,19 +59,19 @@ call (cptr_t cap, message_info_t info, word_t *sender)
   return info;
 }
 
-message_info_t
+message_tag_t
 recv (cptr_t cap, word_t *sender)
 {
-  message_info_t info = message_info_from_word (_syscall1 (SYS_RECV, cap));
+  message_tag_t info = message_info_from_word (_syscall1 (SYS_RECV, cap));
   if (sender)
     *sender = __ipc_buffer->sender_badge;
   return info;
 }
 
-message_info_t
+message_tag_t
 nbrecv (cptr_t cap, word_t *sender)
 {
-  message_info_t info = message_info_from_word (_syscall1 (SYS_NBRECV, cap));
+  message_tag_t info = message_info_from_word (_syscall1 (SYS_NBRECV, cap));
   if (sender)
     *sender = __ipc_buffer->sender_badge;
   return info;
@@ -85,15 +85,15 @@ wait (cptr_t cap, word_t *nfn_word)
     *nfn_word = __ipc_buffer->sender_badge;
 }
 
-message_info_t
-reply (message_info_t info)
+message_tag_t
+reply (message_tag_t info)
 {
   return message_info_from_word (
       _syscall2 (SYS_REPLY, 0, message_info_to_word (info)));
 }
 
-message_info_t
-reply_recv (cptr_t cap, message_info_t info, word_t *sender)
+message_tag_t
+reply_recv (cptr_t cap, message_tag_t info, word_t *sender)
 {
   info = message_info_from_word (
       _syscall2 (SYS_REPLYRECV, cap, message_info_to_word (info)));

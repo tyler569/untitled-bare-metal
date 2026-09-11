@@ -24,7 +24,7 @@ lookup_cap_slot_raw (cte_t *cspace_root, word_t index, word_t depth,
 }
 
 // High-level wrapper that formats errors into IPC buffer
-message_info_t
+message_tag_t
 lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
 {
   const error_t err = lookup_cap_slot_raw (cspace_root, index, depth, out);
@@ -41,7 +41,7 @@ lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth, cte_t **out)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 cnode_debug_print (cte_t *obj)
 {
   cte_t *cte = cap_ptr (obj->cap);
@@ -67,7 +67,7 @@ cnode_debug_print (cte_t *obj)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
             word_t src_offset, uint8_t src_depth, cap_rights_t rights)
 {
@@ -82,7 +82,7 @@ cnode_copy (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
             word_t src_offset, uint8_t src_depth, cap_rights_t rights,
             word_t badge)
@@ -98,7 +98,7 @@ cnode_mint (cte_t *obj, word_t dst_offset, uint8_t dst_depth, cte_t *root,
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
 {
   cte_t *cte;
@@ -109,7 +109,7 @@ cnode_delete (cte_t *obj, word_t offset, uint8_t depth)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 cnode_revoke (cte_t *obj, word_t offset, uint8_t depth)
 {
   cte_t *cte;
@@ -120,7 +120,7 @@ cnode_revoke (cte_t *obj, word_t offset, uint8_t depth)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 cnode_debug_get (cte_t *obj, word_t offset, uint8_t depth)
 {
   cte_t *cte;

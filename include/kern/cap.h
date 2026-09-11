@@ -249,8 +249,8 @@ error_t lookup_cap_slot_raw (cte_t *cspace_root, word_t index, word_t depth,
                              cte_t **out);
 
 // High-level lookup that formats errors into IPC buffer
-message_info_t lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
-                                cte_t **out);
+message_tag_t lookup_cap_slot (cte_t *cspace_root, word_t index, word_t depth,
+                               cte_t **out);
 
 #define lookup_cap_slot_this_tcb(index, out)                                  \
   lookup_cap_slot (&this_tcb->cspace_root, index, 64, out)
@@ -341,9 +341,9 @@ cap_value_type_string (cap_t cap)
 
 void insert_cte_after (struct cte *new, struct cte *after);
 void unlink_cte (struct cte *del);
-message_info_t copy_cap (struct cte *dest, struct cte *src, cap_rights_t);
-message_info_t mint_cap (struct cte *dest, struct cte *src, word_t badge,
-                         cap_rights_t);
+message_tag_t copy_cap (struct cte *dest, struct cte *src, cap_rights_t);
+message_tag_t mint_cap (struct cte *dest, struct cte *src, word_t badge,
+                        cap_rights_t);
 bool is_child_cap (const struct cte *c, const struct cte *parent);
-message_info_t delete_cap (struct cte *c);
-message_info_t revoke_cap (struct cte *c);
+message_tag_t delete_cap (struct cte *c);
+message_tag_t revoke_cap (struct cte *c);

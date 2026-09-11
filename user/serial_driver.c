@@ -58,7 +58,7 @@ is_data_available ()
 }
 
 void
-write_uart (message_info_t info)
+write_uart (message_tag_t info)
 {
   // These can't be interleaved because it will wipe out the IPC buffer
 
@@ -71,11 +71,11 @@ write_uart (message_info_t info)
 }
 
 void
-read_uart (message_info_t)
+read_uart (message_tag_t)
 {
   if (buffer_size == 0)
     {
-      reply (new_message_info (WOULD_BLOCK, 0, 0, 0));
+      reply (new_message_tag (WOULD_BLOCK, 0, 0, 0));
       return;
     }
 
@@ -84,7 +84,7 @@ read_uart (message_info_t)
     set_mr (i, buffer[i]);
   buffer_size = 0;
 
-  reply (new_message_info (0, 0, 0, i));
+  reply (new_message_tag (0, 0, 0, i));
 }
 
 void
@@ -117,7 +117,7 @@ driver_thread_main ()
 
   while (true)
     {
-      message_info_t info;
+      message_tag_t info;
       word_t badge = 0;
 
       info = recv (SERIAL_ENDPOINT_CAP, &badge);

@@ -292,7 +292,7 @@ calc_add (cptr_t calculator_endpoint, word_t a, word_t b)
 {
   set_mr (0, a);
   set_mr (1, b);
-  const message_info_t info = new_message_info (CALCULATOR_ADD, 0, 0, 2);
+  const message_tag_t info = new_message_tag (CALCULATOR_ADD, 0, 0, 2);
   call (calculator_endpoint, info, nullptr);
   return get_mr (0);
 }
@@ -323,7 +323,7 @@ print_to_serial (cptr_t serial_endpoint, const char *message)
   for (const char *c = message; *c; c++)
     {
       set_mr (0, *c);
-      message_info_t info = new_message_info (1, 0, 0, 1);
+      message_tag_t info = new_message_tag (1, 0, 0, 1);
       send (serial_endpoint, info);
     }
 }
@@ -334,7 +334,7 @@ serial_capitalization_server (cptr_t serial_endpoint,
 {
   while (true)
     {
-      message_info_t info = read_serial (serial_endpoint, serial_notification);
+      message_tag_t info = read_serial (serial_endpoint, serial_notification);
       const size_t regs = message_length (info);
 
       if (regs == 0)
@@ -351,7 +351,7 @@ serial_capitalization_server (cptr_t serial_endpoint,
             set_mr (i, byte + 'A' - 'a');
         }
 
-      info = new_message_info (SERIAL_DRIVER_WRITE, 0, 0, regs);
+      info = new_message_tag (SERIAL_DRIVER_WRITE, 0, 0, regs);
       send (serial_endpoint, info);
     }
 }
@@ -360,7 +360,7 @@ void
 enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
 {
   // Call enumerate to get all PCI device addresses
-  message_info_t info = new_message_info (PCI_MANAGER_ENUMERATE, 0, 0, 0);
+  message_tag_t info = new_message_tag (PCI_MANAGER_ENUMERATE, 0, 0, 0);
   info = call (pci_manager_endpoint, info, nullptr);
 
   const size_t num_devices = message_length (info);
@@ -382,7 +382,7 @@ enumerate_and_print_pci_devices (cptr_t pci_manager_endpoint)
 
       // Call device_info to get the first 64 bytes of config space
       set_mr (0, pci_address);
-      info = new_message_info (PCI_MANAGER_DEVICE_INFO, 0, 0, 1);
+      info = new_message_tag (PCI_MANAGER_DEVICE_INFO, 0, 0, 1);
       info = call (pci_manager_endpoint, info, nullptr);
 
       // Parse config space from returned MRs (8 qwords = 64 bytes)

@@ -23,21 +23,21 @@ void do_syscall (uintptr_t, uintptr_t, enum syscall_number);
 #define TRY(expr)                                                             \
   do                                                                          \
     {                                                                         \
-      message_info_t __tag = (expr);                                          \
+      message_tag_t __tag = (expr);                                           \
       if (__tag.label != NO_ERROR)                                            \
         return __tag;                                                         \
     }                                                                         \
   while (0)
 
-// Helper to create success message_info_t
-static inline message_info_t
+// Helper to create success message_tag_t
+static inline message_tag_t
 msg_ok (word_t registers)
 {
-  return new_message_info (NO_ERROR, 0, 0, registers);
+  return new_message_tag (NO_ERROR, 0, 0, registers);
 }
 
-// Helper to create error message_info_t
-static inline message_info_t
+// Helper to create error message_tag_t
+static inline message_tag_t
 msg_err (word_t label, word_t registers)
 {
   if (label != NO_ERROR && label < MAX_ERROR_CODE)
@@ -45,11 +45,11 @@ msg_err (word_t label, word_t registers)
   else if (label != NO_ERROR)
     dbg_printf ("msg_err: err='%lu'\n", label);
 
-  return new_message_info (label, 0, 0, registers);
+  return new_message_tag (label, 0, 0, registers);
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_range_error (word_t min, word_t max)
 {
   set_mr (0, min);
@@ -58,7 +58,7 @@ msg_range_error (word_t min, word_t max)
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_truncated_message (word_t expected, word_t provided)
 {
   set_mr (0, expected);
@@ -67,21 +67,21 @@ msg_truncated_message (word_t expected, word_t provided)
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_delete_first ()
 {
   return msg_err (DELETE_FIRST, 0);
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_revoke_first ()
 {
   return msg_err (REVOKE_FIRST, 0);
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_invalid_argument (word_t argument_number)
 {
   set_mr (0, argument_number);
@@ -89,14 +89,14 @@ msg_invalid_argument (word_t argument_number)
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_invalid_root ()
 {
   return msg_err (INVALID_ROOT, 0);
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_not_enough_memory (word_t available_memory)
 {
   set_mr (0, available_memory);
@@ -104,7 +104,7 @@ msg_not_enough_memory (word_t available_memory)
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_failed_lookup (word_t level)
 {
   set_mr (0, level);
@@ -112,7 +112,7 @@ msg_failed_lookup (word_t level)
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_illegal_operation ()
 {
   return msg_err (ILLEGAL_OPERATION, 0);
@@ -124,27 +124,27 @@ msg_illegal_operation ()
 // response out of the kernel (our contract is that label is always 0
 // (no_error) for all successful operations and data is in MRs)
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_noreturn ()
 {
   return message_info_from_word (~0UL);
 }
 
 static inline bool
-msg_is_noreturn (message_info_t msg)
+msg_is_noreturn (message_tag_t tag)
 {
-  return message_info_to_word (msg) == ~0UL;
+  return message_info_to_word (tag) == ~0UL;
 }
 
 MUST_USE
-static inline message_info_t
+static inline message_tag_t
 msg_needswrite ()
 {
   return message_info_from_word (~1UL);
 }
 
 static inline bool
-msg_is_needswrite (message_info_t msg)
+msg_is_needswrite (message_tag_t tag)
 {
-  return message_info_to_word (msg) == ~1UL;
+  return message_info_to_word (tag) == ~1UL;
 }

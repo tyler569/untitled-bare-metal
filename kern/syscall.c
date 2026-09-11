@@ -8,7 +8,7 @@
 
 #include "kern/syscall_dispatch.c"
 
-static message_info_t
+static message_tag_t
 op_syscall (const uintptr_t a0, const uintptr_t a1,
             const enum syscall_number syscall_number)
 {
@@ -18,7 +18,7 @@ op_syscall (const uintptr_t a0, const uintptr_t a1,
   if (syscall_number == SYS_EXIT)
     dbg_printf ("Task %p ", this_tcb);
 
-  const message_info_t info = message_info_from_word (a1);
+  const message_tag_t info = message_info_from_word (a1);
 
   // the syscalls without a capability handle in a0
   switch (syscall_number)
@@ -131,19 +131,19 @@ do_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 {
   read_lock (&cdt_lock);
 
-  message_info_t tag = op_syscall (a0, a1, syscall_number);
+  message_tag_t tag = op_syscall (a0, a1, syscall_number);
 
   if (msg_is_needswrite (tag))
-	{
-	  read_unlock (&cdt_lock);
-	  write_lock (&cdt_lock);
+    {
+      read_unlock (&cdt_lock);
+      write_lock (&cdt_lock);
 
-	  tag = op_syscall (a0, a1, syscall_number);
+      tag = op_syscall (a0, a1, syscall_number);
 
-	  write_unlock (&cdt_lock);
-	}
+      write_unlock (&cdt_lock);
+    }
   else
-	read_unlock (&cdt_lock);
+    read_unlock (&cdt_lock);
 
   if (!msg_is_noreturn (tag))
     set_ipc_result (this_tcb, tag);

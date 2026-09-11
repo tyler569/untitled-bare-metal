@@ -42,7 +42,7 @@ create_objects (cte_t *untyped, word_t type, word_t size_bits,
     }
 }
 
-message_info_t
+message_tag_t
 untyped_retype (cte_t *slot, word_t type, word_t size_bits, cte_t *root,
                 word_t node_index, uint8_t node_depth, word_t node_offset,
                 word_t num_objects)

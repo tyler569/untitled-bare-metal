@@ -22,12 +22,12 @@ enum
   SERIAL_DRIVER_READ = 2,
 };
 
-static inline message_info_t
+static inline message_tag_t
 read_serial (cptr_t serial_endpoint, cptr_t serial_notification)
 {
   while (true)
     {
-      message_info_t info = new_message_info (SERIAL_DRIVER_READ, 0, 0, 0);
+      message_tag_t info = new_message_tag (SERIAL_DRIVER_READ, 0, 0, 0);
       info = call (serial_endpoint, info, nullptr);
       if (message_label (info) != WOULD_BLOCK)
         return info;

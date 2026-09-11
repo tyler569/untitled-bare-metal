@@ -3,10 +3,10 @@
 #include "kern/obj/tcb.h"
 #include "kern/syscall.h"
 
-static message_info_t
+static message_tag_t
 signal_waiting_receiver (struct tcb *receiver, word_t badge)
 {
-  const message_info_t tag = new_message_info (NO_ERROR, 0, 0, 0);
+  const message_tag_t tag = new_message_tag (NO_ERROR, 0, 0, 0);
 
   set_ipc_result (receiver, tag);
   receiver->ipc_buffer->sender_badge = badge;
@@ -25,7 +25,7 @@ signal_bound_receiver_waiting_on_something_else (struct tcb *receiver,
   signal_waiting_receiver (receiver, badge);
 }
 
-static message_info_t
+static message_tag_t
 queue_receiver_on_notification (struct notification *nfn)
 {
   append_to_list (&this_tcb->send_receive_node, &nfn->list);
@@ -73,7 +73,7 @@ notification_signal (struct notification *nfn, word_t badge)
   signal_waiting_receiver (tcb, nfn_word);
 }
 
-message_info_t
+message_tag_t
 invoke_notification_send (cte_t *cap)
 {
   assert (cap_type (cap) == CAP_NOTIFICATION);
@@ -84,7 +84,7 @@ invoke_notification_send (cte_t *cap)
   return msg_ok (0);
 }
 
-message_info_t
+message_tag_t
 invoke_notification_recv (cte_t *cap)
 {
   assert (cap_type (cap) == CAP_NOTIFICATION);
