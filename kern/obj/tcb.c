@@ -204,7 +204,7 @@ print_this_tcb ()
 void
 switch_tcb (struct tcb *t)
 {
-  assert_eq (t->state, TASK_STATE_RUNNABLE);
+  t->state = TASK_STATE_RUNNABLE;
   this_cpu->return_to_tcb = t;
 }
 

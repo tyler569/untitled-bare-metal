@@ -6,12 +6,9 @@
 static message_tag_t
 signal_waiting_receiver (struct tcb *receiver, word_t badge)
 {
-  const message_tag_t tag = new_message_tag (NO_ERROR, 0, 0, 0);
-
-  set_ipc_result (receiver, tag);
+  set_ipc_result (receiver, msg_ok (0));
   receiver->ipc_buffer->sender_badge = badge;
 
-  receiver->state = TASK_STATE_RUNNABLE;
   switch_tcb (receiver);
 
   return msg_ok (0);

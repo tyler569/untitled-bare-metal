@@ -76,10 +76,7 @@ send_message_directly (struct tcb *receiver, word_t badge, message_tag_t tag,
   transfer_message (this_tcb, receiver, badge, tag);
 
   if (resume_now)
-    {
-      receiver->state = TASK_STATE_RUNNABLE;
-      switch_tcb (receiver);
-    }
+	switch_tcb (receiver);
   else
     make_tcb_runnable (receiver);
 }
