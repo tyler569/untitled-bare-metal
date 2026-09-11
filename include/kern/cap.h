@@ -1,12 +1,14 @@
 #pragma once
 
 #include "assert.h"
+#include "spin_lock.h"
 #include "sys/cdefs.h"
 #include "sys/ipc.h"
 #include "sys/syscall.h"
 #include "sys/types.h"
 
 constexpr uintptr_t BITS_PTR_MASK = 0xFFFF'FFFF'FFF0;
+extern rw_lock_t cdt_lock;
 
 static inline bool
 is_safe_cap_ptr (void *ptr)

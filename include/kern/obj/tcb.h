@@ -6,7 +6,7 @@
 #include "kern/cap.h"
 #include "kern/per_cpu.h"
 #include "list.h"
-#include "spinlock.h"
+#include "spin_lock.h"
 #include "sys/ipc.h"
 #include "sys/types.h"
 

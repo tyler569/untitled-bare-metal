@@ -129,7 +129,22 @@ op_syscall (const uintptr_t a0, const uintptr_t a1,
 void
 do_syscall (uintptr_t a0, uintptr_t a1, enum syscall_number syscall_number)
 {
-  const message_info_t tag = op_syscall (a0, a1, syscall_number);
+  read_lock (&cdt_lock);
+
+  message_info_t tag = op_syscall (a0, a1, syscall_number);
+
+  if (msg_is_needswrite (tag))
+	{
+	  read_unlock (&cdt_lock);
+	  write_lock (&cdt_lock);
+
+	  tag = op_syscall (a0, a1, syscall_number);
+
+	  write_unlock (&cdt_lock);
+	}
+  else
+	read_unlock (&cdt_lock);
+
   if (!msg_is_noreturn (tag))
     set_ipc_result (this_tcb, tag);
 }

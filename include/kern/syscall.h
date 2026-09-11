@@ -135,3 +135,16 @@ msg_is_noreturn (message_info_t msg)
 {
   return message_info_to_word (msg) == ~0UL;
 }
+
+MUST_USE
+static inline message_info_t
+msg_needswrite ()
+{
+  return message_info_from_word (~1UL);
+}
+
+static inline bool
+msg_is_needswrite (message_info_t msg)
+{
+  return message_info_to_word (msg) == ~1UL;
+}
