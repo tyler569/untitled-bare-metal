@@ -135,6 +135,6 @@ create_init_tcb (const void *initrd, size_t initrd_size)
 
   // init_tcb.debug = true;
 
-  make_tcb_runnable (&init_tcb);
+  schedule_tcb (&init_tcb);
   schedule ();
 }

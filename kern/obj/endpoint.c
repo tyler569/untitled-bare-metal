@@ -78,7 +78,7 @@ send_message_directly (struct tcb *receiver, word_t badge, message_tag_t tag,
   if (resume_now)
 	switch_tcb (receiver);
   else
-    make_tcb_runnable (receiver);
+    schedule_tcb (receiver);
 }
 
 static void
@@ -122,7 +122,7 @@ receive_message_from_blocked_sender (struct endpoint *e)
   if (sender->expects_reply)
     this_tcb->reply_to = sender;
   else
-    make_tcb_runnable (sender);
+    schedule_tcb (sender);
 
   return result;
 }

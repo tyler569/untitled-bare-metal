@@ -64,7 +64,7 @@ void switch_tcb (struct tcb *t);
 void return_from_kernel_code ();
 
 void save_tcb_state (struct tcb *t);
-void make_tcb_runnable (struct tcb *t);
+void schedule_tcb (struct tcb *t);
 void schedule ();
 
 void send_message (struct tcb *receiver, uintptr_t message);

@@ -55,7 +55,7 @@ save_tcb_state (struct tcb *t)
 }
 
 void
-make_tcb_runnable (struct tcb *t)
+schedule_tcb (struct tcb *t)
 {
   assert (t->state != TASK_STATE_DEAD);
 
@@ -80,7 +80,7 @@ message_tag_t
 tcb_resume (cte_t *cap)
 {
   struct tcb *tcb = cap_ptr (cap);
-  make_tcb_runnable (tcb);
+  schedule_tcb (tcb);
   return msg_ok (0);
 }
 
@@ -220,7 +220,7 @@ switch_tcb_actual (struct tcb *t)
 
   // Make the current tcb runnable if it still wants to run.
   if (current && current->state == TASK_STATE_RUNNING)
-    make_tcb_runnable (current);
+    schedule_tcb (current);
 
   assert_eq (t->state, TASK_STATE_RUNNABLE);
 
