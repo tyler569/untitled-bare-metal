@@ -9,13 +9,16 @@ netopt="-net nic,model=e1000e -net user"
 gdbserver=""
 video="-display none -vga virtio"
 
-while getopts "dmustv" opt; do
+while getopts "dmn:ustv" opt; do
   case $opt in
     d)
       debugopt="-d int,cpu_reset"
       ;;
     m)
       debugopt="-monitor stdio"
+      ;;
+    n)
+      smp="$OPTARG"
       ;;
     u)
       debugopt="-serial stdio"

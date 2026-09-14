@@ -3,6 +3,8 @@
 #include "kern/mem.h"
 #include "kern/methods.h"
 #include "kern/obj/cnode.h"
+#include "kern/obj/endpoint.h"
+#include "kern/obj/notification.h"
 #include "kern/obj/tcb.h"
 #include "kern/size.h"
 #include "kern/syscall.h"
@@ -30,6 +32,18 @@ create_objects (cte_t *untyped, word_t type, word_t size_bits,
 
       // printf ("Creating object of type %s at %p\n", cap_type_string (type),
       //         obj_ptr);
+      switch (type)
+        {
+        case CAP_ENDPOINT:
+          init_endpoint (obj_ptr);
+          break;
+        case CAP_NOTIFICATION:
+          init_notification (obj_ptr);
+          break;
+        case CAP_TCB:
+          init_tcb (obj_ptr);
+          break;
+        }
 
       dest_slot->cap.type = type;
       dest_slot->cap.size_bits = size_bits;

@@ -32,20 +32,15 @@ queue_receiver_on_notification (struct notification *nfn)
   return msg_noreturn ();
 }
 
-static void
-maybe_init_notification (struct notification *nfn)
+void
+init_notification (struct notification *nfn)
 {
-  if (nfn->list.next)
-    return;
-
   init_list (&nfn->list);
 }
 
 void
 notification_signal (struct notification *nfn, word_t badge)
 {
-  maybe_init_notification (nfn);
-
   nfn->word |= badge;
   const word_t nfn_word = nfn->word;
 
@@ -76,7 +71,6 @@ invoke_notification_send (cte_t *cap)
   assert (cap_type (cap) == CAP_NOTIFICATION);
 
   struct notification *nfn = cap_ptr (cap);
-  maybe_init_notification (nfn);
   notification_signal (nfn, cap->cap.badge);
   return msg_ok (0);
 }
@@ -87,8 +81,6 @@ invoke_notification_recv (cte_t *cap)
   assert (cap_type (cap) == CAP_NOTIFICATION);
 
   struct notification *nfn = cap_ptr (cap);
-  maybe_init_notification (nfn);
-
   if (nfn->bound_tcb && nfn->bound_tcb != this_tcb)
     {
       err_printf (

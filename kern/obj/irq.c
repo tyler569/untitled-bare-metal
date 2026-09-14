@@ -5,10 +5,10 @@
 
 struct irq_handler_data
 {
-  word_t irq;
+  unsigned irq;
+  bool in_service;
   struct notification *n;
   word_t badge;
-  bool in_service;
 };
 
 static uint64_t irq_handlers_issued = 0;

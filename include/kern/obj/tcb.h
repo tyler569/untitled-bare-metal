@@ -54,21 +54,18 @@ struct tcb
 
 void init_tcbs (void *init_elf);
 
-struct tcb *create_tcb (struct tcb *);
-struct tcb *create_tcb_from_elf_in_this_vm (struct tcb *,
-                                            const struct elf_ehdr *elf);
-void kill_tcb (struct tcb *t);
-void destroy_tcb (struct tcb *t);
+void init_tcb (struct tcb *);
+void init_tcb_from_elf_in_this_vm (struct tcb *, const struct elf_ehdr *);
 
-void switch_tcb (struct tcb *t);
+void kill_tcb (struct tcb *);
+void destroy_tcb (struct tcb *);
+
+void switch_tcb (struct tcb *);
 void return_from_kernel_code ();
 
-void save_tcb_state (struct tcb *t);
-void schedule_tcb (struct tcb *t);
+void save_tcb_state (struct tcb *);
+void schedule_tcb (struct tcb *);
 void schedule ();
-
-void send_message (struct tcb *receiver, uintptr_t message);
-void receive_message ();
 
 int invoke_tcb_method (cap_t tcb, word_t method);
 

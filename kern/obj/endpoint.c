@@ -76,7 +76,7 @@ send_message_directly (struct tcb *receiver, word_t badge, message_tag_t tag,
   transfer_message (this_tcb, receiver, badge, tag);
 
   if (resume_now)
-	switch_tcb (receiver);
+    switch_tcb (receiver);
   else
     schedule_tcb (receiver);
 }
@@ -146,9 +146,8 @@ recv_will_block (struct endpoint *e)
 static bool
 send_will_block (struct endpoint *e)
 {
-  return is_list_empty (&e->list)
-         || first_tcb (e)->state == TASK_STATE_SENDING
-		 || first_tcb (e)->state == TASK_STATE_CALLING;
+  return is_list_empty (&e->list) || first_tcb (e)->state == TASK_STATE_SENDING
+         || first_tcb (e)->state == TASK_STATE_CALLING;
 }
 
 static void
@@ -188,12 +187,9 @@ endpoint_nbrecv (struct endpoint *e)
   return receive_message_from_blocked_sender (e);
 }
 
-static void
-maybe_init_endpoint (struct endpoint *e)
+void
+init_endpoint (struct endpoint *e)
 {
-  if (e->list.next)
-    return;
-
   init_list (&e->list);
 }
 
@@ -205,8 +201,6 @@ invoke_endpoint_send (cte_t *cap, message_tag_t tag)
   this_tcb->expects_reply = false;
 
   struct endpoint *e = cap_ptr (cap);
-  maybe_init_endpoint (e);
-
   endpoint_send (e, cap->cap.badge, tag, false);
 }
 
@@ -221,8 +215,6 @@ invoke_endpoint_nbsend (cte_t *cap, message_tag_t tag)
   this_tcb->expects_reply = false;
 
   struct endpoint *e = cap_ptr (cap);
-  maybe_init_endpoint (e);
-
   endpoint_nbsend (e, cap->cap.badge, tag);
 }
 
@@ -248,7 +240,6 @@ invoke_endpoint_recv (cte_t *cap)
     return msg_ok (0);
 
   struct endpoint *e = cap_ptr (cap);
-  maybe_init_endpoint (e);
   return endpoint_recv (e);
 }
 
@@ -261,7 +252,6 @@ invoke_endpoint_nbrecv (cte_t *cap)
     return msg_ok (0);
 
   struct endpoint *e = cap_ptr (cap);
-  maybe_init_endpoint (e);
   return endpoint_nbrecv (e);
 }
 
@@ -274,8 +264,6 @@ invoke_endpoint_call (cte_t *cap, message_tag_t tag)
   this_tcb->state = TASK_STATE_CALLING;
 
   struct endpoint *e = cap_ptr (cap);
-  maybe_init_endpoint (e);
-
   endpoint_send (e, cap->cap.badge, tag, true);
 }
 

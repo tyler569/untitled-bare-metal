@@ -16,6 +16,8 @@ struct notification
 
 static_assert (sizeof (struct notification) <= BIT (NOTIFICATION_SIZE_BITS));
 
+void init_notification (struct notification *);
+
 message_tag_t invoke_notification_send (cte_t *cap);
 message_tag_t invoke_notification_recv (cte_t *cap);
 

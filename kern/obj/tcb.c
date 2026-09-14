@@ -20,23 +20,18 @@ static_assert (sizeof (struct tcb) <= BIT (TCB_SIZE_BITS),
 LIST_HEAD (runnable_tcbs);
 spin_lock_t runnable_tcbs_lock;
 
-struct tcb *
-create_tcb (struct tcb *t)
+void
+init_tcb (struct tcb *)
 {
-  memset (t, 0, sizeof (struct tcb));
-
-  return t;
 }
 
-struct tcb *
-create_tcb_from_elf_in_this_vm (struct tcb *t, const struct elf_ehdr *elf)
+void
+init_tcb_from_elf_in_this_vm (struct tcb *t, const struct elf_ehdr *elf)
 {
-  create_tcb (t);
+  init_tcb (t);
 
   load_elf (elf);
   new_user_frame (&t->saved_state, elf->entry, 0);
-
-  return t;
 }
 
 void
@@ -236,16 +231,14 @@ switch_tcb_actual (struct tcb *t)
 void
 return_from_kernel_code ()
 {
-  struct tcb *current = this_tcb;
-
   if (this_cpu->return_to_tcb == this_tcb)
     return;
   else if (this_cpu->return_to_tcb)
     switch_tcb_actual (this_cpu->return_to_tcb);
   else
     {
-      if (current && current->state != TASK_STATE_DEAD)
-        save_tcb_state (current);
+      if (this_tcb && this_tcb->state != TASK_STATE_DEAD)
+        save_tcb_state (this_tcb);
       halt_forever_interrupts_enabled ();
     }
 }

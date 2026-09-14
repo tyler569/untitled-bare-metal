@@ -11,6 +11,7 @@ struct per_cpu
   struct tcb *current_tcb;
   struct tcb *return_to_tcb;
   struct list_head list;
+  unsigned num;
   bool printing_backtrace;
 };
 

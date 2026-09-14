@@ -12,6 +12,8 @@ struct endpoint
 
 static_assert (sizeof (struct endpoint) <= BIT (ENDPOINT_SIZE_BITS));
 
+void init_endpoint (struct endpoint *);
+
 // sends
 void invoke_endpoint_send (cte_t *cap, message_tag_t tag);
 void invoke_reply (message_tag_t tag);

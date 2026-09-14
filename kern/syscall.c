@@ -15,13 +15,10 @@ static message_tag_t
 op_syscall (const uintptr_t a0, const uintptr_t a1,
             const enum syscall_number syscall_number)
 {
-  if (syscall_number != SYS_DEBUG_WRITE && syscall_number != SYS_EXIT)
-    dbg_printf ("Task %p a0:0x%lX ", this_tcb, a0);
-
-  if (syscall_number == SYS_EXIT)
-    dbg_printf ("Task %p ", this_tcb);
-
   const message_tag_t info = message_info_from_word (a1);
+
+  if (syscall_number != SYS_DEBUG_WRITE)
+    dbg_printf ("[%u %s] ", this_cpu->num, this_tcb->name);
 
   // the syscalls without a capability handle in a0
   switch (syscall_number)
@@ -59,10 +56,10 @@ op_syscall (const uintptr_t a0, const uintptr_t a1,
     {
     case SYS_CALL:
       {
-        dbg_printf ("sys_call (dest: 0x%lX)\n", a0);
-
         if (cap_type (slot) != CAP_ENDPOINT)
           return dispatch_method (slot, info);
+
+        dbg_printf ("sys_call (dest: 0x%lX)\n", a0);
 
         invoke_endpoint_call (slot, info);
         return msg_noreturn ();
