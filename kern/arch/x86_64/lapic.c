@@ -61,7 +61,7 @@ init_lapic ()
 }
 
 void
-send_eoi (uint8_t irq)
+send_eoi (int irq)
 {
   (void)irq;
 

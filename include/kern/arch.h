@@ -49,7 +49,9 @@ void set_vm_root (uintptr_t root);
 
 void set_tls_base (uintptr_t base);
 
-void send_eoi (uint8_t irq);
+void send_eoi (int irq);
+void mask_irq (int irq);
+void unmask_irq (int irq);
 
 uint32_t read_pci_l (uint32_t addr);
 uint16_t read_pci_w (uint32_t addr);

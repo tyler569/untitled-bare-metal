@@ -15,18 +15,18 @@ write_register (uint32_t reg, uint32_t data)
   *ioapic_data = data;
 }
 
-// static uint32_t
-// read_register (uint32_t reg)
-// {
-//   assert (reg < 0x40);
-//   volatile uint32_t *ioapic_reg
-//       = (volatile uint32_t *)(direct_map_of (IOAPIC_BASE));
-//   volatile uint32_t *ioapic_data
-//       = (volatile uint32_t *)(direct_map_of (IOAPIC_BASE + 0x10));
-//
-//   *ioapic_reg = reg;
-//   return *ioapic_data;
-// }
+static uint32_t
+read_register (uint32_t reg)
+{
+  assert (reg < 0x40);
+  volatile uint32_t *ioapic_reg
+      = (volatile uint32_t *)(direct_map_of (IOAPIC_BASE));
+  volatile uint32_t *ioapic_data
+      = (volatile uint32_t *)(direct_map_of (IOAPIC_BASE + 0x10));
+
+  *ioapic_reg = reg;
+  return *ioapic_data;
+}
 
 union ioapic_relocation_entry
 {
@@ -51,12 +51,24 @@ union ioapic_relocation_entry
 };
 
 static void
-write_relocation_entry (uint32_t irq, union ioapic_relocation_entry entry)
+write_relocation_entry (int irq, union ioapic_relocation_entry entry)
 {
   uint32_t reg = 0x10 + irq * 2;
 
   write_register (reg, entry.low);
   write_register (reg + 1, entry.high);
+}
+
+static union ioapic_relocation_entry
+read_relocation_entry (int irq)
+{
+  union ioapic_relocation_entry entry;
+  uint32_t reg = 0x10 + irq * 2;
+
+  entry.low = read_register (reg);
+  entry.high = read_register (reg + 1);
+
+  return entry;
 }
 
 void
@@ -83,4 +95,18 @@ init_ioapic ()
   };
 
   write_relocation_entry (2, entry);
+}
+
+void mask_irq (int irq)
+{
+  auto entry = read_relocation_entry (irq);
+  entry.mask = true;
+  write_relocation_entry (irq, entry);
+}
+
+void unmask_irq (int irq)
+{
+  auto entry = read_relocation_entry (irq);
+  entry.mask = false;
+  write_relocation_entry (irq, entry);
 }

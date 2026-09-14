@@ -75,7 +75,7 @@ void init_pic ();
 void init_ioapic ();
 void init_lapic ();
 
-void send_eoi (uint8_t irq);
+void send_eoi (int irq);
 
 extern per_cpu_t bsp_cpu;
 

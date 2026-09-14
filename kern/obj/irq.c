@@ -5,7 +5,7 @@
 
 struct irq_handler_data
 {
-  unsigned irq;
+  int irq;
   bool in_service;
   struct notification *n;
   word_t badge;
@@ -49,7 +49,7 @@ message_tag_t
 irq_handler_ack (cte_t *obj)
 {
   struct irq_handler_data *data = cap_ptr (obj);
-  send_eoi (data->irq);
+  unmask_irq (data->irq);
   data->in_service = false;
   return msg_ok (0);
 }
@@ -66,22 +66,18 @@ irq_handler_set_notification (cte_t *obj, cte_t *notification)
   return msg_ok (0);
 }
 
-bool
+void
 handle_irq (word_t irq)
 {
   struct irq_handler_data *data = &irq_handlers[irq];
 
-  // Tell the platform code not to EOI since we're waiting until ack()
-  // is called.
-  if (data->n && data->in_service)
-    return true;
+  if (!data->n)
+    return;
 
-  if (data->n && !data->in_service)
-    {
-      data->in_service = true;
-      notification_signal (data->n, data->badge);
-      return true;
-    }
+  if (data->in_service)
+    return;
 
-  return false;
+  mask_irq (data->irq);
+  data->in_service = true;
+  notification_signal (data->n, data->badge);
 }
