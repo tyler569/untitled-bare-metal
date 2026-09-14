@@ -8,7 +8,6 @@
 #include "sys/types.h"
 
 constexpr uintptr_t BITS_PTR_MASK = 0xFFFF'FFFF'FFF0;
-extern rw_lock_t cdt_lock;
 
 static inline bool
 is_safe_cap_ptr (void *ptr)

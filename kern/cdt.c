@@ -5,8 +5,6 @@
 #include "spin_lock.h"
 #include "sys/syscall.h"
 
-rw_lock_t cdt_lock;
-
 void
 insert_cte_after (struct cte *new, struct cte *after)
 {
