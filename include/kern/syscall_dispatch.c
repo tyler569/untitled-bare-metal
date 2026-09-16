@@ -201,9 +201,7 @@ dispatch_method (cte_t *slot, message_tag_t info)
     case METHOD_TCB_CONFIGURE:
       {
         word_t fault_ep = (word_t)get_mr (0);
-        word_t cspace_root_data = (word_t)get_mr (1);
-        word_t vspace_root_data = (word_t)get_mr (2);
-        word_t buffer = (word_t)get_mr (3);
+        word_t buffer = (word_t)get_mr (1);
         cte_t *cspace_root;
         cte_t *vspace_root;
         cte_t *buffer_frame;
@@ -219,8 +217,8 @@ dispatch_method (cte_t *slot, message_tag_t info)
         do
           {
             word_t len = message_length (info);
-            if (len < 4)
-              return msg_truncated_message (len, 4);
+            if (len < 2)
+              return msg_truncated_message (len, 2);
           }
         while (0);
 
@@ -241,16 +239,13 @@ dispatch_method (cte_t *slot, message_tag_t info)
 
         dbg_printf (
             "(cap:%s@%p, fault_ep=0x%lX, cspace_root=cap:%s@%p, "
-            "cspace_root_data=0x%lX, vspace_root=cap:%s@%p, "
-            "vspace_root_data=0x%lX, buffer=0x%lX, buffer_frame=cap:%s@%p)\n",
+            "vspace_root=cap:%s@%p, buffer=0x%lX, buffer_frame=cap:%s@%p)\n",
             cap_type_string (slot), cap_ptr (slot), fault_ep,
             cap_type_string (cspace_root), cap_ptr (cspace_root),
-            cspace_root_data, cap_type_string (vspace_root),
-            cap_ptr (vspace_root), vspace_root_data, buffer,
+            cap_type_string (vspace_root), cap_ptr (vspace_root), buffer,
             cap_type_string (buffer_frame), cap_ptr (buffer_frame));
 
-        return tcb_configure (slot, fault_ep, cspace_root, cspace_root_data,
-                              vspace_root, vspace_root_data, buffer,
+        return tcb_configure (slot, fault_ep, cspace_root, vspace_root, buffer,
                               buffer_frame);
         break;
       }

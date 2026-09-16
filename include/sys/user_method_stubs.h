@@ -73,17 +73,14 @@ cnode_debug_get (cptr_t obj, word_t index, uint8_t depth)
 }
 static inline int
 tcb_configure (cptr_t obj, word_t fault_ep, cptr_t cspace_root,
-               word_t cspace_root_data, cptr_t vspace_root,
-               word_t vspace_root_data, word_t buffer, cptr_t buffer_frame)
+               cptr_t vspace_root, word_t buffer, cptr_t buffer_frame)
 {
   set_mr (0, (word_t)fault_ep);
-  set_mr (1, (word_t)cspace_root_data);
-  set_mr (2, (word_t)vspace_root_data);
-  set_mr (3, (word_t)buffer);
+  set_mr (1, (word_t)buffer);
   set_cap (0, cspace_root);
   set_cap (1, vspace_root);
   set_cap (2, buffer_frame);
-  message_tag_t _info = new_message_tag (METHOD_TCB_CONFIGURE, 0, 3, 4);
+  message_tag_t _info = new_message_tag (METHOD_TCB_CONFIGURE, 0, 3, 2);
   return message_label (call (obj, _info, nullptr));
 }
 static inline int

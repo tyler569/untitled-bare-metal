@@ -47,9 +47,7 @@ types:
         parameters:
           - { name: fault_ep, type: word_t }
           - { name: cspace_root, type: cptr_t }
-          - { name: cspace_root_data, type: word_t }
           - { name: vspace_root, type: cptr_t }
-          - { name: vspace_root_data, type: word_t }
           - { name: buffer, type: word_t }
           - { name: buffer_frame, type: cptr_t }
       # - name: copy_registers

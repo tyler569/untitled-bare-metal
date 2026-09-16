@@ -122,12 +122,10 @@ tcb_vm_root (struct tcb *t)
 
 message_tag_t
 tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
-               word_t cspace_root_data, cte_t *vspace_root,
-               word_t vspace_root_data, word_t buffer, cte_t *buffer_frame)
+               cte_t *vspace_root,
+               word_t buffer, cte_t *buffer_frame)
 {
   (void)fault_ep;
-  (void)cspace_root_data;
-  (void)vspace_root_data;
   (void)buffer;
 
   struct tcb *tcb = cap_ptr (slot);

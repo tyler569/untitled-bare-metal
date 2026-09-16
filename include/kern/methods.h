@@ -16,8 +16,7 @@ message_tag_t cnode_revoke (cte_t *slot, word_t index, uint8_t depth);
 message_tag_t cnode_debug_print (cte_t *slot);
 message_tag_t cnode_debug_get (cte_t *slot, word_t index, uint8_t depth);
 message_tag_t tcb_configure (cte_t *slot, word_t fault_ep, cte_t *cspace_root,
-                             word_t cspace_root_data, cte_t *vspace_root,
-                             word_t vspace_root_data, word_t buffer,
+                             cte_t *vspace_root, word_t buffer,
                              cte_t *buffer_frame);
 message_tag_t tcb_read_registers (cte_t *slot, bool suspend_source,
                                   word_t arch_flags, word_t count,
