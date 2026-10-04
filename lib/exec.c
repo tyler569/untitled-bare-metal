@@ -91,8 +91,7 @@ spawn_thread (struct thread_data *data)
 
   map_buffer (untyped, vspace, stack_buffer, highest_addr);
 
-  tcb_configure (tcb, 0, cspace_root, vspace, ipc_addr,
-                 ipc_buffer.cptr_base);
+  tcb_configure (tcb, 0, cspace_root, vspace, ipc_addr, ipc_buffer.cptr_base);
 
   frame_t regs = {
     .rip = ehdr->entry,

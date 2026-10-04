@@ -62,6 +62,7 @@ irq_handler_set_notification (cte_t *obj, cte_t *notification)
 
   data->n = n;
   data->badge = notification->cap.badge;
+  unmask_irq (data->irq);
 
   return msg_ok (0);
 }

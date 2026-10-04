@@ -79,32 +79,36 @@ init_ioapic ()
 
   for (int i = 1; i < 24; i++)
     {
+      const bool is_pci_link = i == 5 || i == 9 || i == 10 || i == 11;
+
       union ioapic_relocation_entry entry = {
         .vector = i + 0x20,
         .dest = 0,
+        .trigger_mode = is_pci_link,
+        .mask = is_pci_link, // avoid interrupt storm when not configured
       };
 
       write_relocation_entry (i, entry);
     }
 
-  // TODO handle acpi mappings
-
-  union ioapic_relocation_entry entry = {
+  union ioapic_relocation_entry timer = {
     .vector = 0x20,
     .mask = 1,
   };
 
-  write_relocation_entry (2, entry);
+  write_relocation_entry (2, timer);
 }
 
-void mask_irq (int irq)
+void
+mask_irq (int irq)
 {
   auto entry = read_relocation_entry (irq);
   entry.mask = true;
   write_relocation_entry (irq, entry);
 }
 
-void unmask_irq (int irq)
+void
+unmask_irq (int irq)
 {
   auto entry = read_relocation_entry (irq);
   entry.mask = false;
